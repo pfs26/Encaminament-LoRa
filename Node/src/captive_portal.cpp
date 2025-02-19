@@ -39,15 +39,15 @@
 // AsyncWebServer server(80);
 
 // void setUpDNSServer(DNSServer &dnsServer, const IPAddress &localIP) {
-// // Define the DNS interval in milliseconds between processing DNS requests
-// #define DNS_INTERVAL 30
+//     // Define the DNS interval in milliseconds between processing DNS requests
+//     #define DNS_INTERVAL 30
 
 // 	// Set the TTL for DNS response and start the DNS server
 // 	dnsServer.setTTL(3600);
 // 	dnsServer.start(53, "*", localIP);
 // }
 
-// void startSoftAccessPoint(const char *ssid, const char *password, const IPAddress &localIP, const IPAddress &gatewayIP) {
+// void startSoftAP(const char *ssid, const char *password, const IPAddress &localIP, const IPAddress &gatewayIP) {
 // // Define the maximum number of clients that can connect to the server
 // #define MAX_CLIENTS 4
 // // Define the WiFi channel to be used (channel 6 in this case)
@@ -76,12 +76,6 @@
 // }
 
 // void setUpWebserver(AsyncWebServer &server, const IPAddress &localIP) {
-// 	//======================== Webserver ========================
-// 	// WARNING IOS (and maybe macos) WILL NOT POP UP IF IT CONTAINS THE WORD "Success" https://www.esp8266.com/viewtopic.php?f=34&t=4398
-// 	// SAFARI (IOS) IS STUPID, G-ZIPPED FILES CAN'T END IN .GZ https://github.com/homieiot/homie-esp8266/issues/476 this is fixed by the webserver serve static function.
-// 	// SAFARI (IOS) there is a 128KB limit to the size of the HTML. The HTML can reference external resources/images that bring the total over 128KB
-// 	// SAFARI (IOS) popup browser has some severe limitations (javascript disabled, cookies disabled)
-
 // 	// Required
 // 	server.on("/connecttest.txt", [](AsyncWebServerRequest *request) { request->redirect("http://logout.net"); });	// windows 11 captive portal workaround
 // 	server.on("/wpad.dat", [](AsyncWebServerRequest *request) { request->send(404); });								// Honestly don't understand what this is but a 404 stops win 10 keep calling this repeatedly and panicking the esp32 :)
@@ -94,12 +88,6 @@
 // 	server.on("/canonical.html", [](AsyncWebServerRequest *request) { request->redirect(localIPURL); });	   // firefox captive portal call home
 // 	server.on("/success.txt", [](AsyncWebServerRequest *request) { request->send(200); });					   // firefox captive portal call home
 // 	server.on("/ncsi.txt", [](AsyncWebServerRequest *request) { request->redirect(localIPURL); });			   // windows call home
-
-// 	// B Tier (uncommon)
-// 	//  server.on("/chrome-variations/seed",[](AsyncWebServerRequest *request){request->send(200);}); //chrome captive portal call home
-// 	//  server.on("/service/update2/json",[](AsyncWebServerRequest *request){request->send(200);}); //firefox?
-// 	//  server.on("/chat",[](AsyncWebServerRequest *request){request->send(404);}); //No stop asking Whatsapp, there is no internet connection
-// 	//  server.on("/startpage",[](AsyncWebServerRequest *request){request->redirect(localIPURL);});
 
 // 	// return 404 to webpage icon
 // 	server.on("/favicon.ico", [](AsyncWebServerRequest *request) { request->send(404); });	// webpage icon
@@ -136,7 +124,7 @@
 // 	Serial.println("\n\nCaptive Test, V0.5.0 compiled " __DATE__ " " __TIME__ " by CD_FER");  //__DATE__ is provided by the platformio ide
 // 	Serial.printf("%s-%d\n\r", ESP.getChipModel(), ESP.getChipRevision());
 
-// 	startSoftAccessPoint(ssid, password, localIP, gatewayIP);
+// 	startSoftAP(ssid, password, localIP, gatewayIP);
 
 // 	setUpDNSServer(dnsServer, localIP);
 
