@@ -164,6 +164,7 @@ void webpage_start() {
 	// Cal que LOOP executi scheduler_run().
 	dnsReqTask = scheduler_infinite(DNS_INTERVAL, &_processNextDNSReq);
 	_PM("[WEB] STARTED");	// should be somewhere between 270-350 for Generic ESP32 (D0WDQ6 chip, can have a higher startup time on first boot)
+	return true;
 }
 
 void webpage_stop() {

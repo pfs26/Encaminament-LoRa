@@ -12,7 +12,7 @@
 // Interval entre comprovacions de sol·licituds de DNS en ms. 30 sembla ser un valor adequat
 #define DNS_INTERVAL 30 
 
-void webpage_start();
+bool webpage_start();
 void webpage_stop();
 
 #endif
