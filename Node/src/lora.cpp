@@ -7,7 +7,6 @@ change LoRa transceivers.
 
 // Instal·lar versió .zip (i no des del gestor de llibreries)
 // per tenir compatibilitat amb sx1262
-#include <RH_SX126x.h>
 
 #include "config.h"
 #include "lora.h"
@@ -82,27 +81,68 @@ lora_tx_error_t LoRa_send(const lora_data_t* data) {
         return LORA_ERROR; 
     }
 
+    // Inici tasca per comprovar si finalitza transmissió.
+    // Interval a 1ms (mínim) per assegurar retard mínim
     check_send_task = scheduler_infinite(1, &_check_sent);
     
     _PL("[LORA] TX QUEUE");
     return LORA_SUCCESS;
 } 
 
-bool LoRa_receive(lora_data_t* data, uint8_t& length) {
-
+bool LoRa_receive(lora_data_t* data) {
+    /*
+    Obté les dades rebudes del driver.
+    S'hauria d'executar dins de la implementació 
+    del callback de recepeció configurat.
+    */
+    // RadioHead utilitza `length` per saber quants bytes de buffer rebuts copiar. Si és 0, no copiarà res.
+    // S'ocuparà, com a màxim, tot el buffer de `data`. Length tindrà el valor correcte després de rebre
+    data->length = LORA_MAX_SIZE;
+    return driver.recv(data->data, &(data->length));
 }
 
 bool LoRa_isAvailable() {
-
+    if(driver.isChannelActive()) { 
+        _PL("[LORA] TX CHAN BUSY");
+        return false; 
+    }  
+    return true;
 }
 
 bool LoRa_isBusy() {
-
+    return !LoRa_isAvailable();
 }
 
 int16_t LoRa_getLastRSSI() {
+    /*
+    Retorna l'últim RSSI (Receiver Signal Strength Indicator)
+    */
+    return driver.lastRssi();
 }
 
+int16_t LoRa_getLastSNR() {
+    /*
+    Retorna l'últim SNR mesurat (pel receptor) de l'últim missatge
+    */
+    return driver.lastSNR();
+}
+
+// bool LoRa_sleep() {
+//     /*
+//     Posa la radio en mode de baix consum.
+//     Es desperta automàticament en posar-la en un altre mode (RX, TX, IDLE),
+//     a través de `LoRa_send()`, `LoRa_isAvailable()`
+//     */
+//     return driver.sleep();
+// }
+
+bool LoRa_setFrequency(float frequency) {
+    /*
+    Canvia la freq. de la radio. En decimal i MHz.
+    Retorna true si s'ha pogut fer el canvi, false si no.
+    */
+    return driver.setFrequency(frequency);
+}
 
 
 void LoRa_onReceive(lora_callback_t cb) {
@@ -118,6 +158,17 @@ void LoRa_onSend(lora_callback_t cb) {
     onSend = cb;
 }
 
+
+void LoRa_printDebug() {
+    _PL("===============");
+    _PL("[LORA] DEBUG");
+    _PP("\tMODE: "); _PL(driver.mode());
+    _PP("\tTX OK: "); _PL(driver.txGood());
+    _PP("\tRX OK: "); _PL(driver.rxGood());
+    _PP("\tRX BAD: "); _PL(driver.rxBad());
+    _PP("\tFreq Err: "); _PL((int) (driver.getFrequencyError()*1000));
+    _PL("===============");
+}
 
 void _check_received() {
     /*
@@ -142,9 +193,16 @@ void _check_sent() {
     Segueix la mateixa implementació que `waitPacketSent()` de 
     RadioHead, però sense bloquejar. 
     
-    Només s'hauria d'executar després de posar un paquet en TX 
-    (`driver.send()`). En acabar enviament, s'ha de cancel·lar
-    timeout per evitar falsos positius (si està en idle)
+    Només s'hauria d'executar després de posar un paquet en TX  amb `LoRa_send()`. 
+    En acabar enviament, s'ha de cancel·lar timeout per evitar falsos positius:
+        Si continués comprovant, estaria en mode idle i executaria callback (sense ser correcte)
+
+    Podria generar problemes la simultaneïtat de les tasques de recepció i fi de TX?
+        - En tx el mode de driver és TX.
+        - En cridar `available()` el mode passa a ser RX
+        - Potser en fer canvi de mode no es gestionarà bé la interrupció?
+    No, en veure implementació `available()` es veu com abans fa la comprovació
+    de si el mode és TX; si ho és, sempre retornarà `False`
     */
     _PM("[LORA] check send");
     if(driver.mode() != RH_SX126x::RHModeTx) {
@@ -157,10 +215,13 @@ void _check_sent() {
 }
 
 bool _setModemConfig(uint8_t datarate, uint8_t code_rate_denom) {
-    /* Configura el modem de RadioHead a partir
-    d'un datarate entre 0 i 6. Datarates majors es
-    limiten a 6
-
+    /* Configura el modem de RadioHead a partir d'un datarate entre 0 i 6. 
+    Permet especificar també el code rate (redundància) de la capa física, a
+    través del denominador. Un valor entre 5 i 8, resultant amb code
+    rates entre 4/5 i 4/8.
+    Datarates majors es limiten a 6.
+    Denominadors de code rate es limiten entre 5 i 8.
+    
     DR         SF / BW          bps
     0 	LoRa: SF12 / 125 kHz 	250
     1 	LoRa: SF11 / 125 kHz 	440
@@ -169,7 +230,6 @@ bool _setModemConfig(uint8_t datarate, uint8_t code_rate_denom) {
     4 	LoRa: SF8 / 125 kHz 	3125
     5 	LoRa: SF7 / 125 kHz 	5470
     6 	LoRa: SF7 / 250 kHz 	11000
-    
     */
     
     // Limitem datarate i denominador de code rate

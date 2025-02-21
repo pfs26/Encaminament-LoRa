@@ -9,6 +9,7 @@ change LoRa transceivers.
 #define _LORA_H
 
 #include <stdint.h>
+#include <RH_SX126x.h>
 
 // ===== CONFIG =====
 // Potser moure a "config.h"
@@ -53,6 +54,11 @@ bool LoRa_receive(lora_data_t* data, uint8_t& length);
 bool LoRa_isAvailable();
 bool LoRa_isBusy();
 int16_t LoRa_getLastRSSI();
+int16_t LoRa_getLastSNR();
+bool LoRa_sleep();
+bool LoRa_setFrequency(float frequency);
+void LoRa_printDebug();
+
 
 void LoRa_onReceive(lora_callback_t cb);
 void LoRa_onSend(lora_callback_t cb);
