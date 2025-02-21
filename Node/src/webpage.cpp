@@ -149,7 +149,7 @@ void _processNextDNSReq() {
 	dnsServer.processNextRequest();
 }
 
-void webpage_start() {
+bool webpage_start() {
 	// Print a welcome message to the Serial port.
 	_PL("\n\nCaptive Test, V0.5.0 compiled " __DATE__ " " __TIME__ " by CD_FER");  //__DATE__ is provided by the platformio ide
 
