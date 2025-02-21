@@ -5,8 +5,9 @@
 #include <ESPAsyncWebServer.h>	//https://github.com/me-no-dev/ESPAsyncWebServer using the latest dev version from @me-no-dev
 #include <esp_wifi.h>			//Used for mpdu_rx_disable android workaround
 
-#include "config.h"
 #include "webpage.h"
+#include "config.h"
+#include "scheduler.h"
 
 // Pre reading on the fundamentals of captive portals https://textslashplain.com/2022/06/24/captive-portals/
 
@@ -142,34 +143,36 @@ void _stopWebServer() {
     server.reset();
 }
 
-bool isRunning = false;
+Task* dnsReqTask;
+void _processNextDNSReq() {
+	_PM("[WEB] DNS PROC");
+	dnsServer.processNextRequest();
+}
+
 void webpage_start() {
 	// Print a welcome message to the Serial port.
 	_PL("\n\nCaptive Test, V0.5.0 compiled " __DATE__ " " __TIME__ " by CD_FER");  //__DATE__ is provided by the platformio ide
 
-    _PL("Starting AP");
+    _PL("[WEB] Starting AP");
 	_setUpSoftAP();
-    _PL("Starting DNS");
+    _PL("[WEB] Starting DNS");
 	_setUpDNSServer();
-    _PL("Starting WEB");
+    _PL("[WEB] Starting WEB");
 	_setUpWebServer();
 
-	_PM("WEB STARTED");	// should be somewhere between 270-350 for Generic ESP32 (D0WDQ6 chip, can have a higher startup time on first boot)
-    
-    isRunning = true;
-    while(isRunning) {
-        dnsServer.processNextRequest();	 
-        delay(DNS_INTERVAL);	
-    }
-    _PP("Stopped");
+	// Comprovacions cada 30 MS utilitzant les tasques, per no bloquejar el fil principal
+	// Cal que LOOP executi scheduler_run().
+	dnsReqTask = scheduler_infinite(DNS_INTERVAL, &_processNextDNSReq);
+	_PM("[WEB] STARTED");	// should be somewhere between 270-350 for Generic ESP32 (D0WDQ6 chip, can have a higher startup time on first boot)
 }
 
 void webpage_stop() {
-    isRunning = false;
-    _PL("Stoping WEB");
+	_PL("[WEB] Stopping DNS task");
+	scheduler_stop(dnsReqTask);
+    _PL("[WEB] Stoping WEB");
 	_stopWebServer();
-    _PL("Stoping DNS");
+    _PL("[WEB] Stoping DNS");
 	_stopDNSServer();
-    _PL("Stoping AP");
+    _PL("[WEB] Stoping AP");
 	_stopSoftAP();
 }
