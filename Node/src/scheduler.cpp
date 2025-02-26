@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include <TaskScheduler.h>
 
-#include "config.h"
+#include "utils.h"
 
 void _delete_completed_tasks();
 void _start_cleanup_if_needed();

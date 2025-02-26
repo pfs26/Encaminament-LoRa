@@ -6,7 +6,7 @@
 #include <esp_wifi.h>			//Used for mpdu_rx_disable android workaround
 
 #include "webpage.h"
-#include "config.h"
+#include "utils.h"
 #include "scheduler.h"
 
 // Pre reading on the fundamentals of captive portals https://textslashplain.com/2022/06/24/captive-portals/
