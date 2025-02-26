@@ -15,7 +15,6 @@ change LoRa transceivers.
 
 void _received(void);
 void _sent(void);
-void _CADfinished(void);
 void _handleInterrupts(void);
 
 static lora_callback_t onReceive = NULL;
