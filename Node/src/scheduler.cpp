@@ -51,6 +51,7 @@ void scheduler_stop(Task* task) {
 void _delete_completed_tasks() {
     _PP("Before cleanup, task count: ");
     _PL(scheduled_tasks.size());
+    _PP("Heap: "); _PL(ESP.getFreeHeap());
 
     for (auto tsk = scheduled_tasks.begin(); tsk != scheduled_tasks.end();) {
         if (!(*tsk)->isEnabled()) {  // Comprva si tasca habilitada
@@ -65,6 +66,7 @@ void _delete_completed_tasks() {
 
     _PP("After cleanup, task count: ");
     _PL(scheduled_tasks.size());
+    _PP("Heap: "); _PL(ESP.getFreeHeap());
 
     // Aturar cleanup si fa falta
     _stop_cleanup_if_needed();
