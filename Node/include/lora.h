@@ -13,7 +13,7 @@ change LoRa transceivers.
 
 // ===== CONFIG =====
 // Potser moure a "config.h"
-#define LORA_SS SS
+#define LORA_SS SS      
 #define LORA_DIO1 2
 #define LORA_NRESET 22
 #define LORA_BUSY 4
@@ -27,7 +27,7 @@ change LoRa transceivers.
 // ===== FI CONFIG =====
 
 // Interval comprovació recepcions 
-#define LORA_RCV_INTERVAL 1
+#define LORA_IRQFLAGS_CHECK_INTERVAL 5 // interval comprovació flags IRQ tasca programada en ms
 // Mida màxima LoRa. No pot ser major a RADIOLIB_SX126X_MAX_PACKET_LENGTH
 #define LORA_MAX_SIZE RADIOLIB_SX126X_MAX_PACKET_LENGTH
 
@@ -38,6 +38,7 @@ typedef int lora_tx_error_t;
 #define LORA_ERROR_TX_MAX_LENGTH    1
 #define LORA_ERROR_TX_BUSY          2
 #define LORA_ERROR_TX_TIMEOUT       3
+#define LORA_ERROR_TX_PENDING       4
 
 // Estructura dades lora
 typedef struct {
@@ -58,9 +59,9 @@ bool LoRa_isBusy();
 int16_t LoRa_getLastRSSI();
 int16_t LoRa_getLastSNR();
 bool LoRa_sleep();
+bool LoRa_wakeup();
 bool LoRa_setFrequency(float frequency);
 bool LoRa_setTxPower(int power);
-void LoRa_printDebug();
 
 void LoRa_onReceive(lora_callback_t cb);
 void LoRa_onSend(lora_callback_t cb);

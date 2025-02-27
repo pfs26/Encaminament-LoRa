@@ -16,31 +16,33 @@ change LoRa transceivers.
 void _received(void);
 void _sent(void);
 void _handleInterrupts(void);
+void _checkIRQFlags(void);
 
 static lora_callback_t onReceive = NULL;
 static lora_callback_t onSend = NULL;
 
 volatile static bool transmitting = false;
 
+static Task* checkIRQTask;
+volatile uint32_t IRQFlags = 0;
+
 static SX1262 radio = new Module(LORA_SS, LORA_DIO1, LORA_NRESET, LORA_BUSY); 
 
 bool LoRa_init() {
     /*  1. Inicialitza radiolib. 
         2. Configura LoRa a paràmetres configurats.
-        3. Inicialitza scheduler per comprovar recepció de missatges de forma periòdica */
+        3. Inicialitza scheduler per comprovar interrupcions de forma periòdica */
 
     int state = radio.begin(LORA_FREQ, LORA_BW, LORA_SF, LORA_CODERATE, RADIOLIB_SX126X_SYNC_WORD_PRIVATE, LORA_TX_POW);
-    
     if(state != RADIOLIB_ERR_NONE) {
         _PP("[LORA] ERROR: "); _PL(state);
         return false;
     }
-
+    // ISR a executar que es dona interrupció de DIO1 (txDone, rxDone, etc.)
     radio.setDio1Action(_handleInterrupts);
-    // radio.setPacketReceivedAction(_received);
-    // radio.setPacketSentAction(_sent);
-    // radio.setChannelScanAction(_CADfinished);
-
+    // Tasca que comprova flags obtinguts per ISR de forma recurrrent (per no bloquejar ISR)
+    checkIRQTask = scheduler_infinite(LORA_IRQFLAGS_CHECK_INTERVAL, _checkIRQFlags);
+    // Iniciem en mode de recepció per defecte
     radio.startReceive();
 
     _PL("[LORA] Init");
@@ -49,6 +51,7 @@ bool LoRa_init() {
 
 void LoRa_deinit() {
     _PL("[LORA] Deinit");
+    scheduler_stop(checkIRQTask);
     radio.reset();
 }
 
@@ -69,20 +72,17 @@ lora_tx_error_t LoRa_send(const lora_data_t* data) {
         return LORA_ERROR_TX_MAX_LENGTH; 
     }
 
-    // TODO: No bloquejar, retornar codi error específic
-    while(transmitting) {
-        _PL("pending tx");
-    }
+    if(transmitting)
+        return LORA_ERROR_TX_PENDING;
 
     if(!LoRa_isAvailable()) { 
         _PL("[LORA] TX CHAN BUSY");
         return LORA_ERROR_TX_BUSY; 
     }  
 
-    // cli();
+    // startTransmit ja copia les dades a buffer de sx1262
     // NO DESACTIVAR INTERRUPCIONS, SPI LES UTILITZA (i prints també)
     int state = radio.startTransmit(data->data, data->length);
-    // sei();
 
     if(state != RADIOLIB_ERR_NONE) {
         _PL("[LORA] TX ERR");
@@ -99,11 +99,13 @@ bool LoRa_receive(lora_data_t* data) {
     Obté les dades rebudes del driver.
     S'hauria d'executar dins de la implementació 
     del callback de recepeció configurat.
+    Si hi ha més dades de les que hi caben al buffer de `data`, es tallaran
     */
-    // RadioHead utilitza `length` per saber quants bytes de buffer rebuts copiar. Si és 0, no copiarà res.
-    // S'ocuparà, com a màxim, tot el buffer de `data`. Length tindrà el valor correcte després de rebre
     data->length = radio.getPacketLength();
+    if(data->length > LORA_MAX_SIZE) 
+        data->length = LORA_MAX_SIZE-1; // -1 ja que últim és NULL
     int state = radio.readData(data->data, data->length);
+    data->data[data->length] = '\0'; // escrivim l'últim a '\0' 
     return state == RADIOLIB_ERR_NONE;
 }
 
@@ -177,27 +179,19 @@ void LoRa_onSend(lora_callback_t cb) {
     onSend = cb;
 }
 
-
-void LoRa_printDebug() {
-    // _PL("===============");
-    // _PL("[LORA] DEBUG");
-    // _PP("\tMODE: "); _PL(radio.receive());
-    // _PP("\tTX OK: "); _PL(driver.txGood());
-    // _PP("\tRX OK: "); _PL(driver.rxGood());
-    // _PP("\tRX BAD: "); _PL(driver.rxBad());
-    // _PP("\tFreq Err: "); _PL((int) (driver.getFrequencyError()*1000));
-    // _PL("===============");
-}
-
 void _startReceiving() {
     /*
     Iniciar mode de recepció. 
-    Cal que no s'estigui transmetent, sinó no es podrà transmetre
+    Cal que no s'estigui transmetent, sinó no es podrà transmetre.
+    En el cas d'haver un TX pendent, programa l'execució d'aquesta funció
+    al cap de pocs ms, fins que s'ha acabat TX.
+    Això evita bloquejar el fil principal (i per tant que no s'executin 
+    tasques programades)
     */
     if(transmitting) {
-        // Si està en TX, prova-ho de nou en 10ms
-        _PM("Sched new");
-        scheduler_once(_startReceiving, 100);
+        // Si està en TX, retornar. Quan es genera interrupció fi TX ja es posa
+        // en startReceiving
+        // scheduler_once(_startReceiving, 100);
         return;
     }
     radio.startReceive();
@@ -205,35 +199,69 @@ void _startReceiving() {
 }
 
 void _handleInterrupts(void) {
-    uint32_t flags = radio.getIrqFlags();
-    _PP("Handle int: 0x"); _PX(flags>>16); _PP(" "); _PX(flags & 0xFF); _PL();
-    // delay(20);
-    if(flags & RADIOLIB_SX126X_IRQ_RX_DONE) {
-        _received();
-    }
-    if(flags & RADIOLIB_SX126X_IRQ_TX_DONE) {
+    // Si es gestionen interrupcions
+    // aquí (amb els callbacks), es generen crashes a l'ESP.
+    // El temps d'execució dins d'ISR passa a ser molt alt i peta.
+    // (Fins i tot si no s'executa i es programa amb scheduler)
+    // S'evita fent que aquí únicament es guardin els flags, sortint-ne ràpid.
+    // S'inicia una tasca en iniciar que comprova els flags cada pocs ms
+    // dins de LOOP, evitant bloquejar ISR.
+
+    IRQFlags = radio.getIrqFlags();
+}
+
+void _checkIRQFlags(void) {
+    /*
+    Executat a través del gestor de tasques de forma recurrent
+    després d'iniciar-se el mòdul.
+    Comprova els flags i actua conseqüentment.
+    Implementat així per executar-se a través de LOOP,
+    com si fossin interrupcions per software.
+    Evita bloquejar ISR.
+    */
+    // Bloc atòmic?
+    if(!IRQFlags) // retorn prematur si no flags
+        return;
+
+    _PP("Handle int: 0x"); _PX(IRQFlags>>16); _PP(" "); _PX(IRQFlags & 0xFF); _PL();
+    if (IRQFlags & RADIOLIB_SX126X_IRQ_TX_DONE) {
         _sent();
     }
-    // TODO: Potser fa falta clear de flags?
+    if (IRQFlags & RADIOLIB_SX126X_IRQ_RX_DONE) {
+        _received();
+    }
+    IRQFlags = 0;
 }
 
 void _received(void) {
+    /*
+    Executat quan es produeix interrupció
+    de recepció.
+    Comprova si hi ha CB configurat i l'executa.
+    Torna a posar-se en mode de recepció, ja que després 
+    de fer lectura de les dades rebudes es posa en mode standby.
+    */
     _PM("[LORA] _received");
     if (onReceive != NULL) {
         _PL("[LORA] onReceive");
-        // Programar execució: recordar que s'executa dins de ISR, i és necessari sortir-ne ràpid
-        scheduler_once(onReceive);
+        onReceive();
+        // scheduler_once(onReceive);
     }
-    // Iniciar el receive requereix d'interrupcions, desactivades dins d'una ISR
-    // i pot ser lent; programar execució FORA d'ISR.
-    scheduler_once(_startReceiving);
+    _startReceiving();
 }
 
 void _sent(void) {
+    /*
+    Executat quan es produeix interrupció de fi TX.
+    Comprova si hi ha CB configurat i l'executa.
+    Posa flag de TX en curs a fals. Torna a posar-se en mode de recepció,
+    ja que després d'enviar està en standby.
+    */
     _PM("[LORA] _sent()");
+    transmitting = false; // posar al principi. Si onSend volgués tornar a enviar, no podria
     if(onSend != NULL) {
-        scheduler_once(onSend);
+        // scheduler_once(onSend);
+        onSend();
     }
-    transmitting = false;
-    scheduler_once(_startReceiving);
+    _startReceiving();
 }
