@@ -4,7 +4,8 @@
 #define _PM(a) Serial.print(millis()); Serial.print(": "); Serial.println(a)
 #define _PP(a) Serial.print(a)
 #define _PL(a) Serial.println(a)
-#define _PX(a) Serial.print(a, HEX)
+#define _PX(a) { if (a < 16) Serial.print("0"); Serial.print(a, HEX); }
+#define _PF(a, ...) Serial.printf(a, ##__VA_ARGS__)
 #else
 #define _PM(a)
 #define _PP(a)
