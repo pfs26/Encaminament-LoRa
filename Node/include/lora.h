@@ -23,7 +23,7 @@ change LoRa transceivers.
 #define LORA_DATARATE 5 // entre 0 i 7
 #define LORA_SF 9
 #define LORA_CODERATE 5 // Denominador de coderate. Valor entre 5 i 8, resultant en CR = [4/5, 4/6, 4/7, 4/8]
-#define LORA_TX_POW -2  // en dBm, entre -9 i 22
+#define LORA_TX_POW 15  // en dBm, entre -9 i 22
 // ===== FI CONFIG =====
 
 // Interval comprovació recepcions 
@@ -62,6 +62,7 @@ bool LoRa_sleep();
 bool LoRa_wakeup();
 bool LoRa_setFrequency(float frequency);
 bool LoRa_setTxPower(int power);
+long LoRa_getTimeOnAir(int length);
 
 void LoRa_onReceive(lora_callback_t cb);
 void LoRa_onSend(lora_callback_t cb);

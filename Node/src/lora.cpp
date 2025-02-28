@@ -66,7 +66,7 @@ lora_tx_error_t LoRa_send(const lora_data_t* data) {
         4. Espera que s'hagin enviat
     */
     _PL("[LORA] Send");
-
+    
     if(data->length > LORA_MAX_SIZE) { 
         _PL("[LORA] TX MAX LENGTH");
         return LORA_ERROR_TX_MAX_LENGTH; 
@@ -105,6 +105,8 @@ bool LoRa_receive(lora_data_t* data) {
     if(data->length > LORA_MAX_SIZE) 
         data->length = LORA_MAX_SIZE-1; // -1 ja que últim és NULL
     int state = radio.readData(data->data, data->length);
+    
+    // TODO: Hauria realment de ser '\0' l'últim, si el valor de length ja és el que toca?
     data->data[data->length] = '\0'; // escrivim l'últim a '\0' 
     return state == RADIOLIB_ERR_NONE;
 }
@@ -163,6 +165,10 @@ bool LoRa_setTxPower(int power) {
     if(radio.checkOutputPower(power, &checked_pow))
         return false;
     return radio.setOutputPower(checked_pow) == RADIOLIB_ERR_NONE;
+}
+
+long LoRa_getTimeOnAir(int length) {
+    return radio.getTimeOnAir(length);
 }
 
 void LoRa_onReceive(lora_callback_t cb) {
