@@ -68,4 +68,6 @@ bool LoRa_setDataRate(int datarate);
 void LoRa_onReceive(lora_callback_t cb);
 void LoRa_onSend(lora_callback_t cb);
 
+void _printLora(const lora_data_t* const data);
+
 #endif

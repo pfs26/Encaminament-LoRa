@@ -80,6 +80,8 @@ lora_tx_error_t LoRa_send(const lora_data_t* data) {
         return LORA_ERROR_TX_BUSY; 
     }  
 
+    _PP("[LORA] DATA TO SEND: ");
+    _printLora(data);
     // startTransmit ja copia les dades a buffer de sx1262
     // NO DESACTIVAR INTERRUPCIONS, SPI LES UTILITZA (i prints també)
     int state = radio.startTransmit(data->data, data->length);
@@ -270,4 +272,11 @@ void _sent_lora(void) {
         onSend();
     }
     _startReceiving();
+}
+
+void _printLora(const lora_data_t* const data) {
+    for (uint8_t i = 0; i < data->length; ++i) {
+        _PX(((char*)data)[i]);
+    }
+    _PL();
 }
