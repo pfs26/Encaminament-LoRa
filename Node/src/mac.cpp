@@ -6,23 +6,24 @@
 #include "utils.h"
 
 enum mac_event_t {
-    TX,             // Iniciar TX
-    TOUT_BUSY,      // Fi tout de canal ocupat 
-    TOUT_ACK,       // Timeout recepció ACK
-    RX,             // Nova recepció
+    TX_E,             // Iniciar TX
+    TOUT_BUSY_E,      // Fi tout de canal ocupat 
+    TOUT_ACK_E,       // Timeout recepció ACK
+    RX_E,             // Nova recepció
+    RX_ACK_E,         // Recepció ACK
 };
 
 enum lora_event_t {
-    BUSY,           // Canal LORA ocupat
-    IDLE            // Canal LORA lliure
+    BUSY_E,           // Canal LORA ocupat
+    IDLE_E            // Canal LORA lliure
 };
 
 enum mac_state_t {
-    IDLE,           // Esperant
-    TRANSMITTING    // TX propia en curs
+    IDLE_S,           // Esperant
+    TRANSMITTING_S    // TX propia en curs
 };
 
-volatile static mac_state_t fsmState = mac_state_t::IDLE;
+volatile static mac_state_t fsmState = mac_state_t::IDLE_S;
 
 static mac_callback_t onSend = NULL;
 static mac_callback_t onReceive = NULL;
@@ -49,18 +50,24 @@ void _mac_fsm_event_tout_busy(void);
 
 void _onLoraSent(void);
 void _onLoraReceived(void);
-void _received(void);
-void _sent(void);
-void _txError(void);
+void _received_mac(void);
+void _sent_mac(void);
+void _txError_mac(void);
 
 bool MAC_init(mac_addr_t selfAddr, bool is_gateway) {
     // Filtrar que selfAddr no sigui adreça restringida (0x00 i 0xFF)
     self = selfAddr;
     LoRa_onSend(_onLoraSent);
     LoRa_onReceive(_onLoraReceived);
+    _PL("[MAC] Init");
+    return LoRa_init();
 }
 
-bool MAC_deinit();
+void MAC_deinit() {
+    _PL("[MAC] Deinit");
+    LoRa_deinit();
+    onReceive = onSend = onTxFailed = NULL;
+}
 
 mac_err_t MAC_send(mac_addr_t rx, const mac_data_t data, uint8_t length) {
     // 1. Verificar paràmetres (mida data, rx)
@@ -71,21 +78,23 @@ mac_err_t MAC_send(mac_addr_t rx, const mac_data_t data, uint8_t length) {
         return MAC_ERR_MAX_LENGTH;
     if(rx == self)
         return MAC_ERR_INVALID_ADDR;
+    if(!MAC_isAvailable()) // No permetre segon enviament si un està pendent. Sobreescriuria PDU TX actual
+        return MAC_ERR_TX_PENDING;
 
     _getPDU((const mac_data_t*)data, length, &txPDU, rx);
-    _mac_fsm(mac_event_t::TX);
+    _mac_fsm(mac_event_t::TX_E);
 
     return MAC_ERR_SUCCESS;
 }
 
-bool MAC_receive(mac_data_t const * data, uint8_t* length) {
+mac_addr_t MAC_receive(mac_data_t const * data, uint8_t* length) {
 
 }
 
 bool MAC_isAvailable() {
     // Només interessa que nosaltres estiguem IDLE.
     // Si LoRa ocupat ja ho gestionarem amb backoff a FSM.
-    return fsmState == mac_state_t::IDLE;
+    return fsmState == mac_state_t::IDLE_S;
 }
 
 void MAC_onReceive(mac_callback_t cb) {
@@ -161,7 +170,7 @@ void _onLoraSent(void) {
 void _onLoraReceived(void) {
    _PL("[MAC] Frame sent");
    // Generar esdeveniment a FSM
-   _mac_fsm(mac_event_t::RX);
+   _mac_fsm(mac_event_t::RX_E);
 }
 
 // --- FSM ---
@@ -169,28 +178,31 @@ void _onLoraReceived(void) {
 void _mac_fsm(mac_event_t e) {
     // Retorna bool (0, 1): 0 si ocupat (not available) -> lora_event_t::busy
     lora_event_t lora_e = (lora_event_t)LoRa_isAvailable();
-    if(fsmState == mac_state_t::IDLE) {
-        if(e == mac_event_t::TX) {
-            if(lora_e == lora_event_t::IDLE) { 
+    if(fsmState == mac_state_t::IDLE_S) {
+        if(e == mac_event_t::TX_E) {
+            if(lora_e == lora_event_t::IDLE_E) { 
                 /*
                     MAC i LORA lliures. Volem enviar. 
                     1. Obtenim temps de timeout segons mida de dades.
                     2. Programem tout amb scheduler i enviem amb LoRa
                     3. Si error en enviar, aturar tasca anterior
+
+                    TODO: Falta filtrar si és gateway o no
                 */
-                _PL("[MAC] FSM: MAC Idle + Lora IDLE + TX ");
-                fsmState = mac_state_t::TRANSMITTING;
+                _PM("[MAC] FSM: MAC Idle + Lora IDLE + TX ");
+                fsmState = mac_state_t::TRANSMITTING_S;
                 long airtime_us = LoRa_getTimeOnAir(txPDU.length+MAC_PDU_HEADER_SIZE);
                 // Deixem de marge de timeout per rebre "ACK" 3 vegades més de l'esperat 
                 // (l'esperat és 2*timeOnAir, ha d'anar i tornar la resposta, de mateixa mida com a molt)
                 txTimeoutTask = scheduler_once(_mac_fsm_event_tout_ack, 6*airtime_us/1000);
+                _PF("[MAC] Timeout ACK: %d\n", 6*airtime_us/1000);
                 lora_tx_error_t state = LoRa_send((const lora_data_t*)&txPDU);
                 if(state != LORA_SUCCESS) {
                     scheduler_stop(txTimeoutTask); // cancel·lem abans que s'executi (per molt que passi el temps no s'haurà executat ja que necessita bucle de loop)
-                    _txError();
+                    _txError_mac();
                 }
             }
-            else if (lora_e == lora_event_t::BUSY) {
+            else if (lora_e == lora_event_t::BUSY_E) {
                 /*
                     MAC lliure. LORA ocupat. Volem enviar. 
                     1. No és possible enviar si LoRa ocupat.
@@ -198,8 +210,8 @@ void _mac_fsm(mac_event_t e) {
                     3. Obtenir temps aleatori de backoff exponencial a partir de reintents de backoff
                     4. Generar un esdeveniment un cop ha passat el temps
                 */
-                _PL("[MAC] FSM: MAC Idle + Lora BUSY + TX");
-                fsmState = mac_state_t::TRANSMITTING;
+                _PM("[MAC] FSM: MAC Idle + Lora BUSY + TX");
+                fsmState = mac_state_t::TRANSMITTING_S;
                 // Incrementar i limitar intent actual de backoff
                 currentBEBRetry++;
                 currentBEBRetry = MIN(currentBEBRetry, MAC_MAX_BEB_RETRY);
@@ -207,61 +219,127 @@ void _mac_fsm(mac_event_t e) {
                 uint32_t bebTimeout = random(0, 1 << currentBEBRetry)*MAC_BEB_FACTOR_MS;
                 // Programar reintent
                 txTimeoutTask = scheduler_once(_mac_fsm_event_tout_busy, bebTimeout);
+                _PF("[MAC] Timeout BEB: %d\n", bebTimeout);
             }
         } 
-        else if (e == mac_event_t::TOUT_ACK){
+        else if (e == mac_event_t::TOUT_ACK_E){
             /*
                 MAC lliure i es genera timeout de recepció d'ACK. No hauria de ser possible. 
             */
-           _PL("[MAC] FSM: MAC Idle + TOUT_ACK impossible");
+           _PM("[MAC] FSM: MAC Idle + TOUT_ACK impossible");
         }
-        else if (e == mac_event_t::TOUT_BUSY){
+        else if (e == mac_event_t::TOUT_BUSY_E){
             /*
                 MAC lliure i es genera timeout de canal ocupat generat per BEB. No hauria de ser possible
             */
-           _PL("[MAC] FSM: MAC Idle + TOUT_BUSY impossible");
+           _PM("[MAC] FSM: MAC Idle + TOUT_BUSY impossible");
         }
-        else if (e == mac_event_t::RX) {
+        else if (e == mac_event_t::RX_E) {
             /*
                 MAC lliure i es produeix recepció. És frame a retransmetre o per nosaltres. No pot ser d'ack.
+                Estat no canvia, únicament cal processar el rebut i, si és el cas, ja generarà altres esdeveniments
             */
-           _PL("[MAC] FSM: MAC Idle + RX");
-           _received();
+           _PM("[MAC] FSM: MAC Idle + RX");
+           _received_mac();
+        }
+        else if (e == mac_event_t::RX_ACK_E) {
+
         }
     }
-    else if (fsmState == mac_state_t::TRANSMITTING){
-        if(e == mac_event_t::TX) {
-            /*
-                MAC ocupada i es volen enviar noves dades. No s'ha de permetre.
-            */
+    else if (fsmState == mac_state_t::TRANSMITTING_S){
+        if(e == mac_event_t::TX_E) {
+            if(lora_e == lora_event_t::IDLE_E) { 
+                /*
+                    MAC ocupada i es vol tornar a enviar.
+                    Només pot significar un reintent de TX degut a TOUT_ACK.
+                    MAC_send() ja filtra nous TX amb dades diferents.
+                    S'ha de fer una retransmissió.
+
+                    TODO: Hauria de tenir en compte el valor actual de reintents
+                */
+                _PM("[MAC] FSM: MAC TX + LoRa IDLE + TX");
+
+                fsmState = mac_state_t::TRANSMITTING_S;
+                long airtime_us = LoRa_getTimeOnAir(txPDU.length+MAC_PDU_HEADER_SIZE);
+                // Deixem de marge de timeout per rebre "ACK" 3 vegades més de l'esperat 
+                // (l'esperat és 2*timeOnAir, ha d'anar i tornar la resposta, de mateixa mida com a molt)
+                txTimeoutTask = scheduler_once(_mac_fsm_event_tout_ack, 6*airtime_us/1000);
+                _PF("[MAC] Timeout ACK: %d\n", 6*airtime_us/1000);
+                lora_tx_error_t state = LoRa_send((const lora_data_t*)&txPDU);
+                if(state != LORA_SUCCESS) {
+                    scheduler_stop(txTimeoutTask); // cancel·lem abans que s'executi (per molt que passi el temps no s'haurà executat ja que necessita bucle de loop)
+                    _txError_mac();
+                }
+            }
+            else if (lora_e == lora_event_t::BUSY_E) {
+                /*
+                    MAC lliure. LORA ocupat. Volem enviar. 
+                    1. No és possible enviar si LoRa ocupat.
+                    2. Nou estat és TX
+                    3. Obtenir temps aleatori de backoff exponencial a partir de reintents de backoff
+                    4. Generar un esdeveniment un cop ha passat el temps
+                */
+                _PM("[MAC] FSM: MAC Idle + Lora BUSY + TX");
+                fsmState = mac_state_t::TRANSMITTING_S;
+                // Incrementar i limitar intent actual de backoff
+                currentBEBRetry++;
+                currentBEBRetry = MIN(currentBEBRetry, MAC_MAX_BEB_RETRY);
+                // Calcular timeout de backoff
+                uint32_t bebTimeout = random(0, 1 << currentBEBRetry)*MAC_BEB_FACTOR_MS;
+                // Programar reintent
+                txTimeoutTask = scheduler_once(_mac_fsm_event_tout_busy, bebTimeout);
+                _PF("[MAC] Timeout BEB: %d\n", bebTimeout);
+            }
         } 
-        else if (e == mac_event_t::RX) {
+        else if (e == mac_event_t::RX_E) {
             /*
                 MAC ocupada i es produeix recepció. És frame a retransmetre o per nosaltres o ACK.
             */
-           _PL("[MAC] FSM: MAC TX + RX");
-           _received();
+           _PM("[MAC] FSM: MAC TX + RX");
+           _received_mac();
         }
-        else if (e == mac_event_t::TOUT_ACK) {
+        else if (e == mac_event_t::TOUT_ACK_E) {
             /*
                 MAC ocupada i es genera timeout de recepció d'ACK.
                 1. Incrementar comptador reintents
                 2. Generar intent enviament de nou
             */
+            _PM("[MAC] FSM: MAC TX + TOUT_ACK");
+            if(++currentTxRetry == MAC_MAX_RETRIES)
+                _txError_mac();
+            else 
+                _mac_fsm(mac_event_t::TX_E); // generar esdeveniment TX. Ja tindrà en compte currentTxRetry.
         }
-        else if (e == mac_event_t::TOUT_BUSY){}
+        else if (e == mac_event_t::TOUT_BUSY_E) {
+            /*
+                MAC Ocupada i es genera esdeveniment de fi de TOUT_BUSY.
+                Cal fer un intent de transmissió de nou.
+            */
+           _PM("[MAC] FSM: MAC TX + TOUT_BUSY");
+           _mac_fsm(mac_event_t::TX_E);
+
+        }
+        else if (e == mac_event_t::RX_ACK_E) {
+            /*
+                MAC Ocupada i es genera esdeveniment de recepció d'ACK.
+                Fi de transmissió actual.
+                Cal aturar tasca de timeout ACK. Passem a IDLE.
+            */
+           fsmState == mac_state_t::IDLE_S;
+           scheduler_stop(txTimeoutTask);
+        }
     }
 }
 
 void _mac_fsm_event_tout_ack(void) {
-    _mac_fsm(mac_event_t::TOUT_ACK);
+    _mac_fsm(mac_event_t::TOUT_ACK_E);
 }
 
 void _mac_fsm_event_tout_busy(void) {
-    _mac_fsm(mac_event_t::TOUT_BUSY);
+    _mac_fsm(mac_event_t::TOUT_BUSY_E);
 }
 
-void _received(void) {
+void _received_mac(void) {
     /*
     Executat per FSM quan es rep alguna cosa.
     1. Filtrar si és per nosaltres o no
@@ -272,10 +350,11 @@ void _received(void) {
     */
 }
 
-void _sent(void) {
+void _sent_mac(void) {
 }
 
-void _txError(void) {
+void _txError_mac(void) {
+    _PL("[MAC] TX ERR");
     if(onTxFailed != NULL)
         onTxFailed();
 }
@@ -292,7 +371,32 @@ void _printPDU(const mac_pdu_t* const pdu) {
 }
 #endif
 
-/* === Proves ===
+
+void setup() {
+    Serial.begin(115200);
+
+    Serial.print(F("[SX1262] Initializing ... "));
+    Serial.print("Model: "); Serial.println(ESP.getChipModel());
+    Serial.print("CPU: "); Serial.println(ESP.getCpuFreqMHz());
+    Serial.print("Heap: "); Serial.println(ESP.getFreeHeap());
+    Serial.println(esp_reset_reason());
+
+    if(!MAC_init(0x01, false)) {
+        _PL("ERR");
+        while(1);
+    }
+
+    mac_data_t data = "PROVA";
+    MAC_send(0x02, data, strlen((char*)data));
+}
+
+void loop() {
+    scheduler_run();
+}
+
+
+
+/* === Proves CRC ===
 mac_pdu_t pdu;
 mac_data_t data = "PROVA";
 

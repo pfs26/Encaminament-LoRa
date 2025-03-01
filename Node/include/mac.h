@@ -47,16 +47,19 @@ typedef uint8_t mac_err_t;
 #define MAC_ERR_INVALID_ADDR    1
 #define MAC_ERR_MAX_RETRIES     2
 #define MAC_ERR_MAX_LENGTH      3
+#define MAC_ERR_TX_PENDING      4
 
 typedef void (*mac_callback_t)();
 
 bool MAC_init(mac_addr_t selfAddr, bool is_gateway);
-bool MAC_deinit();
+void MAC_deinit();
 
 mac_err_t MAC_send(mac_addr_t rx, const mac_data_t data, uint8_t length);
 mac_addr_t MAC_receive(mac_data_t data, uint8_t* length);
-
+mac_addr_t MAC_receive(mac_data_t const * data, uint8_t* length);
+bool MAC_isAvailable();
 void MAC_onReceive(mac_callback_t cb);
 void MAC_onSend(mac_callback_t cb);
+void MAC_onTxFailed(mac_callback_t cb);
 
 #endif
