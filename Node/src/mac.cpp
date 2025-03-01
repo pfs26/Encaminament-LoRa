@@ -339,6 +339,28 @@ void _mac_fsm_event_tout_busy(void) {
     _mac_fsm(mac_event_t::TOUT_BUSY_E);
 }
 
+bool _lora_data_to_mac_pdu(lora_data_t * const lora, mac_pdu_t * const pdu) {
+    if (lora->length < sizeof(mac_addr_t) * 2 + sizeof(mac_id_t) + sizeof(mac_crc_t) + 1) {
+        _PL("[MAC] lora_to_mac_pdu: Invalid data size");
+        return false;
+    }
+
+    uint8_t* ptr = lora->data; 
+    memcpy(&pdu->tx, ptr, sizeof(mac_addr_t));
+    ptr += sizeof(mac_addr_t);
+    memcpy(&pdu->rx, ptr, sizeof(mac_addr_t));
+    ptr += sizeof(mac_addr_t);
+    memcpy(&pdu->id, ptr, sizeof(mac_id_t));
+    ptr += sizeof(mac_id_t);
+    pdu->length = lora->length - (sizeof(mac_addr_t) * 2 + sizeof(mac_id_t) + sizeof(mac_crc_t));
+
+    memcpy(pdu->data, ptr, pdu->length);
+    ptr += pdu->length;
+    memcpy(&pdu->crc, ptr, sizeof(mac_crc_t));
+
+    return true;
+}
+
 void _received_mac(void) {
     /*
     Executat per FSM quan es rep alguna cosa.
@@ -348,6 +370,23 @@ void _received_mac(void) {
         3.1. Si rebut, enviar un "ACK" (frame amb RX = 0x00, ID = ID esperat)
         3.2. Si no rebut, passar a capa superior
     */
+    lora_data_t data;
+    mac_pdu_t pdu;
+    if(!LoRa_receive(&data))
+        _PL("[MAC] _received_mac: ERR");
+        return;
+    
+    _PP("Received Lora data: ");
+    for (size_t i = 0; i < data.length; i++)
+    {
+        _PX(data.data[i]);
+    }
+    _PL();
+    
+    // Mida dades
+    // data.length conté la mida de totes les dades (incloent headers MAC)
+    // pdu.length només ha de tenir la mida del camp de dades
+    // memcpy(&pdu, &data, data.length);
 }
 
 void _sent_mac(void) {
@@ -369,6 +408,13 @@ void _printPDU(const mac_pdu_t* const pdu) {
     // CRC
     _PX(pdu->crc); _PL();
 }
+
+void _printLora(const lora_data_t* const data) {
+    for (uint8_t i = 0; i < data->length; ++i) {
+        _PX(((char*)data)[i]);
+    }
+    _PL();
+}
 #endif
 
 
@@ -386,8 +432,17 @@ void setup() {
         while(1);
     }
 
-    mac_data_t data = "PROVA";
-    MAC_send(0x02, data, strlen((char*)data));
+    lora_data_t data = {0x01,0x02,0x2C,0x82,0x50,0x52,0x4F,0x56,0x41,0x86};
+    data.length = 10;
+    _printLora(&data);
+
+    mac_pdu_t pdu;
+    _lora_data_to_mac_pdu(&data, &pdu);
+    _printPDU(&pdu);
+    _PF("CRC: %d\n", _verifyCRC(&pdu));
+
+    // mac_data_t data = "PROVA";
+    // MAC_send(0x02, data, strlen((char*)data));
 }
 
 void loop() {
@@ -409,4 +464,14 @@ Serial.printf("Is CRC valid? %d\n", _verifyCRC(&pdu)); // no vàlid
 pdu.tx ^= 0x01; // canviar bit de nou
 Serial.printf("Is CRC valid? %d\n", _verifyCRC(&pdu)); // vàlid
 
+
+=== PROVES LORA_TO_PDU ===
+lora_data_t data = {0x01,0x02,0x2C,0x82,0x50,0x52,0x4F,0x56,0x41,0x86};
+data.length = 10;
+_printLora(&data);
+
+mac_pdu_t pdu;
+_lora_data_to_mac_pdu(&data, &pdu);
+_printPDU(&pdu);
+_PF("CRC: %d\n", _verifyCRC(&pdu));
 */
