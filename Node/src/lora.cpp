@@ -13,8 +13,8 @@ change LoRa transceivers.
 #include "scheduler.h"
 #include "lora.h"
 
-void _received(void);
-void _sent(void);
+void _received_lora(void);
+void _sent_lora(void);
 void _handleInterrupts(void);
 void _checkIRQFlags(void);
 
@@ -231,15 +231,15 @@ void _checkIRQFlags(void) {
 
     _PP("Handle int: 0x"); _PX(IRQFlags>>16); _PP(" "); _PX(IRQFlags & 0xFF); _PL();
     if (IRQFlags & RADIOLIB_SX126X_IRQ_TX_DONE) {
-        _sent();
+        _sent_lora();
     }
     if (IRQFlags & RADIOLIB_SX126X_IRQ_RX_DONE) {
-        _received();
+        _received_lora();
     }
     IRQFlags = 0;
 }
 
-void _received(void) {
+void _received_lora(void) {
     /*
     Executat quan es produeix interrupció
     de recepció.
@@ -256,7 +256,7 @@ void _received(void) {
     _startReceiving();
 }
 
-void _sent(void) {
+void _sent_lora(void) {
     /*
     Executat quan es produeix interrupció de fi TX.
     Comprova si hi ha CB configurat i l'executa.
