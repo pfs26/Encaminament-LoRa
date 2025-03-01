@@ -24,7 +24,6 @@ enum mac_state_t {
 };
 
 volatile static mac_state_t fsmState = mac_state_t::IDLE_S;
-
 static mac_callback_t onSend = NULL;
 static mac_callback_t onReceive = NULL;
 static mac_callback_t onTxFailed = NULL;
@@ -37,6 +36,8 @@ volatile static uint8_t currentTxRetry = 0;
 volatile static uint8_t currentBEBRetry = 0;
 static bool isGateway = false;
 
+static mac_id_t lastFramesIDs[MAC_QUEUE_SIZE];
+
 static Task* txTimeoutTask;
 
 mac_id_t _getRandomID();
@@ -44,9 +45,12 @@ mac_crc_t _computeCRC(const mac_pdu_t* const pdu);
 void _getPDU(const mac_data_t * const data, uint8_t length, mac_pdu_t * const pdu, mac_addr_t rx);
 void _printPDU(const mac_pdu_t* const pdu);
 bool _verifyCRC(const mac_pdu_t* const pdu);
+bool _is_ack_pdu_valid(const mac_pdu_t * const pdu);
 void _mac_fsm(mac_event_t e);
 void _mac_fsm_event_tout_ack(void);
 void _mac_fsm_event_tout_busy(void);
+bool _lora_data_to_mac_pdu(lora_data_t * const lora, mac_pdu_t * const pdu);
+bool _mac_pdu_to_lora_data(lora_data_t * const lora, mac_pdu_t * const pdu);
 
 void _onLoraSent(void);
 void _onLoraReceived(void);
@@ -87,8 +91,9 @@ mac_err_t MAC_send(mac_addr_t rx, const mac_data_t data, uint8_t length) {
     return MAC_ERR_SUCCESS;
 }
 
-mac_addr_t MAC_receive(mac_data_t const * data, uint8_t* length) {
-
+mac_addr_t MAC_receive(mac_data_t* data, uint8_t* length) {
+    *length = rxPDU.length;
+    memcpy(data, rxPDU.data, rxPDU.length);
 }
 
 bool MAC_isAvailable() {
@@ -158,24 +163,57 @@ bool _verifyCRC(const mac_pdu_t* const pdu) {
 }
 
 mac_id_t _getRandomID() {
-    return (mac_id_t)random(0, MAC_MAX_ID);
+    return (mac_id_t)random(1, MAC_MAX_ID);
 }
 
 // ------------------------------
 
 void _onLoraSent(void) {
-   _PL("[MAC] Frame rcv");
+    /*
+        Callback executat per capa inferior LoRa quan es produeix una transmissió.
+    */
+   _PL("[MAC] Frame sent");
 }
 
 void _onLoraReceived(void) {
-   _PL("[MAC] Frame sent");
-   // Generar esdeveniment a FSM
-   _mac_fsm(mac_event_t::RX_E);
+    /*
+        Callback executat quan es produeix una recepció a capa inferior LoRa.
+        Filtra que les dades siguin vàlides i per nosaltres.
+        Si és així, converteix dades rebudes en PDU de MAC, 
+        i genera esdeveniment de recepció; si no, ignora recepció.
+    */
+    _PL("[MAC] Frame rcv");
+
+    lora_data_t data;
+    if(!LoRa_receive(&data)) {
+        _PL("[MAC] _received_mac: ERR");
+        return;
+    }
+
+    _PP("Received Lora data: ");
+
+    _lora_data_to_mac_pdu(&data, &rxPDU);
+    if(!_verifyCRC(&rxPDU)) {
+        _PL("[MAC] _received_mac: CRC ERR");
+        return;
+    }
+
+    if(rxPDU.rx != self) {
+        _PL("[MAC] _received_mac: NOT FOR SELF");
+        return;
+    }
+
+    // Generar esdeveniment a FSM
+    _mac_fsm(mac_event_t::RX_E);
 }
 
 // --- FSM ---
-
 void _mac_fsm(mac_event_t e) {
+    /*
+        FSM principal capa MAC. Gestiona enviaments, aplicant BEB,
+        recepció d'"ACK" i recepció d'altres dades.
+    */
+
     // Retorna bool (0, 1): 0 si ocupat (not available) -> lora_event_t::busy
     lora_event_t lora_e = (lora_event_t)LoRa_isAvailable();
     if(fsmState == mac_state_t::IDLE_S) {
@@ -196,7 +234,9 @@ void _mac_fsm(mac_event_t e) {
                 // (l'esperat és 2*timeOnAir, ha d'anar i tornar la resposta, de mateixa mida com a molt)
                 txTimeoutTask = scheduler_once(_mac_fsm_event_tout_ack, 6*airtime_us/1000);
                 _PF("[MAC] Timeout ACK: %d\n", 6*airtime_us/1000);
-                lora_tx_error_t state = LoRa_send((const lora_data_t*)&txPDU);
+                lora_data_t data;
+                _mac_pdu_to_lora_data(&data, &txPDU);
+                lora_tx_error_t state = LoRa_send(&data);
                 if(state != LORA_SUCCESS) {
                     scheduler_stop(txTimeoutTask); // cancel·lem abans que s'executi (per molt que passi el temps no s'haurà executat ja que necessita bucle de loop)
                     _txError_mac();
@@ -254,8 +294,7 @@ void _mac_fsm(mac_event_t e) {
                     Només pot significar un reintent de TX degut a TOUT_ACK.
                     MAC_send() ja filtra nous TX amb dades diferents.
                     S'ha de fer una retransmissió.
-
-                    TODO: Hauria de tenir en compte el valor actual de reintents
+                    @todo: Hauria de tenir en compte el valor actual de reintents
                 */
                 _PM("[MAC] FSM: MAC TX + LoRa IDLE + TX");
 
@@ -265,7 +304,9 @@ void _mac_fsm(mac_event_t e) {
                 // (l'esperat és 2*timeOnAir, ha d'anar i tornar la resposta, de mateixa mida com a molt)
                 txTimeoutTask = scheduler_once(_mac_fsm_event_tout_ack, 6*airtime_us/1000);
                 _PF("[MAC] Timeout ACK: %d\n", 6*airtime_us/1000);
-                lora_tx_error_t state = LoRa_send((const lora_data_t*)&txPDU);
+                lora_data_t data;
+                _mac_pdu_to_lora_data(&data, &txPDU);
+                lora_tx_error_t state = LoRa_send(&data);
                 if(state != LORA_SUCCESS) {
                     scheduler_stop(txTimeoutTask); // cancel·lem abans que s'executi (per molt que passi el temps no s'haurà executat ja que necessita bucle de loop)
                     _txError_mac();
@@ -294,9 +335,15 @@ void _mac_fsm(mac_event_t e) {
         else if (e == mac_event_t::RX_E) {
             /*
                 MAC ocupada i es produeix recepció. És frame a retransmetre o per nosaltres o ACK.
+                Cal aturar tasca de timeout
+                @todo: De moment únicament es processarà un missatge a la vegada. S'ignorarà recepció si no és ACK.
             */
-           _PM("[MAC] FSM: MAC TX + RX");
-           _received_mac();
+            _PM("[MAC] FSM: MAC TX + RX");
+            if(_is_ack_pdu_valid(&rxPDU)) {
+                _PM("[MAC] ACK Received");
+                fsmState == mac_state_t::IDLE_S;
+                scheduler_stop(txTimeoutTask);
+            }
         }
         else if (e == mac_event_t::TOUT_ACK_E) {
             /*
@@ -319,29 +366,24 @@ void _mac_fsm(mac_event_t e) {
            _mac_fsm(mac_event_t::TX_E);
 
         }
-        else if (e == mac_event_t::RX_ACK_E) {
-            /*
-                MAC Ocupada i es genera esdeveniment de recepció d'ACK.
-                Fi de transmissió actual.
-                Cal aturar tasca de timeout ACK. Passem a IDLE.
-            */
-           fsmState == mac_state_t::IDLE_S;
-           scheduler_stop(txTimeoutTask);
-        }
     }
 }
 
-void _mac_fsm_event_tout_ack(void) {
-    _mac_fsm(mac_event_t::TOUT_ACK_E);
-}
+void _mac_fsm_event_tout_ack(void) { _mac_fsm(mac_event_t::TOUT_ACK_E); }
+void _mac_fsm_event_tout_busy(void) { _mac_fsm(mac_event_t::TOUT_BUSY_E); }
 
-void _mac_fsm_event_tout_busy(void) {
-    _mac_fsm(mac_event_t::TOUT_BUSY_E);
+bool _mac_pdu_to_lora_data(lora_data_t * const lora, mac_pdu_t * const pdu) {
+    uint8_t* ptr = lora->data;
+    memcpy(ptr, pdu, pdu->length+MAC_PDU_HEADER_SIZE-MAC_CRC_SIZE);
+    ptr += pdu->length+MAC_PDU_HEADER_SIZE-MAC_CRC_SIZE;
+    memcpy(ptr, &pdu->crc, sizeof(mac_crc_t));
+    lora->length = txPDU.length+MAC_PDU_HEADER_SIZE;
+    return true;
 }
 
 bool _lora_data_to_mac_pdu(lora_data_t * const lora, mac_pdu_t * const pdu) {
     if (lora->length < sizeof(mac_addr_t) * 2 + sizeof(mac_id_t) + sizeof(mac_crc_t) + 1) {
-        _PL("[MAC] lora_to_mac_pdu: Invalid data size");
+        _PF("[MAC] lora_to_mac_pdu: Invalid data size: %dB\n", lora->length);
         return false;
     }
 
@@ -361,32 +403,35 @@ bool _lora_data_to_mac_pdu(lora_data_t * const lora, mac_pdu_t * const pdu) {
     return true;
 }
 
+bool _is_ack_pdu_valid(const mac_pdu_t * const pdu) {
+    return (pdu->tx == txPDU.rx && pdu->id == txPDU.id+txPDU.rx);
+}
+
 void _received_mac(void) {
     /*
-    Executat per FSM quan es rep alguna cosa.
-    1. Filtrar si és per nosaltres o no
-    2. Filtrar CRC
-    3. Mirar si ID ja rebut anteriorment
-        3.1. Si rebut, enviar un "ACK" (frame amb RX = 0x00, ID = ID esperat)
-        3.2. Si no rebut, passar a capa superior
+    Executat per FSM quan s'ha rebut un frame que no és ACK i és
+    per nosaltres. CRC s'ha verificat en el moment de rebre frame `_onLoraReceived`
+    1. Mirar si ID ja rebut anteriorment
+        1.1. Si rebut, enviar un "ACK" (frame amb RX = 0x00, ID = ID esperat)
+        1.2. Si no rebut, passar a capa superior i guardar ID
     */
-    lora_data_t data;
-    mac_pdu_t pdu;
-    if(!LoRa_receive(&data))
-        _PL("[MAC] _received_mac: ERR");
-        return;
-    
-    _PP("Received Lora data: ");
-    for (size_t i = 0; i < data.length; i++)
-    {
-        _PX(data.data[i]);
+    _PM("[MAC] Received non-ack frame");
+    // Filtrem si rebut
+    bool seen = false;
+    mac_id_t rcvID = rxPDU.id;
+    for(int i = 0; i < MAC_QUEUE_SIZE; i++) {
+        if(lastFramesIDs[i] == rcvID) {
+            seen = true;
+            break;
+        }
     }
-    _PL();
-    
-    // Mida dades
-    // data.length conté la mida de totes les dades (incloent headers MAC)
-    // pdu.length només ha de tenir la mida del camp de dades
-    // memcpy(&pdu, &data, data.length);
+
+    if (seen) {
+
+    }
+    else {
+        MAC_send(rxPDU.tx, "", 0);
+    }
 }
 
 void _sent_mac(void) {
@@ -409,12 +454,7 @@ void _printPDU(const mac_pdu_t* const pdu) {
     _PX(pdu->crc); _PL();
 }
 
-void _printLora(const lora_data_t* const data) {
-    for (uint8_t i = 0; i < data->length; ++i) {
-        _PX(((char*)data)[i]);
-    }
-    _PL();
-}
+
 #endif
 
 
@@ -432,17 +472,8 @@ void setup() {
         while(1);
     }
 
-    lora_data_t data = {0x01,0x02,0x2C,0x82,0x50,0x52,0x4F,0x56,0x41,0x86};
-    data.length = 10;
-    _printLora(&data);
-
-    mac_pdu_t pdu;
-    _lora_data_to_mac_pdu(&data, &pdu);
-    _printPDU(&pdu);
-    _PF("CRC: %d\n", _verifyCRC(&pdu));
-
-    // mac_data_t data = "PROVA";
-    // MAC_send(0x02, data, strlen((char*)data));
+    mac_data_t data = "PROVAA";
+    MAC_send(0x03, data, strlen((char*)data));
 }
 
 void loop() {
