@@ -27,7 +27,7 @@ change LoRa transceivers.
 // ===== FI CONFIG =====
 
 // Interval comprovació recepcions 
-#define LORA_IRQFLAGS_CHECK_INTERVAL 5 // interval comprovació flags IRQ tasca programada en ms
+#define LORA_IRQFLAGS_CHECK_INTERVAL 1 // interval comprovació flags IRQ tasca programada en ms
 // Mida màxima LoRa. No pot ser major a RADIOLIB_SX126X_MAX_PACKET_LENGTH
 #define LORA_MAX_SIZE RADIOLIB_SX126X_MAX_PACKET_LENGTH
 
