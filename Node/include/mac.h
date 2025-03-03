@@ -10,6 +10,9 @@
 #define MAC_MAX_BEB_RETRY 10
 // Factor pel qual es multiplica el valor aleatori de BEB per generar retard, en ms
 #define MAC_BEB_FACTOR_MS 100 
+// Factor de temps addicional per recepció d'ACK, en funció de time on air de les dades enviades
+// Si factor és 5 i time on air és 1ms, el timeout serà de 10 ms (dues vegades el temps esperat, anada+tornada)
+#define MAC_ACK_TIMEOUT_FACTOR 5
 // Número d'IDs de frames anteriors rebuts guardats (per si cal enviar "ACK")
 #define MAC_QUEUE_SIZE 5
 // Polinomi per CRC8 (x^8+x^2+1)
