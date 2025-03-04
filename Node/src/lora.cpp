@@ -203,7 +203,7 @@ void _startReceiving() {
         return;
     }
     radio.startReceive();
-    _PM("[LORA] _startRcv");
+    _PL("[LORA] _startRcv");
 }
 
 void _handleInterrupts(void) {
@@ -231,7 +231,8 @@ void _checkIRQFlags(void) {
     if(!IRQFlags) // retorn prematur si no flags
         return;
 
-    _PP("Handle int: 0x"); _PX(IRQFlags>>16); _PP(" "); _PX(IRQFlags & 0xFF); _PL();
+    _PF("[LORA] Handle int: 0x%04X\n", IRQFlags);
+    // _PP("[LORA] Handle int: 0x"); _PX(IRQFlags>>16); _PP(" "); _PX(IRQFlags & 0xFF); _PL();
     if (IRQFlags & RADIOLIB_SX126X_IRQ_TX_DONE) {
         _sent_lora();
     }
@@ -249,7 +250,7 @@ void _received_lora(void) {
     Torna a posar-se en mode de recepció, ja que després 
     de fer lectura de les dades rebudes es posa en mode standby.
     */
-    _PM("[LORA] _received");
+    _PL("[LORA] _received");
     if (onReceive != NULL) {
         _PL("[LORA] onReceive");
         onReceive();
@@ -265,7 +266,7 @@ void _sent_lora(void) {
     Posa flag de TX en curs a fals. Torna a posar-se en mode de recepció,
     ja que després d'enviar està en standby.
     */
-    _PM("[LORA] _sent()");
+    _PL("[LORA] _sent()");
     transmitting = false; // posar al principi. Si onSend volgués tornar a enviar, no podria
     if(onSend != NULL) {
         // scheduler_once(onSend);
