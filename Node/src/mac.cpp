@@ -47,7 +47,7 @@ static Task* txTimeoutTask;
 
 mac_id_t _getRandomID();
 mac_crc_t _computeCRC(const mac_pdu_t* const pdu);
-void _getPDU(const mac_data_t * const data, uint8_t length, mac_pdu_t * const pdu, mac_addr_t rx, mac_id_t id = 0);
+void _getPDU(const mac_data_t data, uint8_t length, mac_pdu_t * const pdu, mac_addr_t rx, mac_id_t id = 0);
 void _printPDU(const mac_pdu_t* const pdu);
 bool _verifyCRC(const mac_pdu_t* const pdu);
 bool _is_ack_pdu_valid(const mac_pdu_t * const pdu);
@@ -90,7 +90,7 @@ mac_err_t MAC_send(mac_addr_t rx, const mac_data_t data, uint8_t length) {
     if(!MAC_isAvailable()) // No permetre segon enviament si un està pendent. Sobreescriuria PDU TX actual
         return MAC_ERR_TX_PENDING;
 
-    _getPDU((const mac_data_t*)data, length, &txPDU, rx);
+    _getPDU(data, length, &txPDU, rx);
     _mac_fsm(mac_event_t::TX_E);
 
     return MAC_ERR_SUCCESS;
@@ -122,9 +122,28 @@ void MAC_onTxFailed(mac_callback_t cb) {
 
 // ============== MÈTODES PRIVATS ==============
 
+mac_err_t _send_ack(const mac_pdu_t * const refPdu) {
+    if (!MAC_isAvailable()) {
+        _PF("\tMAC not available to send ACK\n");
+        return MAC_ERR_TX_PENDING;
+    }
+    _PF("\tMAC available to send ACK. Trying to send\n");
+
+    // Podem sobreescriure PDU de transmissió; estat actual és IDLE sí o sí, sinó MAC_isAvailable retorna False i no podem enviar ACK
+    _getPDU((const uint8_t*)"", 0, &txPDU, (mac_addr_t) 0x00, refPdu->id + self);
+    // Enviem dades SENSE PASSAR PER FSM, implicaria esperar un ACK del mateix ACK, bucle.
+    lora_data_t data;
+    _mac_pdu_to_lora_data(&data, &txPDU);
+    lora_tx_error_t state = LoRa_send(&data);
+    
+    if(state != LORA_SUCCESS)
+        return MAC_ERR;
+    return MAC_ERR_SUCCESS;
+}
+
 // --- GENERACIÓ PDU ---
 
-void _getPDU(const mac_data_t * const data, uint8_t length, mac_pdu_t * const pdu, mac_addr_t rx, mac_id_t id) {
+void _getPDU(const mac_data_t data, uint8_t length, mac_pdu_t * const pdu, mac_addr_t rx, mac_id_t id) {
     pdu->tx = self;
     pdu->rx = rx;
     memcpy(pdu->data, data, length);
@@ -133,12 +152,6 @@ void _getPDU(const mac_data_t * const data, uint8_t length, mac_pdu_t * const pd
     pdu->crc = _computeCRC(pdu);
     _PL("[MAC] GET PDU");
     _printPDU(pdu);
-    _PF("\tLen: %d", pdu->length); _PL();
-    _PF("\tTX: %d", pdu->tx); _PL();
-    _PF("\tRX: %d", pdu->rx); _PL();
-    _PF("\tData: %s", pdu->data); _PL();
-    _PF("\tID: %d", pdu->id); _PL();
-    _PF("[MAC] CRC: %d", pdu->crc); _PL();
 }
 
 // https://www.nongnu.org/avr-libc/user-manual/group__util__crc.html
@@ -198,16 +211,12 @@ void _onLoraReceived(void) {
         return;
     }
 
-    _PP("Received Lora data: ");
-
     _lora_data_to_mac_pdu(&data, &rxPDU);
+
+    _PL("Received PDU from LORA");
+    _printPDU(&rxPDU);
     if(!_verifyCRC(&rxPDU)) {
         _PL("\tCRC ERR");
-        return;
-    }
-
-    if(rxPDU.rx != self && rxPDU.rx != 0x00) {
-        _PF("\tNot for self: rx=%d\n",rxPDU.rx);
         return;
     }
 
@@ -215,39 +224,25 @@ void _onLoraReceived(void) {
     bool seen = lastFramesIDs.contains(rcvID);
 
     if (seen) {
+        // Si ja l'hem vist abans és perquè era un frame per nosaltres;
         _PF("\tAlready seen id received: %d\n", rcvID);
-        if (!MAC_isAvailable()) {
-            _PF("\tMAC not available to send ACK\n");
-            return;
-        }
-        _PF("\tMAC available to send ACK. Trying to send\n");
-        // Podem sobreescriure PDU de transmissió; estat actual és IDLE sí o sí, sino no s'executa aquest mètode
-        _getPDU((const mac_data_t *)"", 0, &txPDU, (mac_addr_t) 0x00, rxPDU.id + self);
-        // Enviem dades SENSE PASSAR PER FSM, implicaria esperar un ACK del mateix ACK, bucle.
-        lora_data_t data;
-        _mac_pdu_to_lora_data(&data, &txPDU);
-        lora_tx_error_t state = LoRa_send(&data);
+        _send_ack(&rxPDU);
     }
     else {
+        _PF("\tNew id received: %d\n", rcvID);
         // Mirem si el rebut és ACK
         if (_is_ack_pdu_valid(&rxPDU)) {
-            _PF("\tNew id received: %d\n", rcvID);
+            _PF("\tACK Received from %d\n", rxPDU.tx);
             lastFramesIDs.enqueue(rcvID);
-            lastFramesIDs.printBuffer();
             _mac_fsm(mac_event_t::RX_ACK_E);
         }
+        // Si no és ACK, mirem si som el receptor
         else if (rxPDU.rx == self) {
-            _PF("\tNew id received: %d\n", rcvID);
             lastFramesIDs.enqueue(rcvID);
-            lastFramesIDs.printBuffer();
             _PF("\tFrame for higher layer");
 
-            // FICTICI, ELIMINAR!
-            _getPDU((const mac_data_t *)"", 0, &txPDU, (mac_addr_t) 0x00, rxPDU.id + self);
-            // Enviem dades SENSE PASSAR PER FSM, implicaria esperar un ACK del mateix ACK, bucle.
-            lora_data_t data;
-            _mac_pdu_to_lora_data(&data, &txPDU);
-            lora_tx_error_t state = LoRa_send(&data);
+            // FICTICI, ELIMINAR! HO GESTIONARIA CAPA ROUTING
+            _send_ack(&rxPDU);
         }
     }
 }
@@ -319,7 +314,7 @@ void _mac_fsm(mac_event_t e) {
             // i deixant de marge 5 vegades més de l'esperat (l'esperat és 2*timeOnAir, ha d'anar i tornar la resposta, de mateixa mida com a molt)
             long airtime_us = LoRa_getTimeOnAir(txPDU.length+MAC_PDU_HEADER_SIZE);
             txTimeoutTask = scheduler_once(_mac_fsm_event_tout_ack, 2*MAC_ACK_TIMEOUT_FACTOR*airtime_us/1000);
-            _PF("[MAC] Timeout d'ACK: %d\n", 2*MAC_ACK_TIMEOUT_FACTOR*airtime_us/1000);
+            _PF("[MAC] Timeout d'ACK: %dms (2*%d*%d/1000)\n", 2*MAC_ACK_TIMEOUT_FACTOR*airtime_us/1000, MAC_ACK_TIMEOUT_FACTOR, airtime_us);
         }
 
     }
@@ -358,7 +353,6 @@ void _mac_fsm(mac_event_t e) {
             _PF("\tTimeout BEB: %d\n", bebTimeout);
         }
     }
-    _PF("[MAC] EXIT FSM:\tSTATE %d\tMAC %d\tLORA %d\n", fsmState, e, lora_e);
 }
 
 void _mac_fsm_event_tout_ack(void) { _mac_fsm(mac_event_t::TOUT_ACK_E); }
@@ -396,7 +390,9 @@ bool _lora_data_to_mac_pdu(lora_data_t * const lora, mac_pdu_t * const pdu) {
 }
 
 bool _is_ack_pdu_valid(const mac_pdu_t * const pdu) {
-    return (pdu->tx == txPDU.rx && pdu->id == txPDU.id+txPDU.rx && pdu->rx == 0x00);
+    // Pot ser ACK si @TX és la de l'anterior RX
+    // i si ID rebut és ID anterio + ID TX
+    return (pdu->tx == txPDU.rx && pdu->id == txPDU.id+txPDU.rx);
 }
 
 void _sent_mac(void) {
@@ -412,11 +408,12 @@ void _txError_mac(void) {
 void _printPDU(const mac_pdu_t* const pdu) {
     // En escriure, tipus com uint16_t (ID) es guarden en little endian
     // Així, si ID és 60505 = 0xEC59 es mostraria com 59EC
-    for (uint8_t i = 0; i < (pdu->length+2*MAC_ADDRESS_SIZE+MAC_ID_SIZE); ++i) {
-        _PX(((char*)pdu)[i]);
-    }
-    // CRC
-    _PX(pdu->crc); _PL();
+    // for (uint8_t i = 0; i < (pdu->length+2*MAC_ADDRESS_SIZE+MAC_ID_SIZE); ++i) {
+        // _PX(((char*)pdu)[i]);
+    // }
+    // _PX(pdu->crc); _PL();
+    _PF("===== PDU =====\nTX\t%d\nRX\t%d\nID\t%d\nD\t%s\nCRC\t%d\n===============\n",
+    pdu->tx, pdu->rx, pdu->id, pdu->data, pdu->crc);
 }
 #endif
 
