@@ -49,25 +49,20 @@ void scheduler_stop(Task* task) {
 }
 
 void _delete_completed_tasks() {
-    _PP("Before cleanup, task count: ");
-    _PL(scheduled_tasks.size());
-    _PP("Heap: "); _PL(ESP.getFreeHeap());
+    _PF("[SCHED] Before cleanup.\tCount: %d\tHeap: %d\n", scheduled_tasks.size(), ESP.getFreeHeap());
 
     for (auto tsk = scheduled_tasks.begin(); tsk != scheduled_tasks.end();) {
         if (!(*tsk)->isEnabled()) {  // Comprva si tasca habilitada
             ts.deleteTask(**tsk);   
             delete *tsk;  // Borrar de memòria i vector
             tsk = scheduled_tasks.erase(tsk); 
-            _PM("Task deleted");
+            // _PM("Task deleted");
         } else {
             ++tsk;
         }
     }
 
-    _PP("After cleanup, task count: ");
-    _PL(scheduled_tasks.size());
-    _PP("Heap: "); _PL(ESP.getFreeHeap());
-
+    _PF("[SCHED] After cleanup.\tCount: %d\tHeap: %d\n", scheduled_tasks.size(), ESP.getFreeHeap());
     // Aturar cleanup si fa falta
     _stop_cleanup_if_needed();
 }
@@ -78,7 +73,7 @@ void _start_cleanup_if_needed() {
         // Iniciar cleanup
         scheduler_infinite(_TASK_CLEANUP_INTERVAL, &_delete_completed_tasks, _TASK_CLEANUP_INTERVAL);
         is_cleanup_running = true;
-        _PM("Cleanup started");
+        _PL("[SCHED] Cleanup started");
     }
 }
 
@@ -90,7 +85,7 @@ void _stop_cleanup_if_needed() {
         delete cleanup_task;  
         scheduled_tasks.clear();  // Elimina la propia tasca de cleanup
         is_cleanup_running = false;
-        _PM("Cleanup task stopped and deleted");
+        _PL("[SCHED] Cleanup task stopped and deleted");
     }
 }
 
