@@ -215,7 +215,9 @@ void _handleInterrupts(void) {
     // S'inicia una tasca en iniciar que comprova els flags cada pocs ms
     // dins de LOOP, evitant bloquejar ISR.
 
-    IRQFlags = radio.getIrqFlags();
+    // OR per no perdre interrupcions. Sino, si es generen dues interrupcions ABANS que checkIRQflags ho gestioni, la primer es perd.
+    // Ja es posaran a 0 després que checkIRQFlags les comprovi.
+    IRQFlags |= radio.getIrqFlags();
 }
 
 void _checkIRQFlags(void) {
