@@ -5,7 +5,7 @@
 
 class RingBuffer {
 private:
-    uint8_t* buffer;
+    uint16_t* buffer;
     int capacity;
     int head;
     int tail;
@@ -17,10 +17,10 @@ public:
     ~RingBuffer();
 
     // Buffer operations
-    void enqueue(uint8_t value);
-    uint8_t dequeue();
-    bool contains(uint8_t value);
-    bool remove(uint8_t value);
+    void enqueue(uint16_t value);
+    uint16_t dequeue();
+    bool contains(uint16_t value);
+    bool remove(uint16_t value);
     void printBuffer();
 };
 
