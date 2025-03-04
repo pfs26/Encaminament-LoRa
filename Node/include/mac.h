@@ -36,7 +36,7 @@ typedef struct {
     mac_addr_t tx;
     mac_addr_t rx;
     mac_id_t id;
-    uint8_t data[MAC_MAX_DATA_SIZE];
+    uint8_t data[MAC_MAX_DATA_SIZE]; // potser uint8_t data[MAC_MAX_DATA_SIZE+1];, per deixar de marge el caràcter final '\0'
     mac_crc_t crc;
 
     uint8_t length; // Mida del camp de dades (entre 0 i MAC_MAC_DATA_SIZE)

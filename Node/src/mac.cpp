@@ -85,7 +85,7 @@ mac_err_t MAC_send(mac_addr_t rx, const mac_data_t data, uint8_t length) {
     // 4. Enviar LoRa_send()
     if(length > MAC_MAX_DATA_SIZE)
         return MAC_ERR_MAX_LENGTH;
-    if(rx == self)
+    if(rx == self) 
         return MAC_ERR_INVALID_ADDR;
     if(!MAC_isAvailable()) // No permetre segon enviament si un està pendent. Sobreescriuria PDU TX actual
         return MAC_ERR_TX_PENDING;
@@ -99,6 +99,7 @@ mac_err_t MAC_send(mac_addr_t rx, const mac_data_t data, uint8_t length) {
 mac_addr_t MAC_receive(mac_data_t* data, uint8_t* length) {
     *length = rxPDU.length;
     memcpy(data, rxPDU.data, rxPDU.length);
+    (*data)[*length] = '\0';
     return rxPDU.tx;
 }
 
@@ -239,10 +240,15 @@ void _onLoraReceived(void) {
         // Si no és ACK, mirem si som el receptor
         else if (rxPDU.rx == self) {
             lastFramesIDs.enqueue(rcvID);
-            _PF("\tFrame for higher layer");
+            _PL("\tFrame for higher layer");
 
             // FICTICI, ELIMINAR! HO GESTIONARIA CAPA ROUTING
             _send_ack(&rxPDU);
+
+            _received_mac();
+        }
+        else {
+            _PF("\tFrame not for self: %d\n", rxPDU.rx);
         }
     }
 }
@@ -314,7 +320,7 @@ void _mac_fsm(mac_event_t e) {
             // i deixant de marge 5 vegades més de l'esperat (l'esperat és 2*timeOnAir, ha d'anar i tornar la resposta, de mateixa mida com a molt)
             long airtime_us = LoRa_getTimeOnAir(txPDU.length+MAC_PDU_HEADER_SIZE);
             txTimeoutTask = scheduler_once(_mac_fsm_event_tout_ack, 2*MAC_ACK_TIMEOUT_FACTOR*airtime_us/1000);
-            _PF("[MAC] Timeout d'ACK: %dms (2*%d*%d/1000)\n", 2*MAC_ACK_TIMEOUT_FACTOR*airtime_us/1000, MAC_ACK_TIMEOUT_FACTOR, airtime_us);
+            _PF("[MAC] Timeout d'ACK: %dms (%dus airtime)\n", 2*MAC_ACK_TIMEOUT_FACTOR*airtime_us/1000, airtime_us);
         }
 
     }
@@ -329,6 +335,7 @@ void _mac_fsm(mac_event_t e) {
         else if (e == mac_event_t::TOUT_ACK_E && lora_e == lora_event_t::IDLE_E) {
             currentTxRetry++;
             if (currentTxRetry == MAC_MAX_RETRIES) {
+                _PL("\tMAX RETRIES REACHED\n");
                 fsmState = mac_state_t::IDLE_S;
                 _txError_mac();
                 return;
@@ -396,6 +403,17 @@ bool _is_ack_pdu_valid(const mac_pdu_t * const pdu) {
 }
 
 void _sent_mac(void) {
+    _PL("[MAC] SENT");
+    if(onSend != NULL) {
+        onSend();
+    }
+}
+
+void _received_mac(void) {
+    _PL("[MAC] RCV");
+    if(onReceive != NULL) {
+        onReceive();
+    }
 }
 
 void _txError_mac(void) {
@@ -412,34 +430,10 @@ void _printPDU(const mac_pdu_t* const pdu) {
         // _PX(((char*)pdu)[i]);
     // }
     // _PX(pdu->crc); _PL();
-    _PF("===== PDU =====\nTX\t%d\nRX\t%d\nID\t%d\nD\t%s\nCRC\t%d\n===============\n",
-    pdu->tx, pdu->rx, pdu->id, pdu->data, pdu->crc);
+    _PF("===== PDU =====\nTX\t%d\nRX\t%d\nID\t%d\nD\t%s\nCRC\t%d\nACK\t%d\n===============\n",
+    pdu->tx, pdu->rx, pdu->id, pdu->data, pdu->crc, _is_ack_pdu_valid(pdu));
 }
 #endif
-
-
-void setup() {
-    Serial.begin(115200);
-
-    Serial.print(F("[SX1262] Initializing ... "));
-    Serial.print("Model: "); Serial.println(ESP.getChipModel());
-    Serial.print("CPU: "); Serial.println(ESP.getCpuFreqMHz());
-    Serial.print("Heap: "); Serial.println(ESP.getFreeHeap());
-    Serial.println(esp_reset_reason());
-
-    if(!MAC_init(0x03, false)) {
-        _PL("ERR");
-        while(1);
-    }
-
-    // mac_data_t data = "PROVAA";
-    // MAC_send(0x03, data, strlen((char*)data));
-}
-
-void loop() {
-    scheduler_run();
-}
-
 
 
 /* === Proves CRC ===
