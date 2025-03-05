@@ -26,7 +26,7 @@
 #define MAC_CRC_SIZE 1      // bytes per FEC
 
 #define MAC_PDU_HEADER_SIZE (2*MAC_ADDRESS_SIZE + MAC_ID_SIZE + MAC_CRC_SIZE)
-#define MAC_MAX_DATA_SIZE LORA_MAX_SIZE - MAC_PDU_HEADER_SIZE  // @tx + @rx + crc + 2*id
+#define MAC_MAX_DATA_SIZE LORA_MAX_SIZE - MAC_PDU_HEADER_SIZE - 1 // @tx + @rx + crc + id + 1B separador \0
 
 typedef uint8_t mac_addr_t;
 typedef uint8_t mac_crc_t;
@@ -36,30 +36,32 @@ typedef struct {
     mac_addr_t tx;
     mac_addr_t rx;
     mac_id_t id;
-    uint8_t data[MAC_MAX_DATA_SIZE]; // potser uint8_t data[MAC_MAX_DATA_SIZE+1];, per deixar de marge el caràcter final '\0'
+    uint8_t data[MAC_MAX_DATA_SIZE+1]; // potser uint8_t data[MAC_MAX_DATA_SIZE+1];, per deixar de marge el caràcter final '\0'
     mac_crc_t crc;
 
-    uint8_t length; // Mida del camp de dades (entre 0 i MAC_MAC_DATA_SIZE)
+    // uint8_t length; // Mida del camp de dades (entre 0 i MAC_MAC_DATA_SIZE)
 } mac_pdu_t;
 
 typedef uint8_t mac_data_t[MAC_MAX_DATA_SIZE];
 
-typedef uint8_t mac_err_t;
-#define MAC_ERR_SUCCESS         0
-#define MAC_ERR                 -1
-#define MAC_ERR_INVALID_ADDR    1
-#define MAC_ERR_MAX_RETRIES     2
-#define MAC_ERR_MAX_LENGTH      3
-#define MAC_ERR_TX_PENDING      4
+enum mac_err_t{
+    MAC_SUCCESS,
+    MAC_ERR,
+    MAC_ERR_INVALID_ADDR,
+    MAC_ERR_MAX_RETRIES,
+    MAC_ERR_MAX_LENGTH,
+    MAC_ERR_TX_PENDING
+};
+
 
 typedef void (*mac_callback_t)();
 
 bool MAC_init(mac_addr_t selfAddr, bool is_gateway);
 void MAC_deinit();
 
-mac_err_t MAC_send(mac_addr_t rx, const mac_data_t data, uint8_t length);
-mac_addr_t MAC_receive(mac_data_t* data, uint8_t* length);
-mac_addr_t MAC_receive(mac_data_t const * data, uint8_t* length);
+mac_err_t MAC_send(mac_addr_t rx, const mac_data_t data, size_t length);
+mac_addr_t MAC_receive(mac_data_t* data, size_t* length);
+mac_addr_t MAC_receive(mac_data_t const * data, size_t* length);
 bool MAC_isAvailable();
 void MAC_onReceive(mac_callback_t cb);
 void MAC_onSend(mac_callback_t cb);
