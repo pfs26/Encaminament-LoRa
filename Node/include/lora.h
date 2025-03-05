@@ -65,6 +65,7 @@ bool LoRa_wakeup();
 bool LoRa_setFrequency(float frequency);
 bool LoRa_setTxPower(int power);
 long LoRa_getTimeOnAir(int length);
+void LoRa_startReceiving();
 // bool LoRa_setDataRate(int datarate);
 
 void LoRa_onReceive(lora_callback_t cb);

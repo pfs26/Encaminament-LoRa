@@ -125,6 +125,7 @@ bool LoRa_isAvailable() {
     _clearInterrupts();
     int16_t result = radio.scanChannel();
     // TODO: Potser fa falta _startReceiving()?
+    // _startReceiving();
     if(result == RADIOLIB_CHANNEL_FREE) { 
         return true; 
     }  
@@ -167,6 +168,10 @@ bool LoRa_setTxPower(int power) {
 
 long LoRa_getTimeOnAir(int length) {
     return radio.getTimeOnAir(length);
+}
+
+void LoRa_startReceiving() {
+    _startReceiving();
 }
 
 /*
