@@ -5,6 +5,7 @@
 #define LOG_LEVEL_WARN  2
 #define LOG_LEVEL_ERROR 3
 
+// Debug macros with log level filtering
 #if LOG_LEVEL <= LOG_LEVEL_INFO
     #define _PI(fmt, ...) Serial.printf("[I] %s:%d: " fmt "\n", __FILE__, __LINE__, ##__VA_ARGS__)
 #else

@@ -145,35 +145,32 @@ void _stopWebServer() {
 
 Task* dnsReqTask;
 void _processNextDNSReq() {
-	_PM("[WEB] DNS PROC");
+	_PI("[WEB] DNS request");
 	dnsServer.processNextRequest();
 }
 
 bool webpage_start() {
-	// Print a welcome message to the Serial port.
-	_PL("\n\nCaptive Test, V0.5.0 compiled " __DATE__ " " __TIME__ " by CD_FER");  //__DATE__ is provided by the platformio ide
-
-    _PL("[WEB] Starting AP");
+    _PI("[WEB] Starting AP");
 	_setUpSoftAP();
-    _PL("[WEB] Starting DNS");
+    _PI("[WEB] Starting DNS");
 	_setUpDNSServer();
-    _PL("[WEB] Starting WEB");
+    _PI("[WEB] Starting WEB");
 	_setUpWebServer();
 
 	// Comprovacions cada 30 MS utilitzant les tasques, per no bloquejar el fil principal
 	// Cal que LOOP executi scheduler_run().
 	dnsReqTask = scheduler_infinite(DNS_INTERVAL, &_processNextDNSReq);
-	_PM("[WEB] STARTED");	// should be somewhere between 270-350 for Generic ESP32 (D0WDQ6 chip, can have a higher startup time on first boot)
+	_PI("[WEB] Successfully started");	// should be somewhere between 270-350 for Generic ESP32 (D0WDQ6 chip, can have a higher startup time on first boot)
 	return true;
 }
 
 void webpage_stop() {
-	_PL("[WEB] Stopping DNS task");
+	_PI("[WEB] Stopping DNS task");
 	scheduler_stop(dnsReqTask);
-    _PL("[WEB] Stoping WEB");
+    _PI("[WEB] Stoping WEB");
 	_stopWebServer();
-    _PL("[WEB] Stoping DNS");
+    _PI("[WEB] Stoping DNS");
 	_stopDNSServer();
-    _PL("[WEB] Stoping AP");
+    _PI("[WEB] Stoping AP");
 	_stopSoftAP();
 }
