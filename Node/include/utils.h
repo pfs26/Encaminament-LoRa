@@ -1,17 +1,26 @@
 #include "config.h"
 
-#ifdef DEBUG
-#define _PM(a) Serial.print(millis()); Serial.print(": "); Serial.println(a)
-#define _PP(a) Serial.print(a)
-#define _PL(a) Serial.println(a)
-#define _PX(a) { if (a < 16) Serial.print("0"); Serial.print(a, HEX); }
-#define _PF(a, ...) Serial.printf(a, ##__VA_ARGS__)
+// Define log levels
+#define LOG_LEVEL_INFO  1
+#define LOG_LEVEL_WARN  2
+#define LOG_LEVEL_ERROR 3
+
+#if LOG_LEVEL <= LOG_LEVEL_INFO
+    #define _PI(fmt, ...) Serial.printf("[I] %s:%d: " fmt "\n", __FILE__, __LINE__, ##__VA_ARGS__)
 #else
-#define _PM(a)
-#define _PP(a)
-#define _PL(a)
-#define _PX(a)
-#define _PF(a, ...)
+    #define _PI(fmt, ...)
+#endif
+
+#if LOG_LEVEL <= LOG_LEVEL_WARN
+    #define _PW(fmt, ...) Serial.printf("[W] %s:%d: " fmt "\n", __FILE__, __LINE__, ##__VA_ARGS__)
+#else
+    #define _PW(fmt, ...)
+#endif
+
+#if LOG_LEVEL <= LOG_LEVEL_ERROR
+    #define _PE(fmt, ...) Serial.printf("[E] %s:%d: " fmt "\n", __FILE__, __LINE__, ##__VA_ARGS__)
+#else
+    #define _PE(fmt, ...)
 #endif
 
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
