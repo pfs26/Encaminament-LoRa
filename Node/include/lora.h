@@ -54,8 +54,8 @@ typedef void (*lora_callback_t)();
 bool LoRa_init(); 
 void LoRa_deinit();
 
-lora_tx_error_t LoRa_send(const lora_data_t data, uint8_t length); 
-bool LoRa_receive(lora_data_t data, uint8_t* length);
+lora_tx_error_t LoRa_send(const lora_data_t data, size_t length); 
+bool LoRa_receive(lora_data_t data, size_t* length);
 bool LoRa_isAvailable();
 bool LoRa_isBusy();
 int16_t LoRa_getLastRSSI();

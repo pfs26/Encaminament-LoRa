@@ -62,28 +62,20 @@ void LoRa_deinit() {
 }
 
 
-lora_tx_error_t LoRa_send(const lora_data_t data, uint8_t length) {
-    /*
-    Envia dades a través de LoRa utilitzant RadioHead.
-    Si es pot programar enviament, bloqueja fins que s'han enviat.
-        1. Comprova mida de les dades
-        2. Comprova si el canal està ocupat
-        3. Envia dades
-        4. Espera que s'hagin enviat
-        5. DESACTIVAR INTERRUPCIONS, O GENERARÀ INTERRUPCIONS QUE NO TOQUEN!
-    */
-
+lora_tx_error_t LoRa_send(const lora_data_t data, size_t length) {
     _PI("[LORA] Preparing to send");
     
     _clearInterrupts();
 
     if(length > LORA_MAX_SIZE) { 
         _PW("[LORA] Max length exceeded (length = %d)", length);
+        _startReceiving();
         return LORA_ERROR_TX_MAX_LENGTH; 
     }
 
     if(!LoRa_isAvailable()) { 
         _PW("[LORA] Channel busy");
+        _startReceiving();
         return LORA_ERROR_TX_BUSY; 
     }  
 
@@ -100,7 +92,7 @@ lora_tx_error_t LoRa_send(const lora_data_t data, uint8_t length) {
     return LORA_SUCCESS;
 } 
 
-bool LoRa_receive(lora_data_t data, uint8_t* length) {
+bool LoRa_receive(lora_data_t data, size_t* length) {
     /*
     Obté les dades rebudes del driver.
     S'hauria d'executar dins de la implementació 
@@ -247,6 +239,7 @@ void _printLora(const lora_data_t data, uint8_t length) {
     for (uint8_t i = 0; i < length; ++i) {
         Serial.printf("%02X", ((char*)data)[i]);
     }
+    Serial.printf(" (%d)", length);
     Serial.println();
 }
 #else
