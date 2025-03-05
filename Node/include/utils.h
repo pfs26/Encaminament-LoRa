@@ -7,19 +7,20 @@
 
 // Debug macros with log level filtering
 #if LOG_LEVEL <= LOG_LEVEL_INFO
-    #define _PI(fmt, ...) Serial.printf("[I] %s:%d: " fmt "\n", __FILE__, __LINE__, ##__VA_ARGS__)
+    #define _PI(fmt, ...) Serial.printf("[I] %lu %s:%d: " fmt "\n", millis(), __FILENAME__, __LINE__, ##__VA_ARGS__)
+    // #define _PI(fmt, ...) Serial.printf("[I] " %s:%d: " fmt "\n", __FILENAME__, __LINE__, ##__VA_ARGS__)
 #else
     #define _PI(fmt, ...)
 #endif
 
 #if LOG_LEVEL <= LOG_LEVEL_WARN
-    #define _PW(fmt, ...) Serial.printf("[W] %s:%d: " fmt "\n", __FILE__, __LINE__, ##__VA_ARGS__)
+    #define _PW(fmt, ...) Serial.printf("[W] %s:%d: " fmt "\n", __FILENAME__, __LINE__, ##__VA_ARGS__)
 #else
     #define _PW(fmt, ...)
 #endif
 
 #if LOG_LEVEL <= LOG_LEVEL_ERROR
-    #define _PE(fmt, ...) Serial.printf("[E] %s:%d: " fmt "\n", __FILE__, __LINE__, ##__VA_ARGS__)
+    #define _PE(fmt, ...) Serial.printf("[E] %s:%d: " fmt "\n", __FILENAME__, __LINE__, ##__VA_ARGS__)
 #else
     #define _PE(fmt, ...)
 #endif
