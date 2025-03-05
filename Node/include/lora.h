@@ -70,6 +70,6 @@ long LoRa_getTimeOnAir(int length);
 void LoRa_onReceive(lora_callback_t cb);
 // void LoRa_onSend(lora_callback_t cb);
 
-void _printLora(const lora_data_t data, uint8_t length);
+void _printLora(const lora_data_t data, size_t length);
 
 #endif

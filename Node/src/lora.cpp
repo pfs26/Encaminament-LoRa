@@ -234,7 +234,7 @@ void _received_lora(void) {
 }
 
 #if LOG_LEVEL <= LOG_LEVEL_INFO
-void _printLora(const lora_data_t data, uint8_t length) {
+void _printLora(const lora_data_t data, size_t length) {
     Serial.print("[LORA] Packet's data: ");
     for (uint8_t i = 0; i < length; ++i) {
         Serial.printf("%02X", ((char*)data)[i]);
@@ -243,5 +243,5 @@ void _printLora(const lora_data_t data, uint8_t length) {
     Serial.println();
 }
 #else
-void _printLora(const lora_data_t data, uint8_t length) {}
+void _printLora(const lora_data_t data, size_t length) {}
 #endif
