@@ -41,10 +41,12 @@ typedef int lora_tx_error_t;
 #define LORA_ERROR_TX_PENDING       4
 
 // Estructura dades lora
-typedef struct {
-    uint8_t data[LORA_MAX_SIZE];
-    uint8_t length; // Mida de les dades
-} lora_data_t;
+// typedef struct {
+//     uint8_t data[LORA_MAX_SIZE];
+//     uint8_t length; // Mida de les dades
+// } lora_data_t;
+
+typedef uint8_t lora_data_t[LORA_MAX_SIZE];
 
 // Callbacks
 typedef void (*lora_callback_t)();
@@ -52,8 +54,8 @@ typedef void (*lora_callback_t)();
 bool LoRa_init(); 
 void LoRa_deinit();
 
-lora_tx_error_t LoRa_send(const lora_data_t* data); 
-bool LoRa_receive(lora_data_t* data);
+lora_tx_error_t LoRa_send(const lora_data_t data, uint8_t length); 
+bool LoRa_receive(lora_data_t data, uint8_t* length);
 bool LoRa_isAvailable();
 bool LoRa_isBusy();
 int16_t LoRa_getLastRSSI();
@@ -63,11 +65,11 @@ bool LoRa_wakeup();
 bool LoRa_setFrequency(float frequency);
 bool LoRa_setTxPower(int power);
 long LoRa_getTimeOnAir(int length);
-bool LoRa_setDataRate(int datarate);
+// bool LoRa_setDataRate(int datarate);
 
 void LoRa_onReceive(lora_callback_t cb);
-void LoRa_onSend(lora_callback_t cb);
+// void LoRa_onSend(lora_callback_t cb);
 
-void _printLora(const lora_data_t* const data);
+void _printLora(const lora_data_t data, uint8_t length);
 
 #endif

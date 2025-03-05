@@ -3,68 +3,50 @@
 #include "scheduler.h"
 #include "utils.h"
 
-// Si node és transmissor
-// #define TX
+#define SENDER1
 
-void Sent(void);
-void Rcv(void);
+void Send() {
+    #ifdef SENDER1
+        lora_data_t data = "Hola 0x02!";
+    #else
+        lora_data_t data = "Hola 0x01!";
+    #endif
+    while(LoRa_send(data, 10) != LORA_SUCCESS);
 
-int count = 0;
-
-void Sent(void) {
-    _PL("Main SENT");
-    lora_data_t data;
-    sprintf((char*)data.data, "%d", count++);
-    data.length = strlen((char*)data.data);
-    delay(1000);
-    lora_tx_error_t status = LoRa_send(&data);
-    while(status==LORA_ERROR_TX_PENDING || status == LORA_ERROR_TX_BUSY)
-        status = LoRa_send(&data);
+    #ifdef SENDER1
+        scheduler_once(Send, 10000);
+    #else
+        scheduler_once(Send, 250);
+    #endif
 }
 
-void Rcv(void) {
-    _PL("MAIN RCV");
+void onRcv() {
+    Serial.println("Data received");
     lora_data_t data;
-    if(!LoRa_receive(&data)) {
-        _PL("MAIN Error rcv ");
-    }
-
-    Serial.print(millis()); Serial.print(" Received: "); Serial.println((char*)data.data);
-    Serial.print("\tSNR: "); Serial.println(LoRa_getLastSNR());
-    Serial.print("\tRSSI: "); Serial.println(LoRa_getLastRSSI());
+    uint8_t length;
+    LoRa_receive(data, &length);
+    data[length] = '\0';
+    Serial.printf("\tData: %s\tLength: %d\tSNR: %d\tRSSI: %d\n\n", data, length, LoRa_getLastSNR(), LoRa_getLastRSSI());
 }
-
 
 void setup() {
     Serial.begin(115200);
-
     Serial.print(F("[SX1262] Initializing ... "));
     Serial.print("Model: "); Serial.println(ESP.getChipModel());
     Serial.print("CPU: "); Serial.println(ESP.getCpuFreqMHz());
     Serial.print("Heap: "); Serial.println(ESP.getFreeHeap());
-    Serial.println(esp_reset_reason());
+	Serial.print("\n\nCompiled at " __DATE__ " " __TIME__);
 
     if(!LoRa_init()) {
-        _PL("ERR");
+        Serial.println("LoRa init failed");
         while(1);
     }
 
-    #ifdef TX
-        LoRa_onSend(Sent);
-    #else
-        LoRa_onReceive(Rcv);
-    #endif
+    LoRa_onReceive(onRcv);
 
-    #ifdef TX
-        lora_data_t data;
-        sprintf((char*)data.data, "%d", count++);
-        data.length = strlen((char*)data.data);
-        LoRa_send(&data);
-    #endif
+    scheduler_once(Send);
 }
 
 void loop() {
     scheduler_run();
 }
-
-
