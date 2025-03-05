@@ -74,7 +74,6 @@ void MAC_deinit();
 
 mac_err_t MAC_send(mac_addr_t rx, const mac_data_t data, size_t length);
 mac_addr_t MAC_receive(mac_data_t* data, size_t* length);
-mac_addr_t MAC_receive(mac_data_t const * data, size_t* length);
 bool MAC_isAvailable();
 void MAC_onReceive(mac_callback_t cb);
 void MAC_onSend(mac_callback_t cb);
