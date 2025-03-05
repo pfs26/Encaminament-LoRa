@@ -49,7 +49,7 @@ void scheduler_stop(Task* task) {
 }
 
 void _delete_completed_tasks() {
-    _PF("[SCHED] Before cleanup.\tCount: %d\tHeap: %d\n", scheduled_tasks.size(), ESP.getFreeHeap());
+    _PI("[SCHED] Before cleanup.\tCount: %d\tHeap: %d\n", scheduled_tasks.size(), ESP.getFreeHeap());
 
     for (auto tsk = scheduled_tasks.begin(); tsk != scheduled_tasks.end();) {
         if (!(*tsk)->isEnabled()) {  // Comprva si tasca habilitada
@@ -62,7 +62,7 @@ void _delete_completed_tasks() {
         }
     }
 
-    _PF("[SCHED] After cleanup.\tCount: %d\tHeap: %d\n", scheduled_tasks.size(), ESP.getFreeHeap());
+    _PI("[SCHED] After cleanup.\tCount: %d\tHeap: %d\n", scheduled_tasks.size(), ESP.getFreeHeap());
     // Aturar cleanup si fa falta
     _stop_cleanup_if_needed();
 }
@@ -73,7 +73,7 @@ void _start_cleanup_if_needed() {
         // Iniciar cleanup
         scheduler_infinite(_TASK_CLEANUP_INTERVAL, &_delete_completed_tasks, _TASK_CLEANUP_INTERVAL);
         is_cleanup_running = true;
-        _PL("[SCHED] Cleanup started");
+        _PI("[SCHED] Cleanup started");
     }
 }
 
@@ -85,7 +85,7 @@ void _stop_cleanup_if_needed() {
         delete cleanup_task;  
         scheduled_tasks.clear();  // Elimina la propia tasca de cleanup
         is_cleanup_running = false;
-        _PL("[SCHED] Cleanup task stopped and deleted");
+        _PI("[SCHED] Cleanup task stopped and deleted");
     }
 }
 
