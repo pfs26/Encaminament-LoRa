@@ -272,7 +272,7 @@ void _mac_fsm(mac_event_t e) {
             currentTxRetry = 0;
             lora_tx_error_t state = LoRa_send(&data);
             if(state != LORA_SUCCESS) {
-                fsmState == mac_state_t::IDLE_S;
+                fsmState = mac_state_t::IDLE_S;
                 _txError_mac();
             }
         }
@@ -308,7 +308,7 @@ void _mac_fsm(mac_event_t e) {
             _mac_pdu_to_lora_data(&data, &txPDU);
             lora_tx_error_t state = LoRa_send(&data);
             if(state != LORA_SUCCESS) {
-                fsmState == mac_state_t::IDLE_S;
+                fsmState = mac_state_t::IDLE_S;
                 _txError_mac();
             }
         }
@@ -345,7 +345,7 @@ void _mac_fsm(mac_event_t e) {
             _mac_pdu_to_lora_data(&data, &txPDU);
             lora_tx_error_t state = LoRa_send(&data);
             if(state != LORA_SUCCESS) {
-                fsmState == mac_state_t::IDLE_S;
+                fsmState = mac_state_t::IDLE_S;
                 _txError_mac();
             }
         }
@@ -433,7 +433,10 @@ void _printPDU(const mac_pdu_t* const pdu) {
     _PF("===== PDU =====\nTX\t%d\nRX\t%d\nID\t%d\nD\t%s\nCRC\t%d\nACK\t%d\n===============\n",
     pdu->tx, pdu->rx, pdu->id, pdu->data, pdu->crc, _is_ack_pdu_valid(pdu));
 }
+#else
+void _printPDU(const mac_pdu_t* const pdu) {}
 #endif
+
 
 
 /* === Proves CRC ===

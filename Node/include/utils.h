@@ -11,6 +11,7 @@
 #define _PP(a)
 #define _PL(a)
 #define _PX(a)
+#define _PF(a, ...)
 #endif
 
 #define MAX(a,b) ((a) > (b) ? (a) : (b))

@@ -72,8 +72,10 @@ lora_tx_error_t LoRa_send(const lora_data_t* data) {
         return LORA_ERROR_TX_MAX_LENGTH; 
     }
 
-    if(transmitting)
+    if(transmitting) {
+        _PL("[LORA] TX PENDING");
         return LORA_ERROR_TX_PENDING;
+    }
 
     if(!LoRa_isAvailable()) { 
         _PL("[LORA] TX CHAN BUSY");
@@ -200,9 +202,11 @@ void _startReceiving() {
         // Si està en TX, retornar. Quan es genera interrupció fi TX ja es posa
         // en startReceiving
         // scheduler_once(_startReceiving, 100);
+        Serial.println("Cannot start receiving. Is transmitting.");
         return;
     }
     radio.startReceive();
+    Serial.println("Started Receiving");
     _PL("[LORA] _startRcv");
 }
 
@@ -220,28 +224,31 @@ void _handleInterrupts(void) {
     IRQFlags |= radio.getIrqFlags();
 }
 
-void _checkIRQFlags(void) {
-    /*
-    Executat a través del gestor de tasques de forma recurrent
-    després d'iniciar-se el mòdul.
-    Comprova els flags i actua conseqüentment.
-    Implementat així per executar-se a través de LOOP,
-    com si fossin interrupcions per software.
-    Evita bloquejar ISR.
-    */
-    // Bloc atòmic?
-    if(!IRQFlags) // retorn prematur si no flags
-        return;
+static portMUX_TYPE my_spinlock = portMUX_INITIALIZER_UNLOCKED;
 
-    _PF("[LORA] Handle int: 0x%04X\n", IRQFlags);
-    // _PP("[LORA] Handle int: 0x"); _PX(IRQFlags>>16); _PP(" "); _PX(IRQFlags & 0xFF); _PL();
-    if (IRQFlags & RADIOLIB_SX126X_IRQ_TX_DONE) {
-        _sent_lora();
+void _checkIRQFlags(void) {
+    if (!IRQFlags) return;  // Early exit if no flags
+
+    uint16_t flagsCopy;
+    
+    // Critical section to safely read & clear flags
+    taskENTER_CRITICAL(&my_spinlock);
+    flagsCopy = IRQFlags;  // Copy the flags
+    IRQFlags = 0;          // Clear them
+    taskEXIT_CRITICAL(&my_spinlock);
+    // Exit critical section
+
+    _PF("[LORA] Handle int: 0x%04X\n", flagsCopy);
+    
+    if (flagsCopy & RADIOLIB_SX126X_IRQ_TX_DONE) {
+        scheduler_once(_sent_lora);
     }
-    if (IRQFlags & RADIOLIB_SX126X_IRQ_RX_DONE) {
-        _received_lora();
+    if (flagsCopy & RADIOLIB_SX126X_IRQ_RX_DONE) {
+        scheduler_once(_received_lora);
     }
-    IRQFlags = 0;
+    if (flagsCopy & RADIOLIB_SX126X_IRQ_CAD_DONE) {
+        scheduler_once(_startReceiving);
+    }
 }
 
 void _received_lora(void) {
@@ -277,9 +284,13 @@ void _sent_lora(void) {
     _startReceiving();
 }
 
+#ifdef DEBUG
 void _printLora(const lora_data_t* const data) {
     for (uint8_t i = 0; i < data->length; ++i) {
         _PX(((char*)data)[i]);
     }
     _PL();
 }
+#else
+void _printLora(const lora_data_t* const data) {}
+#endif

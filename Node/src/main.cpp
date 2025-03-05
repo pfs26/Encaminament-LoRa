@@ -1,77 +1,147 @@
-/*
-  RadioLib SX126x Ping-Pong Example
-
-  This example is intended to run on two SX126x radios,
-  and send packets between the two.
-
-  For default module settings, see the wiki page
-  https://github.com/jgromes/RadioLib/wiki/Default-configuration#sx126x---lora-modem
-
-  For full API reference, see the GitHub Pages
-  https://jgromes.github.io/RadioLib/
-*/
-
-// include the library
 #include <Arduino.h>
-#include "lora.h"
+#include "mac.h"
 #include "scheduler.h"
 #include "utils.h"
 
-// #define INITIAL
+// #define SENDER1
 
-void Sent(void);
-void Rcv(void);
-
-void Sent(void) {
-    _PL("Main SENT");
-}
-
-void Rcv(void) {
-    _PL("MAIN RCV");
-    lora_data_t data;
-    if(!LoRa_receive(&data)) {
-        _PL("MAIN Error rcv ");
-    }
-
-    _PP("Received: "); _PP((char*)data.data); _PL();
-    #ifdef INITIAL
-    strncpy((char*)data.data, "Hola node 1", LORA_MAX_SIZE-1);
+void Send() {
+    #ifdef SENDER1
+        mac_data_t data = "Hola 0x02!";
+        mac_addr_t rx = 0x02;
     #else
-    strncpy((char*)data.data, "Hola node 2", LORA_MAX_SIZE-1);
+        mac_data_t data = "Hola 0x01!";
+        mac_addr_t rx = 0x01;
     #endif
-    data.length = 11;
-    delay(1000);
-    LoRa_send(&data);
-    
+    while(MAC_send(rx, data, 10) != MAC_ERR_SUCCESS);
 }
+
+void onSend() {
+    Serial.println("MAC frame sent");
+    #ifdef SENDER1
+    scheduler_once(Send, 2500);
+    #else
+    scheduler_once(Send, 10000);
+    #endif
+}
+
+void onErr() {
+    Serial.println("Error sending mac frame");
+    #ifdef SENDER1
+    scheduler_once(Send, 2500);
+    #else
+    scheduler_once(Send, 10000);
+    #endif
+}
+
+void onRcv() {
+    Serial.println("MAC frame received");
+    mac_data_t data;
+    uint8_t length;
+    mac_addr_t tx = MAC_receive(&data, &length);
+    Serial.printf("\tTX: %d\n\tData: %s\tLength: %d\n", tx, data, length);
+}
+
+
 
 void setup() {
-    // Serial.begin(115200);
-    Serial.begin(921600);
+    Serial.begin(115200);
 
-    // initialize SX1262 with default settings
     Serial.print(F("[SX1262] Initializing ... "));
     Serial.print("Model: "); Serial.println(ESP.getChipModel());
     Serial.print("CPU: "); Serial.println(ESP.getCpuFreqMHz());
     Serial.print("Heap: "); Serial.println(ESP.getFreeHeap());
     Serial.println(esp_reset_reason());
 
-    if(!LoRa_init()) {
+
+    #ifdef SENDER1
+    mac_addr_t addr = 0x01;
+    #else
+    mac_addr_t addr = 0x02;
+    #endif
+    if(!MAC_init(addr, false)) {
         _PL("ERR");
         while(1);
     }
 
-    LoRa_onSend(Sent);
-    LoRa_onReceive(Rcv);
+    MAC_onSend(onSend);
+    MAC_onTxFailed(onErr);
+    MAC_onReceive(onRcv);
 
-    #ifdef INITIAL
-    lora_data_t data;
-    strncpy((char*)data.data, "Hola node 1", LORA_MAX_SIZE-1);
-    data.length = 12;
-    LoRa_send(&data);
-    #endif
+    scheduler_once(Send);
 }
 
 void loop() {
     scheduler_run();
 }
+
+
+// /*
+//     Exemple 
+// */
+
+
+// #include <Arduino.h>
+// #include "mac.h"
+// #include "scheduler.h"
+// #include "utils.h"
+
+// // #define SENDER
+
+// int count = 0;
+
+// void onSend() {
+//     Serial.println("MAC frame sent");
+//     delay(5000);
+//     mac_data_t data = "Hola!";
+//     MAC_send(0x02, data, 5);
+// }
+
+// void onErr() {
+//     Serial.println("Error sending mac frame");
+//     delay(5000);
+//     mac_data_t data = "Hola!";
+//     MAC_send(0x02, data, 5);
+// }
+
+// void onRcv() {
+//     Serial.println("MAC frame received");
+//     mac_data_t data;
+//     uint8_t length;
+//     mac_addr_t tx = MAC_receive(&data, &length);
+//     Serial.printf("\tTX: %d\n\tData: %s\tLength: %d\n", tx, data, length);
+// }
+
+// void setup() {
+//     Serial.begin(115200);
+
+//     Serial.print(F("[SX1262] Initializing ... "));
+//     Serial.print("Model: "); Serial.println(ESP.getChipModel());
+//     Serial.print("CPU: "); Serial.println(ESP.getCpuFreqMHz());
+//     Serial.print("Heap: "); Serial.println(ESP.getFreeHeap());
+//     Serial.println(esp_reset_reason());
+
+
+//     #ifdef SENDER
+//     mac_addr_t addr = 0x01;
+//     #else
+//     mac_addr_t addr = 0x02;
+//     #endif
+//     if(!MAC_init(addr, false)) {
+//         _PL("ERR");
+//         while(1);
+//     }
+
+//     MAC_onSend(onSend);
+//     MAC_onTxFailed(onErr);
+//     MAC_onReceive(onRcv);
+
+//     #ifdef SENDER
+//         mac_data_t data = "Hola!";
+//         MAC_send(0x02, data, 5);
+//     #endif
+// }
+
+// void loop() {
+//     scheduler_run();
+// }
