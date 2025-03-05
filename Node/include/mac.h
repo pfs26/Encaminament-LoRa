@@ -5,8 +5,10 @@
 #include "lora.h"
 
 // Número màxim de reintents, sense comptar primera transmissió (així, serien 4 intents)
+// Aquest define és ÚNICAMENT per tenir-ho tot en un mateix lloc. Incrementar-lo a més de 3 generaria problemes
+// ja que camp que indica reintents a PDU és de 2 bits (i per tant valor màxim 3)
 #define MAC_MAX_RETRIES 3
-// Valor màxim de reintents de backoff (Backoff seguirà fent-se, però no augmentarà més, per evitar desbordar uint32)
+// Valor màxim de reintents de backoff (Backoff seguirà fent-se, però no augmentarà més, per evitar desbordar uint32 i temps excessiu)
 #define MAC_MAX_BEB_RETRY 10
 // Factor pel qual es multiplica el valor aleatori de BEB per generar retard, en ms
 #define MAC_BEB_FACTOR_MS 100 
@@ -24,18 +26,28 @@
     #define MAC_MAX_ID ((1<<16)-1)
 #define MAC_ADDRESS_SIZE 1  // bytes per cada adreça
 #define MAC_CRC_SIZE 1      // bytes per FEC
+#define MAC_FLAGS_SIZE 1    // bytes per flags
 
-#define MAC_PDU_HEADER_SIZE (2*MAC_ADDRESS_SIZE + MAC_ID_SIZE + MAC_CRC_SIZE)
-#define MAC_MAX_DATA_SIZE LORA_MAX_SIZE - MAC_PDU_HEADER_SIZE - 1 // @tx + @rx + crc + id + 1B separador \0
+#define MAC_PDU_HEADER_SIZE (2*MAC_ADDRESS_SIZE + MAC_ID_SIZE + MAC_CRC_SIZE + MAC_FLAGS_SIZE)
+#define MAC_MAX_DATA_SIZE LORA_MAX_SIZE - MAC_PDU_HEADER_SIZE - 1 // @tx + @rx + crc + id + flags + 1B separador \0
 
 typedef uint8_t mac_addr_t;
 typedef uint8_t mac_crc_t;
 typedef uint16_t mac_id_t;
 // Estructura dades capa MAC
 typedef struct {
+    uint8_t isACK : 1;    // 0 = Data, 1 = ACK
+    uint8_t retry : 2;    // Valor reintents (0-3)
+    // uint8_t priority : 1; // Prioritat
+    // uint8_t frag : 1;     // 1 = Fragmentat
+    uint8_t reserved : 5; // Reservat ús futur i ocupar tot el byte
+} mac_pdu_flags_t;
+
+typedef struct {
     mac_addr_t tx;
     mac_addr_t rx;
     mac_id_t id;
+    mac_pdu_flags_t flags;
     uint8_t data[MAC_MAX_DATA_SIZE+1]; // potser uint8_t data[MAC_MAX_DATA_SIZE+1];, per deixar de marge el caràcter final '\0'
     mac_crc_t crc;
 
