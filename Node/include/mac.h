@@ -27,9 +27,9 @@
 #define MAC_ADDRESS_SIZE 1  // bytes per cada adreça
 #define MAC_CRC_SIZE 1      // bytes per FEC
 #define MAC_FLAGS_SIZE 1    // bytes per flags
-
-#define MAC_PDU_HEADER_SIZE (2*MAC_ADDRESS_SIZE + MAC_ID_SIZE + MAC_CRC_SIZE + MAC_FLAGS_SIZE)
-#define MAC_MAX_DATA_SIZE LORA_MAX_SIZE - MAC_PDU_HEADER_SIZE - 1 // @tx + @rx + crc + id + flags + 1B separador \0
+#define MAC_LENGTH_FIELD_SIZE 1
+#define MAC_PDU_HEADER_SIZE (2*MAC_ADDRESS_SIZE + MAC_ID_SIZE + MAC_CRC_SIZE + MAC_FLAGS_SIZE + MAC_LENGTH_FIELD_SIZE)
+#define MAC_MAX_DATA_SIZE LORA_MAX_SIZE - MAC_PDU_HEADER_SIZE // @tx + @rx + crc + id + flags + lengthField
 
 typedef uint8_t mac_addr_t;
 typedef uint8_t mac_crc_t;
@@ -48,7 +48,8 @@ typedef struct {
     mac_addr_t rx;
     mac_id_t id;
     mac_pdu_flags_t flags;
-    uint8_t data[MAC_MAX_DATA_SIZE+1]; // potser uint8_t data[MAC_MAX_DATA_SIZE+1];, per deixar de marge el caràcter final '\0'
+    uint8_t dataLength; // Mida de dades. No podem utilitzar el '\0' com a separador, ja que potser capes superiors l'utilitzen al header o en mig de dades
+    uint8_t data[MAC_MAX_DATA_SIZE]; // potser uint8_t data[MAC_MAX_DATA_SIZE+1];, per deixar de marge el caràcter final '\0' -> Ja no si tenim datalength
     mac_crc_t crc;
 
     // uint8_t length; // Mida del camp de dades (entre 0 i MAC_MAC_DATA_SIZE)
