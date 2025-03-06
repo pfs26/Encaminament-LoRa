@@ -116,7 +116,7 @@ mac_err_t _inner_send(mac_addr_t rx, const mac_data_t data, size_t length, bool 
     // 2. Generar PDU (seran dades de LoRa)
     // 3. Iniciar tasca amb tout
     // 4. Enviar LoRa_send()
-    _PW("[MAC] Preparing to send (ACK = %d)", isAck);
+    _PI("[MAC] Preparing to send (ACK = %d)", isAck);
 
     if(length > MAC_MAX_DATA_SIZE) {
         _PW("[MAC] Max length exceeded (%d)", length);
@@ -161,15 +161,18 @@ mac_err_t _inner_send(mac_addr_t rx, const mac_data_t data, size_t length, bool 
 void _prepareTxPDU(mac_addr_t rx, const mac_data_t data, size_t length, uint8_t retry, bool isAck, const mac_pdu_t * const PDUtoACK) {
     txPDU.tx = self;
     txPDU.rx = rx;
-    txPDU.id = isAck ? PDUtoACK->id+self : _getRandomID();
+    txPDU.id = isAck ? PDUtoACK->id+self : (retry > 0 ? txPDU.id : _getRandomID()); // si ACK, utilitzem PDU donada; si retry > 0, no modifiquem ID
+    _PE("ack=%d, retry=%d, id=%d", isAck, retry, txPDU.id);
     txPDU.flags.isACK = isAck;
-    txPDU.flags.retry = 0x00;
-    txPDU.flags.reserved = 0b111;
+    txPDU.flags.retry = retry;
+    txPDU.flags.reserved = 0b11111;
     txPDU.dataLength = length;
     // REQUEREIX QUE DATA SIGUI NULL-TERMINATED (ACABAT AMB \0)
     // AMB STRCPY COPIARÀ \0 FINAL, NECESSARI PER CALCULAR CRC CORRECTAMENT!
     strcpy((char*)txPDU.data, (char*)data);
     txPDU.crc = _computeCRC(&txPDU);
+
+    _printPDU(&txPDU);
 }
 
 size_t _PDUtoLora(const mac_pdu_t * const pdu, lora_data_t lora) {
@@ -214,7 +217,6 @@ mac_crc_t _computeCRC(const mac_pdu_t* const pdu) {
     size_t data_end_pos = offsetof(mac_pdu_t, data) + pdu->dataLength;
     for (size_t i = 0; i < data_end_pos; i++)
     {
-        Serial.printf("%02X", ((char*)pdu)[i]);
         crc = crc ^ ((char*)pdu)[i];
         // Processar bits del byte de dades actual
         for (uint8_t j = 0; j < 8; ++j) {
@@ -310,13 +312,14 @@ void _mac_fsm(mac_event_t e) {
 
     // Retorna bool (0, 1): 0 si ocupat (not available) -> lora_event_t::busy
     lora_event_t lora_e = (lora_event_t)LoRa_isAvailable();
-    _PI("[MAC] FSM:\tSTATE %d\tMAC %d\tLORA %d\n", fsmState, e, lora_e);
+    _PI("[MAC] FSM:\tSTATE %d\tMAC %d\tLORA %d", fsmState, e, lora_e);
     if (fsmState == mac_state_t::IDLE_S) {
         if (e == mac_event_t::TX_E && lora_e == lora_event_t::IDLE_E) {
             fsmState = mac_state_t::TX_S;
             currentTxRetry = 0;
             // txPDU.flags.retry = currentTxRetry;
-            _prepareTxPDU(txPDU.rx, txPDU.data, txPDU.dataLength, currentTxRetry);
+            // PDU ja està preparada (per innerSend)
+            // _prepareTxPDU(txPDU.rx, txPDU.data, txPDU.dataLength, currentTxRetry);
             lora_data_t data;
             size_t lora_length = _PDUtoLora(&txPDU, data);
             lora_tx_error_t state = LoRa_send(data, lora_length);
@@ -357,7 +360,6 @@ void _mac_fsm(mac_event_t e) {
             _PI("\tCHANN FREE; SENDING");
             fsmState = mac_state_t::TX_S;
             _prepareTxPDU(txPDU.rx, txPDU.data, txPDU.dataLength, currentTxRetry);
-            // txPDU.flags.retry = currentTxRetry;
             lora_data_t data;
             size_t lora_length = _PDUtoLora(&txPDU, data);
             lora_tx_error_t state = LoRa_send(data, lora_length);
@@ -376,6 +378,7 @@ void _mac_fsm(mac_event_t e) {
         }
         else if(e == mac_event_t::TX_SUCCESS_E) {
             fsmState = mac_state_t::WAIT_ACK_S;
+            currentTxRetry++; // serà el següent valor de reintent
             LoRa_startReceiving();
             // Iniciem timeout de recepció d'ACK, estimant el time on air (depenent de SF, BW, etc.)
             // i deixant de marge 5 vegades més de l'esperat (l'esperat és 2*timeOnAir, ha d'anar i tornar la resposta, de mateixa mida com a molt)
@@ -394,8 +397,7 @@ void _mac_fsm(mac_event_t e) {
             _sent_mac();
         }
         else if (e == mac_event_t::TOUT_ACK_E && lora_e == lora_event_t::IDLE_E) {
-            currentTxRetry++;
-            if (currentTxRetry >= MAC_MAX_RETRIES) {
+            if (currentTxRetry > MAC_MAX_RETRIES) {
                 _PW("\tMAX RETRIES REACHED\n");
                 fsmState = mac_state_t::IDLE_S;
                 _txError_mac();
@@ -417,7 +419,6 @@ void _mac_fsm(mac_event_t e) {
         }
         else if (e == mac_event_t::TOUT_ACK_E && lora_e == lora_event_t::BUSY_E) {
             fsmState = mac_state_t::WAIT_CHAN_FREE_S;
-            currentTxRetry++;
             currentBEBRetry = 0;
             _PI("\tWAITING CHANN FREE (%d)\n", currentBEBRetry);
             // Calcular timeout de backoff
