@@ -138,7 +138,7 @@ mac_err_t _inner_send(mac_addr_t rx, const mac_data_t data, size_t length, bool 
         return mac_err_t::MAC_ERR;
     }
 
-    _prepareTxPDU(rx, data, length, isAck, PDUtoACK);
+    _prepareTxPDU(rx, data, length, 0, isAck, PDUtoACK);
     _PI("[MAC] Tx PDU ready");
     _printPDU(&txPDU);
 
@@ -162,7 +162,6 @@ void _prepareTxPDU(mac_addr_t rx, const mac_data_t data, size_t length, uint8_t 
     txPDU.tx = self;
     txPDU.rx = rx;
     txPDU.id = isAck ? PDUtoACK->id+self : (retry > 0 ? txPDU.id : _getRandomID()); // si ACK, utilitzem PDU donada; si retry > 0, no modifiquem ID
-    _PE("ack=%d, retry=%d, id=%d", isAck, retry, txPDU.id);
     txPDU.flags.isACK = isAck;
     txPDU.flags.retry = retry;
     txPDU.flags.reserved = 0b11111;
@@ -171,8 +170,6 @@ void _prepareTxPDU(mac_addr_t rx, const mac_data_t data, size_t length, uint8_t 
     // AMB STRCPY COPIARÀ \0 FINAL, NECESSARI PER CALCULAR CRC CORRECTAMENT!
     strcpy((char*)txPDU.data, (char*)data);
     txPDU.crc = _computeCRC(&txPDU);
-
-    _printPDU(&txPDU);
 }
 
 size_t _PDUtoLora(const mac_pdu_t * const pdu, lora_data_t lora) {
@@ -208,17 +205,15 @@ void _LoraToPDU(const lora_data_t lora, size_t length, mac_pdu_t * pdu) {
     // pdu->crc = lora[index];
     memcpy(&pdu->crc, &lora[index], sizeof(mac_crc_t));
 }
-// https://www.nongnu.org/avr-libc/user-manual/group__util__crc.html
-// CRC-8/SMBUS
-mac_crc_t _computeCRC(const mac_pdu_t* const pdu) {
-    // Valor inicial crc
-    mac_crc_t crc = 0x00;
 
+// CRC-8/SMBUS: https://www.nongnu.org/avr-libc/user-manual/group__util__crc.html
+mac_crc_t _computeCRC(const mac_pdu_t* const pdu) {
+    mac_crc_t crc = 0x00;
+    // Posició fins on cal calcular CRC (fins final de dades)
     size_t data_end_pos = offsetof(mac_pdu_t, data) + pdu->dataLength;
     for (size_t i = 0; i < data_end_pos; i++)
     {
         crc = crc ^ ((char*)pdu)[i];
-        // Processar bits del byte de dades actual
         for (uint8_t j = 0; j < 8; ++j) {
             if (crc & 0x80) {
                 crc = (crc << 1) ^ MAC_CRC8_POLY;
@@ -236,12 +231,13 @@ bool _verifyCRC(const mac_pdu_t* const pdu) {
     return expected == obtained;
 }
 
-mac_id_t _getRandomID() {
-    return (mac_id_t)random(1, MAC_MAX_ID);
-}
+mac_id_t _getRandomID() { return (mac_id_t)random(1, MAC_MAX_ID); }
 
 bool _is_ack_valid(const mac_pdu_t * const pdu) {
-    return pdu->flags.isACK && pdu->tx == txPDU.rx && pdu->id == txPDU.id + txPDU.rx;
+    // ACK és vàlid si té flag d'ACK, el transmisor és el receptor de l'últim que hem enviat
+    // i l'ID del frame és l'ID que haviem enviat més l'adreça de TX (anterior nostre RX)
+    // A més, és necessari que l'estat de capa MAC no sigui esperant ACK
+    return pdu->flags.isACK && pdu->tx == txPDU.rx && pdu->id == txPDU.id + txPDU.rx && fsmState != mac_state_t::WAIT_ACK_S;
 }
 
 // ------------------------------
@@ -249,9 +245,19 @@ bool _is_ack_valid(const mac_pdu_t * const pdu) {
 void _onLoraReceived(void) {
     /*
         Callback executat quan es produeix una recepció a capa inferior LoRa.
-        Filtra que les dades siguin vàlides i per nosaltres.
-        Si és així, converteix dades rebudes en PDU de MAC,
-        i genera esdeveniment de recepció; si no, ignora recepció.
+        1. Obté dades de capa inferior
+        2. Verifica CRC. Si no és vàlid, descarta.
+        3. Comprova si s'ha rebut anteriorment aquest frame (per ID)
+            3.1.1. Si no s'ha rebut, verifica si és un ACK (ja que si és ACK implícit no serem els recepetors directament)
+            3.1.2. Si no és ACK, verifica si és per nosaltres. Si no ho és, descarta; 
+            3.1.3. Si és per nosaltres, afegeix ID a cua d'últims IDs vists, i executa _received_mac() per avisar capa superior
+            3.1.4. Si és ACK, avisa a FSM de la recepció d'ACK. No guarda ID cua d'últimes recepcions, 
+                   no es poden repetir recepcions d'ACK i només ompliria la llista amb IDs innecessaris
+            
+            3.2.1. Si s'ha rebut anteriorment és perquè eren dades i per nosaltres.
+                   El motiu de la re-recepció és que el transmissor no ha rebut ACK, o no el vam poder enviar.
+            3.2.2. Intenta enviar un ACK explícit, amb adreça de receptor nul·la (0x00), l'ID que el TX espera
+                   i el flag isAck establert.
     */
     _PI("[MAC] Frame rcv");
 
@@ -276,7 +282,7 @@ void _onLoraReceived(void) {
 
     if (seen) {
         // Si ja l'hem vist abans és perquè era un frame per nosaltres;
-        _PI("\tAlready seen id received: %d\n", rcvID);
+        _PI("\tAlready seen id received: %d", rcvID);
         _send_ack(&rxPDU);
     }
     else {
@@ -284,7 +290,6 @@ void _onLoraReceived(void) {
         // Mirem si el rebut és ACK
         if (_is_ack_valid(&rxPDU)) {
             _PI("\tACK Received from %d\n", rxPDU.tx);
-            lastFramesIDs.enqueue(rcvID);
             _mac_fsm(mac_event_t::RX_ACK_E);
         }
         // Si no és ACK, mirem si som el receptor
@@ -317,9 +322,7 @@ void _mac_fsm(mac_event_t e) {
         if (e == mac_event_t::TX_E && lora_e == lora_event_t::IDLE_E) {
             fsmState = mac_state_t::TX_S;
             currentTxRetry = 0;
-            // txPDU.flags.retry = currentTxRetry;
-            // PDU ja està preparada (per innerSend)
-            // _prepareTxPDU(txPDU.rx, txPDU.data, txPDU.dataLength, currentTxRetry);
+            // PDU ja està preparada, innerSend la prepara
             lora_data_t data;
             size_t lora_length = _PDUtoLora(&txPDU, data);
             lora_tx_error_t state = LoRa_send(data, lora_length);
@@ -335,7 +338,6 @@ void _mac_fsm(mac_event_t e) {
             currentBEBRetry = 0;
             currentTxRetry = 0;
             txPDU.flags.retry = currentTxRetry;
-            _PI("\tWAITING CHANN FREE (%d)\n", currentBEBRetry);
             // Calcular timeout de backoff
             uint32_t bebTimeout = random(0, 1 << currentBEBRetry)*MAC_BEB_FACTOR_MS;
             // Programar reintent
@@ -347,7 +349,7 @@ void _mac_fsm(mac_event_t e) {
         if (e == mac_event_t::TOUT_BUSY_E && lora_e == lora_event_t::BUSY_E) {
             fsmState = mac_state_t::WAIT_CHAN_FREE_S;
             currentBEBRetry++;
-            _PI("\tWAITING CHANN FREE (%d)\n", currentBEBRetry);
+            _PI("\tWaiting chann free (%d)\n", currentBEBRetry);
             // Limitar BEB màxim per no tenir un temps de retard molt elevat
             currentBEBRetry = MIN(currentBEBRetry, MAC_MAX_BEB_RETRY);
             // Calcular timeout de backoff
@@ -398,14 +400,12 @@ void _mac_fsm(mac_event_t e) {
         }
         else if (e == mac_event_t::TOUT_ACK_E && lora_e == lora_event_t::IDLE_E) {
             if (currentTxRetry > MAC_MAX_RETRIES) {
-                _PW("\tMAX RETRIES REACHED\n");
                 fsmState = mac_state_t::IDLE_S;
                 _txError_mac();
                 return;
             }
             fsmState = mac_state_t::TX_S;
             _prepareTxPDU(txPDU.rx, txPDU.data, txPDU.dataLength, currentTxRetry);
-            // txPDU.flags.retry = currentTxRetry;
             lora_data_t data;
             
             size_t lora_length = _PDUtoLora(&txPDU, data);
@@ -420,7 +420,7 @@ void _mac_fsm(mac_event_t e) {
         else if (e == mac_event_t::TOUT_ACK_E && lora_e == lora_event_t::BUSY_E) {
             fsmState = mac_state_t::WAIT_CHAN_FREE_S;
             currentBEBRetry = 0;
-            _PI("\tWAITING CHANN FREE (%d)\n", currentBEBRetry);
+            _PI("\tWaiting chann free (%d)\n", currentBEBRetry);
             // Calcular timeout de backoff
             uint32_t bebTimeout = random(0, 1 << currentBEBRetry)*MAC_BEB_FACTOR_MS;
             // Programar reintent
@@ -449,7 +449,7 @@ void _received_mac(void) {
 }
 
 void _txError_mac(void) {
-    _PI("[MAC] TX ERR");
+    _PW("[MAC] TX ERR");
     LoRa_startReceiving();
     if(onTxFailed != NULL)
         onTxFailed();
@@ -469,34 +469,6 @@ void _printPDU(const mac_pdu_t* const pdu) {
 #else
 void _printPDU(const mac_pdu_t* const pdu) {}
 #endif
-
-
-
-// #include <Arduino.h>
-// #include "lora.h"
-// #include "scheduler.h"
-// #include "utils.h"
-
-// void setup() {
-//     Serial.begin(115200);
-//     Serial.print(F("[SX1262] Initializing ... "));
-//     Serial.print("Model: "); Serial.println(ESP.getChipModel());
-//     Serial.print("CPU: "); Serial.println(ESP.getCpuFreqMHz());
-//     Serial.print("Heap: "); Serial.println(ESP.getFreeHeap());
-// 	Serial.println("\n\nCompiled at " __DATE__ " " __TIME__);
-
-//     if(!MAC_init(0x01, false)) {
-//         Serial.println("LoRa init failed");
-//         while(1);
-//     }
-
-//     mac_data_t data = "PROVA";
-//     MAC_send(0x02, data, strlen((char*)data));
-// }
-
-// void loop() {
-//     scheduler_run();
-// }
 
 /* === Proves CRC ===
 mac_data_t data = "PROVA";
