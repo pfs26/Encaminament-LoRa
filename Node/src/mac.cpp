@@ -35,7 +35,6 @@ static mac_callback_t onTxFailed = NULL;
 static mac_addr_t self;
 
 static mac_pdu_t txPDU, rxPDU;
-static size_t txLength = 0, rxLength = 0;
 
 volatile static uint8_t currentTxRetry = 0;
 volatile static uint8_t currentBEBRetry = 0;
@@ -46,9 +45,11 @@ static RingBuffer lastFramesIDs(MAC_QUEUE_SIZE);
 
 static Task* txTimeoutTask;
 
+void _prepareTxPDU(mac_addr_t rx, const mac_data_t data, size_t length, uint8_t retry = 0, bool isAck = false, const mac_pdu_t * const PDUtoACK = NULL);
+size_t _PDUtoLora(const mac_pdu_t * const pdu, lora_data_t lora);
+void _LoraToPDU(const lora_data_t lora, size_t length, mac_pdu_t * pdu);
 mac_id_t _getRandomID();
 mac_crc_t _computeCRC(const mac_pdu_t* const pdu);
-void _getPDU(const mac_data_t data, uint8_t length, mac_pdu_t * const pdu, mac_addr_t rx, mac_id_t id = 0);
 void _printPDU(const mac_pdu_t* const pdu);
 bool _verifyCRC(const mac_pdu_t* const pdu);
 bool _is_ack_valid(const mac_pdu_t * const pdu);
@@ -56,14 +57,10 @@ void _mac_fsm(mac_event_t e);
 void _mac_fsm_event_tout_ack(void);
 void _mac_fsm_event_tout_busy(void);
 void _start_beb_timeout(uint8_t attempt);
+
 mac_err_t _send_pdu(const mac_pdu_t* const pdu);
-
 mac_err_t _inner_send(mac_addr_t rx, const mac_data_t data, size_t length, bool isAck = false, const mac_pdu_t * const referedPDU = NULL);
-void _prepareTxPDU(mac_addr_t rx, const mac_data_t data, size_t length, uint8_t retry = 0, bool isAck = false, const mac_pdu_t * const PDUtoACK = NULL);
-size_t _PDUtoLora(const mac_pdu_t * const pdu, lora_data_t lora);
-void _LoraToPDU(const lora_data_t lora, size_t length, mac_pdu_t * pdu);
 
-void _onLoraSent(void);
 void _onLoraReceived(void);
 void _received_mac(void);
 void _sent_mac(void);
@@ -88,8 +85,8 @@ mac_err_t MAC_send(mac_addr_t rx, const mac_data_t data, size_t length) {
 }
 
 mac_addr_t MAC_receive(mac_data_t* data, size_t* length) {
-    *length = rxLength;
-    memcpy(data, rxPDU.data, rxLength);
+    *length = rxPDU.dataLength;
+    memcpy(data, rxPDU.data, rxPDU.dataLength);
     // (*data)[*length] = '\0';
     return rxPDU.tx;
 }
@@ -272,42 +269,48 @@ void _onLoraReceived(void) {
     lora_data_t data;
     size_t len;
     if(!LoRa_receive(data, &len)) {
-        _PW("\tRecieve ERR");
+        _PW("[MAC] Recieve ERR");
         return;
     }
 
-    _LoraToPDU(data, len, &rxPDU);
+    // PDU temporal per no sobreescriure
+    mac_pdu_t tempPDU;
+
+    _LoraToPDU(data, len, &tempPDU);
 
     _PI("Received PDU from LORA");
-    _printPDU(&rxPDU);
-    if(!_verifyCRC(&rxPDU)) {
-        _PW("\tCRC ERR");
+    _printPDU(&tempPDU);
+    if(!_verifyCRC(&tempPDU)) {
+        _PW("[MAC] CRC ERR");
         return;
     }
 
-    mac_id_t rcvID = rxPDU.id;
+    mac_id_t rcvID = tempPDU.id;
     bool seen = lastFramesIDs.contains(rcvID);
 
     if (seen) {
         // Si ja l'hem vist abans és perquè era un frame per nosaltres;
-        _PI("\tAlready seen id received: %d", rcvID);
-        _send_ack(&rxPDU);
+        _PI("[MAC] ID already received: %d", rcvID);
+        _send_ack(&tempPDU);
     }
     else {
         _PI("[MAC] New id received: %d", rcvID);
         // Mirem si el rebut és ACK
-        if (_is_ack_valid(&rxPDU)) {
-            _PI("[MAC] ACK Received from %d", rxPDU.tx);
+        if (_is_ack_valid(&tempPDU)) {
+            _PI("[MAC] ACK Received from %d", tempPDU.tx);
             _mac_fsm(mac_event_t::RX_ACK_E);
         }
         // Si no és ACK, mirem si som el receptor
-        else if (rxPDU.rx == self) {
+        else if (tempPDU.rx == self) {
             lastFramesIDs.enqueue(rcvID);
-            _PI("\tFrame for higher layer");
+            _PI("[MAC] Frame for higher layer");
 
             // FICTICI, ELIMINAR! HO GESTIONARIA CAPA ROUTING
-            _send_ack(&rxPDU);
+            _send_ack(&tempPDU);
 
+            rxPDU = tempPDU;
+            // NO PROGRAMAR AMB SCHEDULER, PODRIA SUPOSAR PERDRE DADES 
+            //(Es genera INT de lora, programant onReceive, llavors programem aqui onReceiveMAC. 1r executa lora i sobreescriu rxPDU)
             _received_mac();
         }
         else {

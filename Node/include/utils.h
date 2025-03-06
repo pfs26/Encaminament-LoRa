@@ -11,11 +11,11 @@
 #define COLOR_WARN   "\033[33m"  // Yellow
 #define COLOR_ERROR  "\033[31m"  // Red
 
-// Define column widths for alignment
-#define LOG_LEVEL_WIDTH  1   // Space for [I], [W], [E]
-#define TIMESTAMP_WIDTH  8   // Adjust depending on max millis()
-#define FILENAME_WIDTH   16  // Adjust to fit most filenames
-#define LINE_WIDTH       4   // Space for line number
+// Amplades per aliniar
+#define LOG_LEVEL_WIDTH  1   // Espai per [I], [W], [E]
+#define TIMESTAMP_WIDTH  8   // Per millis()
+#define FILENAME_WIDTH   16  // Nom fitxer + extensió
+#define LINE_WIDTH       4   // Espai línia de codi
 
 #if LOG_LEVEL <= LOG_LEVEL_INFO
     #define _PI(fmt, ...) Serial.printf(COLOR_INFO "[%-*s] %*lu %-*s:%*d | " fmt COLOR_RESET "\n", \
@@ -37,25 +37,6 @@
 #else
     #define _PE(fmt, ...)
 #endif
-
-// #if LOG_LEVEL <= LOG_LEVEL_INFO
-//     #define _PI(fmt, ...) Serial.printf(COLOR_INFO "[I] %lu\t%s:%d:\t\t" fmt COLOR_RESET "\n", millis(), __FILENAME__, __LINE__, ##__VA_ARGS__)
-// #else
-//     #define _PI(fmt, ...)
-// #endif
-
-// #if LOG_LEVEL <= LOG_LEVEL_WARN
-//     #define _PW(fmt, ...) Serial.printf(COLOR_WARN "[W] %lu\t%s:%d:\t\t" fmt COLOR_RESET "\n", millis(), __FILENAME__, __LINE__, ##__VA_ARGS__)
-// #else
-//     #define _PW(fmt, ...)
-// #endif
-
-// #if LOG_LEVEL <= LOG_LEVEL_ERROR
-//     #define _PE(fmt, ...) Serial.printf(COLOR_ERROR "[E] %lu\t%s:%d:\t\t" fmt COLOR_RESET "\n", millis(), __FILENAME__, __LINE__, ##__VA_ARGS__)
-// #else
-//     #define _PE(fmt, ...)
-// #endif
-
 
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
