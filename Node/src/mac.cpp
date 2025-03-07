@@ -40,8 +40,10 @@ volatile static uint8_t currentTxRetry = 0;
 volatile static uint8_t currentBEBRetry = 0;
 static bool isGateway = false;
 
-// static mac_id_t lastFramesIDs[MAC_QUEUE_SIZE];
 static RingBuffer lastFramesIDs(MAC_QUEUE_SIZE);
+
+// Valors per informació
+static int CRCErrors = 0, failedTransmissions = 0, succeededTransmissions = 0, framesReceived = 0; 
 
 static Task* txTimeoutTask;
 
@@ -281,7 +283,8 @@ void _onLoraReceived(void) {
     _PI("Received PDU from LORA");
     _printPDU(&tempPDU);
     if(!_verifyCRC(&tempPDU)) {
-        _PW("[MAC] CRC ERR");
+        CRCErrors++;
+        _PW("[MAC] CRC error (%d)", CRCErrors);
         return;
     }
 
@@ -297,14 +300,15 @@ void _onLoraReceived(void) {
         _PI("[MAC] New id received: %d", rcvID);
         // Mirem si el rebut és ACK
         if (_is_ack_valid(&tempPDU)) {
+            succeededTransmissions++;
             _PI("[MAC] ACK Received from %d", tempPDU.tx);
             _mac_fsm(mac_event_t::RX_ACK_E);
         }
         // Si no és ACK, mirem si som el receptor
         else if (tempPDU.rx == self) {
             lastFramesIDs.enqueue(rcvID);
+            framesReceived++;
             _PI("[MAC] Frame for higher layer");
-
             // FICTICI, ELIMINAR! HO GESTIONARIA CAPA ROUTING
             _send_ack(&tempPDU);
 
@@ -410,6 +414,12 @@ void _mac_fsm(mac_event_t e) {
             }
         }
         else if (e == mac_event_t::TOUT_ACK_E && lora_e == lora_event_t::BUSY_E) {
+            if (currentTxRetry > MAC_MAX_RETRIES) {
+                _PW("[MAC] Max retries exceeded (%d)", currentTxRetry);
+                fsmState = mac_state_t::IDLE_S;
+                _txError_mac();
+                return;
+            }
             fsmState = mac_state_t::WAIT_CHAN_FREE_S;
             currentBEBRetry = 0;
             _start_beb_timeout(currentBEBRetry);
@@ -451,7 +461,8 @@ void _received_mac(void) {
 }
 
 void _txError_mac(void) {
-    _PW("[MAC] TX ERR");
+    failedTransmissions++;
+    _PW("[MAC] TX error (%d)", failedTransmissions);
     LoRa_startReceiving();
     if(onTxFailed != NULL)
         onTxFailed();
