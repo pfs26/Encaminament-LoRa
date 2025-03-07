@@ -34,6 +34,9 @@
 typedef uint8_t mac_addr_t;
 typedef uint8_t mac_crc_t;
 typedef uint16_t mac_id_t;
+typedef uint8_t mac_data_t[MAC_MAX_DATA_SIZE];
+
+
 // Estructura dades capa MAC
 typedef struct {
     uint8_t isACK : 1;    // 0 = Data, 1 = ACK
@@ -49,13 +52,10 @@ typedef struct {
     mac_id_t id;
     mac_pdu_flags_t flags;
     uint8_t dataLength; // Mida de dades. No podem utilitzar el '\0' com a separador, ja que potser capes superiors l'utilitzen al header o en mig de dades
-    uint8_t data[MAC_MAX_DATA_SIZE]; // potser uint8_t data[MAC_MAX_DATA_SIZE+1];, per deixar de marge el caràcter final '\0' -> Ja no si tenim datalength
+    mac_data_t data; // potser uint8_t data[MAC_MAX_DATA_SIZE+1];, per deixar de marge el caràcter final '\0' -> Ja no si tenim datalength
     mac_crc_t crc;
-
-    // uint8_t length; // Mida del camp de dades (entre 0 i MAC_MAC_DATA_SIZE)
 } mac_pdu_t;
 
-typedef uint8_t mac_data_t[MAC_MAX_DATA_SIZE];
 
 enum mac_err_t{
     MAC_SUCCESS,
