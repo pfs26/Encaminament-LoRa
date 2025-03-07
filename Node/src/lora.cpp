@@ -57,6 +57,7 @@ bool LoRa_init() {
 
 void LoRa_deinit() {
     _PI("[LORA] Deinit");
+    onReceive = NULL;
     scheduler_stop(checkIRQTask);
     radio.reset();
 }
@@ -121,7 +122,6 @@ bool LoRa_receive(lora_data_t data, size_t* length) {
 bool LoRa_isAvailable() {
     // DESACTIVAR INTERRUPCIONS, O GENERARÀ INTERRUPCIONS QUE NO TOQUEN!
     // TODO: Incloure TX en curs aquí?
-    // return radio.scanChannel() == RADIOLIB_CHANNEL_FREE;
     _clearInterrupts();
     int16_t result = radio.scanChannel();
     // TODO: Potser fa falta _startReceiving()?
@@ -230,7 +230,7 @@ void _received_lora(void) {
     Torna a posar-se en mode de recepció, ja que després 
     de fer lectura de les dades rebudes es posa en mode standby.
     */
-    _PI("[LORA] Running _received()");
+    _PI("[LORA] Data received. SNR: %d, RSSI: %d", LoRa_getLastSNR(), LoRa_getLastRSSI());
     if (onReceive != NULL) {
         onReceive();
         // scheduler_once(onReceive);
