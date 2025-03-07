@@ -7,6 +7,10 @@ static Preferences preferences;
 static routing_entry_t* RoutingTable; 
 static int RoutingTableSize = 0;
 
+int _getIndexInRoutingTable(routing_addr_t dst);
+bool _saveTableToNVS();
+
+
 bool RoutingTable_init() {
     // Obtenir rutes de NVS (no volàtil) i copiar-ho a routing table
     // A NVS es guarda com una seqüència de bytes, on el primer byte indica dst i el segon nextHop
@@ -16,7 +20,10 @@ bool RoutingTable_init() {
     // així que si cada entrada són 2 byets (dst+nextHop), el màxim de rutes és virtualment "infinit" (125000)
     // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/storage/nvs_flash.html
 
-    preferences.begin("routingTable");
+    if(!preferences.begin("routingTable")){
+        _PE("[RTABLE] Error initializing NVS");
+        return false;
+    }
 
     // Mida en bytes de la taula de rutes
     int sizeInBytes = preferences.getBytesLength("routingTable");
@@ -57,25 +64,25 @@ void RoutingTable_print() {
     Serial.println("==============");
 }
 
-routing_addr_t RoutingTable_findRoute(routing_addr_t dst) {
-    // Iterar totes les entrades fins trobar destí, o retornar 0x00 si no trobada
-    for (int i = 0; i < RoutingTableSize; ++i) {
-        if(RoutingTable[i].dst == dst) {
-            return RoutingTable[i].nextHop;
-        }
+routing_addr_t RoutingTable_getRoute(routing_addr_t dst) {
+    int index = _getIndexInRoutingTable(dst);
+    if(index != -1) {
+        _PI("[RTABLE] Queried route for 0x%02X, through 0x%02X", dst, RoutingTable[index].nextHop);
+        return RoutingTable[index].nextHop;
     }
+    _PW("[RTABLE] Route for %d not found", dst);
     return 0x00;
 }
 
 bool RoutingTable_addRoute(routing_addr_t dst, routing_addr_t nextHop) {
-    if(RoutingTable_findRoute(dst) != 0x00) {
-        _PW("[RTABLE] Route for %d already exists", dst);
+    // Filtrem si ja existeix
+    if(_getIndexInRoutingTable(dst) != -1) {
+        _PW("[RTABLE] Route for 0x%02X already exists", dst);
         return false;
     }
 
-    // Augmentar mida de la taula de rutes
+    // Si no existeix: incrementar mida taula, reassignar memòria de routingtable, guardar registre i guardar a NVS
     RoutingTableSize++;
-    // Reassignar memòria per la nova entrada
     RoutingTable = (routing_entry_t*)realloc(RoutingTable, RoutingTableSize * sizeof(routing_entry_t));
     if (!RoutingTable) {
         _PE("[RTABLE] Error reallocating memory for routing table");
@@ -87,22 +94,18 @@ bool RoutingTable_addRoute(routing_addr_t dst, routing_addr_t nextHop) {
     RoutingTable[RoutingTableSize-1].nextHop = nextHop;
 
     // Guardar taula de rutes a NVS. Fer-ho ara i no en deinit per evitar perdre rutes en cas de crash
-    int state = preferences.putBytes("routingTable", (uint8_t*)RoutingTable, RoutingTableSize * sizeof(routing_entry_t));
-    _PI("[RTABLE] Route added: dst=%d, nextHop=%d (%d)", dst, nextHop, state);
-    return true;
+    if(_saveTableToNVS()) {
+        _PI("[RTABLE] Route added: 0x%02X -> 0x%02X", dst, nextHop);
+        return true;
+    }
+    return false;
 }
 
 bool RoutingTable_removeRoute(routing_addr_t dst) {
-    int indexToRemove = -1;
-    for (int i = 0; i < RoutingTableSize; ++i) {
-        if (RoutingTable[i].dst == dst) {
-            indexToRemove = i;
-            break;
-        }
-    }
+    int indexToRemove = _getIndexInRoutingTable(dst);
 
     if (indexToRemove == -1) {
-        _PW("[RTABLE] Route for %d not found", dst);
+        _PW("[RTABLE] Route for 0x%02X not found", dst);
         return false;
     }
 
@@ -111,20 +114,20 @@ bool RoutingTable_removeRoute(routing_addr_t dst) {
         RoutingTable[i] = RoutingTable[i + 1];
     }
 
-    // Reduir la mida de la taula de rutes
+    // Reduir la mida de la taula de rutes, i reassignar memòria sense la nova ruta
     RoutingTableSize--;
-
-    // Reassignar memòria
     RoutingTable = (routing_entry_t*)realloc(RoutingTable, RoutingTableSize * sizeof(routing_entry_t));
     if (RoutingTableSize > 0 && !RoutingTable) {
         _PE("[RTABLE] Error reallocating memory for routing table");
         return false;
     }
 
-    // Guardar taula de rutes a NVS
-    preferences.putBytes("routingTable", (uint8_t*)RoutingTable, RoutingTableSize * sizeof(routing_entry_t));
-    _PI("[RTABLE] Route for %d removed", dst);
-    return true;
+    // Guardar taula de rutes a NVS; fer-ho aquí i no després a deinit per evitar perdre dades si crash
+    if(_saveTableToNVS()) {
+        _PI("[RTABLE] Route for 0x%02X removed", dst);
+        return true;
+    }
+    return false;
 }
 
 bool RoutingTable_clear() {
@@ -139,26 +142,43 @@ bool RoutingTable_clear() {
     return true;
 }
 
-bool RoutingTable_Update(routing_addr_t dst, routing_addr_t nextHop) {
-    // Actualitza la ruta per `dst`.
-    // Si no existeix, la crea. Si existeix, modifica nextHop
-    if (!RoutingTable_findRoute(dst)) {
+bool RoutingTable_updateRoute(routing_addr_t dst, routing_addr_t nextHop) {
+    // Si no existeix, creem ruta
+    int index = _getIndexInRoutingTable(dst);
+    if (index == -1) {
         return RoutingTable_addRoute(dst, nextHop);
     }
-    // Existeix -> actualitzar
+    // Si existeix, actualitzar nextHop i guardar a NVS
+    RoutingTable[index].nextHop = nextHop;
+    if(_saveTableToNVS()) {
+        _PI("[RTABLE] Route for 0x%02X updated. New nextHop: 0x%02X", dst, nextHop);
+        return true;
+    }
+    return false;
+}
+
+int _getIndexInRoutingTable(routing_addr_t dst) {
     for (int i = 0; i < RoutingTableSize; ++i) {
         if (RoutingTable[i].dst == dst) {
-            RoutingTable[i].nextHop = nextHop;
-            preferences.putBytes("routingTable", (uint8_t*)RoutingTable, RoutingTableSize * sizeof(routing_entry_t));
-            _PI("[RTABLE] Route for %d updated. New nextHop: %d", dst, nextHop);
-            return true;
+            return i;
         }
     }
+    return -1;
+}
+
+bool _saveTableToNVS() {
+    // Guardar taula de rutes a NVS. Verifica que l'escriptura sigui la correcta
+    int bWritten = preferences.putBytes("routingTable", (uint8_t*)RoutingTable, RoutingTableSize * sizeof(routing_entry_t));
+    if (bWritten != RoutingTableSize * sizeof(routing_entry_t)) {
+        _PE("[RTABLE] Error writing routing table to NVS (Bytes written: %d, expected %d)", bWritten, RoutingTableSize * sizeof(routing_entry_t));
+        return false;
+    }
+    _PI("[RTABLE] Routing table saved to NVS (Bytes written: %d)", bWritten);
+    return true;
 }
 
 void setup() {
     Serial.begin(115200);
-    preferences.begin("routingTable", false);
     RoutingTable_init();
     RoutingTable_print();
     RoutingTable_addRoute(0x01, 0x02);
@@ -169,9 +189,13 @@ void setup() {
     RoutingTable_print();
     RoutingTable_removeRoute(0x03);
     RoutingTable_print();
-    RoutingTable_deinit();
+    routing_addr_t nextHop = RoutingTable_getRoute(0x04);
+    Serial.printf("Next hop for 0x04: 0x%02X\n", nextHop);
+    nextHop = RoutingTable_getRoute(0x02);
+    Serial.printf("Next hop for 0x02: 0x%02X\n", nextHop);
+    RoutingTable_updateRoute(0x04, 0x01);
     RoutingTable_print();
-    routing_addr_t nextHop = RoutingTable_findRoute(0x04);
+    nextHop = RoutingTable_getRoute(0x04);
     Serial.printf("Next hop for 0x04: 0x%02X\n", nextHop);
 }
 
