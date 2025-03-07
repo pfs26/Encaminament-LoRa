@@ -28,9 +28,9 @@ enum mac_state_t {
 };
 
 volatile static mac_state_t fsmState = mac_state_t::IDLE_S;
-static mac_callback_t onSend = NULL;
-static mac_callback_t onReceive = NULL;
-static mac_callback_t onTxFailed = NULL;
+static mac_callback_t onSend = nullptr;
+static mac_callback_t onReceive = nullptr;
+static mac_callback_t onTxFailed = nullptr;
 
 static mac_addr_t self;
 
@@ -79,7 +79,7 @@ bool MAC_init(mac_addr_t selfAddr, bool is_gateway) {
 void MAC_deinit() {
     _PI("[MAC] Deinit");
     LoRa_deinit();
-    onReceive = onSend = onTxFailed = NULL;
+    onReceive = onSend = onTxFailed = nullptr;
 }
 
 mac_err_t MAC_send(mac_addr_t rx, const mac_data_t data, size_t length) {
@@ -448,14 +448,14 @@ void _start_beb_timeout(uint8_t attempt) {
 void _sent_mac(void) {
     _PI("[MAC] SENT");
     LoRa_startReceiving();
-    if(onSend != NULL) {
+    if(onSend != nullptr) {
         onSend();
     }
 }
 
 void _received_mac(void) {
     _PI("[MAC] RCV");
-    if(onReceive != NULL) {
+    if(onReceive != nullptr) {
         onReceive();
     }
 }
@@ -464,7 +464,7 @@ void _txError_mac(void) {
     failedTransmissions++;
     _PW("[MAC] TX error (%d)", failedTransmissions);
     LoRa_startReceiving();
-    if(onTxFailed != NULL)
+    if(onTxFailed != nullptr)
         onTxFailed();
 }
 

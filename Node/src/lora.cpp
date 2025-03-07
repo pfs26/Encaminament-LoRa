@@ -23,7 +23,7 @@ volatile bool received = false;
 // void _sent_lora(void);
 // void _checkIRQFlags(void);
 
-static lora_callback_t onReceive = NULL;
+static lora_callback_t onReceive = nullptr;
 // static lora_callback_t onSend = NULL;
 
 // volatile static bool transmitting = false;
@@ -57,7 +57,7 @@ bool LoRa_init() {
 
 void LoRa_deinit() {
     _PI("[LORA] Deinit");
-    onReceive = NULL;
+    onReceive = nullptr;
     scheduler_stop(checkIRQTask);
     radio.reset();
 }
@@ -231,7 +231,7 @@ void _received_lora(void) {
     de fer lectura de les dades rebudes es posa en mode standby.
     */
     _PI("[LORA] Data received. SNR: %d, RSSI: %d", LoRa_getLastSNR(), LoRa_getLastRSSI());
-    if (onReceive != NULL) {
+    if (onReceive != nullptr) {
         onReceive();
         // scheduler_once(onReceive);
     }
