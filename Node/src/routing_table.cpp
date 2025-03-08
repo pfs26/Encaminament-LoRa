@@ -149,6 +149,10 @@ bool RoutingTable_updateRoute(routing_addr_t dst, routing_addr_t nextHop) {
         return RoutingTable_addRoute(dst, nextHop);
     }
     // Si existeix, actualitzar nextHop i guardar a NVS
+    if(RoutingTable[index].nextHop == nextHop) {
+        _PI("[RTABLE] No update for 0x%02X required", dst, nextHop);
+        return true;
+    }
     RoutingTable[index].nextHop = nextHop;
     if(_saveTableToNVS()) {
         _PI("[RTABLE] Route for 0x%02X updated. New nextHop: 0x%02X", dst, nextHop);
