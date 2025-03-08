@@ -29,6 +29,10 @@ bool RoutingTable_init() {
     int sizeInBytes = preferences.getBytesLength("routingTable");
     // Quantitat d'entrades a la taula de rutes (en funció de mida d'entrada de routing_entry)
     RoutingTableSize = sizeInBytes / sizeof(routing_entry_t);
+    if(RoutingTableSize == 0) {
+        _PI("[RTABLE] No routing table found in NVS; initializing empty table");
+        return true;
+    }
     // Assignar la memòria necessaria per guardar totes les rutes
     RoutingTable = (routing_entry_t*)malloc(sizeInBytes);
     if (!RoutingTable) {
