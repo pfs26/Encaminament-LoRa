@@ -120,7 +120,7 @@ mac_err_t _inner_send(mac_addr_t rx, const mac_data_t data, size_t length, bool 
         return mac_err_t::MAC_ERR_MAX_LENGTH;
     }
     if(rx == self) {
-        _PW("[MAC] RX address (%d) cannot be self (%d)", rx, self);
+        _PW("[MAC] RX address (0x%02X) cannot be self (0x%02X)", rx, self);
         return mac_err_t::MAC_ERR_INVALID_ADDR;
     }
     
@@ -301,7 +301,7 @@ void _onLoraReceived(void) {
         // Mirem si el rebut és ACK
         if (_is_ack_valid(&tempPDU)) {
             succeededTransmissions++;
-            _PI("[MAC] ACK Received from %d", tempPDU.tx);
+            _PI("[MAC] ACK Received from 0x%02X", tempPDU.tx);
             _mac_fsm(mac_event_t::RX_ACK_E);
         }
         // Si no és ACK, mirem si som el receptor
@@ -309,6 +309,7 @@ void _onLoraReceived(void) {
             lastFramesIDs.enqueue(rcvID);
             framesReceived++;
             _PI("[MAC] Frame for higher layer");
+
             // @todo: FICTICI, ELIMINAR! HAURIA DE SER EXPLÍCIT SI ÉS LA 1A VEGADA QUE ES REP!!!
             _send_ack(&tempPDU);
 
@@ -318,7 +319,7 @@ void _onLoraReceived(void) {
             _received_mac();
         }
         else {
-            _PI("[MAC] Frame not for self: %d", rxPDU.rx);
+            _PI("[MAC] Frame not for self (rx=0x%02X)", rxPDU.rx);
         }
     }
 }
