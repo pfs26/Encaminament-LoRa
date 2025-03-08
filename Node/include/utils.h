@@ -14,7 +14,7 @@
 // Amplades per aliniar
 #define LOG_LEVEL_WIDTH  1   // Espai per [I], [W], [E]
 #define TIMESTAMP_WIDTH  8   // Per millis()
-#define FILENAME_WIDTH   16  // Nom fitxer + extensió
+#define FILENAME_WIDTH   20  // Nom fitxer + extensió
 #define LINE_WIDTH       4   // Espai línia de codi
 
 #if LOG_LEVEL <= LOG_LEVEL_INFO

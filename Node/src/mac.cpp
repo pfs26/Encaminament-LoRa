@@ -309,7 +309,7 @@ void _onLoraReceived(void) {
             lastFramesIDs.enqueue(rcvID);
             framesReceived++;
             _PI("[MAC] Frame for higher layer");
-            // FICTICI, ELIMINAR! HO GESTIONARIA CAPA ROUTING
+            // @todo: FICTICI, ELIMINAR! HAURIA DE SER EXPLÍCIT SI ÉS LA 1A VEGADA QUE ES REP!!!
             _send_ack(&tempPDU);
 
             rxPDU = tempPDU;

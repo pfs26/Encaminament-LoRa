@@ -70,6 +70,9 @@ routing_err_t Routing_send(routing_addr_t dst, const routing_data_t data, size_t
     txPDU.dataLength = length;
     memcpy(txPDU.data, data, length);
 
+    _PI("[RUTING] Sending packet:");
+    _printPacket(&txPDU);
+
     mac_err_t err = MAC_send(nextHop, (uint8_t*)&txPDU, length+ROUTING_HEADERS_SIZE);
 
     if(err != MAC_SUCCESS) {
@@ -153,14 +156,4 @@ void _printPacket(const routing_pdu_t* const pdu) {
     Serial.print("\n==================\n");
 }
 
-
-void setup() {
-    Serial.begin(115200);
-    Routing_init(0x01, false);
-    Routing_send(0x02, (uint8_t*)"Hola", 4);
-}
-
-void loop() {
-    scheduler_run();
-}
 
