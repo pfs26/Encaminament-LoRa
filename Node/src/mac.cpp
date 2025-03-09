@@ -5,11 +5,10 @@
 #include "scheduler.h"
 #include "utils.h"
 #include "RingBuffer.h"
+#include "utils/LinkedFIFO.hpp"
 
 enum mac_event_t {
     TX_E,             // Iniciar TX
-    TX_ERROR_E,
-    TX_SUCCESS_E,
     TOUT_BUSY_E,      // Fi tout de canal ocupat
     TOUT_ACK_E,       // Timeout recepció ACK
     RX_ACK_E,         // Recepció ACK
@@ -22,10 +21,17 @@ enum lora_event_t {
 
 enum mac_state_t {
     IDLE_S,           // Esperant
-    TX_S,               // Esperant TX
     WAIT_ACK_S,       // Esperant recepció ACK
-    WAIT_CHAN_FREE_S  // Esperant canal LoRa lliure
+    WAIT_CHAN_FREE_S, // Esperant canal LoRa lliure
 };
+
+
+typedef struct {
+    LinkedFIFO<mac_pdu_t> high;
+    LinkedFIFO<mac_pdu_t> low;
+} mac_buffer_t;
+
+static mac_buffer_t txQueue;
 
 volatile static mac_state_t fsmState = mac_state_t::IDLE_S;
 static mac_callback_t onSend = nullptr;
@@ -47,7 +53,13 @@ static int CRCErrors = 0, failedTransmissions = 0, succeededTransmissions = 0, f
 
 static Task* txTimeoutTask;
 
-void _prepareTxPDU(mac_addr_t rx, const mac_data_t data, size_t length, uint8_t retry = 0, bool isAck = false, const mac_pdu_t * const PDUtoACK = NULL);
+bool _is_tx_queue_empty();
+bool _get_next_tx_pdu(mac_pdu_t& pdu);
+static bool _attempt_transmission(uint8_t retry_count);
+static void _setup_ack_reception(void);
+static void _process_next_frame(lora_event_t lora_status);
+
+void _preparePDU(mac_pdu_t* pdu, mac_addr_t rx, const mac_data_t data, size_t length, uint8_t retry = 0, bool isAck = false, const mac_pdu_t * const PDUtoACK = nullptr);
 size_t _PDUtoLora(const mac_pdu_t * const pdu, lora_data_t lora);
 void _LoraToPDU(const lora_data_t lora, size_t length, mac_pdu_t * pdu);
 mac_id_t _getRandomID();
@@ -58,6 +70,7 @@ bool _is_ack_valid(const mac_pdu_t * const pdu);
 void _mac_fsm(mac_event_t e);
 void _mac_fsm_event_tout_ack(void);
 void _mac_fsm_event_tout_busy(void);
+void _mac_fsm_event_tx(void);
 void _start_beb_timeout(uint8_t attempt);
 
 mac_err_t _send_pdu(const mac_pdu_t* const pdu);
@@ -94,7 +107,7 @@ mac_addr_t MAC_receive(mac_data_t* data, size_t* length) {
 }
 
 // Només podem enviar si estem en IDLE; si no, hi ha transmissió en curs
-bool MAC_isAvailable() { return fsmState == mac_state_t::IDLE_S; }
+bool MAC_isAvailable() { return fsmState == mac_state_t::IDLE_S && _is_tx_queue_empty(); }
 
 void MAC_onReceive(mac_callback_t cb) { onReceive = cb; }
 
@@ -103,6 +116,18 @@ void MAC_onSend(mac_callback_t cb) { onSend = cb; }
 void MAC_onTxFailed(mac_callback_t cb) { onTxFailed = cb; }
 
 // ============== MÈTODES PRIVATS ==============
+
+bool _is_tx_queue_empty() { return txQueue.high.isEmpty() && txQueue.low.isEmpty(); }
+bool _get_next_tx_pdu(mac_pdu_t& pdu) {
+    if(!txQueue.high.isEmpty()) {
+        return txQueue.high.pop(pdu);
+    }
+    else if(!txQueue.low.isEmpty()) {
+        return txQueue.low.pop(pdu);
+    }
+    return false;
+}
+
 
 mac_err_t _send_ack(const mac_pdu_t * const refPdu) {
     return _inner_send(0x00, (uint8_t*)"", 0, true, refPdu);
@@ -124,30 +149,32 @@ mac_err_t _inner_send(mac_addr_t rx, const mac_data_t data, size_t length, bool 
         return mac_err_t::MAC_ERR_INVALID_ADDR;
     }
     
-    // No permetre segon enviament si un està pendent. Sobreescriuria PDU TX actual
-    if(!MAC_isAvailable()) { 
-        _PW("[MAC] Not available for another transmission");
-        return mac_err_t::MAC_ERR_TX_PENDING;
-    }
-
     if(isAck && PDUtoACK == NULL) {
         _PW("[MAC] Cannot send ACK to null PDU");
         return mac_err_t::MAC_ERR;
     }
 
-    _prepareTxPDU(rx, data, length, 0, isAck, PDUtoACK);
-    _PI("[MAC] Tx PDU ready");
-    _printPDU(&txPDU);
+    mac_pdu_t tempPdu;
+    _preparePDU(&tempPdu, rx, data, length, 0, isAck, PDUtoACK);
+    _PI("[MAC] PDU ready");
+    _printPDU(&tempPdu);
 
-    // Si és ACK NO es pot passar per FSM -> implicaria que esperaria ACK del mateix ACK, resultant en bucle infinit -> Enviar directament
-    // No interfereix en possibles transmissions en curs, ja que abans es verifica estat MAC amb `MAC_isAvailable()`
-    // Només enviarà ACK explícit si no hi ha transmissió en curs.
+    // En lloc d'enviar, guardem a cua de transmissió. Si ACK, guardem a prioritat alta
     if(isAck) {
-        _PI("[MAC] Sending ACK. Ignoring FSM");
-        return _send_pdu(&txPDU);
+        txQueue.high.push(tempPdu);
     }
     else {
-        _mac_fsm(mac_event_t::TX_E);
+        txQueue.low.push(tempPdu);
+    }
+
+    // Només generem esdeveniment si no hi ha transmissió en curs; si n'hi ha, en acabar-ne una ja farà comprovació de cua
+    if(MAC_isAvailable()) {
+        scheduler_once(_mac_fsm_event_tx);
+        _PI("[MAC] FSM transmission scheduled");
+        // _mac_fsm(mac_event_t::TX_E);
+    }
+    else {
+        _PI("[MAC] Not available for another transmission. Queueing transmission. No FSM event generated");
     }
     return mac_err_t::MAC_SUCCESS;
 }
@@ -163,18 +190,18 @@ mac_err_t _send_pdu(const mac_pdu_t* const pdu) {
 }
 
 // --- GENERACIÓ PDU ---
-void _prepareTxPDU(mac_addr_t rx, const mac_data_t data, size_t length, uint8_t retry, bool isAck, const mac_pdu_t * const PDUtoACK) {
-    txPDU.tx = self;
-    txPDU.rx = rx;
-    txPDU.id = isAck ? PDUtoACK->id+self : (retry > 0 ? txPDU.id : _getRandomID()); // si ACK, utilitzem PDU donada; si retry > 0, no modifiquem ID
-    txPDU.flags.isACK = isAck;
-    txPDU.flags.retry = retry;
-    txPDU.flags.reserved = 0b11111;
-    txPDU.dataLength = length;
+void _preparePDU(mac_pdu_t* pdu, mac_addr_t rx, const mac_data_t data, size_t length, uint8_t retry, bool isAck, const mac_pdu_t * const PDUtoACK) {
+    pdu->tx = self;
+    pdu->rx = rx;
+    pdu->id = isAck ? PDUtoACK->id+self : (retry > 0 ? txPDU.id : _getRandomID()); // si ACK, utilitzem PDU donada; si retry > 0, no modifiquem ID
+    pdu->flags.isACK = isAck;
+    pdu->flags.retry = retry;
+    pdu->flags.reserved = 0b11111;
+    pdu->dataLength = length;
     // REQUEREIX QUE DATA SIGUI NULL-TERMINATED (ACABAT AMB \0)
     // AMB STRCPY COPIARÀ \0 FINAL, NECESSARI PER CALCULAR CRC CORRECTAMENT!
-    strcpy((char*)txPDU.data, (char*)data);
-    txPDU.crc = _computeCRC(&txPDU);
+    strcpy((char*)pdu->data, (char*)data);
+    pdu->crc = _computeCRC(pdu);
 }
 
 size_t _PDUtoLora(const mac_pdu_t * const pdu, lora_data_t lora) {
@@ -328,119 +355,169 @@ void _onLoraReceived(void) {
 /* *   MÀQUINA ESTATS MAC    * */
 /* *************************** */
 void _mac_fsm(mac_event_t e) {
-    /*
-        FSM principal capa MAC. Gestiona enviaments, aplicant BEB,
-        recepció d'"ACK".
-    */
-
-    // Retorna bool (0, 1): 0 si ocupat (not available) -> lora_event_t::busy
+    // Get current LoRa channel status once
     lora_event_t lora_e = (lora_event_t)LoRa_isAvailable();
+    
     _PI("[MAC] FSM:\tSTATE %d\tMAC %d\tLORA %d", fsmState, e, lora_e);
-    if (fsmState == mac_state_t::IDLE_S) {
-        if (e == mac_event_t::TX_E && lora_e == lora_event_t::IDLE_E) {
-            fsmState = mac_state_t::TX_S;
-            currentTxRetry = 0;
-            mac_err_t state = _send_pdu(&txPDU);
-            if(state != LORA_SUCCESS) {
-                _mac_fsm(mac_event_t::TX_ERROR_E);
+    
+    switch (fsmState) {
+        case IDLE_S:
+            if (e == TX_E && !_is_tx_queue_empty()) {
+                _process_next_frame(lora_e);
+            } else if (e == TX_E) {
+                _PI("[MAC] TX requested but queue empty");
+                LoRa_startReceiving();
             }
-            else {
-                _mac_fsm(mac_event_t::TX_SUCCESS_E);
+            break;
+            
+        case WAIT_CHAN_FREE_S:
+            if (e == TOUT_BUSY_E) {
+                if (lora_e == IDLE_E) {
+                    _PI("[MAC] Channel now free after BEB, attempting transmission");
+                    if (_attempt_transmission(currentTxRetry)) {
+                        fsmState = WAIT_ACK_S;
+                        currentBEBRetry = 0; // S'ha aconseguit enviar, posem a 0 
+                        _setup_ack_reception();
+                    } else {
+                        // Apliquem BEB si no s'ha pogut enviar
+                        _start_beb_timeout(currentBEBRetry++);
+                    }
+                } else { // Canal ocupat, apliquem BEB de nou
+                    _PI("[MAC] Channel still busy after BEB timeout, retrying BEB");
+                    _start_beb_timeout(currentBEBRetry++);
+                }
             }
-        }
-        else if (e == mac_event_t::TX_E && lora_e == lora_event_t::BUSY_E) {
-            fsmState = mac_state_t::WAIT_CHAN_FREE_S;
-            currentTxRetry = 0;
-            currentBEBRetry = 0;
-            _start_beb_timeout(currentBEBRetry);
-        }
+            break;
+            
+        case WAIT_ACK_S:
+            if (e == RX_ACK_E) {
+                _PI("[MAC] ACK received");
+                scheduler_stop(txTimeoutTask);
+                _sent_mac();  
+                fsmState = mac_state_t::IDLE_S; 
+                scheduler_once(_mac_fsm_event_tx); // programem enviament de següent frame, ja gestionarà si n'hi ha o no; donem temps a altres tasques
+                // _process_next_frame(lora_e); // no executar-ho així per evitar recursivitat i que bloquegi altres tasques
+            } else if (e == TOUT_ACK_E) {
+                _PI("[MAC] ACK timeout");
+                
+                // Comprovar si s'ha arribat a màxim de reintents
+                if (currentTxRetry >= MAC_MAX_RETRIES) {
+                    _PW("[MAC] Max retries (%d) reached, transmission failed", MAC_MAX_RETRIES);
+                    _txError_mac();
+                    fsmState = mac_state_t::IDLE_S;
+                    scheduler_once(_mac_fsm_event_tx);
+                    // _process_next_frame(lora_e);
+                } else {
+                    // Encara queden reintents
+                    currentTxRetry++;
+                    currentBEBRetry = 0; // a 0 ja que s'havia aconseguit enviar
+                    _PI("[MAC] Retry %d/%d", currentTxRetry, MAC_MAX_RETRIES);
+                    
+                    // Enviar o aplicar BEB segons estat canal
+                    if (lora_e == IDLE_E) {
+                        if (_attempt_transmission(currentTxRetry)) {
+                            fsmState = WAIT_ACK_S; // redundant
+                            _setup_ack_reception();
+                        } else {
+                            fsmState = WAIT_CHAN_FREE_S;
+                            _start_beb_timeout(currentBEBRetry);
+                        }
+                    } else { // Channel busy
+                        _PI("[MAC] Channel busy for retry, moving to WAIT_CHAN_FREE");
+                        fsmState = WAIT_CHAN_FREE_S;
+                        _start_beb_timeout(currentBEBRetry);
+                    }
+                }
+            }
+            break;
+            
+        default:
+            _PE("[MAC] Unknown state: %d", fsmState);
+            fsmState = IDLE_S; // Reset a estat conegut
+            break;
     }
-    else if (fsmState == mac_state_t::WAIT_CHAN_FREE_S) {
-        if (e == mac_event_t::TOUT_BUSY_E && lora_e == lora_event_t::BUSY_E) {
-            fsmState = mac_state_t::WAIT_CHAN_FREE_S;
+}
+
+// Intenta enviar un frame; retorna true si success
+static bool _attempt_transmission(uint8_t retry_count) {
+    // Prepara PDU correcta (amb CRC) donats un nombre de reintents
+    _preparePDU(&txPDU, txPDU.rx, txPDU.data, txPDU.dataLength, retry_count);
+    // Envia paquet LoRa (converting PDU a Lora) i retorna estat
+    lora_tx_error_t state = _send_pdu(&txPDU);
+
+    if (state == LORA_SUCCESS) {
+        _PI("[MAC] Packet sent successfully%s, waiting for ACK", retry_count > 0 ? " after retry" : "");
+        return true;
+    } else {
+        _PI("[MAC] Send failed%s", retry_count > 0 ? " after retry" : "");
+        _txError_mac();
+        return false;
+    }
+}
+
+// Setup ACK reception and timeout
+static void _setup_ack_reception(void) {
+    // Inicia recepció per ack
+    LoRa_startReceiving();
+    
+    // Calcula i programa timeout
+    long airtime_us = LoRa_getTimeOnAir(txPDU.dataLength + MAC_PDU_HEADER_SIZE);
+    uint32_t timeout_ms = 2 * MAC_ACK_TIMEOUT_FACTOR * airtime_us / 1000;
+    txTimeoutTask = scheduler_once(_mac_fsm_event_tout_ack, timeout_ms);
+    _PI("[MAC] Timeout d'ACK: %dms (%dus airtime)", timeout_ms, airtime_us);
+}
+
+// Processar següent frame si n'hi ha
+static void _process_next_frame(lora_event_t lora_status) {
+    if (!_is_tx_queue_empty()) {
+        _get_next_tx_pdu(txPDU);
+        // Nou frame -> Reset comptadors reintents
+        currentTxRetry = currentBEBRetry = 0;
+
+        _PI("[MAC] Queue not empty, sending next packet");
+        if (lora_status == IDLE_E) {
+            if (_attempt_transmission(currentTxRetry)) {
+                if(txPDU.flags.isACK) {
+                    _PI("[MAC] ACK sent, not waiting for ACK");
+                    scheduler_once(_mac_fsm_event_tx); // programem enviament de següent frame, ja gestionarà si n'hi ha o no
+                } 
+                else {
+                    fsmState = WAIT_ACK_S;
+                    _setup_ack_reception(); // En enviament OK, esperem ACK
+                }
+            } else {
+                // Si no es pot enviar a lora, reintentem amb beb? 
+                // (oju que potser queda bloquejat amb aquest frame si problema no és canal (per exemple mida, connexions, etc.))
+                fsmState = WAIT_CHAN_FREE_S;
+                _start_beb_timeout(currentBEBRetry++);
+                // _mac_fsm(TX_E);
+            }
+        } else { // Channel busy
+            _PI("[MAC] Channel busy for next packet, starting BEB");
+            fsmState = WAIT_CHAN_FREE_S;
             _start_beb_timeout(currentBEBRetry++);
         }
-        else if (e == mac_event_t::TOUT_BUSY_E && lora_e == lora_event_t::IDLE_E) {
-            _PI("[MAC] Channel free again, sending");
-            fsmState = mac_state_t::TX_S;
-            _prepareTxPDU(txPDU.rx, txPDU.data, txPDU.dataLength, currentTxRetry);
-            lora_tx_error_t state = _send_pdu(&txPDU);
-            if(state != LORA_SUCCESS) {
-                _mac_fsm(mac_event_t::TX_ERROR_E);
-            }
-            else {
-                _mac_fsm(mac_event_t::TX_SUCCESS_E);
-            }
-        }
-    }
-    else if (fsmState == mac_state_t::TX_S) {
-        if(e == mac_event_t::TX_ERROR_E) {
-            fsmState = mac_state_t::IDLE_S;
-            _txError_mac();
-        }
-        else if(e == mac_event_t::TX_SUCCESS_E) {
-            fsmState = mac_state_t::WAIT_ACK_S;
-            currentTxRetry++; // serà el següent valor de reintent
-            LoRa_startReceiving();
-            // Iniciem timeout de recepció d'ACK, a partir de time on air (depenent de SF, BW, etc.)
-            long airtime_us = LoRa_getTimeOnAir(txPDU.dataLength+MAC_PDU_HEADER_SIZE);
-            txTimeoutTask = scheduler_once(_mac_fsm_event_tout_ack, 2*MAC_ACK_TIMEOUT_FACTOR*airtime_us/1000);
-            _PI("[MAC] Timeout d'ACK: %dms (%dus airtime)", 2*MAC_ACK_TIMEOUT_FACTOR*airtime_us/1000, airtime_us);
-        }
-
-    }
-    else if (fsmState == mac_state_t::WAIT_ACK_S) {
-        if(e == mac_event_t::RX_ACK_E) {
-            // recepció ACK, transmissió DONE
-            _PI("[MAC] ACK received");
-            fsmState = mac_state_t::IDLE_S;
-            scheduler_stop(txTimeoutTask);
-            _sent_mac();
-        }
-        else if (e == mac_event_t::TOUT_ACK_E && lora_e == lora_event_t::IDLE_E) {
-            if (currentTxRetry > MAC_MAX_RETRIES) {
-                _PW("[MAC] Max retries exceeded (%d)", currentTxRetry);
-                fsmState = mac_state_t::IDLE_S;
-                _txError_mac();
-                return;
-            }
-            fsmState = mac_state_t::TX_S;
-            _prepareTxPDU(txPDU.rx, txPDU.data, txPDU.dataLength, currentTxRetry);
-            lora_tx_error_t state = _send_pdu(&txPDU);
-            if(state != LORA_SUCCESS) {
-                _mac_fsm(mac_event_t::TX_ERROR_E);
-            }
-            else {
-                _mac_fsm(mac_event_t::TX_SUCCESS_E);
-            }
-        }
-        else if (e == mac_event_t::TOUT_ACK_E && lora_e == lora_event_t::BUSY_E) {
-            if (currentTxRetry > MAC_MAX_RETRIES) {
-                _PW("[MAC] Max retries exceeded (%d)", currentTxRetry);
-                fsmState = mac_state_t::IDLE_S;
-                _txError_mac();
-                return;
-            }
-            fsmState = mac_state_t::WAIT_CHAN_FREE_S;
-            currentBEBRetry = 0;
-            _start_beb_timeout(currentBEBRetry);
-        }
+    } else {
+        _PI("[MAC] Queue empty, going to IDLE");
+        fsmState = IDLE_S;
     }
 }
 
 void _mac_fsm_event_tout_ack(void) { _mac_fsm(mac_event_t::TOUT_ACK_E); }
 void _mac_fsm_event_tout_busy(void) { _mac_fsm(mac_event_t::TOUT_BUSY_E); }
+void _mac_fsm_event_tx(void) { _mac_fsm(mac_event_t::TX_E); }
 
 void _start_beb_timeout(uint8_t attempt) {
     _PI("[MAC] Waiting chann free (%d)", attempt);
     // Limitar a valor màxim
     attempt = MIN(attempt, MAC_MAX_BEB_RETRY);
     // Calcular timeout de backoff
-    uint32_t bebTimeout = random(0, 1 << attempt)*MAC_BEB_FACTOR_MS;
+    uint32_t bebTimeout = random(0, 1 << attempt)*MAC_BEB_SLOT_MS;
     // Programar reintent. Generarà esdeveniment a FSM de BEB_TIMEOUT
     txTimeoutTask = scheduler_once(_mac_fsm_event_tout_busy, bebTimeout);
     _PI("[MAC] Timeout BEB: %dms", bebTimeout);
 }
+
 
 /* *************************** */
 /* * CALLBACKS CAPA SUPERIOR * */

@@ -10,8 +10,8 @@
 #define MAC_MAX_RETRIES 3
 // Valor màxim de reintents de backoff (Backoff seguirà fent-se, però no augmentarà més, per evitar desbordar uint32 i temps excessiu)
 #define MAC_MAX_BEB_RETRY 10
-// Factor pel qual es multiplica el valor aleatori de BEB per generar retard, en ms
-#define MAC_BEB_FACTOR_MS 100 
+// Slots de temps en ms per BEB
+#define MAC_BEB_SLOT_MS 100 
 // Factor de temps addicional per recepció d'ACK, en funció de time on air de les dades enviades
 // Si factor és 5 i time on air és 1ms, el timeout serà de 10 ms (dues vegades el temps esperat, anada+tornada)
 #define MAC_ACK_TIMEOUT_FACTOR 3
