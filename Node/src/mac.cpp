@@ -356,7 +356,7 @@ void _onLoraReceived(void) {
             _received_mac();
         }
         else {
-            _PI("[MAC] Frame not for self (rx=0x%02X)", rxPDU.rx);
+            _PI("[MAC] Frame not for self (rx=0x%02X)", tempPDU.rx);
         }
     }
 }
@@ -367,7 +367,7 @@ void _onLoraReceived(void) {
 void _mac_fsm(mac_event_t e) {
     // Obtenim estat canal per poder-ho utilitzar com a esdeveniment (aplicar beb)
     lora_event_t lora_e = (lora_event_t)LoRa_isAvailable();
-    lora_e = lora_event_t::BUSY_E;
+    // lora_e = lora_event_t (random(0, 3)/2); // FICTICI, ELIMINAR, NOMÉS PER SIMULAR ESTAT CANAL (33%)
     _PI("[MAC] FSM:\tSTATE %d\tMAC %d\tLORA %d", fsmState, e, lora_e);
     
     switch (fsmState) {
@@ -376,7 +376,6 @@ void _mac_fsm(mac_event_t e) {
                 _get_next_tx_pdu(txPDU);
                 currentTxRetry = 0; 
                 if (lora_e == IDLE_E) {
-                    _PI("Attempting transmission");
                     _attempt_transmission(currentTxRetry);
                 } else { // Channel busy
                     _PI("[MAC] Channel busy for retry, moving to WAIT_CHAN_FREE");
@@ -470,7 +469,6 @@ static bool _attempt_transmission(uint8_t retry_count) {
         }
     } else {
         _PI("[MAC] Send failed%s", retry_count > 0 ? " after retry" : "");
-        // Apliquem BEB si no s'ha pogut enviar
         _start_beb_timeout(currentBEBRetry++);
         // _txError_mac();
     }
@@ -506,6 +504,7 @@ void _start_beb_timeout(uint8_t attempt) {
     // Programar reintent. Generarà esdeveniment a FSM de BEB_TIMEOUT
     txTimeoutTask = scheduler_once(_mac_fsm_event_tout_busy, bebTimeout);
     _PI("[MAC] Timeout BEB: %dms", bebTimeout);
+    LoRa_startReceiving();
 }
 
 
