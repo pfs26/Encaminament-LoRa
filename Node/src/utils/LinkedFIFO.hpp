@@ -61,6 +61,11 @@ public:
         size--; // reduir mida
         return true;
     }
+
+    size_t count() {
+        return size;
+    }
+
     // Eliminar tots els elements de la cua
     void clear() {
         T temp; 
