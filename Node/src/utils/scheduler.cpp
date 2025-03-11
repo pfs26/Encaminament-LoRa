@@ -2,8 +2,9 @@
 
 #include <Arduino.h>
 #include <TaskScheduler.h>
-
+#include <deque>
 #include "utils.h"
+#include "LinkedFIFO.hpp"
 
 void _delete_completed_tasks();
 void _start_cleanup_if_needed();
@@ -11,7 +12,9 @@ void _stop_cleanup_if_needed();
 
 Scheduler ts;  
 bool is_cleanup_running = false;
-std::vector<Task*> scheduled_tasks;
+
+std::deque<Task*> scheduled_tasks;
+// std::vector<Task*> scheduled_tasks;
 
 Task* scheduler_once(TaskCallback cb, unsigned long startDelay) {
     Task* task = new Task(TASK_IMMEDIATE, 1, cb, &ts, true, NULL, NULL, false);
@@ -49,19 +52,17 @@ void scheduler_stop(Task* task) {
 }
 
 void _delete_completed_tasks() {
-    _PI("[SCHED] Before cleanup.\tCount: %d\tHeap: %d", scheduled_tasks.size(), ESP.getFreeHeap());
-
+    _PI("[SCHED] Cleanup started. Tasks: %d, Heap: %d", scheduled_tasks.size(), ESP.getFreeHeap());
     for (auto tsk = scheduled_tasks.begin(); tsk != scheduled_tasks.end();) {
         if (!(*tsk)->isEnabled()) {  // Comprva si tasca habilitada
             ts.deleteTask(**tsk);   
             delete *tsk;  // Borrar de memòria i vector
             tsk = scheduled_tasks.erase(tsk); 
-            // _PM("Task deleted");
         } else {
             ++tsk;
         }
     }
-
+    // No obtenir heap aquí, genera crash a esp? 
     // _PI("[SCHED] After cleanup.\tCount: %d\tHeap: %d", scheduled_tasks.size(), ESP.getFreeHeap());
     // Aturar cleanup si fa falta
     _stop_cleanup_if_needed();
