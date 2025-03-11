@@ -12,6 +12,10 @@ enum mac_event_t {
     TOUT_BUSY_E,      // Fi tout de canal ocupat
     TOUT_ACK_E,       // Timeout recepció ACK
     RX_ACK_E,         // Recepció ACK
+
+#ifdef MAC_DUTY_CYCLE
+    TOUT_DUTY_E,      // Fi temps per duty cycle
+#endif
 };
 
 enum lora_event_t {
@@ -76,7 +80,9 @@ void _mac_fsm(mac_event_t e);
 void _mac_fsm_event_tout_ack(void);
 void _mac_fsm_event_tout_busy(void);
 void _mac_fsm_event_tx(void);
+void _mac_fsm_event_duty_timeout(void);
 void _start_beb_timeout(uint8_t attempt);
+void _apply_duty_cycle_delay();
 
 mac_err_t _send_pdu(const mac_pdu_t* const pdu);
 mac_err_t _inner_send(mac_addr_t rx, const mac_data_t data, size_t length, bool isAck = false, const mac_pdu_t * const referedPDU = NULL);
@@ -337,7 +343,6 @@ void _onLoraReceived(void) {
         _PI("[MAC] New id received: %d", rcvID);
         // Mirem si el rebut és ACK
         if (_is_ack_valid(&tempPDU)) {
-            succeededTransmissions++;
             _PI("[MAC] ACK Received from 0x%02X", tempPDU.tx);
             _mac_fsm(mac_event_t::RX_ACK_E);
         }
@@ -391,7 +396,6 @@ void _mac_fsm(mac_event_t e) {
             if (e == TOUT_BUSY_E) {
                 if (lora_e == IDLE_E) {
                     _PI("[MAC] Channel now free after BEB, attempting transmission");
-                    _PI("Attempting transmission");
                     _attempt_transmission(currentTxRetry);
                 } else { // Canal ocupat, apliquem BEB de nou
                     _PI("[MAC] Channel still busy after BEB timeout, retrying BEB");
@@ -404,28 +408,22 @@ void _mac_fsm(mac_event_t e) {
             if (e == RX_ACK_E) {
                 _PI("[MAC] ACK received");
                 scheduler_stop(txTimeoutTask);
+                succeededTransmissions++; // si rebem ack és perquè ja eren dades
                 _sent_mac();  
-                fsmState = mac_state_t::IDLE_S; 
-                scheduler_once(_mac_fsm_event_tx); // programem enviament de següent frame, ja gestionarà si n'hi ha o no; donem temps a altres tasques
+                _apply_duty_cycle_delay();
             } else if (e == TOUT_ACK_E) {
                 _PI("[MAC] ACK timeout");
                 // Comprovar si s'ha arribat a màxim de reintents
                 if (currentTxRetry > MAC_MAX_RETRIES) {
                     _PW("[MAC] Max retries (%d) reached, transmission failed", MAC_MAX_RETRIES);
                     _txError_mac();
-                    fsmState = mac_state_t::IDLE_S;
-                    // @todo: Potser si es vol considerar l'1% de duty cyle, es podria programar
-                    // la següent execució tenint en compte aquest 1%
-                    // Si airtime d'1 segon, deixariem 99 segons lliures -> delay = 99*airtime
-                    // es podria quedar en un estat de "waiting" per no estar idle, i filtrar si cua ocupada abans d'entrar-hi
-                    scheduler_once(_mac_fsm_event_tx);
+                    _apply_duty_cycle_delay();
                 } else {
                     // Encara queden reintents
                     _PI("[MAC] Retry %d/%d", currentTxRetry, MAC_MAX_RETRIES);
                     
                     // Enviar o aplicar BEB segons estat canal
                     if (lora_e == IDLE_E) {
-                        _PI("Attempting transmission");
                         _attempt_transmission(currentTxRetry);
                     } else { // Channel busy
                         _PI("[MAC] Channel busy for retry, moving to WAIT_CHAN_FREE");
@@ -434,12 +432,35 @@ void _mac_fsm(mac_event_t e) {
                 }
             }
             break;
+
+        case WAIT_DUTY_CYCLE_S:
+            if (e == TOUT_DUTY_E) {
+                _PI("[MAC] Duty cycle timeout");
+                fsmState = mac_state_t::IDLE_S;
+                scheduler_once(_mac_fsm_event_tx);
+            }
+            break;
             
         default:
             _PE("[MAC] Unknown state: %d", fsmState);
             fsmState = IDLE_S; // Reset a estat conegut
             break;
     }
+}
+
+void _apply_duty_cycle_delay() {
+    
+    #ifdef MAC_DUTY_CYCLE
+        fsmState = mac_state_t::WAIT_DUTY_CYCLE_S;
+        long airtime = LoRa_getTimeOnAir(txPDU.dataLength + MAC_PDU_HEADER_SIZE);
+        long airtime_with_retry_ms = airtime*(currentTxRetry)/1000;
+        long duty_cycle_delay = airtime_with_retry_ms*(100-MAC_DUTY_CYCLE);
+        _PE("[MAC] Duty cycle delay: %dms", duty_cycle_delay);
+        scheduler_once(_mac_fsm_event_duty_timeout, duty_cycle_delay);
+    #else
+        fsmState = mac_state_t::IDLE_S;
+        scheduler_once(_mac_fsm_event_tx);
+    #endif
 }
 
 void _set_retry_count(mac_pdu_t* pdu, uint8_t retry) {
@@ -454,7 +475,6 @@ static bool _attempt_transmission(uint8_t retry_count) {
     // Envia paquet LoRa (converting PDU a Lora) i retorna estat
     lora_tx_error_t state = _send_pdu(&txPDU);
 
-    _PE("[MAC] Attempting transmission!");
     if (state == LORA_SUCCESS) {
         if(txPDU.flags.isACK) {
             _PI("[MAC] ACK sent, not waiting for ACK");
@@ -464,7 +484,7 @@ static bool _attempt_transmission(uint8_t retry_count) {
         else {
             _PI("[MAC] Packet sent successfully%s, waiting for ACK", retry_count > 0 ? " after retry" : "");
             currentBEBRetry = 0; // S'ha aconseguit enviar, posem a 0 
-            currentTxRetry++; // Hem fet un intent de TX (fallit)
+            currentTxRetry++; // Hem fet un intent de TX
             _setup_ack_reception(); // En enviament OK, esperem ACK
         }
     } else {
@@ -493,6 +513,7 @@ static void _setup_ack_reception(void) {
 void _mac_fsm_event_tout_ack(void) { _mac_fsm(mac_event_t::TOUT_ACK_E); }
 void _mac_fsm_event_tout_busy(void) { _mac_fsm(mac_event_t::TOUT_BUSY_E); }
 void _mac_fsm_event_tx(void) { _mac_fsm(mac_event_t::TX_E); }
+void _mac_fsm_event_duty_timeout(void) { _mac_fsm(mac_event_t::TOUT_DUTY_E); }
 
 void _start_beb_timeout(uint8_t attempt) {
     _PI("[MAC] Waiting chann free (%d)", attempt);
@@ -513,9 +534,10 @@ void _start_beb_timeout(uint8_t attempt) {
 /* *************************** */
 
 void _sent_mac(void) {
-    _PI("[MAC] SENT");
+    _PI("[MAC] Sent. Notify higher layer?");
     LoRa_startReceiving();
-    if(onSend != nullptr) {
+    // Notifiquem només si no és ACK (generat per MAC); han de ser dades (que venen de capa superior)
+    if(!txPDU.flags.isACK && onSend != nullptr) {
         onSend();
     }
 }
@@ -531,8 +553,10 @@ void _txError_mac(void) {
     failedTransmissions++;
     _PW("[MAC] TX error (%d)", failedTransmissions);
     LoRa_startReceiving();
-    if(onTxFailed != nullptr)
+    // Notifiquem només si no és ACK (generat per MAC); han de ser dades (que venen de capa superior)
+    if(!txPDU.flags.isACK && onTxFailed != nullptr) {
         onTxFailed();
+    }
 }
 
 #if LOG_LEVEL <= LOG_LEVEL_INFO
@@ -549,67 +573,3 @@ void _printPDU(const mac_pdu_t* const pdu) {
 #else
 void _printPDU(const mac_pdu_t* const pdu) {}
 #endif
-
-/* === Proves CRC ===
-mac_data_t data = "PROVA";
-
-_prepareTxPDU(0xFF, data, strlen((char*) data));
-_printPDU(&txPDU);
-
-mac_crc_t crc = txPDU.crc;
-Serial.printf("Is CRC valid? %d\n", _verifyCRC(&txPDU)); // vàlid
-txPDU.tx ^= 0x01; // canviar un bit
-Serial.printf("Is CRC valid? %d\n", _verifyCRC(&txPDU)); // no vàlid
-txPDU.tx ^= 0x01; // canviar bit de nou
-Serial.printf("Is CRC valid? %d\n", _verifyCRC(&txPDU)); // vàlid
-txPDU.crc ^= 0x01; // canviar bit de crc
-Serial.printf("Is CRC valid? %d\n", _verifyCRC(&txPDU)); // no vàlid
-
-mac_data_t data2 = "";
-
-_prepareTxPDU(0xFF, data2, strlen((char*) data2));
-_printPDU(&txPDU);
-
-crc = txPDU.crc;
-Serial.printf("Is CRC valid? %d\n", _verifyCRC(&txPDU)); // vàlid
-txPDU.tx ^= 0x01; // canviar un bit
-Serial.printf("Is CRC valid? %d\n", _verifyCRC(&txPDU)); // no vàlid
-txPDU.tx ^= 0x01; // canviar bit de nou
-Serial.printf("Is CRC valid? %d\n", _verifyCRC(&txPDU)); // vàlid
-txPDU.crc ^= 0x01; // canviar bit de crc
-Serial.printf("Is CRC valid? %d\n", _verifyCRC(&txPDU)); // no vàlid
-
-
-=== PROVES LORA_TO_PDU ===
-lora_data_t data = {0x01,0x02,0x03, 0x04,0x05,0x04,'H','I','!','!',0x0A};
-_printLora(data, 11);
-
-mac_pdu_t pdu;
-_LoraToPDU(data, 11, &pdu);
-_printPDU(&pdu);
-size_t len = _PDUtoLora(&pdu, data);
-_printLora(data, len);
-
-lora_data_t data2 = {0x01,0x02,0x03, 0x04,0x02,0x00, 0x0A};
-_printLora(data2, 7);
-
-_LoraToPDU(data2, 7, &pdu);
-_printPDU(&pdu);
-len = _PDUtoLora(&pdu, data2);
-_printLora(data2, len);
-
-// lora_data_t data3;
-for (size_t i = offsetof(mac_pdu_t, data); i < LORA_MAX_SIZE; i++)
-{
-    data[i] = 'A' + (i % 26);  
-}
-
-data[offsetof(mac_pdu_t, dataLength)] = MAC_MAX_DATA_SIZE;
-
-_printLora(data, 255);
-
-_LoraToPDU(data, 255, &pdu);
-_printPDU(&pdu);
-len = _PDUtoLora(&pdu, data);
-_printLora(data, len);
-*/

@@ -15,6 +15,8 @@
 // Factor de temps addicional per recepció d'ACK, en funció de time on air de les dades enviades
 // Si factor és 5 i time on air és 1ms, el timeout serà de 10 ms (dues vegades el temps esperat, anada+tornada)
 #define MAC_ACK_TIMEOUT_FACTOR 3
+// Percentatge de duty cycle màxim, per complir amb regulacions, en tant per cent. No definir si no es vol complir
+#define MAC_DUTY_CYCLE 1
 // Número d'IDs de frames anteriors rebuts guardats (per si cal enviar "ACK")
 #define MAC_QUEUE_SIZE 5
 // Polinomi per CRC8 (x^8+x^2+1)
