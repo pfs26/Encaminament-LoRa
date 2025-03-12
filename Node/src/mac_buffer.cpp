@@ -11,7 +11,7 @@ bool MACbuff_isRxEmpty() {
     return rxQueue.high.isEmpty() && rxQueue.low.isEmpty();
 }
 
-mac_buffer_priority_t MACbuff_PopTx(mac_pdu_t& pdu) {
+mac_buffer_priority_t MACbuff_popTx(mac_pdu_t& pdu) {
     if(!txQueue.high.isEmpty()) {
         txQueue.high.pop(pdu);
         return MACBUFF_PRIORITY_HIGH;
@@ -23,7 +23,7 @@ mac_buffer_priority_t MACbuff_PopTx(mac_pdu_t& pdu) {
     return MACBUFF_PRIORITY_NONE;
 }
 
-bool MACbuff_PushTx(mac_pdu_t& pdu, mac_buffer_priority_t priority) {
+bool MACbuff_pushTx(mac_pdu_t& pdu, mac_buffer_priority_t priority) {
     switch (priority) {
         case MACBUFF_PRIORITY_HIGH:
             txQueue.high.push(pdu);
@@ -37,7 +37,7 @@ bool MACbuff_PushTx(mac_pdu_t& pdu, mac_buffer_priority_t priority) {
     return true;
 }
 
-mac_buffer_priority_t MACbuff_PopRx(mac_pdu_t& pdu) {
+mac_buffer_priority_t MACbuff_popRx(mac_pdu_t& pdu) {
     if(!rxQueue.high.isEmpty()) {
         rxQueue.high.pop(pdu);
         return MACBUFF_PRIORITY_HIGH;
@@ -49,7 +49,7 @@ mac_buffer_priority_t MACbuff_PopRx(mac_pdu_t& pdu) {
     return MACBUFF_PRIORITY_NONE;
 }
 
-bool MACbuff_PushRx(mac_pdu_t& pdu, mac_buffer_priority_t priority) {
+bool MACbuff_pushRx(mac_pdu_t& pdu, mac_buffer_priority_t priority) {
     switch (priority) {
         case MACBUFF_PRIORITY_HIGH:
             rxQueue.high.push(pdu);
@@ -61,4 +61,12 @@ bool MACbuff_PushRx(mac_pdu_t& pdu, mac_buffer_priority_t priority) {
             return false;
     }
     return true;
+}
+
+size_t MACbuff_getTxSize() {
+    return txQueue.high.getSize() + txQueue.low.getSize();
+}
+
+size_t MACbuff_getRxSize() {
+    return rxQueue.high.getSize() + rxQueue.low.getSize();
 }
