@@ -1,9 +1,18 @@
 /*
-    Exemple de comunicació MAC entre dos nodes.
+    Per verificar cua de recepció de MAC.
+    Capa MAC notifica en cada recepció a la capa superior pel callback; si la capa superior
+    no obté les dades rebudes, es guarden en buffer de recepció.
+    En executar `MAC_receive()` s'obté la primera dada rebuda. És responsabilitat de la capa
+    superior d'obtenir les dades (i en cas de no fer-ho, gestionar quantes en queden per rebre).
 
-    - Un node envia frames cada 2,5s (`SENDER1`), l'altre cada 10s.
-    - Es reintenta en cas d'error.
-    - Els missatges rebuts es mostren per pantalla.
+    El buffer de recepció existeix, únicament, com a mesura de seguretat per no perdre dades.
+
+    Situació:
+        1. Un node de recepció que no envia dades, només ACK. Guarda les dades al buffer de recepció
+        2. Quan s'avisa per callback de recepció, guarda quantes dades s'han rebut
+        3. En rebre'n 5, obté les 5 dades rebudes de cop
+
+        Requereix un node transmissor que enviï les dades.
 */
 
 #include <Arduino.h>
@@ -11,36 +20,6 @@
 #include "scheduler.h"
 #include "utils.h"
 
-#define SENDER1
-
-void Send() {
-    #ifdef SENDER1
-        mac_data_t data = "";
-        mac_addr_t rx = 0x02;
-    #else
-        mac_data_t data = "Hola 0x01!";
-        mac_addr_t rx = 0x01;
-    #endif
-    while(MAC_send(rx, data, strlen((char*)data)) != mac_err_t::MAC_SUCCESS);
-}
-
-void onSend() {
-    Serial.println("MAC frame sent");
-    #ifdef SENDER1
-    scheduler_once(Send, 20000);
-    #else
-    scheduler_once(Send, 20000);
-    #endif
-}
-
-void onErr() {
-    Serial.println("Error sending mac frame");
-    #ifdef SENDER1
-    scheduler_once(Send, 20000);
-    #else
-    scheduler_once(Send, 20000);
-    #endif
-}
 
 void onRcv() {
     static int received = 0;
@@ -70,21 +49,15 @@ void setup() {
     Serial.println(esp_reset_reason());
 
 
-    #ifdef SENDER1
+
     mac_addr_t addr = 0x01;
-    #else
-    mac_addr_t addr = 0x02;
-    #endif
+
     if(!MAC_init(addr, false)) {
         _PE("ERR");
         while(1);
     }
 
-    MAC_onSend(onSend);
-    MAC_onTxFailed(onErr);
     MAC_onReceive(onRcv);
-
-    scheduler_once(Send);
 }
 
 void loop() {
