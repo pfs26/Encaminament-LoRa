@@ -9,27 +9,10 @@ change LoRa transceivers.
 #define _LORA_H
 
 #include <stdint.h>
-#include <RadioLib.h>
-
-// ===== CONFIG =====
-// Potser moure a "config.h"
-#define LORA_SS SS      
-#define LORA_DIO1 2
-#define LORA_NRESET 22
-#define LORA_BUSY 4
-
-#define LORA_FREQ 868.0
-#define LORA_BW 125.0   // En kHz
-#define LORA_DATARATE 5 // entre 0 i 7
-#define LORA_SF 9
-#define LORA_CODERATE 5 // Denominador de coderate. Valor entre 5 i 8, resultant en CR = [4/5, 4/6, 4/7, 4/8]
-#define LORA_TX_POW -9  // en dBm, entre -9 i 22
-// ===== FI CONFIG =====
+#include "lora_common.h"
 
 // Interval comprovació recepcions 
 #define LORA_IRQFLAGS_CHECK_INTERVAL 1 // interval comprovació flags IRQ tasca programada en ms
-// Mida màxima LoRa. No pot ser major a RADIOLIB_SX126X_MAX_PACKET_LENGTH
-#define LORA_MAX_SIZE RADIOLIB_SX126X_MAX_PACKET_LENGTH
 
 // Errors en TX
 typedef int lora_tx_error_t;
@@ -39,17 +22,6 @@ typedef int lora_tx_error_t;
 #define LORA_ERROR_TX_BUSY          2
 #define LORA_ERROR_TX_TIMEOUT       3
 #define LORA_ERROR_TX_PENDING       4
-
-// Estructura dades lora
-// typedef struct {
-//     uint8_t data[LORA_MAX_SIZE];
-//     uint8_t length; // Mida de les dades
-// } lora_data_t;
-
-typedef uint8_t lora_data_t[LORA_MAX_SIZE];
-
-// Callbacks
-typedef void (*lora_callback_t)();
 
 bool LoRa_init(); 
 void LoRa_deinit();
@@ -66,11 +38,7 @@ bool LoRa_setFrequency(float frequency);
 bool LoRa_setTxPower(int power);
 long LoRa_getTimeOnAir(int length);
 void LoRa_startReceiving();
-// bool LoRa_setDataRate(int datarate);
 
 void LoRa_onReceive(lora_callback_t cb);
-// void LoRa_onSend(lora_callback_t cb);
-
-void _printLora(const lora_data_t data, size_t length);
 
 #endif

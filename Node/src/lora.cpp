@@ -18,20 +18,16 @@ void _onReceive(void);
 int16_t _startReceiving();
 void _clearInterrupts();
 void _checkReceived(void);
+void _printLora(const lora_data_t data, size_t length);
 
 volatile bool received = false;
-// void _sent_lora(void);
-// void _checkIRQFlags(void);
 
 static lora_callback_t onReceive = nullptr;
-// static lora_callback_t onSend = NULL;
-
-// volatile static bool transmitting = false;
 
 static Task* checkIRQTask;
-// volatile uint32_t IRQFlags = 0;
 
-static SX1262 radio = new Module(LORA_SS, LORA_DIO1, LORA_NRESET, LORA_BUSY); 
+// No static, ja que és la mateixa radio utilitzada per LoRaWAN
+SX1262 radio = new Module(LORA_SS, LORA_DIO1, LORA_NRESET, LORA_BUSY); 
 
 bool LoRa_init() {
     /*  1. Inicialitza radiolib. 
