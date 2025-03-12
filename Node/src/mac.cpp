@@ -150,6 +150,9 @@ mac_addr_t MAC_receive(mac_data_t* data, size_t* length) {
     return pdu.tx;
 }
 
+// Retorna missatges pendents de ser "rebuts" per capa superior
+size_t MAC_toReceive() { return MACbuff_getRxSize(); }
+
 // Només podem enviar si estem en IDLE; si no, hi ha transmissió en curs
 bool MAC_isAvailable() { return fsmState == mac_state_t::IDLE_S && MACbuff_isTxEmpty(); }
 
