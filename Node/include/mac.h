@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "lora.h"
+#include "node_address.h"
 
 // Número màxim de reintents, sense comptar primera transmissió (així, serien 4 intents)
 // Aquest define és ÚNICAMENT per tenir-ho tot en un mateix lloc. Incrementar-lo a més de 3 generaria problemes
@@ -33,7 +34,6 @@
 #define MAC_PDU_HEADER_SIZE (2*MAC_ADDRESS_SIZE + MAC_ID_SIZE + MAC_CRC_SIZE + MAC_FLAGS_SIZE + MAC_LENGTH_FIELD_SIZE)
 #define MAC_MAX_DATA_SIZE LORA_MAX_SIZE - MAC_PDU_HEADER_SIZE // @tx + @rx + crc + id + flags + lengthField
 
-typedef uint8_t mac_addr_t;
 typedef uint8_t mac_crc_t;
 typedef uint16_t mac_id_t;
 typedef uint8_t mac_data_t[MAC_MAX_DATA_SIZE];
@@ -49,8 +49,8 @@ typedef struct {
 } mac_pdu_flags_t;
 
 typedef struct {
-    mac_addr_t tx;
-    mac_addr_t rx;
+    node_address_t tx;
+    node_address_t rx;
     mac_id_t id;
     mac_pdu_flags_t flags;
     uint8_t dataLength; // Mida de dades. No podem utilitzar el '\0' com a separador, ja que potser capes superiors l'utilitzen al header o en mig de dades
@@ -71,11 +71,11 @@ enum mac_err_t{
 
 typedef void (*mac_callback_t)();
 
-bool MAC_init(mac_addr_t selfAddr, bool is_gateway);
+bool MAC_init(node_address_t selfAddr, bool is_gateway);
 void MAC_deinit();
 
-mac_err_t MAC_send(mac_addr_t rx, const mac_data_t data, size_t length);
-mac_addr_t MAC_receive(mac_data_t* data, size_t* length);
+mac_err_t MAC_send(node_address_t rx, const mac_data_t data, size_t length);
+node_address_t MAC_receive(mac_data_t* data, size_t* length);
 size_t MAC_toReceive();
 bool MAC_isAvailable();
 void MAC_onReceive(mac_callback_t cb);

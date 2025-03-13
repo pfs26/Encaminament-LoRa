@@ -39,7 +39,7 @@ static mac_callback_t onSend = nullptr;
 static mac_callback_t onReceive = nullptr;
 static mac_callback_t onTxFailed = nullptr;
 
-static mac_addr_t self;
+static node_address_t self;
 
 static mac_pdu_t txPDU; // PDU en transmissió
 
@@ -55,7 +55,7 @@ static int CRCErrors = 0, failedTransmissions = 0, succeededTransmissions = 0, f
 static Task* txTimeoutTask;
 
 // Mètodes per generar i interactuar amb PDU
-static void _preparePDU(mac_pdu_t* pdu, mac_addr_t rx, const mac_data_t data, size_t length, uint8_t retry = 0, bool isAck = false, const mac_pdu_t * const PDUtoACK = nullptr);
+static void _preparePDU(mac_pdu_t* pdu, node_address_t rx, const mac_data_t data, size_t length, uint8_t retry = 0, bool isAck = false, const mac_pdu_t * const PDUtoACK = nullptr);
 static void _printPDU(const mac_pdu_t* const pdu);
 static void _set_retry_count(mac_pdu_t* pdu, uint8_t retry);
 static mac_id_t _getRandomID();
@@ -77,7 +77,7 @@ static void _apply_duty_cycle_delay();
 
 // Mètodes i ajudes per transmissions
 static bool _attempt_transmission(uint8_t retry_count);
-static mac_err_t _inner_send(mac_addr_t rx, const mac_data_t data, size_t length, bool isAck = false, const mac_pdu_t * const referedPDU = NULL);
+static mac_err_t _inner_send(node_address_t rx, const mac_data_t data, size_t length, bool isAck = false, const mac_pdu_t * const referedPDU = NULL);
 static mac_err_t _send_pdu(const mac_pdu_t* const pdu);
 static void _send_ack(const mac_pdu_t * const refPdu);
 
@@ -89,8 +89,8 @@ static void _txError_mac(void);
 
 // ============== MÈTODES PÚBLICS ==============
 
-bool MAC_init(mac_addr_t selfAddr, bool is_gateway) {
-    if (selfAddr == 0x00 || selfAddr == 0xFF) {
+bool MAC_init(node_address_t selfAddr, bool is_gateway) {
+    if (!IS_ADDRESS_VALID(selfAddr)) {
         _PE("[MAC] Invalid address (0x%02X)", selfAddr);
         return false;
     }
@@ -106,7 +106,7 @@ void MAC_deinit() {
     onReceive = onSend = onTxFailed = nullptr;
 }
 
-mac_err_t MAC_send(mac_addr_t rx, const mac_data_t data, size_t length) {
+mac_err_t MAC_send(node_address_t rx, const mac_data_t data, size_t length) {
     _PI("[MAC] Preparing to send");
 
     if(length > MAC_MAX_DATA_SIZE) {
@@ -141,7 +141,7 @@ mac_err_t MAC_send(mac_addr_t rx, const mac_data_t data, size_t length) {
     return mac_err_t::MAC_SUCCESS;
 }
 
-mac_addr_t MAC_receive(mac_data_t* data, size_t* length) {
+node_address_t MAC_receive(mac_data_t* data, size_t* length) {
     mac_pdu_t pdu;
     MACbuff_popRx(pdu);
     *length = pdu.dataLength;
@@ -184,7 +184,7 @@ static mac_err_t _send_pdu(const mac_pdu_t* const pdu) {
 
 // --- GENERACIÓ PDU ---
 // Prepara una PDU a partir dels paràmetres donats
-static void _preparePDU(mac_pdu_t* pdu, mac_addr_t rx, const mac_data_t data, size_t length, uint8_t retry, bool isAck, const mac_pdu_t * const PDUtoACK) {
+static void _preparePDU(mac_pdu_t* pdu, node_address_t rx, const mac_data_t data, size_t length, uint8_t retry, bool isAck, const mac_pdu_t * const PDUtoACK) {
     pdu->tx = self;
     pdu->rx = rx;
     pdu->id = isAck ? PDUtoACK->id+self : (retry > 0 ? txPDU.id : _getRandomID()); // si ACK, utilitzem PDU donada; si retry > 0, no modifiquem ID
@@ -440,6 +440,7 @@ static void _set_retry_count(mac_pdu_t* pdu, uint8_t retry) {
 }
 
 // Intenta enviar PDU guardada a txPDU; recalcula PDU amb nombre intents donat i nou CRC
+// Ajusta potència de TX en funció de reintent
 static bool _attempt_transmission(uint8_t retry_count) {
     _set_retry_count(&txPDU, retry_count); // Estableix nombre reintents i nou CRC
     lora_tx_error_t state = _send_pdu(&txPDU); // Envia PDU per LoRa

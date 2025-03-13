@@ -1,8 +1,9 @@
 #include "routing.h"
 #include "utils.h"
-#include <scheduler.h>
+#include "scheduler.h"
 
-static routing_addr_t self;
+
+static node_address_t self;
 static bool isGateway;
 
 static routing_pdu_t txPDU, rxPDU;
@@ -16,11 +17,15 @@ void _onMacTxFailed(void);
 void _packetReceived();
 
 
-bool Routing_init(routing_addr_t selfAddr, bool is_gateway) {
+bool Routing_init(node_address_t selfAddr, bool is_gateway) {
     // Inicialitzar capa MAC
     // Inicialitzar taula de rutes
     // Configurar callbacks
-
+    if (!IS_ADDRESS_VALID(selfAddr)) {
+        _PE("[ROUTING] Invalid address (0x%02X)", selfAddr);
+        return false;
+    }
+    
     self = selfAddr;
     isGateway = is_gateway;
     if(!MAC_init(selfAddr, isGateway)) {
@@ -47,7 +52,7 @@ void Routing_deinit() {
     _PI("[ROUTING] Deinitialized");
 }
 
-routing_err_t Routing_send(routing_addr_t dst, const routing_data_t data, size_t length) {
+routing_err_t Routing_send(node_address_t dst, const routing_data_t data, size_t length) {
     // Comprovar si hi ha ruta a la taula
     // Si no hi ha ruta, enviar paquet de descobriment
     // Si hi ha ruta, enviar paquet amb la ruta
@@ -58,7 +63,7 @@ routing_err_t Routing_send(routing_addr_t dst, const routing_data_t data, size_t
         return ROUTING_ERR_MAX_LENGTH;
     }
 
-    routing_addr_t nextHop = RoutingTable_getRoute(dst);
+    node_address_t nextHop = RoutingTable_getRoute(dst);
     if(nextHop == 0x00) {
         _PW("[ROUTING] No route to 0x%02X", dst);
         return ROUTING_ERR_NO_ROUTE;
@@ -84,7 +89,7 @@ routing_err_t Routing_send(routing_addr_t dst, const routing_data_t data, size_t
     return ROUTING_SUCCESS;
 }
 
-routing_addr_t Routing_receive(routing_data_t* data, size_t* length) {
+node_address_t Routing_receive(routing_data_t* data, size_t* length) {
     // Executat per capa superior després que s'executi el callback configurat
 
     *length = rxPDU.dataLength;
@@ -98,7 +103,7 @@ void _onMacReceived(void) {
     // i veure si és per nosaltres o cal reenviar-lo
     size_t MAClength = 0;
     // Podem copiar directament sobre PDU, ja es farà el mapeig correcte
-    mac_addr_t tx = MAC_receive((mac_data_t*)&rxPDU, &MAClength);
+    node_address_t tx = MAC_receive((mac_data_t*)&rxPDU, &MAClength);
 
     if(rxPDU.dst == self) {
         _PI("[ROUTING] Received packet from 0x%02X", rxPDU.src);
@@ -115,7 +120,7 @@ void _onMacReceived(void) {
         return;
     }
 
-    routing_addr_t nextHop = RoutingTable_getRoute(rxPDU.dst);
+    node_address_t nextHop = RoutingTable_getRoute(rxPDU.dst);
     if(nextHop == 0x00) {
         _PW("[ROUTING] No route to 0x%02X", rxPDU.dst);
         // TODO: ACK explícit, no hi haurà encaminament (i per tant ACK implícit)
