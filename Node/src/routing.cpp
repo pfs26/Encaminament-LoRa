@@ -109,21 +109,17 @@ void _onMacReceived(void) {
         _PI("[ROUTING] Received packet from 0x%02X", rxPDU.src);
         _printPacket(&rxPDU);
         _packetReceived();
-        // TODO: ACK explícit, no hi haurà encaminament (i per tant ACK implícit)
         return;
     }
 
     if(rxPDU.ttl == 0) {
         _PW("[ROUTING] TTL expired");
-        // TODO: ACK explícit, no hi haurà encaminament (i per tant ACK implícit)
-        // Per molt que TTL sigui 0, no fa falta que MAC faci tots els reintents
         return;
     }
 
     node_address_t nextHop = RoutingTable_getRoute(rxPDU.dst);
-    if(nextHop == 0x00) {
+    if(nextHop == NODE_ADDRESS_NULL) {
         _PW("[ROUTING] No route to 0x%02X", rxPDU.dst);
-        // TODO: ACK explícit, no hi haurà encaminament (i per tant ACK implícit)
         return;
     }
 

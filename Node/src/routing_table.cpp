@@ -7,7 +7,7 @@ static Preferences preferences;
 static routing_entry_t* RoutingTable; 
 static int RoutingTableSize = 0;
 
-int _getIndexInRoutingTable(routing_addr_t dst);
+int _getIndexInRoutingTable(node_address_t dst);
 bool _saveTableToNVS();
 
 
@@ -68,17 +68,17 @@ void RoutingTable_print() {
     Serial.println("==============");
 }
 
-routing_addr_t RoutingTable_getRoute(routing_addr_t dst) {
+node_address_t RoutingTable_getRoute(node_address_t dst) {
     int index = _getIndexInRoutingTable(dst);
     if(index != -1) {
         _PI("[RTABLE] Queried route for 0x%02X, through 0x%02X", dst, RoutingTable[index].nextHop);
         return RoutingTable[index].nextHop;
     }
     _PW("[RTABLE] Route for %d not found", dst);
-    return 0x00;
+    return NODE_ADDRESS_NULL;
 }
 
-bool RoutingTable_addRoute(routing_addr_t dst, routing_addr_t nextHop) {
+bool RoutingTable_addRoute(node_address_t dst, node_address_t nextHop) {
     // Filtrem si ja existeix
     if(_getIndexInRoutingTable(dst) != -1) {
         _PW("[RTABLE] Route for 0x%02X already exists", dst);
@@ -105,7 +105,7 @@ bool RoutingTable_addRoute(routing_addr_t dst, routing_addr_t nextHop) {
     return false;
 }
 
-bool RoutingTable_removeRoute(routing_addr_t dst) {
+bool RoutingTable_removeRoute(node_address_t dst) {
     int indexToRemove = _getIndexInRoutingTable(dst);
 
     if (indexToRemove == -1) {
@@ -146,7 +146,7 @@ bool RoutingTable_clear() {
     return true;
 }
 
-bool RoutingTable_updateRoute(routing_addr_t dst, routing_addr_t nextHop) {
+bool RoutingTable_updateRoute(node_address_t dst, node_address_t nextHop) {
     // Si no existeix, creem ruta
     int index = _getIndexInRoutingTable(dst);
     if (index == -1) {
@@ -165,7 +165,7 @@ bool RoutingTable_updateRoute(routing_addr_t dst, routing_addr_t nextHop) {
     return false;
 }
 
-int _getIndexInRoutingTable(routing_addr_t dst) {
+int _getIndexInRoutingTable(node_address_t dst) {
     for (int i = 0; i < RoutingTableSize; ++i) {
         if (RoutingTable[i].dst == dst) {
             return i;
@@ -197,7 +197,7 @@ bool _saveTableToNVS() {
 //     RoutingTable_print();
 //     RoutingTable_removeRoute(0x03);
 //     RoutingTable_print();
-//     routing_addr_t nextHop = RoutingTable_getRoute(0x04);
+//     node_address_t nextHop = RoutingTable_getRoute(0x04);
 //     Serial.printf("Next hop for 0x04: 0x%02X\n", nextHop);
 //     nextHop = RoutingTable_getRoute(0x02);
 //     Serial.printf("Next hop for 0x02: 0x%02X\n", nextHop);
