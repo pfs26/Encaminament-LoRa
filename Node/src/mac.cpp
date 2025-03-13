@@ -252,7 +252,7 @@ static bool _verifyCRC(const mac_pdu_t* const pdu) {
 }
 
 // Genera un identificador aleatori pel frame
-static mac_id_t _getRandomID() { return (mac_id_t)random(1, MAC_MAX_ID); }
+static mac_id_t _getRandomID() { return (mac_id_t)random(1, (1 << (8 * sizeof(mac_id_t))) - 1); }
 
 // Verifica si l'ACK de la PDU donada és vàlid
 // És vàlid si té flag d'ACK, el transmisor és el receptor de l'últim que hem enviat

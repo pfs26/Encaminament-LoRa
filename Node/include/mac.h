@@ -26,7 +26,6 @@
 // NO CANVIA DINÀMICAMENT STRUCT DE MAC_DATA_T
 // UTILITZAT NOMÉS PER SABER MIDA MÀXIMA DE DADES
 #define MAC_ID_SIZE 2       // bytes utilitzats per ID
-    #define MAC_MAX_ID ((1<<16)-1)
 #define MAC_ADDRESS_SIZE 1  // bytes per cada adreça
 #define MAC_CRC_SIZE 1      // bytes per FEC
 #define MAC_FLAGS_SIZE 1    // bytes per flags
