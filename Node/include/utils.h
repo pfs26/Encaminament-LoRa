@@ -57,6 +57,9 @@
     } \
     size_t remaining = len % 30; \
     if (remaining > 0) { \
+        for(int i = 0; i < 30-remaining; i++) \
+            Serial.print("   "); \
+        Serial.print('\t'); \
         for (size_t j = len - remaining; j < len; j++) { \
             if (data[j] >= 32 && data[j] <= 126) { \
                 Serial.print((char)data[j]); \
