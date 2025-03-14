@@ -35,9 +35,9 @@ enum mac_state_t {
 
 
 volatile static mac_state_t fsmState = mac_state_t::IDLE_S;
-static mac_callback_t onSend = nullptr;
-static mac_callback_t onReceive = nullptr;
-static mac_callback_t onTxFailed = nullptr;
+static mac_tx_callback_t onSend = nullptr;
+static mac_tx_callback_t onTxFailed = nullptr;
+static mac_rx_callback_t onReceive = nullptr;
 
 static node_address_t self;
 
@@ -94,19 +94,25 @@ bool MAC_init(node_address_t selfAddr, bool is_gateway) {
         _PE("[MAC] Invalid address (0x%02X)", selfAddr);
         return false;
     }
+
+    if(!LoRa_init() || !LoRaRAW_init()) {
+        return false;
+    }
+    
     self = selfAddr;
     LoRaRAW_onReceive(_onLoraReceived);
     _PI("[MAC] Init");
-    return LoRa_init();
+    return true;
 }
 
 void MAC_deinit() {
     _PI("[MAC] Deinit");
     LoRa_deinit();
-    onReceive = onSend = onTxFailed = nullptr;
+    onSend = onTxFailed = nullptr;
+    onReceive = nullptr;
 }
 
-mac_err_t MAC_send(node_address_t rx, const mac_data_t data, size_t length) {
+mac_err_t MAC_send(node_address_t rx, const mac_data_t data, size_t length, mac_id_t* ID) {
     _PI("[MAC] Preparing to send");
 
     if(length > MAC_MAX_DATA_SIZE) {
@@ -118,17 +124,17 @@ mac_err_t MAC_send(node_address_t rx, const mac_data_t data, size_t length) {
         return mac_err_t::MAC_ERR_INVALID_ADDR;
     }
     
-    mac_pdu_t tempPdu;
-    _preparePDU(&tempPdu, rx, data, length, 0, false);
+    mac_pdu_t tempPDU;
+    _preparePDU(&tempPDU, rx, data, length, 0, false);
     _PI("[MAC] PDU ready");
-    _printPDU(&tempPdu);
+    _printPDU(&tempPDU);
 
     // Verifiquem aquí i no després de push, ja que sinó sempre serà fals! No canviarà estat de MAC_isAvailable
     // ja que interrupció només estableix un flag, que no es comprova fins que s'executa la tasca (a partir de loop)
     bool isMacAvailable = MAC_isAvailable();
 
     // No s'utilitzen prioritats (de moment), però per si de cas. Per defecte, baixa
-    MACbuff_pushTx(tempPdu, MACBUFF_PRIORITY_LOW); // Guardem dades a buffer de transmissió
+    MACbuff_pushTx(tempPDU, MACBUFF_PRIORITY_LOW); // Guardem dades a buffer de transmissió
 
     // Només generem esdeveniment si no hi ha transmissió en curs; si n'hi ha, en acabar-ne una ja farà comprovació de cua
     if(isMacAvailable) {
@@ -138,6 +144,10 @@ mac_err_t MAC_send(node_address_t rx, const mac_data_t data, size_t length) {
     else {
         _PI("[MAC] Queueing transmission (Position: %d)", MACbuff_getTxSize());
     }
+    // Guardar ID de PDU a apuntador proporcionat
+    if(ID)
+        *ID = tempPDU.id;
+
     return mac_err_t::MAC_SUCCESS;
 }
 
@@ -156,11 +166,11 @@ size_t MAC_toReceive() { return MACbuff_getRxSize(); }
 // Només podem enviar si estem en IDLE; si no, hi ha transmissió en curs
 bool MAC_isAvailable() { return fsmState == mac_state_t::IDLE_S && MACbuff_isTxEmpty(); }
 
-void MAC_onReceive(mac_callback_t cb) { onReceive = cb; }
+void MAC_onReceive(mac_rx_callback_t cb) { onReceive = cb; }
 
-void MAC_onSend(mac_callback_t cb) { onSend = cb; }
+void MAC_onSend(mac_tx_callback_t cb) { onSend = cb; }
 
-void MAC_onTxFailed(mac_callback_t cb) { onTxFailed = cb; }
+void MAC_onTxFailed(mac_tx_callback_t cb) { onTxFailed = cb; }
 
 // ============== MÈTODES PRIVATS ==============
 
@@ -495,7 +505,7 @@ static void _sent_mac(void) {
     _PI("[MAC] Sent. Notify higher layer?");
     LoRaRAW_startReceiving();
     if(!txPDU.flags.isACK && onSend != nullptr) { // Notificar només si dades (no ACK)
-        onSend();
+        onSend(txPDU.id); // Notifiquem proporcionant ID
     }
 }
 
@@ -510,7 +520,7 @@ static void _txError_mac(void) {
     _PW("[MAC] TX error (%d)", failedTransmissions);
     LoRaRAW_startReceiving();
     if(!txPDU.flags.isACK && onTxFailed != nullptr) { // Notificar només si dades (no ACK) @note: no sembla ser necessari si sendack no passa per fsm
-        onTxFailed();
+        onTxFailed(txPDU.id); // Notifiquem proporcionant ID
     }
 }
 
