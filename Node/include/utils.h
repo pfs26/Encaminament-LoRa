@@ -10,6 +10,7 @@
 #define COLOR_INFO   "\033[32m"  // Green
 #define COLOR_WARN   "\033[33m"  // Yellow
 #define COLOR_ERROR  "\033[31m"  // Red
+#define COLOR_GRAY   "\033[37m"
 
 // Amplades per aliniar
 #define LOG_LEVEL_WIDTH  1   // Espai per [I], [W], [E]
@@ -37,6 +38,35 @@
 #else
     #define _PE(fmt, ...)
 #endif
+
+#define DUMP_ARRAY(arr, len) { \
+    uint8_t *data = (uint8_t *)arr; \
+    for (size_t i = 0; i < len; i++) { \
+        if (i % 30 == 0 && i != 0) { \
+            Serial.print("\t"); \
+            for (size_t j = i - 30; j < i; j++) { \
+                if (data[j] >= 32 && data[j] <= 126) { \
+                    Serial.print((char)data[j]); \
+                } else { \
+                    Serial.print('.'); \
+                } \
+            } \
+            Serial.println(); \
+        } \
+        Serial.printf("%02X ", data[i]); \
+    } \
+    size_t remaining = len % 30; \
+    if (remaining > 0) { \
+        for (size_t j = len - remaining; j < len; j++) { \
+            if (data[j] >= 32 && data[j] <= 126) { \
+                Serial.print((char)data[j]); \
+            } else { \
+                Serial.print('.'); \
+            } \
+        } \
+        Serial.println(); \
+    } \
+}
 
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
