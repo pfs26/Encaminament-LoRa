@@ -22,9 +22,9 @@ enum lora_tx_error_t {
 #define LORA_FREQ 868.0 // En MHz
 #define LORA_BW 125.0   // En kHz
 #define LORA_DATARATE 5 // entre 0 i 7
-#define LORA_SF 7
+#define LORA_SF 7   // Entre 7 i 12 (a menor SF, major velocitat, però menor distància)
 #define LORA_CODERATE 5 // Denominador de coderate. Valor entre 5 i 8, resultant en CR = [4/5, 4/6, 4/7, 4/8]
-#define LORA_TX_POW 22  // en dBm, entre -9 i 22
+#define LORA_TX_POW -9  // en dBm, entre -9 i 22
 
 
 

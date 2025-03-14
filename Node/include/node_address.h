@@ -9,6 +9,6 @@
 
 typedef uint8_t node_address_t;
 
-#define IS_ADDRESS_VALID(addr) ((addr) == NODE_ADDRESS_NULL || (addr) == NODE_ADDRESS_BROADCAST)
+#define IS_ADDRESS_VALID(addr) ((addr) != NODE_ADDRESS_NULL && (addr) != NODE_ADDRESS_BROADCAST)
 
 #endif
