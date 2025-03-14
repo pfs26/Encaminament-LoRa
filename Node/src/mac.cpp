@@ -95,7 +95,7 @@ bool MAC_init(node_address_t selfAddr, bool is_gateway) {
         return false;
     }
     self = selfAddr;
-    LoRa_onReceive(_onLoraReceived);
+    LoRaRAW_onReceive(_onLoraReceived);
     _PI("[MAC] Init");
     return LoRa_init();
 }
@@ -175,8 +175,8 @@ static void _send_ack(const mac_pdu_t * const refPdu) {
 static mac_err_t _send_pdu(const mac_pdu_t* const pdu) {
     lora_data_t data;
     size_t dataLen = _PDUtoLora(pdu, data);
-    lora_tx_error_t state = LoRa_send(data, dataLen);
-    if (state != mac_err_t::MAC_SUCCESS) {
+    lora_tx_error_t state = LoRaRAW_send(data, dataLen);
+    if (state != lora_tx_error_t::LORA_SUCCESS) {
         return mac_err_t::MAC_ERR;
     }
     return mac_err_t::MAC_SUCCESS;
@@ -287,7 +287,7 @@ static void _onLoraReceived(void) {
 
     lora_data_t data;
     size_t len;
-    if(!LoRa_receive(data, &len)) {
+    if(!LoRaRAW_receive(data, &len)) {
         _PW("[MAC] Recieve ERR");
         return;
     }
@@ -341,7 +341,7 @@ static void _onLoraReceived(void) {
 /* *************************** */
 static void _mac_fsm(mac_event_t e) {
     // Obtenim estat canal per poder-ho utilitzar com a esdeveniment (aplicar beb)
-    lora_event_t lora_e = (lora_event_t)LoRa_isAvailable();
+    lora_event_t lora_e = (lora_event_t)LoRaRAW_isAvailable();
     // lora_e = lora_event_t (random(0, 3)/2); // FICTICI, ELIMINAR, NOMÉS PER SIMULAR ESTAT CANAL (33%)
     // _PI("[MAC] FSM:\tSTATE %d\tMAC %d\tLORA %d", fsmState, e, lora_e);
     
@@ -358,7 +358,7 @@ static void _mac_fsm(mac_event_t e) {
                 }
             } else if (e == TX_E) {
                 _PI("[MAC] TX requested but queue empty");
-                LoRa_startReceiving();
+                LoRaRAW_startReceiving();
             }
             break;
             
@@ -422,7 +422,7 @@ static void _apply_duty_cycle_delay() {
     
     #ifdef MAC_DUTY_CYCLE
         fsmState = mac_state_t::WAIT_DUTY_CYCLE_S;
-        long airtime = LoRa_getTimeOnAir(txPDU.dataLength + MAC_PDU_HEADER_SIZE);
+        long airtime = LoRaRAW_getTimeOnAir(txPDU.dataLength + MAC_PDU_HEADER_SIZE);
         long airtime_with_retry_ms = airtime*(currentTxRetry)/1000;
         long duty_cycle_delay = airtime_with_retry_ms*(100-MAC_DUTY_CYCLE);
         _PE("[MAC] Duty cycle delay: %dms", duty_cycle_delay);
@@ -443,9 +443,9 @@ static void _set_retry_count(mac_pdu_t* pdu, uint8_t retry) {
 // Ajusta potència de TX en funció de reintent
 static bool _attempt_transmission(uint8_t retry_count) {
     _set_retry_count(&txPDU, retry_count); // Estableix nombre reintents i nou CRC
-    lora_tx_error_t state = _send_pdu(&txPDU); // Envia PDU per LoRa
+    mac_err_t state = _send_pdu(&txPDU); // Envia PDU per LoRa
 
-    if (state == LORA_SUCCESS) {
+    if (state == MAC_SUCCESS) {
         _PI("[MAC] Frame sent successfully%s, waiting for ACK", retry_count > 0 ? " after retry" : "");
         currentBEBRetry = 0; // S'ha aconseguit enviar, posem a 0 
         currentTxRetry++; // Hem fet un intent de TX
@@ -461,10 +461,10 @@ static bool _attempt_transmission(uint8_t retry_count) {
 static void _setup_ack_reception(void) {
     fsmState = WAIT_ACK_S;
 
-    LoRa_startReceiving();
+    LoRaRAW_startReceiving();
     
     // Calcula i programa timeout
-    long airtime_us = LoRa_getTimeOnAir(txPDU.dataLength + MAC_PDU_HEADER_SIZE);
+    long airtime_us = LoRaRAW_getTimeOnAir(txPDU.dataLength + MAC_PDU_HEADER_SIZE);
     uint32_t timeout_ms = 2 * MAC_ACK_TIMEOUT_FACTOR * airtime_us / 1000;
     txTimeoutTask = scheduler_once(_mac_fsm_event_tout_ack, timeout_ms);
     _PI("[MAC] Timeout d'ACK: %dms (%dus airtime)", timeout_ms, airtime_us);
@@ -483,7 +483,7 @@ static void _start_beb_timeout(uint8_t attempt) {
     uint32_t bebTimeout = random(0, 1 << attempt)*MAC_BEB_SLOT_MS; // Calcular timeout de backoff
     txTimeoutTask = scheduler_once(_mac_fsm_event_tout_busy, bebTimeout); // Programar timeout
     _PI("[MAC] Timeout BEB: %dms", bebTimeout);
-    LoRa_startReceiving();
+    LoRaRAW_startReceiving();
 }
 
 
@@ -493,7 +493,7 @@ static void _start_beb_timeout(uint8_t attempt) {
 
 static void _sent_mac(void) {
     _PI("[MAC] Sent. Notify higher layer?");
-    LoRa_startReceiving();
+    LoRaRAW_startReceiving();
     if(!txPDU.flags.isACK && onSend != nullptr) { // Notificar només si dades (no ACK)
         onSend();
     }
@@ -508,7 +508,7 @@ static void _received_mac(void) {
 static void _txError_mac(void) {
     failedTransmissions++;
     _PW("[MAC] TX error (%d)", failedTransmissions);
-    LoRa_startReceiving();
+    LoRaRAW_startReceiving();
     if(!txPDU.flags.isACK && onTxFailed != nullptr) { // Notificar només si dades (no ACK) @note: no sembla ser necessari si sendack no passa per fsm
         onTxFailed();
     }
