@@ -4,9 +4,6 @@
 #include <Arduino.h>
 #include "lora_common.h"
 #include "lora.h"
-// Extern per poder utilitzar-les de `lora-h`, sense haver d'incloure'l (dependència circular)
-// extern void LoRa_setModeWAN();
-// extern void LoRa_setModeRAW();
 
 #define RADIOLIB_LORAWAN_JOIN_EUI  0x0000000000000000
 
@@ -15,6 +12,8 @@
 #define RADIOLIB_LORAWAN_APP_KEY   0x30, 0x45, 0xF3, 0xB9, 0xB1, 0xBC, 0xE5, 0xB5, 0xF9, 0x6A, 0xB4, 0xA7, 0x79, 0x39, 0x74, 0xE6
 #define RADIOLIB_LORAWAN_NWK_KEY   0xC6, 0xC7, 0x8D, 0x65, 0xF8, 0xAD, 0x37, 0xBF, 0x6E, 0x9C, 0x52, 0x8D, 0x52, 0x63, 0x1F, 0x56
 
+// Defineix si els uplinks esperaran confirmació o no
+#define CONFIRMED_UPLINKS 1
 
 // Inicialitza i configura LoRaWAN (OOTA i guardar info a NVS)
 bool LW_init();
@@ -23,7 +22,9 @@ bool LW_init();
 void LW_deinit();
 
 // Enviar dades a través de LoRaWAN
-bool LW_send(const lora_data_t data, size_t length, uint8_t port, bool confirmed = false);
+bool LW_send(const lora_data_t data, size_t length, uint8_t port, bool confirmed = CONFIRMED_UPLINKS);
+
+bool LW_receive(lora_data_t data, size_t *length, uint8_t *port);
 
 // Comprovar si hi ha connexió establerta amb xarxa LoRaWAN
 bool LW_isConnected();
