@@ -13,15 +13,17 @@
 
 int count = 0;
 
-void onSend() {
-    Serial.println("MAC frame sent");
+void onSend(mac_id_t id) {
+    Serial.printf("MAC frame sent (%d)\n", id);
     delay(5000);
     mac_data_t data = "Hola!";
-    MAC_send(0x02, data, 5);
+    mac_id_t id;
+    MAC_send(0x02, data, 5, &id);
+    Serial.printf("Sent %d\n", id);
 }
 
-void onErr() {
-    Serial.println("Error sending mac frame");
+void onErr(mac_id_t id) {
+    Serial.printf("Error sending mac frame %d\n", id);
     delay(5000);
     mac_data_t data = "Hola!";
     MAC_send(0x02, data, 5);
@@ -31,7 +33,7 @@ void onRcv() {
     Serial.println("MAC frame received");
     mac_data_t data;
     size_t length;
-    mac_addr_t tx = MAC_receive(&data, &length);
+    node_address_t tx = MAC_receive(&data, &length);
     data[length] = '\0'; // Per poder imprimir amb serial
     Serial.printf("\tTX: %d\n\tData: %s\tLength: %d\n", tx, data, length);
 }
@@ -47,9 +49,9 @@ void setup() {
 
 
     #ifdef SENDER
-    mac_addr_t addr = 0x01;
+    node_address_t addr = 0x01;
     #else
-    mac_addr_t addr = 0x02;
+    node_address_t addr = 0x02;
     #endif
     if(!MAC_init(addr, false)) {
         _PE("ERR");
@@ -62,7 +64,9 @@ void setup() {
 
     #ifdef SENDER
         mac_data_t data = "Hola!";
-        MAC_send(0x02, data, 5);
+        mac_id_t id;
+        MAC_send(0x02, data, 5, &id);
+        Serial.printf("Sent %d\n", id);
     #endif
 }
 

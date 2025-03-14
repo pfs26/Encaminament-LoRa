@@ -68,18 +68,19 @@ enum mac_err_t{
 };
 
 
-typedef void (*mac_callback_t)();
+typedef void (*mac_rx_callback_t)();
+typedef void (*mac_tx_callback_t)(mac_id_t);
 
 bool MAC_init(node_address_t selfAddr, bool is_gateway);
 void MAC_deinit();
 
-mac_err_t MAC_send(node_address_t rx, const mac_data_t data, size_t length);
+mac_err_t MAC_send(node_address_t rx, const mac_data_t data, size_t length, mac_id_t* ID = nullptr);
 node_address_t MAC_receive(mac_data_t* data, size_t* length);
 size_t MAC_toReceive();
 bool MAC_isAvailable();
-void MAC_onReceive(mac_callback_t cb);
-void MAC_onSend(mac_callback_t cb);
-void MAC_onTxFailed(mac_callback_t cb);
+void MAC_onReceive(mac_rx_callback_t cb);
+void MAC_onSend(mac_tx_callback_t cb);
+void MAC_onTxFailed(mac_tx_callback_t cb);
 
 
 #endif

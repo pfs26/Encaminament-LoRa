@@ -9,12 +9,14 @@ static bool isGateway;
 static routing_pdu_t txPDU, rxPDU;
 
 static routing_callback_t onPacketReceived = nullptr;
+static routing_callback_t onPacketSent = nullptr;
 
 void _printPacket(const routing_pdu_t* const pdu);
 void _onMacReceived(void);
-void _onMacSend(void);
-void _onMacTxFailed(void);
+void _onMacSend(mac_id_t);
+void _onMacTxFailed(mac_id_t);
 void _packetReceived();
+void _packetSent();
 
 
 bool Routing_init(node_address_t selfAddr, bool is_gateway) {
@@ -98,6 +100,10 @@ node_address_t Routing_receive(routing_data_t* data, size_t* length) {
     return rxPDU.src;
 }
 
+void Routing_onReceive(routing_callback_t cb) {
+    onPacketReceived = cb;
+}
+
 void _onMacReceived(void) {
     // Executat quan MAC obté un frame per nosaltres; cal que processem el paquet
     // i veure si és per nosaltres o cal reenviar-lo
@@ -111,6 +117,9 @@ void _onMacReceived(void) {
         _packetReceived();
         return;
     }
+
+    // @todo: Falta filtrar per si som gateway -> cal reenviar-ho a través de MAC cap a gateway!
+    //        important que gateway estigui a taula de rutes correctament definit!
 
     if(rxPDU.ttl == 0) {
         _PW("[ROUTING] TTL expired");
@@ -131,11 +140,11 @@ void _onMacReceived(void) {
     _PI("[ROUTING] Forwarded packet to 0x%02X", rxPDU.dst);
 }
 
-void _onMacSend(void) {
+void _onMacSend(mac_id_t id) {
     // Probablement no utilitzat
 }
 
-void _onMacTxFailed(void) {
+void _onMacTxFailed(mac_id_t id) {
     // Probablement no utilitzat; routing només es preocupa d'obtenir següent RX i enviar,
     // MAC és qui gestiona reintents
 }
@@ -143,6 +152,13 @@ void _onMacTxFailed(void) {
 void _packetReceived() {
     if(onPacketReceived != nullptr) {
         onPacketReceived();
+    }
+}
+
+// Probablement no utilitzat
+void _packetSent() {
+    if(onPacketSent != nullptr) {
+        onPacketSent();
     }
 }
 
