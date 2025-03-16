@@ -2,14 +2,16 @@
 #include "utils.h"
 #include "scheduler.h"
 
-
 static node_address_t self;
 static bool isGateway;
 
 static routing_pdu_t txPDU, rxPDU;
 
-static routing_callback_t onPacketReceived = nullptr;
-static routing_callback_t onPacketSent = nullptr;
+static routing_rx_callback_t onPacketReceived = nullptr;
+static routing_tx_callback_t onPacketSent = nullptr;
+static routing_tx_callback_t onTxError = nullptr;
+
+static std::vector<mac_id_t> higherLayerPackets;
 
 void _printPacket(const routing_pdu_t* const pdu);
 void _onMacReceived(void);
@@ -40,6 +42,9 @@ bool Routing_init(node_address_t selfAddr, bool is_gateway) {
         return false;
     }
 
+    // Potser reservar memòria per un número N de paquets, amb possibilitat d'augmentar dinàmicament
+    // higherLayerPackets.reserve(10);
+
     MAC_onReceive(_onMacReceived);
     MAC_onSend(_onMacSend);
     MAC_onTxFailed(_onMacTxFailed);
@@ -49,8 +54,11 @@ bool Routing_init(node_address_t selfAddr, bool is_gateway) {
 }
 
 void Routing_deinit() {
-    MAC_deinit();
+    onPacketReceived = nullptr;
+    onPacketSent = onTxError = nullptr;
+    higherLayerPackets.clear();
     RoutingTable_deinit();
+    MAC_deinit();
     _PI("[ROUTING] Deinitialized");
 }
 
@@ -79,15 +87,18 @@ routing_err_t Routing_send(node_address_t dst, const routing_data_t data, size_t
 
     _PI("[RUTING] Sending packet:");
     _printPacket(&txPDU);
-
-    mac_err_t err = MAC_send(nextHop, (uint8_t*)&txPDU, length+ROUTING_HEADERS_SIZE);
+    // @todo: falta filtrar si som gateway, enviar a través de wan. Potser ho ha de fer MAC
+    // a partir de l'adreça de destí?
+    mac_id_t packetID;
+    mac_err_t err = MAC_send(nextHop, (uint8_t*)&txPDU, length+ROUTING_HEADERS_SIZE, &packetID);
 
     if(err != MAC_SUCCESS) {
         _PW("[ROUTING] Error sending PDU (state: %d)", err);
         return ROUTING_ERR;
     }
 
-    _PI("[ROUTING] Sent PDU to 0x%02X", dst);
+    higherLayerPackets.push_back(packetID);
+    _PI("[ROUTING] Added packet to send queue (ID: %d)", packetID);
     return ROUTING_SUCCESS;
 }
 
@@ -100,9 +111,9 @@ node_address_t Routing_receive(routing_data_t* data, size_t* length) {
     return rxPDU.src;
 }
 
-void Routing_onReceive(routing_callback_t cb) {
-    onPacketReceived = cb;
-}
+void Routing_onReceive(routing_rx_callback_t cb) { onPacketReceived = cb; }
+void Routing_onSend(routing_tx_callback_t cb) { onPacketSent = cb; }
+void Routing_onTxError(routing_tx_callback_t cb) { onTxError = cb; }
 
 void _onMacReceived(void) {
     // Executat quan MAC obté un frame per nosaltres; cal que processem el paquet
@@ -121,7 +132,7 @@ void _onMacReceived(void) {
     // @todo: Falta filtrar per si som gateway -> cal reenviar-ho a través de MAC cap a gateway!
     //        important que gateway estigui a taula de rutes correctament definit!
 
-    if(rxPDU.ttl == 0) {
+    if(rxPDU.ttl == 1) {
         _PW("[ROUTING] TTL expired");
         return;
     }
@@ -142,23 +153,40 @@ void _onMacReceived(void) {
 
 void _onMacSend(mac_id_t id) {
     // Probablement no utilitzat
+    if(onPacketSent == nullptr) {
+        return;
+    }
+    int pos = 0; // Per guardar quin element s'ha d'eliminar
+    for(int value : higherLayerPackets) { // iterar per cada element del vector
+        if(value == id) {
+            higherLayerPackets.erase(higherLayerPackets.begin() + pos);
+            onPacketSent(id);
+            return;
+        }
+        pos++;
+    }
 }
 
 void _onMacTxFailed(mac_id_t id) {
     // Probablement no utilitzat; routing només es preocupa d'obtenir següent RX i enviar,
     // MAC és qui gestiona reintents
+    if(onTxError == nullptr) {
+        return;
+    }
+    int pos = 0; // Per guardar quin element s'ha d'eliminar
+    for(int value : higherLayerPackets) { // iterar per cada element del vector
+        if(value == id) {
+            higherLayerPackets.erase(higherLayerPackets.begin() + pos);
+            onTxError(id);
+            return;
+        }
+        pos++;
+    }
 }
 
 void _packetReceived() {
     if(onPacketReceived != nullptr) {
         onPacketReceived();
-    }
-}
-
-// Probablement no utilitzat
-void _packetSent() {
-    if(onPacketSent != nullptr) {
-        onPacketSent();
     }
 }
 

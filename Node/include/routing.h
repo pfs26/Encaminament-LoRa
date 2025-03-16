@@ -21,7 +21,9 @@ typedef struct {
     routing_data_t data;
 } routing_pdu_t;
 
-typedef void (*routing_callback_t)(void);
+typedef void (*routing_rx_callback_t)(void);
+typedef void (*routing_tx_callback_t)(uint16_t); // no definir a mac_id_t, per si mai es canvia i no es vol utilitzar MAC
+                                                 // l'únic requisit és que sigui uint16_t
 
 enum routing_err_t {
     ROUTING_SUCCESS,
@@ -34,5 +36,8 @@ bool Routing_init(node_address_t selfAddr, bool is_gateway);
 void Routing_deinit();
 routing_err_t Routing_send(node_address_t rx, const routing_data_t data, size_t length);
 node_address_t Routing_receive(routing_data_t* data, size_t* length);
+void Routing_onReceive(routing_rx_callback_t cb);
+void Routing_onSend(routing_tx_callback_t cb);
+void Routing_onTxError(routing_tx_callback_t cb);
 
 #endif
