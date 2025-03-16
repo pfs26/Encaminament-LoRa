@@ -34,7 +34,7 @@ enum routing_err_t {
 
 bool Routing_init(node_address_t selfAddr, bool is_gateway);
 void Routing_deinit();
-routing_err_t Routing_send(node_address_t rx, const routing_data_t data, size_t length);
+routing_err_t Routing_send(node_address_t rx, const routing_data_t data, size_t length, uint16_t* id = nullptr);
 node_address_t Routing_receive(routing_data_t* data, size_t* length);
 void Routing_onReceive(routing_rx_callback_t cb);
 void Routing_onSend(routing_tx_callback_t cb);

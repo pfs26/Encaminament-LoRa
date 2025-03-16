@@ -62,7 +62,7 @@ void Routing_deinit() {
     _PI("[ROUTING] Deinitialized");
 }
 
-routing_err_t Routing_send(node_address_t dst, const routing_data_t data, size_t length) {
+routing_err_t Routing_send(node_address_t dst, const routing_data_t data, size_t length, uint16_t* id) {
     // Comprovar si hi ha ruta a la taula
     // Si no hi ha ruta, enviar paquet de descobriment
     // Si hi ha ruta, enviar paquet amb la ruta
@@ -98,6 +98,9 @@ routing_err_t Routing_send(node_address_t dst, const routing_data_t data, size_t
     }
 
     higherLayerPackets.push_back(packetID);
+    if (id)
+        *id = packetID;
+    
     _PI("[ROUTING] Added packet to send queue (ID: %d)", packetID);
     return ROUTING_SUCCESS;
 }
