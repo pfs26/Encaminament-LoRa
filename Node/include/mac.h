@@ -69,12 +69,17 @@ enum mac_err_t{
 
 
 typedef void (*mac_rx_callback_t)();
-typedef void (*mac_tx_callback_t)(mac_id_t);
+// propagar un identificador de 16 bits; no s'utilitza `mac_id_t` per compatibilitat amb capes més altes
+// ja que així no cal incloure mac; es queda fixat a 16 bits, i si mai es modifica mida de mac_id_t
+// no hauria de suposar un problema si es veu aquest identificador com un de diferent
+typedef void (*mac_tx_callback_t)(uint16_t); 
 
 bool MAC_init(node_address_t selfAddr, bool is_gateway);
 void MAC_deinit();
 
-mac_err_t MAC_send(node_address_t rx, const mac_data_t data, size_t length, mac_id_t* ID = nullptr);
+// ID és un identificador pel frame enviat per ser utilitzat per capes superiors per fer-ne seguiment
+// **NO** té perquè ser igual al mac_id_t!
+mac_err_t MAC_send(node_address_t rx, const mac_data_t data, size_t length, uint16_t* ID = nullptr);
 node_address_t MAC_receive(mac_data_t* data, size_t* length);
 size_t MAC_toReceive();
 bool MAC_isAvailable();

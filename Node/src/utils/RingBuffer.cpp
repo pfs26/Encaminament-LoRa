@@ -5,6 +5,8 @@
         3. Permet buscar elements dins del buffer
 */
 
+// TODO: Potser hauria de ser una interfície de std::vector, reservant mida demanada, i limitant? O de deque?
+
 #include "RingBuffer.h"
 
 RingBuffer::RingBuffer(int size) {

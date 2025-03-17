@@ -112,7 +112,7 @@ void MAC_deinit() {
     onReceive = nullptr;
 }
 
-mac_err_t MAC_send(node_address_t rx, const mac_data_t data, size_t length, mac_id_t* ID) {
+mac_err_t MAC_send(node_address_t rx, const mac_data_t data, size_t length, uint16_t* ID) {
     _PI("[MAC] Preparing to send");
 
     if(length > MAC_MAX_DATA_SIZE) {
@@ -389,7 +389,7 @@ static void _mac_fsm(mac_event_t e) {
                 _PI("[MAC] ACK received");
                 scheduler_stop(txTimeoutTask);
                 succeededTransmissions++; // si rebem ack és perquè ja eren dades
-                _sent_mac();  
+                _sent_mac();  //  @todo; IMPORTANT SI TEMPS MOLT ELEVAT, EXECUTAR AMB SCHEDULER!
                 _apply_duty_cycle_delay();
             } else if (e == TOUT_ACK_E) {
                 _PI("[MAC] ACK timeout");

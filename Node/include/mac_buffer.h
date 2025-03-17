@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include "utils/LinkedFIFO.hpp"
 #include "mac.h"
-
+// @todo: revisar necessitat de linkedfifo vs std::vector, considerant opció de provisionar memòria inicial
 typedef struct {
     LinkedFIFO<mac_pdu_t> high;
     LinkedFIFO<mac_pdu_t> low;
