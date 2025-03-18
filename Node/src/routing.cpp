@@ -85,7 +85,7 @@ routing_err_t Routing_send(node_address_t dst, const routing_data_t data, size_t
     txPDU.dataLength = length;
     memcpy(txPDU.data, data, length);
 
-    _PI("[RUTING] Sending packet:");
+    _PI("[ROUTING] Sending packet:");
     _printPacket(&txPDU);
     // @todo: falta filtrar si som gateway, enviar a través de wan. Potser ho ha de fer MAC
     // a partir de l'adreça de destí?
@@ -193,6 +193,7 @@ void _packetReceived() {
     }
 }
 
+#if LOG_LEVEL <= LOG_LEVEL_INFO
 void _printPacket(const routing_pdu_t* const pdu) {
     // Mostra info de PDU en format maco.
     // Les dades les intenta mostrar en format ASCII, i només mostra tants chars com marca dataLength (o fins que hi ha '\0', culpa de mostrar-ho com string)
@@ -203,5 +204,7 @@ void _printPacket(const routing_pdu_t* const pdu) {
         Serial.printf("%02X ", pdu->data[i]); 
     Serial.print("\n==================\n");
 }
-
+#else
+void _printPacket(const routing_pdu_t* const pdu) {}
+#endif
 
