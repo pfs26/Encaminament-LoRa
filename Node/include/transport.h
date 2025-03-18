@@ -9,8 +9,9 @@
 datarate, maximum number of hops, delay between hops (TX+ACK+possible retries), and any other overheads
 After each retry, the delay is doubled, applying an exponential backoff; thus, if the maximum retries
 is set to 5 (6 total attempts), and the initial timeout is 1second, on the last attempt the timeout
-will be set to 1*2^(6-1) sec. The real timeout follows `tout(attempt) = tout_base * 2^(attempt-1)` */
-#define TRANSPORT_RETRY_DELAY 5 
+will be set to 1*2^(6-1) sec. The real timeout follows `tout(attempt) = tout_base * 2^(attempt-1)` 
+Value is specified in ms! */
+#define TRANSPORT_RETRY_DELAY 5000 
 
 // Mida de cua d'últims segments rebuts, per filtrar repeticions
 #define TRANSPORT_QUEUE_SIZE 10
@@ -30,7 +31,7 @@ typedef struct {
 typedef struct {
     transport_id_t ID;
     transport_pdu_flags_t flags;
-    size_t dataLength; 
+    uint8_t dataLength; 
     transport_data_t data;
 } transport_pdu_t;
 

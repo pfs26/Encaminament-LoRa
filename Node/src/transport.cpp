@@ -79,8 +79,10 @@ transport_err_t Transport_send(node_address_t rx, uint8_t port, const transport_
     pdu.dataLength = length;
     memcpy(pdu.data, data, length);
 
-    uint16_t segmentID;
-    routing_err_t state = Routing_send(rx, (const uint8_t*) &pdu, length+ROUTING_HEADERS_SIZE, &segmentID);
+    _printSegment(&pdu);
+
+    uint16_t segmentID; 
+    routing_err_t state = Routing_send(rx, (const uint8_t*) &pdu, length+TRANSPORT_HEADER_SIZE, &segmentID);
 
     if(state != ROUTING_SUCCESS) {
         _PW("[TRANSPORT] Error sending segment (state: %d)", state);
@@ -99,8 +101,6 @@ transport_err_t Transport_send(node_address_t rx, uint8_t port, const transport_
         // Guardem a llista
         txQueue.push_back(pduMeta);
     }
-
-    _printSegment(&pdu);
     
     return TRANSPORT_SUCCESS;
 }
@@ -117,6 +117,11 @@ void Transport_onReceive(transport_callback_t cb) {
     onReceive = cb;
 }
 
+void Transport_onSend(transport_callback_t cb) {
+    onSend = cb;
+}
+
+
 // Executat per capa inferior (Routing) quan s'han rebut dades per nosaltres
 void _onRoutingReceived() {
     /*
@@ -126,7 +131,7 @@ void _onRoutingReceived() {
         3. Verificar si és ACK per nosaltres
         4. Validar ACK
     */
-    _PI("[ROUTING] Received segment");
+    _PI("[TRANSPORT] Received segment");
 
     transport_pdu_t pdu;
     size_t RoutingLength;
@@ -135,9 +140,13 @@ void _onRoutingReceived() {
 
     // Si sol·licita ACK, enviem
     if (pdu.flags.ACKRequest) { 
+        _PI("[TRANSPORT] ACK requested for segment %d", pdu.ID);
         transport_pdu_t ack;
         size_t length = _buildAck(&ack, rx, pdu.ID);
         routing_err_t state = Routing_send(rx, (const uint8_t*) &ack, length);
+    }
+    else {
+        _PI("[TRANSPORT] ACK not requested for segment %d", pdu.ID);
     }
 
     // Mirem si és ACK
@@ -171,6 +180,7 @@ void _ackReceived(transport_pdu_t* pdu) {
         }
         index++;
     }
+    _PE("[TRANSPORT] ACK received for unknown segment %d. ACK received after TOUT, check TOUT settings", pdu->ID);
 }
 
 void _onRoutingSent(uint16_t id) {
@@ -186,17 +196,33 @@ void _onRoutingSent(uint16_t id) {
             return;
         }
     }
+    // Si no es troba és perquè no s'esperava ACK (UDP)
+    _PI("[TRANSPORT] Segment %d sent without expecting ACK", id);
 }
 
 void _onRoutingTxError(uint16_t id) {
     // Un txError pot venir únicament de MAC (propagat a través de routing)
     // pot significar que no ha rebut ACK de next hop, i ha esgotat reintents de MAC
-    // Podriem actuar intentant reenviar, o no actuar i deixar que tout ack actui com s'espera
-    // El mateix retard de tout ack podria fer que error a MAC es corregis (congestió, node OFF, etc.)
+    // Com a tal, no s'ha rebut ACK i per tant no s'ha executat esdeveniment de MAC onSend (i propagat per routing)
 
-    // Una segona opció és retransmetre directament, obtenint Task* de metadades amb ID donat, cancel·lant
-    // la tasca i generant una nova transmissió.
-    _PW("[TRANSPORT] TX Error for frame %d. If ACKrequested, wait for retransmission after TOUT");
+    // Una opció és reenviar automàticament de nou; una altra és aplicar TOUT com si no es rebés ACK
+    // amb la possibilitat que si hi havia congestió o algun problema s'hagi corregit
+    for(size_t i = 0; i < txQueue.size(); i++) {
+        // Per referència (com si fos un punter) per modificar-ho directament a cua
+        transport_tx_metadata& meta = txQueue[i];
+        if(meta.id == id) {
+            long toutDuration_ms = TRANSPORT_RETRY_DELAY*(1 << meta.retries);
+            long toutInstant = millis() + toutDuration_ms - 5; // 5ms de marge
+            meta.isSent = true;
+            meta.ackTimeout = toutInstant;
+            meta.retries++;
+            meta.ackTask = scheduler_once(_checkTxQueueMetadata, toutDuration_ms);
+            _PW("[TRANSPORT] TX Error for frame %d. Applying TOUT ACK delay (%d ms) to see if network corrects itself. Running at %dms", id, toutDuration_ms, toutInstant);
+            return;
+        }
+    }
+    _PW("[TRANSPORT] TX Error for frame %d. ACK was not expected, transmission will not succeed", id);
+
 }
 
 /* Executat per callback programar amb scheduler_once quan es produeix un ack timeout
@@ -215,17 +241,19 @@ void _checkTxQueueMetadata(void) {
                 txQueue.erase(txQueue.begin() + pos);
                 return;
             }
+            _PI("[TRANSPORT] ACK timeout for segment %d. Retrying... (retry %d)", meta.id, meta.retries);
             _resendSegment(&txQueue[pos]); // Pass the address of the actual element in the vector
             return;
         }
     }
+    _PE("[TRANSPORT] ACK timeout callback without any pending segment. This should not happen. Check guard ms at TOUT");
 }
 
 void _resendSegment(transport_tx_metadata* meta) {
     meta->isSent = false;
     meta->ackTimeout = -1;
     uint16_t segmentID;
-    routing_err_t state = Routing_send(meta->rx, (const uint8_t*) &meta->pdu, meta->dataLength+ROUTING_HEADERS_SIZE, &segmentID);
+    routing_err_t state = Routing_send(meta->rx, (const uint8_t*) &meta->pdu, meta->dataLength+TRANSPORT_HEADER_SIZE, &segmentID);
 
     if(state != ROUTING_SUCCESS) {
         _PW("[TRANSPORT] Error re-sending segment (state: %d)", state);
@@ -249,15 +277,18 @@ size_t _buildAck(transport_pdu_t* pdu, node_address_t rx, transport_id_t id) {
 }
 
 
+#if LOG_LEVEL <= LOG_LEVEL_INFO
 void _printSegment(const transport_pdu_t* const pdu) {
     // Mostra info de PDU en format maco.
-    Serial.printf("===== SEGMENT =====\nID\t%d\nPORT\t%d\nACK-Req\t%d\nACK-Resp\t%d\nD-LEN\t%d\nDATA\t%.*s\nD-HEX\t", 
-    pdu->ID, pdu->flags.port, pdu->flags.ACKRequest, pdu->flags.ACKResponse, pdu->dataLength, pdu->data);
+    Serial.printf("===== SEGMENT =====\nID\t%d\nPORT\t%d\nACKReq\t%d\nACKResp\t%d\nD-LEN\t%d\nDATA\t%.*s\nD-HEX\t", 
+    pdu->ID, pdu->flags.port, pdu->flags.ACKRequest, pdu->flags.ACKResponse, pdu->dataLength, pdu->dataLength, pdu->data);
     for (int i = 0; i < pdu->dataLength; i++) 
         Serial.printf("%02X ", pdu->data[i]); 
-    Serial.print("\n==================\n");
+    Serial.print("\n===================\n");
 }
-
+#else
+void _printSegment(const transport_pdu_t* const pdu) {}
+#endif
 
 void _segmentReceived(void) {
     if(onReceive != nullptr) {
