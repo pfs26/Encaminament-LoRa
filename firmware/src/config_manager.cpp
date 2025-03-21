@@ -1,6 +1,6 @@
 #include "config_manager.h"
 
-Preferences preferences;
+static Preferences preferences;
 
 void config_init() {
     preferences.begin("LoRa");
