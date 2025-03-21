@@ -13,7 +13,11 @@
 #define RADIOLIB_LORAWAN_NWK_KEY   0xC6, 0xC7, 0x8D, 0x65, 0xF8, 0xAD, 0x37, 0xBF, 0x6E, 0x9C, 0x52, 0x8D, 0x52, 0x63, 0x1F, 0x56
 
 // Defineix si els uplinks esperaran confirmació o no
-#define CONFIRMED_UPLINKS 1
+#define LW_CONFIRMED_UPLINKS 1
+// Port utilitzat per defecte per enviar uplinks a lorawan
+#define LW_DEFAULT_UPLINK_PORT 1
+
+
 
 // Inicialitza i configura LoRaWAN (OOTA i guardar info a NVS)
 bool LW_init();
@@ -22,7 +26,7 @@ bool LW_init();
 void LW_deinit();
 
 // Enviar dades a través de LoRaWAN
-bool LW_send(const lora_data_t data, size_t length, uint8_t port, bool confirmed = CONFIRMED_UPLINKS);
+bool LW_send(const lora_data_t data, size_t length, uint8_t port = LW_DEFAULT_UPLINK_PORT, bool confirmed = LW_CONFIRMED_UPLINKS);
 
 bool LW_receive(lora_data_t data, size_t *length, uint8_t *port);
 
