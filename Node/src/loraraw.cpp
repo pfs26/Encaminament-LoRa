@@ -138,10 +138,20 @@ Retorna true si s'ha pogut fer el canvi, false si no.
 bool LoRaRAW_setFrequency(float frequency) { return radio.setFrequency(frequency) == RADIOLIB_ERR_NONE; }
 
 bool LoRaRAW_setTxPower(int power) {
+    // limitem a potència màxima. La mínima configurable és LORA_TX_POW.
+    // Després potser es tornen a limitar segons radio utilitzada 
+    power = MIN(power, LORA_MAX_TX_POW);
     int8_t checked_pow = 0;
-    if(radio.checkOutputPower(power, &checked_pow))
-        return false;
-    return radio.setOutputPower(checked_pow) == RADIOLIB_ERR_NONE;
+    // Estableix a `checked_pow` la potència màxima/mínima possible
+    radio.checkOutputPower(power, &checked_pow);
+    int16_t state = radio.setOutputPower(checked_pow);
+    
+    if (state == RADIOLIB_ERR_NONE) {
+        _PI("[LR] Set power to %d dBm", checked_pow);
+        return true;
+    }
+    _PW("[LR] Error setting power (code = %d)", state);
+    return false;
 }
 
 long LoRaRAW_getTimeOnAir(int length) {
