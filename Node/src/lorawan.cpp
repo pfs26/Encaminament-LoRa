@@ -101,40 +101,43 @@ void LW_deinit() {
 // de downlinks a "piggy-back" (guardant que s'ha de fer confirmació a següent uplink);
 // Així la gestió d'ACK no depèn de nosaltres; simplement hem d'enviar quan així ho volem
 bool LW_send(const lora_data_t data, size_t length, uint8_t port, bool confirmed) {
+    bool returnState = true; // no retornem directament si false per poder posar mode a RAW en acabar
+
     LoRa_setModeWAN();
     bool reused = _reuseSession();
     if(!reused) {
         _PW("[LW] Could not restore session");
         // LW_init(); // @todo: potser abans deinit; retornar error i programar amb scheduler
-        return false;
+        returnState = false;
     }
 
-    LoRaWANEvent_t dEvent;
-    int16_t state = node.sendReceive((uint8_t*)data, length, (uint8_t)port, 
-                                    downlink_data.data, &downlink_data.length, confirmed, 
-                                    (LoRaWANEvent_t*)nullptr, &dEvent);
+    if (returnState) {
+        LoRaWANEvent_t dEvent;
+        int16_t state = node.sendReceive((uint8_t*)data, length, (uint8_t)port, 
+                                        downlink_data.data, &downlink_data.length, confirmed, 
+                                        (LoRaWANEvent_t*)nullptr, &dEvent);
 
-    if(state < RADIOLIB_ERR_NONE) {
-        _PW("[LW] Error sending data (code = %d)", state);
-        return false;
-    }
-    else if (state == 0) {
-        _PI("[LW] Data sent; none received");
-    }
-    else {
-        _PI("[LW] Data sent; downlink received");
-        _PI("[LW] \tWindow: %d, Power: %d, fPort: %d, Confirmed: %d, Confirming: %d, Size: %d, Data: %s", 
-            state, dEvent.power, dEvent.fPort, dEvent.confirmed, dEvent.confirming, length, data);
+        if(state < RADIOLIB_ERR_NONE) {
+            _PW("[LW] Error sending data (code = %d)", state);
+            returnState = false;
+        }
+        else if (state == 0) {
+            _PI("[LW] Data sent; none received");
+        }
+        else {
+            _PI("[LW] Data sent; downlink received");
+            _PI("[LW] \tWindow: %d, Power: %d, fPort: %d, Confirmed: %d, Confirming: %d, Size: %d, Data: %s", 
+                state, dEvent.power, dEvent.fPort, dEvent.confirmed, dEvent.confirming, length, data);
 
-        downlink_data.port = dEvent.fPort;
-        if(onReceive != nullptr) {
-            scheduler_once(onReceive);
+            downlink_data.port = dEvent.fPort;
+            if(onReceive != nullptr) {
+                scheduler_once(onReceive);
+            }
         }
     }
-
     LoRa_setModeRAW();
 
-    return true;
+    return returnState;
 }
 
 // Retorna les dades guardades de l'últim downlink
