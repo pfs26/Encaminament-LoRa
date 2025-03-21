@@ -453,6 +453,11 @@ static void _set_retry_count(mac_pdu_t* pdu, uint8_t retry) {
 // Ajusta potència de TX en funció de reintent
 static bool _attempt_transmission(uint8_t retry_count) {
     _set_retry_count(&txPDU, retry_count); // Estableix nombre reintents i nou CRC
+
+    // Modificar potència TX segons reintent
+    int power = LORA_TX_POW + (retry_count * MAC_TX_POW_STEP);
+    LoRaRAW_setTxPower(power);
+
     mac_err_t state = _send_pdu(&txPDU); // Envia PDU per LoRa
 
     if (state == MAC_SUCCESS) {

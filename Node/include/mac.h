@@ -22,6 +22,8 @@
 #define MAC_QUEUE_SIZE 5
 // Polinomi per CRC8 (x^8+x^2+1)
 #define MAC_CRC8_POLY 0x07
+// Increment de potència per cada retransmissió. Operació en float, després ja es converteix a int
+#define MAC_TX_POW_STEP ((float)(LORA_MAX_TX_POW - LORA_TX_POW) / MAC_MAX_RETRIES)
 
 // NO CANVIA DINÀMICAMENT STRUCT DE MAC_DATA_T
 // UTILITZAT NOMÉS PER SABER MIDA MÀXIMA DE DADES
