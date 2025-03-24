@@ -5556,6 +5556,16 @@
 	)
 	(wire
 		(pts
+			(xy 25.4 55.88) (xy 29.21 55.88)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4d34da6b-c73c-47ab-8621-0585cf82e19a")
+	)
+	(wire
+		(pts
 			(xy 29.21 54.61) (xy 29.21 55.88)
 		)
 		(stroke
@@ -7371,6 +7381,28 @@
 			)
 		)
 	)
+	(global_label "CHIP_PU"
+		(shape input)
+		(at 25.4 55.88 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "bd3d142f-5937-400b-b513-ce136441296b")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 14.3714 55.88 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
 	(global_label "data-"
 		(shape input)
 		(at 80.01 66.04 0)
@@ -8661,7 +8693,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_JST:JST_PH_B5B-PH-K_1x05_P2.00mm_Vertical"
+		(property "Footprint" "Connector_JST:JST_PH_S5B-PH-K_1x05_P2.00mm_Horizontal"
 			(at 262.89 118.11 0)
 			(effects
 				(font
@@ -12533,7 +12565,7 @@
 				)
 			)
 		)
-		(property "Footprint" "TPS63802DLAR:VREG_TPS63802DLAR"
+		(property "Footprint" "TPS63802DLAR_foot:VREG_TPS63802DLAR"
 			(at 185.42 69.85 0)
 			(effects
 				(font
