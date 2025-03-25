@@ -45,7 +45,6 @@ static mac_pdu_t txPDU; // PDU en transmissió
 
 volatile static uint8_t currentTxRetry = 0;
 volatile static uint8_t currentBEBRetry = 0;
-static bool isGateway = false;
 
 static RingBuffer lastFramesIDs(MAC_QUEUE_SIZE);
 
@@ -89,7 +88,7 @@ static void _txError_mac(void);
 
 // ============== MÈTODES PÚBLICS ==============
 
-bool MAC_init(node_address_t selfAddr, bool is_gateway) {
+bool MAC_init(node_address_t selfAddr) {
     if (!IS_ADDRESS_VALID(selfAddr)) {
         _PE("[MAC] Invalid address (0x%02X)", selfAddr);
         return false;

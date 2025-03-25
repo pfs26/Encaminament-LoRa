@@ -37,7 +37,7 @@ bool Routing_init(node_address_t selfAddr, bool is_gateway) {
     
     self = selfAddr;
     isGateway = is_gateway;
-    if(!MAC_init(selfAddr, isGateway)) {
+    if(!MAC_init(selfAddr)) {
         _PE("[ROUTING] Error initializing MAC");
         return false;
     }

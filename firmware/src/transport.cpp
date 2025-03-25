@@ -61,6 +61,8 @@ bool Transport_init(node_address_t selfAddr, bool is_gateway) {
 void Transport_deinit() {
     txQueue.clear();
     Routing_deinit();
+    onReceive = nullptr;
+    onSend = nullptr;
     _PI("[TRANSPORT] De-initialized");
 }
 
