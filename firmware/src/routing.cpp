@@ -94,7 +94,7 @@ routing_err_t Routing_send(node_address_t dst, const routing_data_t data, size_t
     routing_err_t state = ROUTING_ERR;
     // Si som gateway i destí és gateway, enviar a través de lorawan
     // Només hauria de passar si capa superior vol enviar alguna cosa?
-    if (isGateway && dst == NODE_GATEWAY_ADDRESS) {
+    if (isGateway && dst == NODE_ADDRESS_GATEWAY) {
         state = _sendThroughLoRaWAN(&txPDU, &packetID);
     }
     else {
@@ -179,7 +179,7 @@ void _processReceivedPacket(size_t length) {
     // Cuidado amb els temps! Si es fa un envio a LoRaWAN amb confirmació el temps de TX és, marcat per estàndard, 
     // mínim (2+/-1 segons aleatoris) + tx + rx + processament! Si TOUT ACK transport és inferior a això hi haurà retransmissió!
     // No només això, finestres de recepció separades per 1 segon, fent que temps de TX sigui en qualsevol cas major a aquest!
-    if (isGateway && rxPDU.dst == NODE_GATEWAY_ADDRESS) {
+    if (isGateway && rxPDU.dst == NODE_ADDRESS_GATEWAY) {
         _PI("[ROUTING] Received packet for gateway. Forwarding to LoRaWAN");
         _sendThroughLoRaWAN(&rxPDU);
         _packetReceived();
