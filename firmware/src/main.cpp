@@ -1,7 +1,20 @@
 /*
-    Exemple amb dos nodes: un és transmissor i l'altre receptor.
-    El transmissor envia frames cada 5 segons. El retard del tansmissor és bloquejant (fet amb delay())
-    El receptor imprimeix les dades rebudes per pantalla, i envia ACK si li toca
+    Exemple de comunicació entre dos nodes amb LoRaWAN i routing per gateway.
+    Situació:
+        - Gateway **real** de LoRaWAN, que utilitza l'adreça 'virtual' NODE_ADDRESS_GATEWAY (0x01)
+        - Node amb rol de gateway de la xarxa privada, amb adreça 0x02
+        - Node client de la xarxa privada, amb adreça 0x03
+    El node client (0x03) vol fer una transmissió a gateway LoRaWAN (0x01), utilitzant node gateway (0x02) com a intermediari.
+    El node gateway (0x02) ha de reenviar la trama a LoRaWAN, i el gateway LoRaWAN ha de rebre la trama.
+
+    Es fa una única transmissió des de capa de transport.
+
+    La taula de ruta de client és:
+        0x01 -> 0x02
+        0x02 -> 0x02
+    La taula de ruta de gateway és:
+        0x01 -> 0x01
+        0x03 -> 0x03
 */
 
 #include <Arduino.h>
@@ -10,19 +23,12 @@
 #include "scheduler.h"
 #include "utils.h"
 
-#define SENDER
+// #define GATEWAY
 
 int count = 0;
 
 void onSend() {
-    Serial.println("Segment sent");
-    transport_data_t data = "UDP!!";
-    transport_err_t state = Transport_send(0x02, 0x01, data, 5, false);
-    if(state != TRANSPORT_SUCCESS) {
-        Serial.printf("Error sending: %d\n", state);
-        return;
-    }
-    Serial.println("Segment scheduled to be sent");
+    Serial.println("Segment sent to LoRaWAN!");
 }
 
 void onRcv() {
@@ -37,20 +43,27 @@ void onRcv() {
 
 void setup() {
     Serial.begin(115200);
-
+    delay(2000);
+    
     Serial.print(F("[SX1262] Initializing ... "));
     Serial.print("Model: "); Serial.println(ESP.getChipModel());
     Serial.print("CPU: "); Serial.println(ESP.getCpuFreqMHz());
     Serial.print("Heap: "); Serial.println(ESP.getFreeHeap());
     Serial.println(esp_reset_reason());
+    Serial.println("=================================");
+    Serial.println("LoRaWAN with Gateway routing test");
+    Serial.println("=================================");
 
 
-    #ifdef SENDER
-    node_address_t addr = 0x01;
+    #ifdef GATEWAY
+        node_address_t addr = 0x02;
+        bool is_gateway = true;
     #else
-    node_address_t addr = 0x02;
+        node_address_t addr = 0x03;
+        bool is_gateway = false;
     #endif
-    if(!Transport_init(addr, false)) {
+
+    if(!Transport_init(addr, is_gateway)) {
         _PE("ERR");
         while(1);
     }
@@ -60,23 +73,22 @@ void setup() {
     Transport_onSend(onSend);
 
     RoutingTable_clear();
-    #ifdef SENDER
-        RoutingTable_addRoute(0x02, 0x02);
-        transport_data_t data = "Hola!";
-        transport_err_t state = Transport_send(0x02, 0x01, data, 5, true);
-        if(state != TRANSPORT_SUCCESS) {
-            Serial.printf("Error sending: %d\n", state);
-            return;
-        }
-        Serial.println("Segment scheduled to be sent");
-        state = Transport_send(0x02, 0x01, data, 5, true);
-        if(state != TRANSPORT_SUCCESS) {
-            Serial.printf("Error sending: %d\n", state);
-            return;
-        }
-        Serial.println("Segment scheduled to be sent");
-    #else
+    #ifdef GATEWAY
         RoutingTable_addRoute(0x01, 0x01);
+        RoutingTable_addRoute(0x03, 0x03);
+    #else
+        RoutingTable_addRoute(0x01, 0x02);
+        RoutingTable_addRoute(0x02, 0x02);
+    #endif
+
+    #ifndef GATEWAY
+        transport_data_t data = "Hola!";
+        transport_err_t state = Transport_send(NODE_ADDRESS_GATEWAY, 0x01, data, 5, true);
+        if(state != TRANSPORT_SUCCESS) {
+            Serial.printf("Error sending: %d\n", state);
+            return;
+        }
+        Serial.println("Segment scheduled to be sent");
     #endif
 }
 
