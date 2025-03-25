@@ -76,7 +76,7 @@ typedef void (*mac_rx_callback_t)();
 // no hauria de suposar un problema si es veu aquest identificador com un de diferent
 typedef void (*mac_tx_callback_t)(uint16_t); 
 
-bool MAC_init(node_address_t selfAddr, bool is_gateway);
+bool MAC_init(node_address_t selfAddr);
 void MAC_deinit();
 
 // ID és un identificador pel frame enviat per ser utilitzat per capes superiors per fer-ne seguiment
