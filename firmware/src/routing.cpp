@@ -176,7 +176,9 @@ void _processReceivedPacket(size_t length) {
 
     // Si som gateway i destí és gateway, enviar a través de lorawan
     // Passem a capa superior per si cal gestionar ACK!
-    // @todo: OJU QUE SI ES MANTÉ AIXÍ NO PASSARÀ MAI PERQUE ABANS ES DONARÀ AL CONDICIÓ DE LÍNIA 149!!!!
+    // Cuidado amb els temps! Si es fa un envio a LoRaWAN amb confirmació el temps de TX és, marcat per estàndard, 
+    // mínim (2+/-1 segons aleatoris) + tx + rx + processament! Si TOUT ACK transport és inferior a això hi haurà retransmissió!
+    // No només això, finestres de recepció separades per 1 segon, fent que temps de TX sigui en qualsevol cas major a aquest!
     if (isGateway && rxPDU.dst == NODE_GATEWAY_ADDRESS) {
         _PI("[ROUTING] Received packet for gateway. Forwarding to LoRaWAN");
         _sendThroughLoRaWAN(&rxPDU);
