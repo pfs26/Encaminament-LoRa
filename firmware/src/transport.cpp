@@ -214,6 +214,7 @@ void _onRoutingTxError(uint16_t id) {
         transport_tx_metadata& meta = txQueue[i];
         if(meta.id == id) {
             long toutDuration_ms = TRANSPORT_RETRY_DELAY*(1 << meta.retries);
+            // TOUT amb marge per evitar que poca precisió de millis() afecti (o scheduler, etc.)
             long toutInstant = millis() + toutDuration_ms - 5; // 5ms de marge
             meta.isSent = true;
             meta.ackTimeout = toutInstant;
@@ -237,7 +238,7 @@ void _checkTxQueueMetadata(void) {
     for(size_t pos = 0; pos < txQueue.size(); pos++) {
         // Per referència (com si fos un punter) per modificar-ho directament a cua
         transport_tx_metadata& meta = txQueue[pos];
-        if(meta.ackTimeout != -1 && meta.isSent && millis() > meta.ackTimeout) {
+        if(meta.ackTimeout != -1 && meta.isSent && millis() >= meta.ackTimeout) {
             if(meta.retries > TRANSPORT_MAX_RETRIES) {
                 _PW("[TRANSPORT] Max retries for segment %d reached", meta.id);
                 txQueue.erase(txQueue.begin() + pos);
