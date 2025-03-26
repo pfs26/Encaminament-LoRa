@@ -127,11 +127,17 @@ bool LW_send(const lora_data_t data, size_t length, uint8_t port, bool confirmed
         else {
             _PI("[LW] Data sent; downlink received");
             _PI("[LW] \tWindow: %d, Power: %d, fPort: %d, Confirmed: %d, Confirming: %d, Size: %d, Data: %s", 
-                state, dEvent.power, dEvent.fPort, dEvent.confirmed, dEvent.confirming, length, data);
-
-            downlink_data.port = dEvent.fPort;
-            if(onReceive != nullptr) {
-                scheduler_once(onReceive);
+                state, dEvent.power, dEvent.fPort, dEvent.confirmed, dEvent.confirming, downlink_data.length, downlink_data.data);
+        
+            if(dEvent.fPort == 0) {
+                _PW("[LW] Received downlink with port 0; ignoring");
+            }
+            else {
+                downlink_data.port = dEvent.fPort;
+                if(onReceive != nullptr) {
+                    scheduler_once(onReceive);
+                    _PW("[LW] Scheduled downlink reception for higher layer");
+                }
             }
         }
     }
@@ -203,3 +209,9 @@ bool _reuseSession() {
     }	
     return true;
 }
+
+
+
+//                                              ID   Flgs Len Data
+// 03 02 2BED F8 0D         03 01 05 09         C8E1 05   05  48 6F 6C 61 21              9A
+//                          03 01 04 09         C8E1 05   05  48 6F 6C 61 21       

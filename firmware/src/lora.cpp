@@ -19,7 +19,7 @@ bool LoRa_init() {
 
     int state = radio.begin(LORA_FREQ, LORA_BW, LORA_SF, LORA_CODERATE, RADIOLIB_SX126X_SYNC_WORD_PRIVATE, LORA_TX_POW);
     if(state != RADIOLIB_ERR_NONE) {
-        _PE("[LORA] %d", state);
+        _PE("[LORA] Error initializing radio: %d", state);
         return false;
     }
     isLoraInitialized = true;
@@ -34,6 +34,14 @@ void LoRa_deinit() {
 }
 
 void LoRa_setModeRAW() {
+    // Mirant implementació de 'begin' es veu que no depèn de l'estat (si ja inicialtizat)
+    // i únicament estableix els paràmetres proporcionats.
+    // Configurarà també el SyncWord per defecte (@todo: potser mirar d'oferir opció de configuració?)
+    int state = radio.begin(LORA_FREQ, LORA_BW, LORA_SF, LORA_CODERATE, RADIOLIB_SX126X_SYNC_WORD_PRIVATE, LORA_TX_POW);
+    if(state != RADIOLIB_ERR_NONE) {
+        _PE("[LORA] Error setting mode RAW: %d", state);
+    }
+    
     LoRaRAW_startReceiving();
 }   
 
