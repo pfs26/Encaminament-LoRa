@@ -208,10 +208,4 @@ bool _reuseSession() {
         return false;
     }	
     return true;
-}
-
-
-
-//                                              ID   Flgs Len Data
-// 03 02 2BED F8 0D         03 01 05 09         C8E1 05   05  48 6F 6C 61 21              9A
-//                          03 01 04 09         C8E1 05   05  48 6F 6C 61 21       
+} 
