@@ -5,10 +5,19 @@
 #include "RingBuffer.h"
 
 static Task* ackTimeoutTask;
-static transport_callback_t onReceive = nullptr;
-static transport_callback_t onSend = nullptr;
 
 static RingBuffer lastIds(TRANSPORT_QUEUE_SIZE);
+
+struct transport_app_handlers {
+    transport_callback_t onReceive = nullptr;
+    transport_callback_t onSend = nullptr;
+};
+
+static uint8_t initCount = 0;
+
+// Array per guardar els callbacks de les aplicacions de capa superior
+// facilitant la gestió de múltiples aplicacions. Veure issue #11
+static transport_app_handlers appHandlers[TRANSPORT_MAX_PORT];
 
 // Estructura per guardar dades d'una transmissió generada per `Transport_Send` amb reconeixament
 // Guarda estat transmissió, timeout de retransmissió i informació necessaria per fer els reintents
@@ -32,15 +41,20 @@ void _onRoutingSent(uint16_t id);
 void _onRoutingTxError(uint16_t id);
 size_t _buildAck(transport_pdu_t* pdu, node_address_t rx, transport_id_t id);
 void _printSegment(const transport_pdu_t* const pdu);
-void _segmentReceived(void);
-void _segmentSent(void);
+void _segmentReceived(transport_port_t port);
+void _segmentSent(transport_port_t port);
 void _ackReceived(transport_pdu_t* pdu);
-
 void _checkTxQueueMetadata(void);
 void _resendSegment(transport_tx_metadata* meta);
 
 bool Transport_init(node_address_t selfAddr, bool is_gateway) {
     _PI("[TRANSPORT] Initializing...");
+
+    // Post-increment, així la primera vegada sí que farà inicialització com toca
+    if(initCount++ > 0) {
+        _PI("[TRANSPORT] Already initialized, ignoring...");
+        return true;
+    }
 
     if(!Routing_init(selfAddr, is_gateway)) {
         _PE("[TRANSPORT] Error initializing routing layer");
@@ -58,20 +72,32 @@ bool Transport_init(node_address_t selfAddr, bool is_gateway) {
     return true;
 }
 
-void Transport_deinit() {
+void Transport_deinit(transport_port_t port) {
+    // Pre-decrement, així només es desinicialitza quan totes les aplicacions ho hagin fet
+    if(--initCount > 0) {
+        _PI("[TRANSPORT] Still initialized, removing callbacks for port %d", port);
+        appHandlers[port].onReceive = appHandlers[port].onSend = nullptr;
+        return;
+    }
+
+    // La resta d'apphandlers ja seran nullptr, ja que ho farà a IF anterior
+    appHandlers[port].onReceive = appHandlers[port].onSend = nullptr;
     txQueue.clear();
     Routing_deinit();
-    onReceive = nullptr;
-    onSend = nullptr;
     _PI("[TRANSPORT] De-initialized");
 }
 
-transport_err_t Transport_send(node_address_t rx, uint8_t port, const transport_data_t data, size_t length, bool ackRequested) {
+transport_err_t Transport_send(node_address_t rx, transport_port_t port, const transport_data_t data, size_t length, bool ackRequested) {
     _PI("[TRANSPORT] Preparing to send");
 
     if(length > TRANSPORT_MAX_DATA_SIZE) {
         _PW("[TRANSPORT] Max length exceeded (%d)", length);
         return TRANSPORT_ERR_MAX_LENGTH;
+    }
+
+    if(port > TRANSPORT_MAX_PORT) {
+        _PW("[TRANSPORT] Invalid port (%d)", port);
+        return TRANSPORT_ERR;
     }
 
     transport_pdu_t pdu;
@@ -107,7 +133,7 @@ transport_err_t Transport_send(node_address_t rx, uint8_t port, const transport_
     return TRANSPORT_SUCCESS;
 }
 
-node_address_t Transport_receive(uint8_t* port, transport_data_t* data, size_t* length) {
+node_address_t Transport_receive(transport_port_t* port, transport_data_t* data, size_t* length) {
     *port = rxPDU.flags.port;
     *length = rxPDU.dataLength;
     memcpy(data, rxPDU.data, *length);
@@ -115,14 +141,24 @@ node_address_t Transport_receive(uint8_t* port, transport_data_t* data, size_t* 
     return NODE_ADDRESS_NULL;
 }
 
-void Transport_onReceive(transport_callback_t cb) {
-    onReceive = cb;
-}
+bool Transport_onEvent(transport_port_t port, transport_callback_t onReceive, transport_callback_t onSend) {
+    if(port > TRANSPORT_MAX_PORT) {
+        _PW("[TRANSPORT] Invalid port (%d)", port);
+        return false;
+    }
 
-void Transport_onSend(transport_callback_t cb) {
-    onSend = cb;
-}
+    // AND, ja que potser una aplicació només vol registrar un esdeveniment
+    if(appHandlers[port].onReceive != nullptr && appHandlers[port].onSend != nullptr) {
+        _PW("[TRANSPORT] Port %d already in use", port);
+        return false;
+    }
 
+    appHandlers[port].onReceive = onReceive;
+    appHandlers[port].onSend = onSend;
+
+    _PI("[TRANSPORT] Registered event(s) for port %d", port);
+    return true;
+}
 
 // Executat per capa inferior (Routing) quan s'han rebut dades per nosaltres
 void _onRoutingReceived() {
@@ -163,9 +199,9 @@ void _onRoutingReceived() {
         lastIds.enqueue(pdu.ID);
         // Guardem dades rebudes perquè sigui accessible a capa superior
         memcpy(&rxPDU, &pdu, sizeof(transport_pdu_t));
-        _segmentReceived(); // @todo: potser scheduler
+        _segmentReceived(pdu.flags.port); // @todo: potser scheduler -> potser no, ja que no assegurem que mentre es no es produeix no es rebi una altra cosa
     } else {
-        _PI("[TRANSPORT] Segment already received. Sender didn't receive ACK");
+        _PI("[TRANSPORT] Segment already received. Sender didn't receive ACK. ACK sent again. Ignoring...");
     }
 }
 
@@ -177,7 +213,7 @@ void _ackReceived(transport_pdu_t* pdu) {
             scheduler_stop(meta.ackTask); // aturem tout ack
             txQueue.erase(txQueue.begin() + index); // eliminem registre
             _PI("[TRANSPORT] ACK received for segment %d", meta.pdu.ID);
-            _segmentSent(); // @todo: potser amb scheduler
+            _segmentSent(pdu->flags.port); // @todo: potser amb scheduler
             return;
         }
         index++;
@@ -293,14 +329,14 @@ void _printSegment(const transport_pdu_t* const pdu) {
 void _printSegment(const transport_pdu_t* const pdu) {}
 #endif
 
-void _segmentReceived(void) {
-    if(onReceive != nullptr) {
-        onReceive();
+void _segmentReceived(transport_port_t port) {
+    if(appHandlers[port].onReceive != nullptr) {
+        appHandlers[port].onReceive();
     }
 }
 
-void _segmentSent(void) {
-    if(onSend != nullptr) {
-        onSend();
+void _segmentSent(transport_port_t port) {
+    if(appHandlers[port].onSend != nullptr) {
+        appHandlers[port].onSend();
     }
 }
