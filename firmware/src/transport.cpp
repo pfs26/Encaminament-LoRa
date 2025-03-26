@@ -213,7 +213,7 @@ void _ackReceived(transport_pdu_t* pdu) {
             scheduler_stop(meta.ackTask); // aturem tout ack
             txQueue.erase(txQueue.begin() + index); // eliminem registre
             _PI("[TRANSPORT] ACK received for segment %d", meta.pdu.ID);
-            _segmentSent(pdu->flags.port); // @todo: potser amb scheduler
+            _segmentSent(meta.pdu.flags.port); // utilitzar meta i no PDU ja que meta conté port correcte. ACK s'envien per port 0
             return;
         }
         index++;
