@@ -176,7 +176,7 @@ void _ackReceived(transport_pdu_t* pdu) {
         if(meta.pdu.ID == pdu->ID) {
             scheduler_stop(meta.ackTask); // aturem tout ack
             txQueue.erase(txQueue.begin() + index); // eliminem registre
-            _PI("[TRANSPORT] ACK received for %d", meta.id);
+            _PI("[TRANSPORT] ACK received for segment %d", meta.pdu.ID);
             _segmentSent(); // @todo: potser amb scheduler
             return;
         }
