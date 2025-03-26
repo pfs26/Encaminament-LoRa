@@ -92,6 +92,16 @@ routing_err_t Routing_send(node_address_t dst, const routing_data_t data, size_t
 
     uint16_t packetID;
     routing_err_t state = ROUTING_ERR;
+
+    // if (dst == self) {
+    //     // Si destí és nosaltres mateixos, no cal enviar-ho a capa MAC
+    //     // Només cal notificar capa superior
+    //     _PI("[ROUTING] Trying to send packet to itself");
+    //     scheduler_once(_WANPacketSent);
+    //     _packetReceived();
+    //     return ROUTING_SUCCESS;
+    // }
+    
     // Si som gateway i destí és gateway, enviar a través de lorawan
     // Només hauria de passar si capa superior vol enviar alguna cosa?
     if (isGateway && dst == NODE_ADDRESS_GATEWAY) {
