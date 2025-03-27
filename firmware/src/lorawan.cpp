@@ -2,6 +2,8 @@
 #include "utils.h"
 #include "scheduler.h"
 
+#include "Preferences.h"
+
 // Arrays per guardar credencials de xarxa LoRaWAN
 static uint64_t joinEUI =   RADIOLIB_LORAWAN_JOIN_EUI;
 static uint64_t devEUI  =   RADIOLIB_LORAWAN_DEV_EUI;
@@ -14,9 +16,10 @@ static LoRaWANNode node(&radio, &EU868, 0);
 // Flag per determinar si es pot re-utilitzar una sessió anterior
 static bool isSessionSaved = false;
 // guarda comptadors up/downs, etc. utilitzats per evitar atacs repetició
-static uint8_t LWsession[RADIOLIB_LORAWAN_SESSION_BUF_SIZE]; 
+// Guardat a memoria RTC per persistir entre deep-sleeps (per si mai s'utilitza deep sleep tenir-ho controlar)
+static RTC_DATA_ATTR uint8_t LWsession[RADIOLIB_LORAWAN_SESSION_BUF_SIZE];
 // claus generades en fer un JoinRequest
-static uint8_t nonces[RADIOLIB_LORAWAN_NONCES_BUF_SIZE];									
+static uint8_t nonces[RADIOLIB_LORAWAN_NONCES_BUF_SIZE];
 
 // Callback executat quan hi ha una nova recepció
 // En LoRaWAN classe A la recepció es fa després d'una transmissió; per coherència
@@ -36,11 +39,14 @@ static struct {
 
 bool _reuseSession();
 void _saveSession();
+bool _lwActivate();
+
+static Preferences prefs;
 
 bool LW_init() {
     int16_t state = RADIOLIB_ERR_UNKNOWN;
     _PI("[LW] Initializing...");
-    
+
     // LoRa_init() MUST be called before LW_init(), as radio initialization is done there
     if(!isLoraInitialized) {
         _PE("[LW] Lora not initialized, call LoRa_init() first");
@@ -48,25 +54,33 @@ bool LW_init() {
     }
 
     LoRa_setModeWAN();
-    
+
     node.beginOTAA(joinEUI, devEUI, nwkKey, appKey);
     node.setADR(false);
 
-    state = RADIOLIB_ERR_NETWORK_NOT_JOINED;
-    uint8_t failedJoins = 0;
-    while (state != RADIOLIB_LORAWAN_NEW_SESSION) {
-        state = node.activateOTAA();
-        if (state != RADIOLIB_LORAWAN_NEW_SESSION) {
-            _PW("[LW] Join failed (code = %d)", state);
-            uint32_t retryInSeconds = min((failedJoins++ + 1UL) * 5, 3UL * 20UL);
-            _PW("[LW] Retrying in %d seconds. WARNING: this is a blocking delay!", retryInSeconds);
-            delay(retryInSeconds*1000);
-            continue;
-        } 
-        
-        _PI("[LW] Activated OTAA. Saving nonces");
-        memcpy(nonces, node.getBufferNonces(), RADIOLIB_LORAWAN_NONCES_BUF_SIZE); 
-    } 
+    if(_lwActivate()) {
+        _PI("[LW] Reused session");
+    }
+    else {
+        state = RADIOLIB_ERR_NETWORK_NOT_JOINED;
+        uint8_t failedJoins = 0;
+        while (state != RADIOLIB_LORAWAN_NEW_SESSION) {
+            state = node.activateOTAA();
+            if (state != RADIOLIB_LORAWAN_NEW_SESSION) {
+                _PW("[LW] Join failed (code = %d)", state);
+                uint32_t retryInSeconds = min((failedJoins++ + 1UL) * 5, 3UL * 20UL);
+                _PW("[LW] Retrying in %d seconds. WARNING: this is a blocking delay!", retryInSeconds);
+                delay(retryInSeconds*1000);
+                continue;
+            }
+
+            _PI("[LW] Activated OTAA. Saving nonces");
+            failedJoins = 0;
+            prefs.begin("lorawan", false);
+            prefs.putBytes("nonces", nonces, RADIOLIB_LORAWAN_NONCES_BUF_SIZE);
+            prefs.end();
+        }
+    }
 
     uint8_t maxPayloadLength = node.getMaxPayloadLen();
     if(maxPayloadLength > LORA_MAX_SIZE) { // @todo: revisar!
@@ -77,16 +91,14 @@ bool LW_init() {
 
     // Cal guardar sessió després de cada uplink (comptadors canvien!)
     _saveSession();
-    
+
     _PI("[LW] Joined the network successfully");
-    // reset the failed join count
-    failedJoins = 0;
 
     // hold off off hitting the airwaves again too soon - an issue in the US
-    delay(1000);  
+    delay(1000);
 
     LoRa_setModeRAW();
-    
+
     return true;
 }
 
@@ -113,9 +125,10 @@ bool LW_send(const lora_data_t data, size_t length, uint8_t port, bool confirmed
 
     if (returnState) {
         LoRaWANEvent_t dEvent;
-        int16_t state = node.sendReceive((uint8_t*)data, length, (uint8_t)port, 
-                                        downlink_data.data, &downlink_data.length, confirmed, 
+        int16_t state = node.sendReceive((uint8_t*)data, length, (uint8_t)port,
+                                        downlink_data.data, &downlink_data.length, confirmed,
                                         (LoRaWANEvent_t*)nullptr, &dEvent);
+        _saveSession(); // guardar sessió ja que comptadors han canviat
 
         if(state < RADIOLIB_ERR_NONE) {
             _PW("[LW] Error sending data (code = %d)", state);
@@ -126,9 +139,9 @@ bool LW_send(const lora_data_t data, size_t length, uint8_t port, bool confirmed
         }
         else {
             _PI("[LW] Data sent; downlink received");
-            _PI("[LW] \tWindow: %d, Power: %d, fPort: %d, Confirmed: %d, Confirming: %d, Size: %d, Data: %s", 
+            _PI("[LW] \tWindow: %d, Power: %d, fPort: %d, Confirmed: %d, Confirming: %d, Size: %d, Data: %s",
                 state, dEvent.power, dEvent.fPort, dEvent.confirmed, dEvent.confirming, downlink_data.length, downlink_data.data);
-        
+
             if(dEvent.fPort == 0) {
                 _PW("[LW] Received downlink with port 0; ignoring");
             }
@@ -155,7 +168,7 @@ bool LW_receive(lora_data_t data, size_t *length, uint8_t *port) {
     memcpy(data, downlink_data.data, downlink_data.length);
     *length = downlink_data.length;
     *port = downlink_data.port;
-    
+
     // fPort no hauria de ser mai 0, ja que és port reservat per mac commands; radiolib ho gestiona i no hauria de notificar-ho
     downlink_data.port = 0;
     return true;
@@ -173,7 +186,6 @@ void LW_onReceive(lora_callback_t cb) {
 
 // Guarda la sessió de LoRaWAN actual a array, permetent poder-la reutilitzar
 // per establir nova connexió sense handshake d'OTAA.
-// Per complir amb LoRaWAN v1.1 cal utilitzar NVS (@todo)
 void _saveSession() {
     memcpy(LWsession, node.getBufferSession(), RADIOLIB_LORAWAN_SESSION_BUF_SIZE);
     isSessionSaved = true;
@@ -182,6 +194,8 @@ void _saveSession() {
 
 // Obté la sessió guardada, i l'utilitza per reconnectar-se a la xarxa
 bool _reuseSession() {
+    return _lwActivate();
+    /*
     if(!isSessionSaved) {
         _PE("[LW] Cannot restore unsaved session. Call LW_init()");
         return RADIOLIB_ERR_UNKNOWN;
@@ -189,23 +203,61 @@ bool _reuseSession() {
 
     int16_t state = RADIOLIB_ERR_UNKNOWN;
     _PI("[LW] Using past nonce and session");
-    state = node.setBufferNonces(nonces); 	
+    state = node.setBufferNonces(nonces);
     if(state != RADIOLIB_ERR_NONE) {
         _PW("[LW] Could not restore saved LoRaWAN nonce. Initialize LW again (code = %d)", state);
         return false;
-    }													
+    }
 
-    state = node.setBufferSession(LWsession); 
+    state = node.setBufferSession(LWsession);
     if(state != RADIOLIB_ERR_NONE) {
         _PW("[LW] Could not restore saved LoRaWAN session. Initialize LW again (code = %d)", state);
         return false;
-    }	
+    }
 
     _PI("[LW] Restored session, activating");
     state = node.activateOTAA();
     if(state != RADIOLIB_LORAWAN_SESSION_RESTORED && state != RADIOLIB_ERR_NONE) {
         _PW("[LW] Failed to activate restored session. Initialize LW again (code = %d)", state);
         return false;
-    }	
+    }
     return true;
-} 
+    */
+}
+
+bool _lwActivate() {
+    int16_t state = RADIOLIB_ERR_UNKNOWN;
+    prefs.begin("lorawan", false);
+    if (!prefs.isKey("nonces")) {
+        _PI("[LW] No Nonces saved - starting fresh.");
+        prefs.end();
+        return false;
+    }
+
+    // Obtenim nonces de memòria NVS
+    uint8_t buffer[RADIOLIB_LORAWAN_NONCES_BUF_SIZE];
+    prefs.getBytes("nonces", buffer, RADIOLIB_LORAWAN_NONCES_BUF_SIZE);
+    state = node.setBufferNonces(buffer);
+    if(state != RADIOLIB_ERR_NONE) {
+        _PW("[LW] Could not restore saved LoRaWAN nonce. Should connect to LW again (code = %d)", state);
+    }
+
+    // Obtenim sessió de memòria RTC (hauria d'existir, ja que nonce existeix)
+    if (state == RADIOLIB_ERR_NONE) {
+        state = node.setBufferSession(LWsession);
+        if(state != RADIOLIB_ERR_NONE) {
+            _PW("[LW] Could not restore saved LoRaWAN session. Should connect to LW again (code = %d)", state);
+        }
+    }
+
+    // Amb nonces i sessió restaurats, podem activar fàcilment
+    if (state == RADIOLIB_ERR_NONE) {
+        state = node.activateOTAA();
+        if(state != RADIOLIB_LORAWAN_SESSION_RESTORED && state != RADIOLIB_ERR_NONE) {
+            _PW("[LW] Failed to activate restored session. Should connect to LW again (code = %d)", state);
+        }
+    }
+
+    prefs.end();
+    return state == RADIOLIB_LORAWAN_SESSION_RESTORED || state == RADIOLIB_ERR_NONE;
+}
