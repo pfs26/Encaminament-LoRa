@@ -411,7 +411,7 @@ static void _mac_fsm(mac_event_t e) {
                 }
             }
             break;
-
+        #ifdef MAC_DUTY_CYCLE
         case WAIT_DUTY_CYCLE_S:
             if (e == TOUT_DUTY_E) {
                 _PI("[MAC] Duty cycle timeout");
@@ -419,7 +419,7 @@ static void _mac_fsm(mac_event_t e) {
                 scheduler_once(_mac_fsm_event_tx);
             }
             break;
-            
+        #endif
         default:
             _PE("[MAC] Unknown state: %d", fsmState);
             fsmState = IDLE_S; // Reset a estat conegut
@@ -488,7 +488,11 @@ static void _setup_ack_reception(void) {
 static void _mac_fsm_event_tout_ack(void) { _mac_fsm(mac_event_t::TOUT_ACK_E); }
 static void _mac_fsm_event_tout_busy(void) { _mac_fsm(mac_event_t::TOUT_BUSY_E); }
 static void _mac_fsm_event_tx(void) { _mac_fsm(mac_event_t::TX_E); }
-static void _mac_fsm_event_duty_timeout(void) { _mac_fsm(mac_event_t::TOUT_DUTY_E); }
+static void _mac_fsm_event_duty_timeout(void) { 
+    #ifdef MAC_DUTY_CYLCE 
+        _mac_fsm(mac_event_t::TOUT_DUTY_E); 
+    #endif
+}
 
 static void _start_beb_timeout(uint8_t attempt) {
     _PI("[MAC] Waiting chann free (%d)", attempt);
