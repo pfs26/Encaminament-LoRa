@@ -19,7 +19,7 @@ static bool isSessionSaved = false;
 // Guardat a memoria RTC per persistir entre deep-sleeps (per si mai s'utilitza deep sleep tenir-ho controlar)
 static RTC_DATA_ATTR uint8_t LWsession[RADIOLIB_LORAWAN_SESSION_BUF_SIZE];
 // claus generades en fer un JoinRequest
-static uint8_t nonces[RADIOLIB_LORAWAN_NONCES_BUF_SIZE];
+// static uint8_t nonces[RADIOLIB_LORAWAN_NONCES_BUF_SIZE];
 
 // Callback executat quan hi ha una nova recepció
 // En LoRaWAN classe A la recepció es fa després d'una transmissió; per coherència
@@ -76,6 +76,7 @@ bool LW_init() {
 
             _PI("[LW] Activated OTAA. Saving nonces");
             failedJoins = 0;
+            uint8_t* nonces = node.getBufferNonces();
             prefs.begin("lorawan", false);
             prefs.putBytes("nonces", nonces, RADIOLIB_LORAWAN_NONCES_BUF_SIZE);
             prefs.end();
@@ -189,7 +190,7 @@ void LW_onReceive(lora_callback_t cb) {
 void _saveSession() {
     memcpy(LWsession, node.getBufferSession(), RADIOLIB_LORAWAN_SESSION_BUF_SIZE);
     isSessionSaved = true;
-    DUMP_ARRAY(LWsession, RADIOLIB_LORAWAN_SESSION_BUF_SIZE);
+    _PI("[LW] Saving session:");
 }
 
 // Obté la sessió guardada, i l'utilitza per reconnectar-se a la xarxa
@@ -236,7 +237,7 @@ bool _lwActivate() {
 
     // Obtenim nonces de memòria NVS
     uint8_t buffer[RADIOLIB_LORAWAN_NONCES_BUF_SIZE];
-    prefs.getBytes("nonces", buffer, RADIOLIB_LORAWAN_NONCES_BUF_SIZE);
+    prefs.getBytes("nonces", &buffer, RADIOLIB_LORAWAN_NONCES_BUF_SIZE);
     state = node.setBufferNonces(buffer);
     if(state != RADIOLIB_ERR_NONE) {
         _PW("[LW] Could not restore saved LoRaWAN nonce. Should connect to LW again (code = %d)", state);
