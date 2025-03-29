@@ -26,7 +26,7 @@ enum lora_tx_error_t {
 #define LORA_CODERATE 5 // Denominador de coderate. Valor entre 5 i 8, resultant en CR = [4/5, 4/6, 4/7, 4/8]
 #define LORA_MAX_TX_POW -9 // en dBm, entre -9 i 22. A EU, màxim de 14 dBm
 #define LORA_TX_POW -9  // en dBm, entre -9 i 22
-
+#define LORA_SYNC_WORD 0x23 // Sync word privat (per defecte) per evitar interferències amb altres xarxes
 
 
 // Radio de RadioLib utilitzada;

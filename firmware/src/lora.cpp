@@ -17,7 +17,7 @@ bool LoRa_init() {
     /*  1. Inicialitza radiolib. 
         2. Configura LoRa a paràmetres configurats. */
 
-    int state = radio.begin(LORA_FREQ, LORA_BW, LORA_SF, LORA_CODERATE, RADIOLIB_SX126X_SYNC_WORD_PRIVATE, LORA_TX_POW);
+    int state = radio.begin(LORA_FREQ, LORA_BW, LORA_SF, LORA_CODERATE, LORA_SYNC_WORD, LORA_TX_POW);
     if(state != RADIOLIB_ERR_NONE) {
         _PE("[LORA] Error initializing radio: %d", state);
         return false;
