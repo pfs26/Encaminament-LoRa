@@ -235,7 +235,7 @@ void _onRoutingSent(uint16_t id) {
         }
     }
     // Si no es troba és perquè no s'esperava ACK (UDP)
-    _PI("[TRANSPORT] Segment %d sent without expecting ACK", id);
+    _PI("[TRANSPORT] Frame with ID %d sent without expecting ACK", id);
 }
 
 void _onRoutingTxError(uint16_t id) {

@@ -117,6 +117,12 @@ routing_err_t Routing_send(node_address_t dst, const routing_data_t data, size_t
 
         mac_err_t err = MAC_send(nextHop, (uint8_t*)&txPDU, length+ROUTING_HEADERS_SIZE, &packetID);
         state = err == MAC_SUCCESS ? ROUTING_SUCCESS : ROUTING_ERR;
+
+        // Si s'ha pogut enviar, afegir a llista de paquets que cal notificar a capa superior
+        // És responabilitat de capa superior guardar-se ID per si vol actuar sobre aquest paquet i event
+        // Només guardem si és per MAC; per LW ID serà sempre 0, ja que no hi ha retard entre ordre TX - TX - RX
+        // Simplement és per formalitat i mantenir estructura d'esdeveniments a capa superior
+        higherLayerPackets.push_back(packetID);
     }
 
     // Filtrem errors de TX
@@ -125,9 +131,6 @@ routing_err_t Routing_send(node_address_t dst, const routing_data_t data, size_t
         return ROUTING_ERR;
     }
 
-    // Si s'ha pogut enviar, afegir a llista de paquets que cal notificar a capa superior
-    // És responabilitat de capa superior guardar-se ID per si vol actuar sobre aquest paquet i event
-    higherLayerPackets.push_back(packetID);
     if (id)
         *id = packetID;
     

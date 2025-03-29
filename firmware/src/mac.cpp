@@ -305,14 +305,16 @@ static void _onLoraReceived(void) {
 
     _LoraToPDU(data, len, &receivedPDU);
 
-    _PI("Received PDU from LORA");
-    _printPDU(&receivedPDU);
     if(!_verifyCRC(&receivedPDU)) {
         CRCErrors++;
         _PW("[MAC] CRC error (%d)", CRCErrors);
+        DUMP_ARRAY(&receivedPDU, len);
         return;
     }
-
+    
+    _PI("Received valid PDU from LORA");
+    _printPDU(&receivedPDU);
+    
     mac_id_t rcvID = receivedPDU.id;
     bool seen = lastFramesIDs.contains(rcvID);
 
