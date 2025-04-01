@@ -3,18 +3,6 @@
 
 #include "routing.h"
 
-// Nombre màxim de reintents si no es rep ACK (i sol·licitat)
-#define TRANSPORT_MAX_RETRIES 3 
-/* Time before an ACK timeout; it shuold consider payload length (including overhead of headers),
-datarate, maximum number of hops, delay between hops (TX+ACK+possible retries), and any other overheads
-After each retry, the delay is doubled, applying an exponential backoff; thus, if the maximum retries
-is set to 5 (6 total attempts), and the initial timeout is 1second, on the last attempt the timeout
-will be set to 1*2^(6-1) sec. The real timeout follows `tout(attempt) = tout_base * 2^(attempt-1)` 
-Value is specified in ms! */
-#define TRANSPORT_RETRY_DELAY 5000 
-
-// Mida de cua d'últims segments rebuts, per filtrar repeticions
-#define TRANSPORT_QUEUE_SIZE 10
 
 // Ports màxims (2^6-1 = 63)
 #define TRANSPORT_MAX_PORT 63

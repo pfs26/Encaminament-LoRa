@@ -4,24 +4,9 @@
 #include <stdint.h>
 #include "lora.h"
 #include "node_address.h"
+#include "config.h"
 
-// Número màxim de reintents, sense comptar primera transmissió (així, serien 4 intents)
-// Aquest define és ÚNICAMENT per tenir-ho tot en un mateix lloc. Incrementar-lo a més de 3 generaria problemes
-// ja que camp que indica reintents a PDU és de 2 bits (i per tant valor màxim 3)
-#define MAC_MAX_RETRIES 3
-// Valor màxim de reintents de backoff (Backoff seguirà fent-se, però no augmentarà més, per evitar desbordar uint32 i temps excessiu)
-#define MAC_MAX_BEB_RETRY 10
-// Slots de temps en ms per BEB
-#define MAC_BEB_SLOT_MS 100 
-// Factor de temps addicional per recepció d'ACK, en funció de time on air de les dades enviades
-// Si factor és 5 i time on air és 1ms, el timeout serà de 10 ms (dues vegades el temps esperat, anada+tornada)
-#define MAC_ACK_TIMEOUT_FACTOR 3
-// Percentatge de duty cycle màxim, per complir amb regulacions, en tant per cent. No definir si no es vol complir
-// #define MAC_DUTY_CYCLE 1
-// Número d'IDs de frames anteriors rebuts guardats (per si cal enviar "ACK")
-#define MAC_QUEUE_SIZE 5
-// Polinomi per CRC8 (x^8+x^2+1)
-#define MAC_CRC8_POLY 0x07
+
 // Increment de potència per cada retransmissió. Operació en float, després ja es converteix a int
 #define MAC_TX_POW_STEP ((float)(LORA_MAX_TX_POW - LORA_TX_POW) / MAC_MAX_RETRIES)
 

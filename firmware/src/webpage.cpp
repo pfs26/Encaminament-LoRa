@@ -72,7 +72,7 @@ void _setUpSoftAP() {
 	WiFi.softAPConfig(localIP, gatewayIP, subnetMask);
 
 	// Start the soft access point with the given ssid, password, channel, max number of clients
-	WiFi.softAP(SSID, PASSWORD, WIFI_CHANNEL, 0, MAX_CLIENTS);
+	WiFi.softAP(WIFI_SSID, WIFI_PASSWORD, WIFI_CHANNEL, 0, MAX_CLIENTS);
 
 	// Disable AMPDU RX on the ESP32 WiFi to fix a bug on Android
 	esp_wifi_stop();

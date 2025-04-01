@@ -6,7 +6,6 @@
 #include "node_address.h"
 #include "routing_table.h"
 
-#define ROUTING_MAX_TTL 5
 
 #define ROUTING_HEADERS_SIZE (2+1+1) // 2 adreces + 1 ttl + 1 datalength
 #define ROUTING_MAX_DATA_SIZE MAC_MAX_DATA_SIZE - ROUTING_HEADERS_SIZE

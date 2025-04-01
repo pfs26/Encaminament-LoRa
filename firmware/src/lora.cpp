@@ -4,9 +4,9 @@
     It also allows for easy LoRa transceivers swapping.
 */
 
-
 #include "utils.h"
 #include "lora.h"
+#include "config_manager.h"
 
 bool isLoraInitialized = false;
 
@@ -18,6 +18,12 @@ bool LoRa_init() {
         2. Configura LoRa a paràmetres configurats. */
 
     int state = radio.begin(LORA_FREQ, LORA_BW, LORA_SF, LORA_CODERATE, LORA_SYNC_WORD, LORA_TX_POW);
+    // int state = radio.begin(config_getFrequency(), 
+    //                         config_getBandwidth(), 
+    //                         config_getSpreadingFactor(), 
+    //                         config_getCoderate(), 
+    //                         config_getSyncword(), 
+    //                         config_getTransmissionPower());
     if(state != RADIOLIB_ERR_NONE) {
         _PE("[LORA] Error initializing radio: %d", state);
         return false;
@@ -37,7 +43,13 @@ void LoRa_setModeRAW() {
     // Mirant implementació de 'begin' es veu que no depèn de l'estat (si ja inicialtizat)
     // i únicament estableix els paràmetres proporcionats.
     // Configurarà també el SyncWord per defecte (@todo: potser mirar d'oferir opció de configuració?)
-    int state = radio.begin(LORA_FREQ, LORA_BW, LORA_SF, LORA_CODERATE, RADIOLIB_SX126X_SYNC_WORD_PRIVATE, LORA_TX_POW);
+    int state = radio.begin(LORA_FREQ, LORA_BW, LORA_SF, LORA_CODERATE, LORA_SYNC_WORD, LORA_TX_POW);
+    // int state = radio.begin(config_getFrequency(), 
+    //                         config_getBandwidth(), 
+    //                         config_getSpreadingFactor(), 
+    //                         config_getCoderate(), 
+    //                         config_getSyncword(), 
+    //                         config_getTransmissionPower());
     if(state != RADIOLIB_ERR_NONE) {
         _PE("[LORA] Error setting mode RAW: %d", state);
     }
