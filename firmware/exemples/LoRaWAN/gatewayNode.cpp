@@ -68,9 +68,7 @@ void setup() {
         while(1);
     }
 
-
-    Transport_onReceive(onRcv);
-    Transport_onSend(onSend);
+    Transport_onEvent(0x01, onRcv, nullptr);
 
     RoutingTable_clear();
     #ifdef GATEWAY
