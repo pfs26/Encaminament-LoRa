@@ -148,7 +148,7 @@ bool Transport_onEvent(transport_port_t port, transport_callback_t onReceive, tr
     }
 
     // AND, ja que potser una aplicació només vol registrar un esdeveniment
-    if(appHandlers[port].onReceive != nullptr && appHandlers[port].onSend != nullptr) {
+    if(appHandlers[port].onReceive != nullptr || appHandlers[port].onSend != nullptr) {
         _PW("[TRANSPORT] Port %d already in use", port);
         return false;
     }
