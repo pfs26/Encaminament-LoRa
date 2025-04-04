@@ -31,8 +31,7 @@ void forwardCMD(sleep_command_t cmd);
 void onWakeup();
 void received();
 
-static node_address_t forwardCmdTo[SLEEP_MAX_FORWARD_NODES] = {0x06}; // Nodes a qui reenviar el SYNC
-static node_address_t self = 0x03;
+static node_address_t forwardCmdTo[SLEEP_MAX_FORWARD_NODES]; // Nodes a qui reenviar el SYNC
 
 // Temps de sleep en `milisegons`. A memòria RTC per mantenir-lo en deep sleep. S'actualitza a partir de "controlador P"
 static RTC_DATA_ATTR uint64_t sleepTime = SLEEP_SLEEP_TIME; 
