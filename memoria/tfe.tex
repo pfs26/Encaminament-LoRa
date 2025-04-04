@@ -1,0 +1,125 @@
+\documentclass{tfgitic}[2025/06/06]
+
+% Aqui carregueu packages complementaris que necessiteu
+%\usepackage{}
+
+% Indica quines bd bibliografiques usarem
+\addbibresource{tfe.bib}
+
+
+\title{Disseny de nodes LoRa amb encaminament estàtic per aplicacions de monitoratge}
+% Si voleu subtitol descomenteu
+%\subtitle{}
+
+% L'autor del treball. Admet gènere (vegeu 9.2 del manual) fent \author[f]{}
+\author{Pol Flotats Sabata}
+
+% La direcció. Un treball ordinari te un o excepcionalment dos directors.
+% admet gènerer i número (vegeu 9.2 del manual)
+\advisor{Jordi Bonet Dalmau i Arnau Arumi Casanovas}
+
+% Si el treball es fa sota un conveni de pràctiques (modalitat empresa)
+% llavors el director (advisor) és la persona de la empresa que
+% dirigeix el treball i, a més, hi ha un professor que fa de tutor (counselor).
+% En aquest cas també es consigna l'empresa (company)
+% \counselor admet gènere (vegeu 9.2 del manual)
+%
+% \counselor{}
+% \company{}
+
+% Els àmbits temàtics en que es classifica el treball. Pregunteu al
+% director.
+\topics{}
+
+% Si voleu dedicatòria descomenteu
+%\dedication{}
+
+% Si voleu agraïments descomenteu
+%\begin{acknowledgments}
+%\end{acknowledgments}
+
+
+\begin{resum}
+\end{resum}
+
+\begin{abstract}
+\end{abstract}
+
+
+
+
+\begin{document}
+
+% Si feu servir apèndixs, descomenteu
+%\part{Memòria}
+
+\chapter{Introducció}
+\section{Objectius}
+\section{Limitacions del treball}
+\section{Organització de la memòria}
+
+\chapter{Antecedents}
+\section{Introducció a LoRa i LoRaWAN}
+\section{Treballs relacionats}
+% meshtastic -> xarxa mesh però sense baix consum, broadcasts podent afectar communicació, etc.
+% tampoc permeten compatibilitat amb lorawan
+% \section{Solucions existents}
+% loramesher -> sense broadcast, però requereixen descobriment de rutes previs
+% Cap dels dos permeten baix consum i modes de deep sleep
+
+% Aqui van els capitols especifics del treball
+\chapter{Disseny} % no es veu afectat per material
+\section{Elecció del material}
+\section{Protocol de comunicació}
+\subsection{Accés al medi}
+\subsection{Encaminament}
+\subsection{Transport}
+\subsection{Aplicació}
+\section{Reducció del consum}
+
+\chapter{Implementació tècnica}
+\section{Estructura}
+\subsection{Organització del codi}
+% S'ha implementat seguint model de capes, on cada capa és un mòdul.
+% Cada capa inferior notifica a la superior a través de callbacks, 
+% i cada capa superior notifica a la inferior a través de mètodes.
+% S'ha intentat que no hi hagi mètodes bloquejants, amb excepció dels 
+% mètodes "finals" com transmissió.
+\subsection{Biblioteques i entorn de desenvolupament}
+\section{Protocol de comunicació}
+\subsection{Accés al medi}
+\subsection{Encaminament}
+\subsection{Transport}
+\subsection{Aplicació}
+\section{Aplicació de baix consum}
+\section{Validació del funcionament i resultats}
+
+
+\chapter{Conclusions}
+% En el capítol de conclusions cal resumir els resultats del treball. Cal emfasitzar els
+% resultats més importants i relacionar-los amb els objectius que es tenien.
+% També és l’apartat escaient per indicar els objectius que no s’han assolit i reflexionar
+% sobre per què no s’han assolit.
+\chapter{Treball futur}
+% Si cal es pot afegir un capítol sobre «treball futur» en el que es desgranin aquelles línies
+% de treball que podrien ser continuació natural del treball. És convenient exposar, com
+% a molt, només les tres o quatre més importants. S’han d’explicar, situar en el marc del
+% treball i suggerir breument algunes idees sobre com es podrien encarar
+
+
+\printbibliography
+
+% Si feu servir apèndixs, descomenteu
+% (també la  \part del principi del document)
+%\appendix
+%\part{Apèndixs}
+%\chapter{Un apèndix}
+
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% LaTeX-biblatex-use-Biber: t
+%%% End:
