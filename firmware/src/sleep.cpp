@@ -58,7 +58,7 @@ bool Sleep_init(void) {
     // Executar mètode inicial per configurar tasques de sleep inicials
     // `onWakeup`, ja que s'executa després de cada inicialització o wakeup
     onWakeup();
-    _PI("[SLEEP] Init: %llu minutes sleep (default: %llu), %llu seconds work (default: %llu)", MS_TO_MIN(sleepTime), MS_TO_MIN(SLEEP_SLEEP_TIME), MS_TO_S(workTime), MS_TO_S(SLEEP_WORK_TIME));
+    _PI("[SLEEP] Init: %.2f minutes sleep (default: %.2f), %.2f minutes work (default: %.2f)", MS_TO_MIN(sleepTime), MS_TO_MIN(SLEEP_SLEEP_TIME), MS_TO_MIN(workTime), MS_TO_MIN(SLEEP_WORK_TIME));
 
     Transport_onEvent(SLEEP_PORT, received, nullptr);
 
@@ -187,7 +187,7 @@ void onSyncReceived() {
 
     // Reenviar SYNC a nodes de la llista
     forwardCMD(SLEEP_CMD_SYNC);
-    _PI("[SLEEP] Scheduling sleep in %llu s", MS_TO_S(workTime));
+    _PI("[SLEEP] Scheduling sleep in %.2f minutes", MS_TO_MIN(workTime));
 }
 
 // Posa el microcontrolador i ràdio en mode de baix consum
@@ -224,7 +224,7 @@ void goToSleep() {
     // Haurien de ser accions ràpides, per no afectar temps de dormir
     _onBeforeSleep();
 
-    _PI("[SLEEP] Going to sleep for %llu seconds", MS_TO_S(sleepTime));
+    _PI("[SLEEP] Going to sleep for %.2f minutes", MS_TO_MIN(sleepTime));
     // Activar wakeup a partir de timer
     esp_sleep_enable_timer_wakeup(MS_TO_US(sleepTime)); 
     // Posar radio a dormir
@@ -255,11 +255,11 @@ void onWakeup() {
     _PI("[SLEEP] Wake up");
     if(isSync) {
         workToutTask = scheduler_once(goToSleep, workTime); 
-        _PI("[SLEEP] Scheduling sleep in %llu seconds", MS_TO_S(workTime));
+        _PI("[SLEEP] Scheduling sleep in %.2f minutes", MS_TO_MIN(workTime));
     }
     else {
         workToutTask = scheduler_once(goToSleep, SLEEP_FIRST_BOOT_TOUT); 
-        _PI("[SLEEP] Scheduling init timeout in %llu seconds", MS_TO_S(SLEEP_FIRST_BOOT_TOUT));
+        _PI("[SLEEP] Scheduling init timeout in %.2f minutes", MS_TO_MIN(SLEEP_FIRST_BOOT_TOUT));
     }
     // Programa sleep de nou al cap de `workTime` segons per si no es rep SYNC. 
     // Si es rep SYNC, s'iniciarà de nou i `workTime` passarà a ser `SLEEP_WORK_TIME`

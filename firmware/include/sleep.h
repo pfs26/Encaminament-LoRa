@@ -4,11 +4,11 @@
 
 // Macros utils per conversió
 #define MS_TO_US(x) (x * 1000ULL)           // Milisegons a microsegons
-#define MS_TO_S(x) (x / 1000)               // Milisegons a segons
-#define MS_TO_MIN(x) (x / 60000)            // Milisegons a minuts
+#define MS_TO_S(x) (x / 1000.0)               // Milisegons a segons
+#define MS_TO_MIN(x) (x / 60000.0)            // Milisegons a minuts
 #define S_TO_US(x) (x * 1000000ULL)         // Segons a microsegons
 #define S_TO_MS(x) (x * 1000ULL)            // Segons a milisegons
-#define S_TO_MIN(x) (x / 60)                // Segons a minuts
+#define S_TO_MIN(x) (x / 60.0)                // Segons a minuts
 #define MIN_TO_US(x) (S_TO_US(x * 60))      // Minuts a microsegons
 #define MIN_TO_MS(x) (x * 60 * 1000ULL)     // Minuts a milisegons
 #define MIN_TO_S(x) (x * 60)                // Minuts a segons
@@ -24,19 +24,21 @@
 #define SLEEP_MIN_SLEEP_TIME S_TO_MS(15)
 
 // Defineix si és un node "iniciador" de xarxa.
-// Enviarà SYNC sense esperar a rebre'l
+// Enviarà SYNC sense esperar a rebre'l. Haurien de ser-ho 
+// els nodes amb rol de gateway, mantenint així la responsabilitat. 
+// Aquests són també els que tenen inicialització més crítica (LWAN)
 #define SLEEP_IS_INITIATOR false
 
 // Durada d'un cicle de funcionament, en `ms`
-#define SLEEP_CYCLE_DURATION S_TO_MS(30)
+#define SLEEP_CYCLE_DURATION MIN_TO_MS(2)
 // Temps de funcionament normal, després de rebre SYNC, en `ms`
-#define SLEEP_WORK_TIME S_TO_MS(10)
+#define SLEEP_WORK_TIME S_TO_MS(30)
 // Temps en que espera rebre SYNC i no s'haurien de realitzar altres
 // transmissions, en `ms` Si no es rep SYNC, està inclòs en el temps de treball;
 // si es rep, s'afegeix al temps de treball.
+// **NO UTILITZAT**, només per possible ús futur
 #define SLEEP_SYNC_TIME S_TO_MS(2)
-// Temps de sleep **per defecte**; controlador funcionarà a partir d'aquest. En
-// `ms`
+// Temps de sleep **per defecte**; controlador funcionarà a partir d'aquest. En `ms`
 #define SLEEP_SLEEP_TIME (SLEEP_CYCLE_DURATION - SLEEP_WORK_TIME)
 
 // Factor de reducció del temps de sleep en cada cicle si no rep SYNC
