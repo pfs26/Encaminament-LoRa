@@ -17,7 +17,8 @@ static uint8_t initCount = 0;
 
 // Array per guardar els callbacks de les aplicacions de capa superior
 // facilitant la gestió de múltiples aplicacions. Veure issue #11
-static transport_app_handlers appHandlers[TRANSPORT_MAX_PORT];
+// TRANSPORT_MAX_PORT + 1, ja que hi ha 64 possibles ports (comptant el 0)
+static transport_app_handlers appHandlers[TRANSPORT_MAX_PORT+1];
 
 // Estructura per guardar dades d'una transmissió generada per `Transport_Send` amb reconeixament
 // Guarda estat transmissió, timeout de retransmissió i informació necessaria per fer els reintents
@@ -278,6 +279,7 @@ void _checkTxQueueMetadata(void) {
             if(meta.retries > TRANSPORT_MAX_RETRIES) {
                 _PW("[TRANSPORT] Max retries for segment %d reached", meta.id);
                 txQueue.erase(txQueue.begin() + pos);
+                // @todo: potser caldria notificar a capa superior que no s'ha pogut enviar?
                 return;
             }
             _PI("[TRANSPORT] ACK timeout for segment %d. Retrying... (retry %d)", meta.id, meta.retries);
@@ -335,6 +337,9 @@ void _segmentReceived(transport_port_t port) {
     }
 }
 
+// Notifica a capa aplicació amb el port corresponent que s'ha enviat un segment
+// No s'indica quin segment s'ha enviat; la capa d'aplicació no hauria de realitzar
+// més d'una transmissió seguida
 void _segmentSent(transport_port_t port) {
     if(appHandlers[port].onSend != nullptr) {
         appHandlers[port].onSend();
