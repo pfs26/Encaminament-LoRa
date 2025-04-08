@@ -104,6 +104,7 @@ transport_err_t Transport_send(node_address_t rx, transport_port_t port, const t
     transport_pdu_t pdu;
     pdu.flags.port = port;
     pdu.flags.ACKRequest = ackRequested;
+    pdu.flags.ACKResponse = 0;
     pdu.ID = random(1, (1 << (8 * sizeof(transport_id_t))) - 1);
     pdu.dataLength = length;
     memcpy(pdu.data, data, length);
