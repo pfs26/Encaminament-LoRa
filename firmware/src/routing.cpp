@@ -156,7 +156,7 @@ routing_err_t _sendThroughLoRaWAN(routing_pdu_t* pdu, uint16_t* id) {
     bool state = LW_send((uint8_t*)pdu, pdu->dataLength+ROUTING_HEADERS_SIZE);
     if (id) 
         *id = 0; // ID = 0 no es pot generar mai a capa MAC, per tant és un valor segur per identificar que és un paquet LoRaWAN
-                 // Tampoc s'hauria de donar el cas que es vulguin fer dues transmissions WAN simultànies   
+                 // Tampoc s'hauria de donar el cas que es vulguin fer dues transmissions WAN simultànies (bloquejant)   
     // Programem execució d'esdeveniments simulats per mantenir coherència amb capa MAC
     if (state) {
         scheduler_once(_WANPacketSent);
@@ -194,8 +194,10 @@ void _processReceivedPacket(size_t length) {
     // No només això, finestres de recepció separades per 1 segon, fent que temps de TX sigui en qualsevol cas major a aquest!
     if (isGateway && rxPDU.dst == NODE_ADDRESS_GATEWAY) {
         _PI("[ROUTING] Received packet for gateway. Forwarding to LoRaWAN");
-        _sendThroughLoRaWAN(&rxPDU);
-        _packetReceived();
+        routing_err_t state = _sendThroughLoRaWAN(&rxPDU);
+        if (state == ROUTING_SUCCESS) {
+            _packetReceived();
+        }
         return;
     }
 
