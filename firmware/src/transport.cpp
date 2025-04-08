@@ -321,11 +321,14 @@ size_t _buildAck(transport_pdu_t* pdu, node_address_t rx, transport_id_t id) {
 #if LOG_LEVEL <= LOG_LEVEL_INFO
 void _printSegment(const transport_pdu_t* const pdu) {
     // Mostra info de PDU en format maco.
-    Serial.printf("===== SEGMENT =====\nID\t%d\nPORT\t%d\nACKReq\t%d\nACKResp\t%d\nD-LEN\t%d\nDATA\t%.*s\nD-HEX\t", 
-    pdu->ID, pdu->flags.port, pdu->flags.ACKRequest, pdu->flags.ACKResponse, pdu->dataLength, pdu->dataLength, pdu->data);
-    for (int i = 0; i < pdu->dataLength; i++) 
-        Serial.printf("%02X ", pdu->data[i]); 
-    Serial.print("\n===================\n");
+    _PI("[TRANSPORT] SEGMENT: ID=%d PORT=%d ACKreq=%d ACKResp=%d D-LEN=%d DATA=%.*s", 
+        pdu->ID, pdu->flags.port, pdu->flags.ACKRequest, pdu->flags.ACKResponse, pdu->dataLength, pdu->dataLength, pdu->data);
+
+    // Serial.printf("===== SEGMENT =====\nID\t%d\nPORT\t%d\nACKReq\t%d\nACKResp\t%d\nD-LEN\t%d\nDATA\t%.*s\nD-HEX\t", 
+    // pdu->ID, pdu->flags.port, pdu->flags.ACKRequest, pdu->flags.ACKResponse, pdu->dataLength, pdu->dataLength, pdu->data);
+    // for (int i = 0; i < pdu->dataLength; i++) 
+    //     Serial.printf("%02X ", pdu->data[i]); 
+    // Serial.print("\n===================\n");
 }
 #else
 void _printSegment(const transport_pdu_t* const pdu) {}

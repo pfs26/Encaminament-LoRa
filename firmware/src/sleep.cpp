@@ -9,15 +9,15 @@
 //         4. Manté mode de funcionament normal durant Wt (Work Time), espera Gt, i després es torna a posar en mode sleep.
 //         5. Manté mode sleep durant St (Sleep Time), i després es torna a despertar. Es desperta a T0.
 //         6. Espera a rebre el missatge "SYNC" durant SyT (Sync Time).
-//             6.1. Si no rep missatge "SYNC" manté funcionament normal durant Wt i es torna a adormir. 
+//             6.1. Si no rep missatge "SYNC" manté funcionament normal durant Wt i es torna a adormir.
 //                  Redueix St en un 1% -> Despertarà abans, intentant rebre llavors "SYNC". Sempre dins d'un límit mínim.
 
 //                  Si en qualsevol moment de funcionament normal rep el missatge de Sync (a temps T1) **i no havia sincronitzat**
-//                  és que s'ha despertat massa d'hora. Augmentar St tal que `St = St + (T1-T0) / 2` 
+//                  és que s'ha despertat massa d'hora. Augmentar St tal que `St = St + (T1-T0) / 2`
 //             6.2. Si rep el "SYNC" a T1, augmentarà St tal que `St = St + (T1-T0) / 2`.
 //                  Això farà que es desperti més tard, però sempre abans que quan rebi "SYNC".
 //                  Intenta augmentar temps sleep per reduir consum
-//         7. Repeteix passos 2-6 indefinidament.        
+//         7. Repeteix passos 2-6 indefinidament.
 // */
 
 #include <Arduino.h>
@@ -34,10 +34,10 @@ void received();
 static node_address_t forwardCmdTo[SLEEP_MAX_FORWARD_NODES]; // Nodes a qui reenviar el SYNC
 
 // Temps de sleep en `milisegons`. A memòria RTC per mantenir-lo en deep sleep. S'actualitza a partir de "controlador P"
-static RTC_DATA_ATTR uint64_t sleepTime = SLEEP_SLEEP_TIME; 
+static RTC_DATA_ATTR uint64_t sleepTime = SLEEP_SLEEP_TIME;
 // Temps de treball en `milisegons`. A memòria RTC per mantenir-lo en deep sleep. S'actualitza a partir de "controlador P"
 // Augmenta a mesura que es redueix sleepTime; en rebre SYNC, es reinicia a `SLEEP_WORK_TIME`
-static RTC_DATA_ATTR uint64_t workTime = SLEEP_WORK_TIME; 
+static RTC_DATA_ATTR uint64_t workTime = SLEEP_WORK_TIME;
 // Control si està sincronitzat a la xarxa o no
 static RTC_DATA_ATTR bool isSync = false;
 
@@ -159,7 +159,7 @@ void onSyncReceived() {
         return;
     }
     _PI("[SLEEP] Sync received");
-    
+
     // Si és primera sincronització, marquem recepció SYNC a instant 0
     // per tal que no afecti retard inicial al càlcul de cicle de sleep
     tempsRecepcioSync = isSync ? millis() : 0;
@@ -170,7 +170,7 @@ void onSyncReceived() {
 
     // En qualsevol cas el node ja estarà sincronitzat a la xarxa
     isSync = true;
-    
+
     // Si hi havia una tasca programada (tasca de treball inicial per si no es rep SYNC)
     // la parem i n'iniciem una de nova després de rebre SYNC
     if(workToutTask != nullptr) {
@@ -228,12 +228,12 @@ void goToSleep() {
     _onBeforeSleep();
 
     // Activar wakeup a partir de timer
-    esp_sleep_enable_timer_wakeup(MS_TO_US(sleepTime)); 
+    esp_sleep_enable_timer_wakeup(MS_TO_US(sleepTime));
     // Posar radio a dormir
     LoRaRAW_sleep();
     _PI("[SLEEP] Going to sleep for %.2f minutes", MS_TO_MIN(sleepTime));
     // Iniciar sleep
-    esp_deep_sleep_start(); 
+    esp_deep_sleep_start();
 }
 
 // Processat en rebre dades d'aplicació SLEEP
@@ -243,7 +243,7 @@ void received() {
     transport_port_t port;
     Transport_receive(&port, (transport_data_t*)&data, &datalen);
     if(port != SLEEP_PORT) {
-        Serial.println("Port no vàlid");
+        _PE("[SLEEP] Received data on wrong port: %d. Check transport layer handlers", port);
         return;
     }
 
@@ -256,14 +256,14 @@ void received() {
 void onWakeup() {
     _PI("[SLEEP] Wake up");
     if(isSync) {
-        workToutTask = scheduler_once(goToSleep, workTime); 
+        workToutTask = scheduler_once(goToSleep, workTime);
         _PI("[SLEEP] Scheduling sleep in %.2f minutes", MS_TO_MIN(workTime));
     }
     else {
-        workToutTask = scheduler_once(goToSleep, SLEEP_FIRST_BOOT_TOUT); 
+        workToutTask = scheduler_once(goToSleep, SLEEP_FIRST_BOOT_TOUT);
         _PI("[SLEEP] Scheduling init timeout in %.2f minutes", MS_TO_MIN(SLEEP_FIRST_BOOT_TOUT));
     }
-    // Programa sleep de nou al cap de `workTime` segons per si no es rep SYNC. 
+    // Programa sleep de nou al cap de `workTime` segons per si no es rep SYNC.
     // Si es rep SYNC, s'iniciarà de nou i `workTime` passarà a ser `SLEEP_WORK_TIME`
-    // per mantenir el cicle de funcionament normal. 
+    // per mantenir el cicle de funcionament normal.
 }

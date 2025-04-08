@@ -536,12 +536,14 @@ static void _txError_mac(void) {
 
 #if LOG_LEVEL <= LOG_LEVEL_INFO
 static void _printPDU(const mac_pdu_t* const pdu) {
-    // Intenta mostrar en ASCII; mostra també en HEX per si caràcters no imprimibles
-    Serial.printf("===== PDU =====\nTX\t%d\nRX\t%d\nID\t%d\nD-LEN\t%d\nDATA\t%.*s\nD-HEX\t", 
-    pdu->tx, pdu->rx, pdu->id, pdu->dataLength, pdu->dataLength, pdu->data);
-    for (int i = 0; i < pdu->dataLength; i++) 
-        Serial.printf("%02X ", pdu->data[i]); 
-    Serial.printf("\nCRC\t%d\nACK\t%d\nRETRY\t%d\n===============\n", pdu->crc, pdu->flags.isACK, pdu->flags.retry);
+    // Intenta mostrar en ASCII; mostra també en HEX per si caràcters no imprimibles4
+    _PI("[MAC] FRAME: TX=%02X RX=%02X ID=%d D-LEN=%d DATA=%.*s CRC=%d ACK=%d RETRY=%d", 
+        pdu->tx, pdu->rx, pdu->id, pdu->dataLength, pdu->dataLength, pdu->data, pdu->crc, pdu->flags.isACK, pdu->flags.retry);
+    // Serial.printf("===== PDU =====\nTX\t%d\nRX\t%d\nID\t%d\nD-LEN\t%d\nDATA\t%.*s\nD-HEX\t", 
+    // pdu->tx, pdu->rx, pdu->id, pdu->dataLength, pdu->dataLength, pdu->data);
+    // for (int i = 0; i < pdu->dataLength; i++) 
+    //     Serial.printf("%02X ", pdu->data[i]); 
+    // Serial.printf("\nCRC\t%d\nACK\t%d\nRETRY\t%d\n===============\n", pdu->crc, pdu->flags.isACK, pdu->flags.retry);
 }
 #else
 static void _printPDU(const mac_pdu_t* const pdu) {}

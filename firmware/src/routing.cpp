@@ -291,11 +291,14 @@ void _printPacket(const routing_pdu_t* const pdu) {
     // Mostra info de PDU en format maco.
     // Les dades les intenta mostrar en format ASCII, i només mostra tants chars com marca dataLength (o fins que hi ha '\0', culpa de mostrar-ho com string)
     // Mostra també amb hexadecimal per si hi ha 0x00 entre mig saber si realment és correcte.
-    Serial.printf("===== PACKET =====\nSRC\t%d\nDST\t%d\nTTL\t%d\nD-LEN\t%d\nDATA\t%.*s\nD-HEX\t", 
-    pdu->src, pdu->dst, pdu->ttl, pdu->dataLength, pdu->dataLength, pdu->data);
-    for (int i = 0; i < pdu->dataLength; i++) 
-        Serial.printf("%02X ", pdu->data[i]); 
-    Serial.print("\n==================\n");
+    _PI("[ROUTING] PACKET: SRC=%02X DST=%02X TTL=%d D-LEN=%d DATA=%.*s", 
+        pdu->src, pdu->dst, pdu->ttl, pdu->dataLength, pdu->dataLength, pdu->data);
+
+    // Serial.printf("===== PACKET =====\nSRC\t%d\nDST\t%d\nTTL\t%d\nD-LEN\t%d\nDATA\t%.*s\nD-HEX\t", 
+    // pdu->src, pdu->dst, pdu->ttl, pdu->dataLength, pdu->dataLength, pdu->data);
+    // for (int i = 0; i < pdu->dataLength; i++) 
+    //     Serial.printf("%02X ", pdu->data[i]); 
+    // Serial.print("\n==================\n");
 }
 #else
 void _printPacket(const routing_pdu_t* const pdu) {}
