@@ -1,6 +1,7 @@
 #ifndef SLEEP_H
 #define SLEEP_h
 #include "transport.h"
+#include "config.h"
 
 // Macros utils per conversió
 #define MS_TO_US(x) (x * 1000ULL)           // Milisegons a microsegons
@@ -16,50 +17,15 @@
 
 // Port que utilitza l'aplicació de SLEEP
 #define SLEEP_PORT 0x01
-// Nombre màxim de nodes a qui es reenviaran les ordres de SLEEP
+// Nombre màxim de nodes a qui es reenviaran les ordres de SLEEP. 
+// Si és molt gran, overhead per enviar missatges de SYNC pot serà alt
 #define SLEEP_MAX_FORWARD_NODES 10
 
-// Temps de sleep mínim que controlador P no superarà, en el cas que no rebi
-// SYNC, en `ms`.
-#define SLEEP_MIN_SLEEP_TIME S_TO_MS(15)
 
-// Defineix si és un node "iniciador" de xarxa.
-// Enviarà SYNC sense esperar a rebre'l. Haurien de ser-ho 
-// els nodes amb rol de gateway, mantenint així la responsabilitat. 
-// Aquests són també els que tenen inicialització més crítica (LWAN)
-#define SLEEP_IS_INITIATOR false
-
-// Durada d'un cicle de funcionament, en `ms`
-#define SLEEP_CYCLE_DURATION MIN_TO_MS(2)
-// Temps de funcionament normal, després de rebre SYNC, en `ms`
-#define SLEEP_WORK_TIME S_TO_MS(30)
-// Temps en que espera rebre SYNC i no s'haurien de realitzar altres
-// transmissions, en `ms` Si no es rep SYNC, està inclòs en el temps de treball;
-// si es rep, s'afegeix al temps de treball.
-// **NO UTILITZAT**, només per possible ús futur
-#define SLEEP_SYNC_TIME S_TO_MS(2)
 // Temps de sleep **per defecte**; controlador funcionarà a partir d'aquest. En `ms`
 #define SLEEP_SLEEP_TIME (SLEEP_CYCLE_DURATION - SLEEP_WORK_TIME)
 
-// Factor de reducció del temps de sleep en cada cicle si no rep SYNC
-// Si és 0.1, el temps de sleep es reduirà un 10% cada cicle si no rep SYNC.
-#define SLEEP_SLEEP_TIME_FACTOR_NSYNC 0.1
-// Factor de "controlador P" en rebre SYNC. Si és 0.5, el temps de sleep
-// augmentarà la meitat del temps de recepció de SYNC.
-#define SLEEP_SLEEP_TIME_FACTOR_SYNC 0.5
 
-// Temps mínim que volem que estigui despert abans de rebre SYNC, en
-// `milisegons` Evita que controlador P augmenti massa el temps de sleep, i
-// deixa un marge de mínim aquest temps entre despertar i rebre SYNC (basant-se
-// en temps SYNC anterior)
-// **IMPORTANT** que deixi suficient marge per tal que la recepció de SYNC no es
-// perdi Valors d'algun segon semblen ser adequats
-#define SLEEP_MIN_TIME_BEFORE_SYNC S_TO_MS(2)
-
-// Temps màxim d'espera per primera sincronització a la xarxa, en `ms`
-// Com a últim recurs per evitar deixar ràdio + ESP actius permanentment
-// Dormirà durant `SLEEP_SLEEP_TIME`
-#define SLEEP_FIRST_BOOT_TOUT MIN_TO_MS(2)
 
 // Enum per definir ordres possibles. Definició per ús futur
 enum sleep_command_t : uint8_t {

@@ -69,6 +69,48 @@ Value is specified in ms! */
 #define TRANSPORT_QUEUE_SIZE 10
 
 
+/* ========= */
+/*   SLEEP   */
+/* ========= */
+// Defineix si és un node "iniciador" de xarxa.
+// Enviarà SYNC sense esperar a rebre'l. Haurien de ser-ho els nodes amb rol de gateway, mantenint
+// així la responsabilitat. Aquests són també els que tenen inicialització més crítica (LWAN)
+#define SLEEP_IS_INITIATOR IS_GATEWAY
+
+// Temps de sleep mínim que controlador P no superarà, en el cas que no rebi SYNC, en `ms`.
+// Utilitzat per limitar el temps de sleep a un mínim, evitant consumir excessivament
+#define SLEEP_MIN_SLEEP_TIME S_TO_MS(15)
+
+// Durada d'un cicle de funcionament, en `ms`
+#define SLEEP_CYCLE_DURATION MIN_TO_MS(1)
+// Temps de funcionament normal, després de rebre SYNC, en `ms`
+#define SLEEP_WORK_TIME S_TO_MS(30)
+// Temps en que espera rebre SYNC i no s'haurien de realitzar altres
+// transmissions, en `ms` Si no es rep SYNC, està inclòs en el temps de treball;
+// si es rep, s'afegeix al temps de treball.
+// **NO UTILITZAT**, només per possible ús futur
+#define SLEEP_SYNC_TIME S_TO_MS(2)
+
+// Factor de reducció del temps de sleep en cada cicle si no rep SYNC
+// Si és 0.1, el temps de sleep es reduirà un 10% cada cicle si no rep SYNC.
+#define SLEEP_SLEEP_TIME_FACTOR_NSYNC 0.1
+// Factor de "controlador P" en rebre SYNC. Si és 0.5, el temps de sleep
+// augmentarà la meitat del temps de recepció de SYNC.
+#define SLEEP_SLEEP_TIME_FACTOR_SYNC 0.5
+
+// Temps mínim que volem que estigui despert abans de rebre SYNC, en
+// `milisegons` Evita que controlador P augmenti massa el temps de sleep, i
+// deixa un marge de mínim aquest temps entre despertar i rebre SYNC (basant-se
+// en temps SYNC anterior)
+// **IMPORTANT** que deixi suficient marge per tal que la recepció de SYNC no es
+// perdi Valors d'algun segon semblen ser adequats
+#define SLEEP_MIN_TIME_BEFORE_SYNC S_TO_MS(2)
+
+// Temps màxim d'espera per primera sincronització a la xarxa, en `ms`
+// Com a últim recurs per evitar deixar ràdio + ESP actius permanentment
+// Dormirà durant `SLEEP_SLEEP_TIME`
+#define SLEEP_FIRST_BOOT_TOUT MIN_TO_MS(2)
+
 /* =========== */
 /*   GENERAL   */
 /* =========== */

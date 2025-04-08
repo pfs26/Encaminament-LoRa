@@ -6,9 +6,7 @@
 #include "sleep.h"
 #include <stdlib.h> // For rand()
 
-#define GATEWAY 0
-
-#if GATEWAY
+#if IS_GATEWAY
     #define NODE_ADDRESS 0x02
 #else
     #define NODE_ADDRESS 0x03
@@ -44,29 +42,29 @@ void onSend() {
 }
 
 void beforeSleeping() {
-    Serial.println("Preparing to sleep...");
+    Serial.printf("[%d] Going to sleep...\n", millis());
     Serial.printf("TCP sent: %d\tTCP tries: %d\tUDP sent: %d\n", TCPsent, TCPtries, UDPsent);
 }
 
 void ready() {
-    // Randomly decide if the node should transmit
+    Serial.printf("[%d] Ready to send data\n", millis());
     
     if ((float)esp_random() / UINT32_MAX < SEND_CHANCE) {
-        // Define the array of possible nodes to send to
-        #if GATEWAY
-            node_address_t nodes[] = {0x03, 0x01}; // Example: Gateway sends to node 0x03
+        // Adreces a qui enviar possibles
+        #if IS_GATEWAY
+            node_address_t nodes[] = {0x03, 0x01}; 
         #else
-            node_address_t nodes[] = {0x02, 0x01}; // Example: Node sends to gateway 0x02
+            node_address_t nodes[] = {0x02, 0x01}; 
         #endif
 
-        // Pick a random node from the array
+        // Escollir node aleatori
         size_t nodeCount = sizeof(nodes) / sizeof(node_address_t);
         node_address_t targetNode = nodes[esp_random() % nodeCount];
 
-        // Randomly decide if an ACK is expected
+        // Escollir si s'ha d'enviar amb ACK o sense
         bool ackRequested = ((float)esp_random() / UINT32_MAX < ACK_CHANCE);
 
-        // Send the message
+        // Enviar missatge. Dades és el número de transmissió actual (TCP + UDP + 1)
         transport_data_t message = {TCPtries + UDPsent + 1};
         transport_err_t result = Transport_send(targetNode, 63, message, 1, ackRequested);
         if (result == TRANSPORT_SUCCESS) {
@@ -95,17 +93,16 @@ void setup() {
         Serial.print("Flash: "); Serial.println(ESP.getFlashChipSize());
         Serial.print("Flash speed: "); Serial.println(ESP.getFlashChipSpeed());
         Serial.print("Flash mode: "); Serial.println(ESP.getFlashChipMode());
-        // SHould print the random chances for ACK, TCP and UDP. Also pritn node address and its role
         Serial.println("===========================");
         Serial.println("RANDOM OPERATION SLEEP TEST");
         Serial.println("===========================");
-        Serial.printf("Node address: 0x%02X\tGateway: %d\n", NODE_ADDRESS, GATEWAY);
+        Serial.printf("Node address: 0x%02X\tGateway: %d\n", NODE_ADDRESS, IS_GATEWAY);
         Serial.printf("ACK chance: %.2f\tSend chance: %.2f\n", ACK_CHANCE, SEND_CHANCE);
         Serial.println("===========================");
         firstBoot = false;
     }
         
-    if(!Transport_init(NODE_ADDRESS, GATEWAY)) {
+    if(!Transport_init(NODE_ADDRESS, IS_GATEWAY)) {
         Serial.println("Transport init failed");
         while(1) delay(1);
     }
@@ -116,7 +113,7 @@ void setup() {
     Sleep_onSync(ready);
 
     // Configurem nodes a qui notificar missatges de sincronització
-    #if GATEWAY
+    #if IS_GATEWAY
         node_address_t nodes[] = {0x03};
     #else
         node_address_t nodes[] = {};
