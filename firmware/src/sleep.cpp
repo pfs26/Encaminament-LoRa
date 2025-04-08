@@ -195,41 +195,43 @@ void onSyncReceived() {
 // augmentant el temps de sleep si s'ha rebut després d'estona d'haver despertat,
 // o disminuint-lo si no s'ha rebut, augmentant així la finestra de recepció.
 void goToSleep() {
-    // Si no s'ha rebut SYNC en el temps de treball, reduir el temps de sleep, despertant abans per si es rep SYNC
-    if(tempsRecepcioSync == -1) {
-        uint64_t reduccio = sleepTime*SLEEP_SLEEP_TIME_FACTOR_NSYNC;
-        sleepTime -= reduccio;
-        if(sleepTime < SLEEP_MIN_SLEEP_TIME) {
-            sleepTime = SLEEP_MIN_SLEEP_TIME;
-        } else {
-            workTime += reduccio; // Augmentar temps de treball de següent cicle -> estarà més temps despert INICIALMENT
-            _PI("[SLEEP] Sync not received. Sleep time reduced by %d%% (%llu ms)", (SLEEP_SLEEP_TIME_FACTOR_NSYNC*100), reduccio);
-        }
-    }
-    else {
-        uint64_t increment = tempsRecepcioSync  * SLEEP_SLEEP_TIME_FACTOR_SYNC; // ms
-        uint64_t diferencia = tempsRecepcioSync - increment; // ms
-        // Limitem increment per tal que minim hi hagi `SLEEP_MIN_TIME_BEFORE_SYNC` entre despertar i recepció esperada SYNC
-        if (increment < SLEEP_MIN_TIME_BEFORE_SYNC) {
-            increment = increment - SLEEP_MIN_TIME_BEFORE_SYNC + diferencia;
-            _PI("[SLEEP] Sync received. Sleep time limited");
+    // Si som inicialitzadors, el cicle de sleep no s'ha de modificar
+    if(!SLEEP_IS_INITIATOR) {
+        // Si no s'ha rebut SYNC en el temps de treball, reduir el temps de sleep, despertant abans per si es rep SYNC
+        if(tempsRecepcioSync == -1) {
+            uint64_t reduccio = sleepTime*SLEEP_SLEEP_TIME_FACTOR_NSYNC;
+            sleepTime -= reduccio;
+            if(sleepTime < SLEEP_MIN_SLEEP_TIME) {
+                sleepTime = SLEEP_MIN_SLEEP_TIME;
+            } else {
+                workTime += reduccio; // Augmentar temps de treball de següent cicle -> estarà més temps despert INICIALMENT
+                _PI("[SLEEP] Sync not received. Sleep time reduced by %.2f%% (%llu ms)", (SLEEP_SLEEP_TIME_FACTOR_NSYNC*100), reduccio);
+            }
         }
         else {
-            _PI("[SLEEP] Sync received. Sleep time increased by %llu ms", increment);
+            uint64_t increment = tempsRecepcioSync  * SLEEP_SLEEP_TIME_FACTOR_SYNC; // ms
+            uint64_t diferencia = tempsRecepcioSync - increment; // ms
+            // Limitem increment per tal que minim hi hagi `SLEEP_MIN_TIME_BEFORE_SYNC` entre despertar i recepció esperada SYNC
+            if (increment < SLEEP_MIN_TIME_BEFORE_SYNC) {
+                increment = increment - SLEEP_MIN_TIME_BEFORE_SYNC + diferencia;
+                _PI("[SLEEP] Sync received. Sleep time limited");
+            }
+            else {
+                _PI("[SLEEP] Sync received. Sleep time increased by %llu ms", increment);
+            }
+            sleepTime += increment;
         }
-        sleepTime += increment;
     }
 
     // Notifiquem que s'anirà a dormir, per si es volen realitzar accions
     // Haurien de ser accions ràpides, per no afectar temps de dormir
     _onBeforeSleep();
 
-    _PI("[SLEEP] Going to sleep for %.2f minutes", MS_TO_MIN(sleepTime));
     // Activar wakeup a partir de timer
     esp_sleep_enable_timer_wakeup(MS_TO_US(sleepTime)); 
     // Posar radio a dormir
     LoRaRAW_sleep();
-    _PI("[SLEEP] Going to sleep");
+    _PI("[SLEEP] Going to sleep for %.2f minutes", MS_TO_MIN(sleepTime));
     // Iniciar sleep
     esp_deep_sleep_start(); 
 }
