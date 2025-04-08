@@ -110,6 +110,11 @@ void _onBeforeSleep() {
     }
 }
 
+/*
+    Potser seria interessant introduir un temps aleatori;
+    aquest faria separar intents de transmissió entre dos nodes, 
+    ja que segurament voldrien intentar enviar a la vegada
+*/
 void _onSync() {
     if(onSync != nullptr) {
         onSync();
@@ -187,7 +192,7 @@ void onSyncReceived() {
 
     // Programem notificació de recepció de sync. S'executarà
     // després de fer transmissions a forwardToNodes
-    scheduler_once(_onSync);
+    scheduler_once(_onSync, SLEEP_GUARD_TIME);
     _PI("[SLEEP] Scheduling sleep in %.2f minutes", MS_TO_MIN(workTime));
 }
 

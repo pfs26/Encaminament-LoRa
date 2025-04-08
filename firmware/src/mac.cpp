@@ -260,8 +260,8 @@ static bool _verifyCRC(const mac_pdu_t* const pdu) {
     return expected == obtained;
 }
 
-// Genera un identificador aleatori pel frame
-static mac_id_t _getRandomID() { return (mac_id_t)random(1, (1 << (8 * sizeof(mac_id_t))) - 1); }
+// Genera un identificador aleatori pel frame. Random NO inclou valor màxim (així entre [1, 2^n-1])
+static mac_id_t _getRandomID() { return (mac_id_t)random(1, (1 << (8 * sizeof(mac_id_t)))); }
 
 // Verifica si l'ACK de la PDU donada és vàlid
 // És vàlid si té flag d'ACK, el transmisor és el receptor de l'últim que hem enviat
@@ -440,6 +440,7 @@ static void _apply_duty_cycle_delay() {
         scheduler_once(_mac_fsm_event_duty_timeout, duty_cycle_delay);
     #else
         fsmState = mac_state_t::IDLE_S;
+        // @todo: si es vol afegir un retard per evitar enviar de nou després d'una transmissió, modificar aquí!
         scheduler_once(_mac_fsm_event_tx);
     #endif
 }
@@ -474,6 +475,8 @@ static bool _attempt_transmission(uint8_t retry_count) {
 }
 
 // Inicia recepció d'ACK, calculant timeout
+// @todo: potser es pot introduir una mica d'aleatorietat, per evitar col·lisions múltiples
+// si dos nodes intenten enviar just a la mateixa vegada? Reintents els farien al mateix temps sino
 static void _setup_ack_reception(void) {
     fsmState = WAIT_ACK_S;
 
@@ -500,7 +503,7 @@ static void _start_beb_timeout(uint8_t attempt) {
     _PI("[MAC] Waiting chann free (%d)", attempt);
     fsmState = WAIT_CHAN_FREE_S;
     attempt = MIN(attempt, MAC_MAX_BEB_RETRY); // Limitar a valor màxim
-    uint32_t bebTimeout = random(0, 1 << attempt)*MAC_BEB_SLOT_MS; // Calcular timeout de backoff
+    uint32_t bebTimeout = random(0, (1 << attempt) + 1) * MAC_BEB_SLOT_MS; // Calcular timeout de backoff. Random + 1 perquè no inclou extrem màxim
     txTimeoutTask = scheduler_once(_mac_fsm_event_tout_busy, bebTimeout); // Programar timeout
     _PI("[MAC] Timeout BEB: %dms", bebTimeout);
     LoRaRAW_startReceiving();

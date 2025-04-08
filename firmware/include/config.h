@@ -1,7 +1,6 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
-#define LOG_LEVEL 1 // "4 = none; 1 = info; 2 = warn; 3 = err"
 
 /* ======== */
 /*   LORA   */
@@ -85,11 +84,9 @@ Value is specified in ms! */
 #define SLEEP_CYCLE_DURATION MIN_TO_MS(1)
 // Temps de funcionament normal, després de rebre SYNC, en `ms`
 #define SLEEP_WORK_TIME S_TO_MS(30)
-// Temps en que espera rebre SYNC i no s'haurien de realitzar altres
-// transmissions, en `ms` Si no es rep SYNC, està inclòs en el temps de treball;
-// si es rep, s'afegeix al temps de treball.
-// **NO UTILITZAT**, només per possible ús futur
-#define SLEEP_SYNC_TIME S_TO_MS(2)
+// Temps en espera després de rebre SYNC abans no inicia funcionament normal
+// per evitar inicar TX quan nodes veins encara no han processat SYNC
+#define SLEEP_GUARD_TIME S_TO_MS(2)
 
 // Factor de reducció del temps de sleep en cada cicle si no rep SYNC
 // Si és 0.1, el temps de sleep es reduirà un 10% cada cicle si no rep SYNC.
@@ -114,8 +111,10 @@ Value is specified in ms! */
 /* =========== */
 /*   GENERAL   */
 /* =========== */
+#define LOG_LEVEL 2 // "4 = none; 1 = info; 2 = warn; 3 = err"
+
 #define SELF_ADDRESS 0x03 // Adreça per defecte del node (uint8_t) - Modificable
-#define IS_GATEWAY false  // Es un gateway? (true/false) - Modificable  
+#define IS_GATEWAY true  // Es un gateway? (true/false) - Modificable  
 
 #define WIFI_SSID "LORA"       // Nom de la xarxa que genera el dispositiu
 #define WIFI_PASSWORD NULL     // Contrasenya; NULL si és obert; sinó, de més de 8 caràcters en string ("12345678")
