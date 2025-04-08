@@ -164,10 +164,6 @@ void onSyncReceived() {
     // per tal que no afecti retard inicial al càlcul de cicle de sleep
     tempsRecepcioSync = isSync ? millis() : 0;
 
-    // Programem notificació de recepció de sync. S'executarà
-    // després de fer transmissions a forwardToNodes
-    scheduler_once(_onSync);
-
     // En qualsevol cas el node ja estarà sincronitzat a la xarxa
     isSync = true;
 
@@ -187,6 +183,10 @@ void onSyncReceived() {
 
     // Reenviar SYNC a nodes de la llista
     forwardCMD(SLEEP_CMD_SYNC);
+
+    // Programem notificació de recepció de sync. S'executarà
+    // després de fer transmissions a forwardToNodes
+    scheduler_once(_onSync);
     _PI("[SLEEP] Scheduling sleep in %.2f minutes", MS_TO_MIN(workTime));
 }
 
@@ -197,8 +197,14 @@ void onSyncReceived() {
 void goToSleep() {
     // Si som inicialitzadors, el cicle de sleep no s'ha de modificar
     if(!SLEEP_IS_INITIATOR) {
+        // Si encara no s'ha sincronitzat inicialment a la xarxa, no modificar temps de sleep
+        // (criteri marcat per evitar reduir encara més temps de sleep, en teoria temps despert s
+        // si no sincronitzat hauria de ser major que sincronitzat)
+        if(!isSync) {
+            _PI("[SLEEP] Not yet synchronized with network. Sleeping won't be modified");
+        }
         // Si no s'ha rebut SYNC en el temps de treball, reduir el temps de sleep, despertant abans per si es rep SYNC
-        if(tempsRecepcioSync == -1) {
+        else if(tempsRecepcioSync == -1) {
             uint64_t reduccio = sleepTime*SLEEP_SLEEP_TIME_FACTOR_NSYNC;
             sleepTime -= reduccio;
             if(sleepTime < SLEEP_MIN_SLEEP_TIME) {
@@ -208,7 +214,7 @@ void goToSleep() {
                 _PI("[SLEEP] Sync not received. Sleep time reduced by %.2f%% (%llu ms)", (SLEEP_SLEEP_TIME_FACTOR_NSYNC*100), reduccio);
             }
         }
-        else {
+        else { // S'ha rebut sync. Intentem augmentar temps de sleep si s'ha rebut després d'estona
             uint64_t increment = tempsRecepcioSync  * SLEEP_SLEEP_TIME_FACTOR_SYNC; // ms
             uint64_t diferencia = tempsRecepcioSync - increment; // ms
             // Limitem increment per tal que minim hi hagi `SLEEP_MIN_TIME_BEFORE_SYNC` entre despertar i recepció esperada SYNC
