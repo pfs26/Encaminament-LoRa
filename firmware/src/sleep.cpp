@@ -179,6 +179,7 @@ void onSyncReceived() {
     // Si un node ho ha de reenviar a molts, potser triga molt temps, dorm més tard del compte i NO rep següent sync
     // WORK TIME inclou temps de reenviament de SYNC
     workTime = SLEEP_WORK_TIME;
+    sleepTime = SLEEP_SLEEP_TIME; // @todo: veure si hauria de ser així! En rebre sync fem reset de temps de sleep
     workToutTask = scheduler_once(goToSleep, workTime);
 
     // Reenviar SYNC a nodes de la llista

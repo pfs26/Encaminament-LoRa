@@ -193,7 +193,7 @@ void _onRoutingReceived() {
     if (pdu.flags.ACKResponse) {
         _ackReceived(&pdu);
         // No retornem; podria arribar a permetre rebre ACK i segment a la vegada 
-        // return;
+        return;
     }
     
     // Si no s'havia rebut abans, guardem que s'havia rebut, i avisem capa superior 
