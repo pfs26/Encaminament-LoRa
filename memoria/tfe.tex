@@ -2,14 +2,26 @@
 
 % Aqui carregueu packages complementaris que necessiteu
 \usepackage{biblatex}
+% \usepackage[table,xcdraw]{xcolor}
+\usepackage{colortbl}
+\usepackage{booktabs}
+\usepackage{hhline}
+\usepackage{caption}
+
+\renewcommand{\figureautorefname}{figura}
+\renewcommand{\tableautorefname}{taula}
+\renewcommand{\sectionautorefname}{secció}
+\renewcommand{\subsectionautorefname}{apartat}
+\renewcommand{\subsubsectionautorefname}{subapartat}
+\renewcommand{\chapterautorefname}{capítol}
+
 
 % Indica quines bd bibliografiques usarem
 \addbibresource{tfe.bib}
 
-
 \title{Disseny de nodes LoRa amb encaminament estàtic per aplicacions de monitoratge}
 % Si voleu subtitol descomenteu
-%\subtitle{}
+\subtitle{Viabilitat d'ús en entorns de baix consum}
 
 % L'autor del treball. Admet gènere (vegeu 9.2 del manual) fent \author[f]{}
 \author{Pol Flotats Sabata}
@@ -54,12 +66,15 @@
 %\part{Memòria}
 
 \chapter{Introducció}
+\label{chap:intro}
 \section{Objectius}
+\label{sec:objectius}
 \section{Limitacions del treball}
 \section{Organització de la memòria}
 
 \chapter{Antecedents}
 \section{Introducció a LoRa i LoRaWAN}
+\section{Sobre els protocols de comunicació}
 \section{Treballs relacionats}
 % meshtastic -> xarxa mesh però sense baix consum, broadcasts podent afectar communicació, etc.
 % tampoc permeten compatibilitat amb lorawan
@@ -68,16 +83,19 @@
 % Cap dels dos permeten baix consum i modes de deep sleep
 
 % Aqui van els capitols especifics del treball
-\chapter{Disseny} % no es veu afectat per material
-\section{Elecció del material}
-\section{Protocol de comunicació}
-\subsection{Accés al medi}
-\subsection{Encaminament}
-\subsection{Transport}
-\subsection{Aplicació}
-\section{Reducció del consum}
+\chapter{Disseny del protocol de comunicació} % no es veu afectat per material
+\section{Medi físic}
+\subsection{LoRa}
+\subsection{LoRaWAN}
+% Uplinks es faran amb ACK o no depenent de define en compilar
+% fet així per evitar que s'hagin de fer molts downlinks per ACKs
+% ja que TTN limita (fair use policy) a 10 downlinks per dia
+\section{Accés al medi}
+\section{Encaminament}
+\section{Transport}
+\section{Aplicació}
 
-\chapter{Implementació tècnica}
+\chapter{Implementació del protocol}
 \section{Estructura}
 \subsection{Organització del codi}
 % S'ha implementat seguint model de capes, on cada capa és un mòdul.
@@ -86,20 +104,64 @@
 % S'ha intentat que no hi hagi mètodes bloquejants, amb excepció dels 
 % mètodes "finals" com transmissió.
 \subsection{Biblioteques i entorn de desenvolupament}
+% platformio + radiolib (comentar radiohead + lmic)
 \section{Protocol de comunicació}
+\subsection{Capa física}
 \subsection{Accés al medi}
 \subsection{Encaminament}
 \subsection{Transport}
 \subsection{Aplicació}
-\section{Aplicació de baix consum}
 \section{Validació del funcionament i resultats}
 
+\chapter{Aplicació en entorns de baix consum}
+% explicar avantatges i inconvenients d'utilitzar
+% el protocol de sincronització genèric aqui. També s'hauria d'explicar el seu disseny
+
+% quines son totes les opcions plantejades, avantatges i inconvenients, i perquè
 
 \chapter{Conclusions}
 
 \chapter{Treball futur}
 
+% https://www.latex-tables.com/
+% configurar amb opció de SCALE
+\begin{figure}
+    \centering
+    \resizebox{\linewidth}{!}{%
+        \begin{tabular}{l||cccccccccccccccccc} 
+            \hhline{~|t|~~~~~~~----~~~~~~~}
+            \textbf{N1} &                          &                            &                            &                            &                            &                            & \multicolumn{1}{c|}{}      & \multicolumn{1}{c|}{RX2:9} & \multicolumn{1}{c|}{TX1:9} & \multicolumn{1}{c|}{{\cellcolor[rgb]{0.753,0.749,0.737}}RXG} & \multicolumn{1}{c|}{{\cellcolor[rgb]{0.753,0.749,0.737}}TXG} &                                                              &                                                              &                          &                          &                          &                          &                           \\ 
+            \hhline{~||~~~~~~------~~~~~~}
+            \textbf{N2} &                          &                            &                            &                            &                            & \multicolumn{1}{c|}{}      & \multicolumn{1}{c|}{RX3:9} & \multicolumn{1}{c|}{TX2:9} &                            & \multicolumn{1}{c|}{}                                        & \multicolumn{1}{c|}{{\cellcolor[rgb]{0.753,0.749,0.737}}RXG} & \multicolumn{1}{c|}{{\cellcolor[rgb]{0.753,0.749,0.737}}TXG} &                                                              &                          &                          &                          &                          &                           \\ 
+            \hhline{~||~~~~~---~~---~~~~~}
+            \textbf{N3} &                          &                            &                            &                            & \multicolumn{1}{c|}{}      & \multicolumn{1}{c|}{RX4:9} & \multicolumn{1}{c|}{TX3:9} &                            &                            &                                                              & \multicolumn{1}{c|}{}                                        & \multicolumn{1}{c|}{{\cellcolor[rgb]{0.753,0.749,0.737}}RXG} & \multicolumn{1}{c|}{{\cellcolor[rgb]{0.753,0.749,0.737}}TXG} &                          &                          &                          &                          &                           \\ 
+            \hhline{~||~~~~---~~~~---~~~~}
+            \textbf{N4} &                          &                            &                            & \multicolumn{1}{c|}{}      & \multicolumn{1}{c|}{RX5:9} & \multicolumn{1}{c|}{TX4:9} &                            &                            &                            &                                                              &                                                              & \multicolumn{1}{c|}{}                                        & \multicolumn{1}{c|}{{\cellcolor[rgb]{0.753,0.749,0.737}}RXG} & \multicolumn{1}{c|}{TXG} &                          &                          &                          &                           \\ 
+            \cline{5-7}\cline{14-16}
+            \textbf{N5} &                          &                            & \multicolumn{1}{c|}{}      & \multicolumn{1}{c|}{RX6:9} & \multicolumn{1}{c|}{TX5:9} &                            &                            &                            &                            &                                                              &                                                              &                                                              & \multicolumn{1}{c|}{}                                        & \multicolumn{1}{c|}{RXG} & \multicolumn{1}{c|}{TXG} &                          &                          &                           \\ 
+            \cline{4-6}\cline{15-17}
+            \textbf{N6} &                          & \multicolumn{1}{c|}{}      & \multicolumn{1}{c|}{RX7:9} & \multicolumn{1}{c|}{TX6:9} &                            &                            &                            &                            &                            &                                                              &                                                              &                                                              &                                                              & \multicolumn{1}{c|}{}    & \multicolumn{1}{c|}{RXG} & \multicolumn{1}{c|}{TXG} &                          &                           \\ 
+            \cline{3-5}\cline{16-18}
+            \textbf{N7} & \multicolumn{1}{c|}{}    & \multicolumn{1}{c|}{RX8:9} & \multicolumn{1}{c|}{TX7:9} &                            &                            &                            &                            &                            &                            &                                                              &                                                              &                                                              &                                                              &                          & \multicolumn{1}{c|}{}    & \multicolumn{1}{c|}{RXG} & \multicolumn{1}{c|}{TXG} &                           \\ 
+            \cline{2-4}\cline{17-19}
+            \textbf{N8} & \multicolumn{1}{c|}{RX9} & \multicolumn{1}{c|}{TX8:9} &                            &                            &                            &                            &                            &                            &                            &                                                              &                                                              &                                                              &                                                              &                          &                          & \multicolumn{1}{c|}{}    & \multicolumn{1}{c|}{RXG} & \multicolumn{1}{c|}{TXG}  \\ 
+            \cline{2-3}\cline{18-19}
+            \textbf{N9} & \multicolumn{1}{c|}{TX9} &                            &                            &                            &                            &                            &                            &                            &                            &                                                              &                                                              &                                                              &                                                              &                          &                          &                          & \multicolumn{1}{c|}{}    & \multicolumn{1}{c|}{RXG}  \\
+            \cline{2-2}\cline{19-19}
+        \end{tabular}
+    }
+    \caption{Model sense missatge de sincronització, amb dades acumulatives}
+    \label{tab:noSyncAcumulatiu}
+\end{figure}
+
+\autoref{chap:intro}
+\autoref{sec:objectius}
+\autoref{tab:noSyncAcumulatiu}
+
+\listoftables
+\listoffigures
 \printbibliography
+
 
 % Si feu servir apèndixs, descomenteu
 % (també la  \part del principi del document)
