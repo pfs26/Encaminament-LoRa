@@ -1,0 +1,33 @@
+\babel@toc {catalan}{}\relax 
+\contentsline {chapter}{\nonumberline Resum}{iii}{chapter*.1}%
+\contentsline {chapter}{\nonumberline Abstract}{iii}{chapter*.2}%
+\babel@toc {english}{}\relax 
+\babel@toc {catalan}{}\relax 
+\contentsline {chapter}{\numberline {1}Introducció}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Objectius}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Limitacions del treball}{1}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Organització de la memòria}{1}{section.1.3}%
+\contentsline {chapter}{\numberline {2}Antecedents}{3}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Introducció a LoRa i LoRaWAN}{3}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Treballs relacionats}{3}{section.2.2}%
+\contentsline {chapter}{\numberline {3}Disseny del protocol de comunicació}{5}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Accés al medi}{5}{section.3.1}%
+\contentsline {subsection}{\numberline {3.1.1}LoRa}{5}{subsection.3.1.1}%
+\contentsline {subsection}{\numberline {3.1.2}LoRaWAN}{5}{subsection.3.1.2}%
+\contentsline {section}{\numberline {3.2}Encaminament}{5}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Transport}{5}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Aplicació}{5}{section.3.4}%
+\contentsline {chapter}{\numberline {4}Implementació del protocol}{7}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Estructura}{7}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Organització del codi}{7}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.2}Biblioteques i entorn de desenvolupament}{7}{subsection.4.1.2}%
+\contentsline {section}{\numberline {4.2}Protocol de comunicació}{7}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Accés al medi}{7}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Encaminament}{7}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}Transport}{7}{subsection.4.2.3}%
+\contentsline {subsection}{\numberline {4.2.4}Aplicació}{7}{subsection.4.2.4}%
+\contentsline {section}{\numberline {4.3}Validació del funcionament i resultats}{7}{section.4.3}%
+\contentsline {chapter}{\numberline {5}Singularització en entorn real}{9}{chapter.5}%
+\contentsline {chapter}{\numberline {6}Conclusions}{11}{chapter.6}%
+\contentsline {chapter}{\numberline {7}Treball futur}{13}{chapter.7}%
+\providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 
