@@ -19,9 +19,10 @@
 % Indica quines bd bibliografiques usarem
 \addbibresource{tfe.bib}
 
-\title{Disseny de nodes LoRa amb encaminament estàtic per aplicacions de monitoratge}
-% Si voleu subtitol descomenteu
-\subtitle{Viabilitat d'ús en entorns de baix consum}
+% \title{Disseny d’un protocol LoRa amb encaminament estàtic per aplicacions de monitoratge}
+\title{Disseny d’un protocol LoRa amb encaminament estàtic per aplicacions de monitoratge}
+\subtitle{Aplicació en xarxes de baix consum mitjançant sincronització temporal}
+% \subtitle{Adaptació per a escenaris de baix consum mitjançant sincronització temporal}
 
 % L'autor del treball. Admet gènere (vegeu 9.2 del manual) fent \author[f]{}
 \author{Pol Flotats Sabata}
@@ -66,62 +67,151 @@
 %\part{Memòria}
 
 \chapter{Introducció}
-\label{chap:intro}
 \section{Objectius}
-\label{sec:objectius}
-\section{Limitacions del treball}
-\section{Organització de la memòria}
+\section{Limitacions i abast del treball}
+\section{Estructura de la memòria}
 
 \chapter{Antecedents}
-\section{Introducció a LoRa i LoRaWAN}
-\section{Sobre els protocols de comunicació}
+\section{Protocols de comunicació: capes i modularitat}
+Un protocol de comunicació defineix com dos o més dispositius d'una xarxa poden intercanviar informació. 
+Ho fa mitjançant regles i normes que determinen la sintaxi ---format dels missatges---, la semàntica ---el seu significat---, i mecanismes
+de detecció i correcció d'errors.
+
+Per tal que es pugui establir una comunicació, és necessari que els dispositius involucrats implementin el mateix protocol. Per facilitar-ho,
+es defineixen estàndards tècnics, publicats per organitzacions com l'\acro{iso} o l'\acro{ieee}, permetent que els fabricants puguin dissenyar dispositius compatibles. 
+Un exemple de protocol estandaritzat és \acro{http}, amb el seu detall consultable a \cite{fielding_hypertext_2014}.
+
+
+Per facilitar el disseny i implementació dels protocols, sovint es descomposen en protocols més simples.
+Aquests es poden agrupar en capes, on cada capa s'encarrega d'una part específica del procés de comunicació. El resultat
+és el que es coneix com una pila de protocols. 
+En aquests dissenys, cada capa depèn de les capes inferiors per realitzar les seves funcions, i proporciona serveis a les capes superiors. 
+El disseny i verificació de cada capa es pot fer de forma independent, i ofereixen la possibilitat d'implementar diferents protocols en cada capa, 
+sempre que es mantingui la interfície definida entre elles.
+
+Un dels models més coneguts és el model \acro{osi}, definit per set capes. Tot i no ser utilitzat en sistemes reals, és de gran utilitat 
+en entorns acadèmics per comprendre la divisió per capes. Per a més informació, es pot consultar \cite{noauthor_isoiec_1994}.
+
+En sistemes reals, el model més utilitzat és el model \acro{tcp/ip}, que estableix les bases d'Internet. Està format per quatre capes:
+\begin{enumerate}
+    \item Enllaç. És la capa de més baix nivell. S'encarrega de la comunicació entre dispositius d'una mateixa xarxa ---és a dir, es poden comunicar directament---, i
+    de la detecció i correció d'errors produits en la comunicació. També gestiona l'accés al medi físic per on es transmeten les dades, 
+    que sovint és compartit entre diversos dispositius.
+    \item Xarxa. Gestiona la comunicació entre dispositius que no es poden comunicar directament, utilitzant-ne un (o més) com a intermediari. 
+    Els dispositius intermedis són coneguts com a encaminadors (\est{routers}), i s'encarreguen de determinar la ruta més eficient entre dos dispositius.
+    \item Transport. Defineix la connexió entre QUEDEM AQUIIII
+    \item Aplicació. És la capa més alta i propera a l'usuari final. Defineix els protocols utilitzats per aplicacions de l'usuari, 
+    com ara \acro{http} com a estàndard per a la navegació web, o protocols de suport, com ara \acro{dns} per a la resolució de noms de domini.
+\end{enumerate}
+
+Per a l'estàndard complet i més detall, es pot consultar \cite{braden_requirements_1989}. 
+
+% \subsection{Referència al model TCP/IP}
+\section{Tecnologia LoRa i LoRaWAN}
+% \subsection{Limitacions legals i d’ús (EU868, TTN)}
 \section{Treballs relacionats}
-% meshtastic -> xarxa mesh però sense baix consum, broadcasts podent afectar communicació, etc.
-% tampoc permeten compatibilitat amb lorawan
-% \section{Solucions existents}
-% loramesher -> sense broadcast, però requereixen descobriment de rutes previs
-% Cap dels dos permeten baix consum i modes de deep sleep
+% \subsection{Meshtastic, LoRaMesher i altres solucions}
+% \subsection{Limitacions en consum i compatibilitat}
 
-% Aqui van els capitols especifics del treball
-\chapter{Disseny del protocol de comunicació} % no es veu afectat per material
-\section{Medi físic}
-\subsection{LoRa}
-\subsection{LoRaWAN}
-% Uplinks es faran amb ACK o no depenent de define en compilar
-% fet així per evitar que s'hagin de fer molts downlinks per ACKs
-% ja que TTN limita (fair use policy) a 10 downlinks per dia
-\section{Accés al medi}
-\section{Encaminament}
-\section{Transport}
-\section{Aplicació}
-
-\chapter{Implementació del protocol}
-\section{Estructura}
-\subsection{Organització del codi}
-% S'ha implementat seguint model de capes, on cada capa és un mòdul.
-% Cada capa inferior notifica a la superior a través de callbacks, 
-% i cada capa superior notifica a la inferior a través de mètodes.
-% S'ha intentat que no hi hagi mètodes bloquejants, amb excepció dels 
-% mètodes "finals" com transmissió.
-\subsection{Biblioteques i entorn de desenvolupament}
-% platformio + radiolib (comentar radiohead + lmic)
-\section{Protocol de comunicació}
+\chapter{Desenvolupament del protocol de comunicació}
+\section{Disseny per capes}
 \subsection{Capa física}
 \subsection{Accés al medi}
-\subsection{Encaminament}
-\subsection{Transport}
-\subsection{Aplicació}
-\section{Validació del funcionament i resultats}
+\subsection{Encaminament estàtic}
+\subsection{Capa de transport}
+\subsection{Capa d’aplicació}
+\section{Implementació}
+\subsection{Arquitectura del codi i comunicació entre capes}
+\subsection{Biblioteques i entorn de desenvolupament}
+\subsection{Proves i validació funcional}
 
-\chapter{Aplicació en entorns de baix consum}
-% explicar avantatges i inconvenients d'utilitzar
-% el protocol de sincronització genèric aqui. També s'hauria d'explicar el seu disseny
-
-% quines son totes les opcions plantejades, avantatges i inconvenients, i perquè
+\chapter{Adaptació a entorns de baix consum}
+\section{Descripció de l’escenari: xarxa lineal de sensors}
+\section{Limitacions del protocol sense optimitzacions energètiques}
+% \section{Estratègies de sincronització i activació temporal}
+\section{Estratègies de sincronització}
+\subsection{Sincronització explícita}
+\subsection{Sincronització implícita}
+% \subsection{Avantatges i inconvenients de cada enfocament}
+% \subsection{Compromisos entre consum i generalitat del protocol}
 
 \chapter{Conclusions}
+% \section{Resultats assolits}
+% \section{Limitacions del disseny final}
+% \section{Punts clau de millora}
 
 \chapter{Treball futur}
+% \section{Suport a topologies més complexes}
+% \section{Optimització del consum energètic}
+% \section{Integració amb LoRaWAN o altres protocols}
+
+
+% \chapter{Introducció}
+% \label{chap:intro}
+% \section{Objectius}
+% \label{sec:objectius}
+% \section{Limitacions del treball}
+% \section{Organització de la memòria}
+
+% \chapter{Antecedents}
+% \section{Introducció a LoRa i LoRaWAN}
+% % Mencionar limitacions legals de TTN i EU868
+% \section{Sobre els protocols de comunicació}
+% \section{Treballs relacionats}
+% % meshtastic -> xarxa mesh però sense baix consum, broadcasts podent afectar communicació, etc.
+% % tampoc permeten compatibilitat amb lorawan
+% % \section{Solucions existents}
+% % loramesher -> sense broadcast, però requereixen descobriment de rutes previs
+% % Cap dels dos permeten baix consum i modes de deep sleep
+
+% % Aqui van els capitols especifics del treball
+% \chapter{Disseny del protocol de comunicació} % no es veu afectat per material
+% \section{Medi físic}
+% \subsection{LoRa}
+% \subsection{LoRaWAN}
+% % Uplinks es faran amb ACK o no depenent de define en compilar
+% % fet així per evitar que s'hagin de fer molts downlinks per ACKs
+% % ja que TTN limita (fair use policy) a 10 downlinks per dia
+% \section{Accés al medi}
+% % Mencionar que seria aquí on es faria limitació d'accés al medi
+% % Podent afegir un últim estat que "esperi" un temps fins següent TX
+% % Parlar llavors sobre les possibles limitacions que això podria comportar
+% % (per exemple si es limiten ACKs de capa MAC, o no es limiten, o es limiten ACKs de transport...)
+% \section{Encaminament}
+% \section{Transport}
+% \section{Aplicació}
+% \chapter{Implementació del protocol}
+% \section{Estructura}
+% \subsection{Organització del codi}
+% % S'ha implementat seguint model de capes, on cada capa és un mòdul.
+% % Cada capa inferior notifica a la superior a través de callbacks, 
+% % i cada capa superior notifica a la inferior a través de mètodes.
+% % S'ha intentat que no hi hagi mètodes bloquejants, amb excepció dels 
+% % mètodes "finals" com transmissió.
+% \subsection{Biblioteques i entorn de desenvolupament}
+% % platformio + radiolib (comentar radiohead + lmic)
+% \section{Protocol de comunicació}
+% \subsection{Capa física}
+% \subsection{Accés al medi}
+% \subsection{Encaminament}
+% \subsection{Transport}
+% \subsection{Aplicació}
+% \section{Validació del funcionament i resultats}
+
+% \chapter{Aplicació en entorns de baix consum}
+% % explicar avantatges i inconvenients d'utilitzar
+% % el protocol de sincronització genèric aqui. També s'hauria d'explicar el seu disseny
+
+% % quines son totes les opcions plantejades, avantatges i inconvenients, i perquè
+% \section{Descripció de la situació}
+% % Com és la xarxa, i què es vol aconseguir
+
+% % Per a cada iteració: avantatges i inconvenients. Què implicaria afegir nous nodes?
+% % Limitacions de temps? memòria?
+
+% \chapter{Conclusions}
+
+% \chapter{Treball futur}
 
 % https://www.latex-tables.com/
 % configurar amb opció de SCALE
@@ -146,12 +236,12 @@
             \cline{2-4}\cline{17-19}
             \textbf{N8} & \multicolumn{1}{c|}{RX9} & \multicolumn{1}{c|}{TX8:9} &                            &                            &                            &                            &                            &                            &                            &                                                              &                                                              &                                                              &                                                              &                          &                          & \multicolumn{1}{c|}{}    & \multicolumn{1}{c|}{RXG} & \multicolumn{1}{c|}{TXG}  \\ 
             \cline{2-3}\cline{18-19}
-            \textbf{N9} & \multicolumn{1}{c|}{TX9} &                            &                            &                            &                            &                            &                            &                            &                            &                                                              &                                                              &                                                              &                                                              &                          &                          &                          & \multicolumn{1}{c|}{}    & \multicolumn{1}{c|}{RXG}  \\
+            \textcolor[rgb]{0.1,1,0.2}{\textbf{N9}} & \multicolumn{1}{c|}{TX9} &                            &                            &                            &                            &                            &                            &                            &                            &                                                              &                                                              &                                                              &                                                              &                          &                          &                          & \multicolumn{1}{c|}{}    & \multicolumn{1}{c|}{RXG}  \\
             \cline{2-2}\cline{19-19}
         \end{tabular}
     }
     \caption{Model sense missatge de sincronització, amb dades acumulatives}
-    \label{tab:noSyncAcumulatiu}
+    \label{fig:noSyncAcumulatiu}
 \end{figure}
 
 \autoref{chap:intro}
@@ -160,6 +250,7 @@
 
 \listoftables
 \listoffigures
+
 \printbibliography
 
 
