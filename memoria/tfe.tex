@@ -96,12 +96,16 @@ En sistemes reals, el model més utilitzat és el model \acro{tcp/ip}, que estab
 \begin{enumerate}
     \item Enllaç. És la capa de més baix nivell. S'encarrega de la comunicació entre dispositius d'una mateixa xarxa ---és a dir, es poden comunicar directament---, i
     de la detecció i correció d'errors produits en la comunicació. També gestiona l'accés al medi físic per on es transmeten les dades, 
-    que sovint és compartit entre diversos dispositius.
-    \item Xarxa. Gestiona la comunicació entre dispositius que no es poden comunicar directament, utilitzant-ne un (o més) com a intermediari. 
-    Els dispositius intermedis són coneguts com a encaminadors (\est{routers}), i s'encarreguen de determinar la ruta més eficient entre dos dispositius.
-    \item Transport. Defineix la connexió entre QUEDEM AQUIIII
-    \item Aplicació. És la capa més alta i propera a l'usuari final. Defineix els protocols utilitzats per aplicacions de l'usuari, 
-    com ara \acro{http} com a estàndard per a la navegació web, o protocols de suport, com ara \acro{dns} per a la resolució de noms de domini.
+    que sovint és compartit amb altres dispositius.
+    \item Xarxa. Gestiona la comunicació entre dispositius que es troben en xarxes diferents i, per tant, no es poden comunicar directament. 
+    Per fer-ho, s'utilitzen dispositius intermedis, coneguts com a encaminadors (\est{routers}), 
+    que determinen la ruta més eficient per fer arribar les dades al seu destí.
+    \item Transport. Defineix la connexió d'extrem a extrem entre els dispositius origen i destí i, si és necessari, que la transmissió sigui fiable. 
+    Els protocols d'aquesta capa poden oferir mecanismes com l'ordenació de missatges, l'eliminació de missatges duplicats i la gestió de congestió. 
+    Els dos protocols més coneguts d'aquesta capa són \acro{tcp}, que garanteix la transmissió fiable de dades mitjançant confirmacions i retransmissions,
+    i \acro{udp}, que no garanteix fiabilitat, però és més eficient per aplicacions en temps real com el contingut en estríming o videjocs.
+    \item Aplicació. És la capa més alta i propera a l'usuari final. Defineix els protocols que utilitzen les aplicacions per comunicar-se a través de la xarxa.
+    com ara \acro{http}, utilitzat per a la navegació web, o protocols de suport, com ara \acro{dns} per a la resolució de noms de domini.
 \end{enumerate}
 
 Per a l'estàndard complet i més detall, es pot consultar \cite{braden_requirements_1989}. 
