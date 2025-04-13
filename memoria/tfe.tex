@@ -73,45 +73,45 @@
 
 \chapter{Antecedents}
 \section{Protocols de comunicació: capes i modularitat}
-Un protocol de comunicació defineix com dos o més dispositius d'una xarxa poden intercanviar informació. 
-Ho fa mitjançant regles i normes que determinen la sintaxi ---format dels missatges---, la semàntica ---el seu significat---, i mecanismes
-de detecció i correcció d'errors.
+Un protocol de comunicació defineix com dos o més dispositius d'una xarxa poden intercanviar informació. Ho fa mitjançant regles i normes que determinen la sintaxi ---format dels missatges---, la semàntica ---el seu significat---, i mecanismes de detecció i correcció d'errors.
 
-Per tal que es pugui establir una comunicació, és necessari que els dispositius involucrats implementin el mateix protocol. Per facilitar-ho,
-es defineixen estàndards tècnics, publicats per organitzacions com l'\acro{iso} o l'\acro{ieee}, permetent que els fabricants puguin dissenyar dispositius compatibles. 
-Un exemple de protocol estandaritzat és \acro{http}, amb el seu detall consultable a \cite{fielding_hypertext_2014}.
+Per tal que es pugui establir una comunicació, és necessari que els dispositius involucrats implementin el mateix protocol. Per facilitar-ho, es defineixen estàndards tècnics, publicats per organitzacions com l'\acro{iso} o l'\acro{ieee}, permetent que els fabricants puguin dissenyar dispositius compatibles. Un exemple de protocol estandaritzat és \acro{http}, amb el seu detall consultable a \cite{fielding_hypertext_2014}.
 
+Per facilitar el disseny i implementació dels protocols, sovint es descomposen en protocols més simples. Aquests es poden agrupar en capes, on cada capa s'encarrega d'una part específica del procés de comunicació. El resultat és el que es coneix com una pila de protocols. 
+En aquests dissenys, cada capa depèn de les capes inferiors per realitzar les seves funcions, i proporciona serveis a les capes superiors. El disseny i verificació de cada capa es pot fer de forma independent, i ofereixen la possibilitat d'implementar diferents protocols en cada capa, sempre que es mantingui la interfície definida entre elles.
 
-Per facilitar el disseny i implementació dels protocols, sovint es descomposen en protocols més simples.
-Aquests es poden agrupar en capes, on cada capa s'encarrega d'una part específica del procés de comunicació. El resultat
-és el que es coneix com una pila de protocols. 
-En aquests dissenys, cada capa depèn de les capes inferiors per realitzar les seves funcions, i proporciona serveis a les capes superiors. 
-El disseny i verificació de cada capa es pot fer de forma independent, i ofereixen la possibilitat d'implementar diferents protocols en cada capa, 
-sempre que es mantingui la interfície definida entre elles.
-
-Un dels models més coneguts és el model \acro{osi}, definit per set capes. Tot i no ser utilitzat en sistemes reals, és de gran utilitat 
-en entorns acadèmics per comprendre la divisió per capes. Per a més informació, es pot consultar \cite{noauthor_isoiec_1994}.
+Un dels models més coneguts és el model \acro{osi}, definit per set capes. Tot i no ser utilitzat en sistemes reals, és de gran utilitat en entorns acadèmics per comprendre la divisió per capes. Per a més informació, es pot consultar \cite{noauthor_isoiec_1994}.
 
 En sistemes reals, el model més utilitzat és el model \acro{tcp/ip}, que estableix les bases d'Internet. Està format per quatre capes:
 \begin{enumerate}
-    \item Enllaç. És la capa de més baix nivell. S'encarrega de la comunicació entre dispositius d'una mateixa xarxa ---és a dir, es poden comunicar directament---, i
-    de la detecció i correció d'errors produits en la comunicació. També gestiona l'accés al medi físic per on es transmeten les dades, 
-    que sovint és compartit amb altres dispositius.
-    \item Xarxa. Gestiona la comunicació entre dispositius que es troben en xarxes diferents i, per tant, no es poden comunicar directament. 
-    Per fer-ho, s'utilitzen dispositius intermedis, coneguts com a encaminadors (\est{routers}), 
-    que determinen la ruta més eficient per fer arribar les dades al seu destí.
-    \item Transport. Defineix la connexió d'extrem a extrem entre els dispositius origen i destí i, si és necessari, que la transmissió sigui fiable. 
-    Els protocols d'aquesta capa poden oferir mecanismes com l'ordenació de missatges, l'eliminació de missatges duplicats i la gestió de congestió. 
-    Els dos protocols més coneguts d'aquesta capa són \acro{tcp}, que garanteix la transmissió fiable de dades mitjançant confirmacions i retransmissions,
-    i \acro{udp}, que no garanteix fiabilitat, però és més eficient per aplicacions en temps real com el contingut en estríming o videjocs.
-    \item Aplicació. És la capa més alta i propera a l'usuari final. Defineix els protocols que utilitzen les aplicacions per comunicar-se a través de la xarxa.
-    com ara \acro{http}, utilitzat per a la navegació web, o protocols de suport, com ara \acro{dns} per a la resolució de noms de domini.
+    \item \emph{Enllaç}. És la capa de més baix nivell. S'encarrega de la comunicació entre dispositius d'una mateixa xarxa ---és a dir, es poden comunicar directament---, i de la detecció i correció d'errors produits en la comunicació. També gestiona l'accés al medi físic per on es transmeten les dades, que sovint és compartit amb altres dispositius.
+    \item \emph{Xarxa}. Gestiona la comunicació entre dispositius que es troben en xarxes diferents i, per tant, no es poden comunicar directament. Per fer-ho, s'utilitzen dispositius intermedis, coneguts com a encaminadors (\est{routers}), que determinen la ruta més eficient per fer arribar les dades al seu destí.
+    \item \emph{Transport}. Defineix la connexió d'extrem a extrem entre els dispositius origen i destí i, si és necessari, que la transmissió sigui fiable. Els protocols d'aquesta capa poden oferir mecanismes com l'ordenació de missatges, l'eliminació de missatges duplicats i la gestió de congestió. Els dos protocols més coneguts d'aquesta capa són \acro{tcp}, que garanteix la transmissió fiable de dades mitjançant confirmacions i retransmissions, i \acro{udp}, que no garanteix fiabilitat, però és més eficient per aplicacions en temps real com el contingut en estríming o videjocs.
+    \item \emph{Aplicació}. És la capa més alta i propera a l'usuari final. Defineix els protocols que utilitzen les aplicacions per comunicar-se a través de la xarxa, com ara \acro{http}, utilitzat per a la navegació web, o protocols de suport, com ara \acro{dns}, per a la resolució de noms de domini.
 \end{enumerate}
-
 Per a l'estàndard complet i més detall, es pot consultar \cite{braden_requirements_1989}. 
 
 % \subsection{Referència al model TCP/IP}
 \section{Tecnologia LoRa i LoRaWAN}
+El nom de \emph{LoRa} prové de l'anglès \est{Long Range}. És una tecnologia de comunicació sense fils, de llarg abast, i de baix consum, fent que sigui especialment útil per a aplicacions d'Internet de les Coses (\acro{iot}). Va ser desenvolupada per \emph{Cycleo}, que va ser adquirida per \emph{Semtech} el 2012.
+
+Per assolir una comunicació de llarg abast, LoRa utilitza modulació de \emph{chirp spread spectrum} (\acro{css}), que permet una comunicació robusta i fiable en entorns amb interferències.
+La tecnologia LoRa utilitza modulació de \emph{chirp spread spectrum} (\acro{css}), el qual utilitza polsos de freqüència variable per transmetre dades, utilitzant tot l'ample de banda disponible. Aquest fet permet una comunicació robusta i fiable en entorns amb interferències i soroll, i és resistent a l'efecte \emph{Doppler}.
+
+Consta de diversos paràmetres que es poden ajustar per adaptar la comunicació a diferents necessitats:
+\begin{itemize}
+    \item \emph{Ample de banda}. És l'ample de banda del canal de transmissió, sovint de \SI{125}{\kHz}, però també pot ser de \SI{250}{\kHz} o \SI{500}{\kHz}. Un ample de banda més gran permet una major velocitat de transmissió, però redueix la sensibilitat de recepció i, per tant, el rang de comunicació.
+\end{itemize}
+
+Així, podríem enumerar les següents característiques:
+\begin{itemize}
+    \item \emph{Llarg abast}. La tecnologia LoRa permet comunicacions de fins a 15 km en entorns rurals i fins a 5 km en entorns urbans \cite{noauthor_lora_2024}.
+    \item \emph{Baix consum}. En no estar pensat per transmetre grans quantitats de dades, ni de forma recurrent (poques vegades al dia), el consum energètic és molt baix. Això permet que els dispositius funcionin amb bateries durant anys. 
+    \item \emph{Baixa velocitat de transmissió}. En no estar pensat per transmetre grans quantitats de dades, la velocitat de transmissió és baixa, amb un màxim de 50 kbps.
+    \item \emph{Fiabilitat}. Gràcies a la modulació \acro{css}, es permet resistir a interferències i al soroll. Això també ajuda a augmentar el rang de comunicació, o a disminuir el consum energètic, ja que permet utilitzar potències de transmissió més baixes sense perdre fiabilitat.
+    \item \emph{Bandes ISM}. Utilitza bandes \acro{ism}, lliures de llicència, com la banda de 868 MHz a Europa o la de 915 MHz als Estats Units. Això permet que qualsevol persona pugui utilitzar la tecnologia sense necessitat d'obtenir una llicència. Malgrat això, existeixen limitacions legals, com la potència màxima de transmissió o la quantitat de dades que es poden transmetre en un període de temps determinat. Per a més informació, es pot consultar \ref{subsec:limitacions_legals}.
+\end{itemize}
+
 % \subsection{Limitacions legals i d’ús (EU868, TTN)}
 \section{Treballs relacionats}
 % \subsection{Meshtastic, LoRaMesher i altres solucions}
