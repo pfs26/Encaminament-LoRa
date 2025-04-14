@@ -73,6 +73,7 @@
 
 \chapter{Antecedents}
 \section{Protocols de comunicació: capes i modularitat}
+\label{sec:protocols}
 Un protocol de comunicació defineix com dos o més dispositius d'una xarxa poden intercanviar informació. Ho fa mitjançant regles i normes que determinen la sintaxi ---format dels missatges---, la semàntica ---el seu significat---, i mecanismes de detecció i correcció d'errors.
 
 Per tal que es pugui establir una comunicació, és necessari que els dispositius involucrats implementin el mateix protocol. Per facilitar-ho, es defineixen estàndards tècnics, publicats per organitzacions com l'\acro{iso} o l'\acro{ieee}, permetent que els fabricants puguin dissenyar dispositius compatibles. Un exemple de protocol estandaritzat és \acro{http}, amb el seu detall consultable a \cite{fielding_hypertext_2014}.
@@ -93,29 +94,70 @@ Per a l'estàndard complet i més detall, es pot consultar \cite{braden_requirem
 
 % \subsection{Referència al model TCP/IP}
 \section{Tecnologia LoRa i LoRaWAN}
+Els termes \emph{LoRa} i \emph{LoRaWAN} sovint es confonen i s'utilitzen ambdós termes indistintament. Mentre que el primer és una tecnologia propietària, el segon és mantingut per una associació sense ànim de lucre. En aquest apartat es presenten ambdues tecnologies, indicant-ne les seves característiques i limitacions.
+
+\subsection{LoRa}
 El nom de \emph{LoRa} prové de l'anglès \est{Long Range}. És una tecnologia de comunicació sense fils, de llarg abast, i de baix consum, fent que sigui especialment útil per a aplicacions d'Internet de les Coses (\acro{iot}). Va ser desenvolupada per \emph{Cycleo}, que va ser adquirida per \emph{Semtech} el 2012.
 
-Per assolir una comunicació de llarg abast, LoRa utilitza modulació de \emph{chirp spread spectrum} (\acro{css}), que permet una comunicació robusta i fiable en entorns amb interferències.
-La tecnologia LoRa utilitza modulació de \emph{chirp spread spectrum} (\acro{css}), el qual utilitza polsos de freqüència variable per transmetre dades, utilitzant tot l'ample de banda disponible. Aquest fet permet una comunicació robusta i fiable en entorns amb interferències i soroll, i és resistent a l'efecte \emph{Doppler}.
+Utilitza freqüència sub-GHz en bandes \acro{ism} ---\emph{Industrial, Scientific and Medical}---, que són bandes de freqüència lliures de llicència. Això permet que qualsevol persona pugui utilitzar la tecnologia sense necessitat d'obtenir una llicència. Malgrat això, existeixen limitacions legals, com la potència màxima de transmissió o la quantitat de dades que es poden transmetre en un període de temps determinat. Per a més informació, es pot consultar \ref{subsec:limitacions_legals}.
+
+Per assolir una comunicació de llarg abast, LoRa utilitza modulació de \emph{chirp spread spectrum} (\acro{css}), que permet una comunicació robusta i fiable en entorns amb interferències. Aquesta modulació es basa en codificar cada símbol com un senyal que s'escampa per tot l'ample de banda disponible, augmentant (o disminuint) de forma lineal la freqüència al llarg del temps. Gràcies a que la freqüència varia de forma lineal, també és resistent a l'efecte \emph{Doppler}, com s'ha estudiat a \cite{doroshkin_experimental_2019}.
 
 Consta de diversos paràmetres que es poden ajustar per adaptar la comunicació a diferents necessitats:
 \begin{itemize}
-    \item \emph{Ample de banda}. És l'ample de banda del canal de transmissió, sovint de \SI{125}{\kHz}, però també pot ser de \SI{250}{\kHz} o \SI{500}{\kHz}. Un ample de banda més gran permet una major velocitat de transmissió, però redueix la sensibilitat de recepció i, per tant, el rang de comunicació.
+    \item \emph{Ample de banda}. És l'ample de banda (\acro{bw}) del canal de transmissió, sovint de \SI{125}{\kHz}, però també pot ser de \SI{250}{\kHz} o \SI{500}{\kHz}. Un ample de banda més gran permet una major velocitat de transmissió, però redueix la sensibilitat de recepció i, per tant, el rang de comunicació.
+    \item \emph{Data rate}. És la velocitat de transmissió de dades (\acro{dr}), que depèn de l'ample de banda i del factor d'espargiment. Un data rate més alt permet una major velocitat de transmissió, però redueix la sensibilitat de recepció i, per tant, el rang de comunicació.
+    \item \emph{Spreading Factor}. El factor d'espargiment (\acro{sf}) defineix la durada dels símbols i, per tant, la velocitat de transmissió. Un \acro{sf} més alt permet una major sensibilitat de recepció, ja que cada símbol ocupa més temps i, per tant, és més fàcil de detectar. Això permet una comunicació a llarg abast, però redueix la velocitat de transmissió. Els valors possibles de \acro{sf} són entre 7 i 12 i, per cada increment de 1 d'\acro{sf}, es redueix la velocitat de transmissió a la meitat. Una característica molt important és que els diferents \acro{sf} són ortogonals entre ells. Això implica que senyals modulats amb diferents \acro{sf} i en un mateix canal no interfereixin entre ells. 
+    \item \emph{Coding Rate}. La taxa de codificació (\acro{cr}) defineix la proporció d'informació útil que es transmet en comparació amb la quantitat total de dades enviades. Els possibles valors són $\frac{4}{5}$, $\frac{4}{6}$, $\frac{4}{7}$ i $\frac{4}{8}$. Així, per un \acro{cr} de $\frac{4}{5}$, per cada quatre bits d'informació útil, se n'afegeix un de redundància.
 \end{itemize}
 
-Així, podríem enumerar les següents característiques:
+Tots aquests paràmetres estan relacionats entre ells, i és important trobar un equilibri entre ells per aconseguir la millor comunicació possible. Per exemple, si es vol obtenir una comunicació a llarg abast, es pot augmentar el \acro{sf} i el \acro{cr}. Això reduirà la velocitat de transmissió i, per tant, augmentarà el consum energètic, ja que serà necessari estar transmetent més temps. En canvi, si es vol una comunicació ràpida, es pot reduir el \acro{sf} i augmentar el \acro{bw}, però això reduirà el rang de comunicació.
+
+Amb una configuració adequada, es poden aconseguir comunicacions de fins a quinze quilòmetres en entorns rurals, i amb una vida útil de les bateries de diversos mesos i anys, com especifica Semtech a \cite{noauthor_lora_2024}.
+
+\subsection{LoRaWAN}
+Pel que fa a LoRaWAN, es tracta d'una definició de l'arquitectura d'un sistema \acro{LPWAN} (\est{Low Power Wide Area Network}), desenvolupada i mantenida per la \href{https://lora-alliance.org}{LoRa Alliance}. Defineix el protocol de comunicació i l'arquitectura de la xarxa, així com els mecanismes de seguretat i gestió de la xarxa. 
+
+Utilitzant l'estructura per capes vista a la \autoref{sec:protocols}, LoRaWAN opera principalment a nivell d'enllaç, malgrat que també implementa característiques d'altres capes (com ara el control de sessions). A nivell físic, utilitza la modulació LoRa.
+
+Pel que fa a l'estructura de la xarxa, consta de 4 components principals:
 \begin{itemize}
-    \item \emph{Llarg abast}. La tecnologia LoRa permet comunicacions de fins a 15 km en entorns rurals i fins a 5 km en entorns urbans \cite{noauthor_lora_2024}.
-    \item \emph{Baix consum}. En no estar pensat per transmetre grans quantitats de dades, ni de forma recurrent (poques vegades al dia), el consum energètic és molt baix. Això permet que els dispositius funcionin amb bateries durant anys. 
-    \item \emph{Baixa velocitat de transmissió}. En no estar pensat per transmetre grans quantitats de dades, la velocitat de transmissió és baixa, amb un màxim de 50 kbps.
-    \item \emph{Fiabilitat}. Gràcies a la modulació \acro{css}, es permet resistir a interferències i al soroll. Això també ajuda a augmentar el rang de comunicació, o a disminuir el consum energètic, ja que permet utilitzar potències de transmissió més baixes sense perdre fiabilitat.
-    \item \emph{Bandes ISM}. Utilitza bandes \acro{ism}, lliures de llicència, com la banda de 868 MHz a Europa o la de 915 MHz als Estats Units. Això permet que qualsevol persona pugui utilitzar la tecnologia sense necessitat d'obtenir una llicència. Malgrat això, existeixen limitacions legals, com la potència màxima de transmissió o la quantitat de dades que es poden transmetre en un període de temps determinat. Per a més informació, es pot consultar \ref{subsec:limitacions_legals}.
+    \item \emph{Dispositius finals}. Sensors o actuadors que transmeten, a través de LoRa, missatges als \est{gateways}, conegut com a \est{uplinks}. També pot ser a l'inrevés, on els \est{gateways} transmeten missatges als dispositius finals, conegut com a \est{downlinks}.  
+    \item \emph{Gateways}. Dispositius que reben els missatges dels dispositius finals i els transmeten al servidor de la xarxa. La comunicació entre els \est{gateways} i el servidor de la xarxa es realitza a través d'Internet, i no utilitza LoRa. 
+    \item \emph{Servidor de la xarxa}. Dispositiu que gestiona els dispositius finals, els \est{gateways} i aplicacions de la xarxa. S'encarrega de la gestió de les comunicacions, la seguretat i la configuració dels dispositius finals. Gestionen també el xifrat punt a punt ---entre dispositius finals i servidors d'aplicació---.
+    \item \emph{Servidor d'aplicació}. Processa les dades d'aplicació enviades pels dispositius finals.
+\end{itemize}
+Aquests dispositius es troben organitzats en una estructura d'«estrella d'estrelles», on a la part central hi trobem el servidor de la xarxa. Aquest es comunica amb múltiples \est{gateways}, i cada \est{gateway} es comunica a la vegada amb múltiples dispositius finals. 
+Un fet important és que un dispositiu final no escull el \est{gateway} amb qui comunicar-se: en transmetre, tots els \est{gateways} que reben les dades ho reenvien al servidor de la xarxa. El servidor de xarxa és qui s'encarrega de detecar missatges duplicats i escollir quin és el millor \est{gateway} per transmetre un \est{downlink}. Aquesta estructura simplifica el disseny dels dispositius finals, amb el cost d'una major complexitat en el servidor de xarxa, tenint en compte que hi ha un únic servidor de xarxa per una quantitat N de dispositius finals.
+
+Els dispositius finals poden operar en tres modes diferents, coneguts com a \emph{classes}:
+\begin{itemize}
+    \item \emph{Classe A}. És la classe més senzilla i de menor consum. Els dispositius finals només poden rebre missatges després d'haver realitzat una transmissió (\est{uplink}), moment en el qual obren dues finestres de recepció per rebre \est{downlinks}. Aquesta és la classe més utilitzada en aplicacions d'\acro{iot}, ja que permet un funcionament de baix consum, sent únicament necessari posar-se en mode de recepció després de fer una transmissió.
+    \item \emph{Classe B}. Els dispositius finals obren finestres de recepció en moments predeterminats (coneguts com a \est{ping slots}), a més de les finestres de recepció que obren després d'un \est{uplink}. Aquest fet fa que la latència de recepció de \est{downlinks} sigui molt menor que en la classe A.
+    \item \emph{Classe C}. Obren també dues finestres de recepció després d'un \est{uplink}, amb la diferència que la segona finestra es manté oberta fins la següent transmissió. Així, es pot considerar que aquests dispositius sempre estan rebent, amb l'exepció de quan transmeten. La latència de recepció de \est{downlinks} és la mínima d'entre les tres classes, però el consum energètic és màxim.
 \end{itemize}
 
-% \subsection{Limitacions legals i d’ús (EU868, TTN)}
+Una altra característica important de LoRaWAN és la seva capacitat d'autoajustament, conegut com a \acro{adr} (\est{Adaptative Data Rate}). Els dispositius finals poden ajustar automàticament els paràmetres de comunicació, com el \acro{sf} o la potència de transmissió, per adaptar-se a les condicions del canal de comunicació. Quan s'utilitza, el servidor de la xarxa pot indicar als dispositius finals quins paràmetres utilitzar, reduint el consum energètic i possibles interferències amb altres dispositius. Per exemple, un dispositiu molt proper a un \est{gateway} hauria d'utilitzar \acro{sf} més baixos, mentre que dispositius llunyans n'haurien d'utilitzar de més elevats.
+
+\subsection{The Things Network}
+Es tracta d'un projecte d'\acro{iot} que proporciona un servidor de xarxa públic i gratuït. El seu objectiu és crear una xarxa global de dispositius LoRaWAN, permetent la comunicació entre ells sense necessitat d'infraestructura pròpia. Els usuaris poden connectar els seus \est{gateways} a la xarxa i compartir la seva cobertura amb altres usuaris.
+
+També ofereix la possibilitat d'afegir dispositius finals a la xarxa, i gestionar-los a través de la seva interfície web. A més, permeten la integració amb altres serveis, com ara \emph{Node-RED} o \emph{Grafana}, per visualitzar i analitzar les dades dels dispositius finals.
+
+\subsection{Limitacions legals}
+\label{subsec:limitacions_legals}
+Com s'ha comentat anteriorment, LoRa utilitza bandes de freqüència lliures de llicència. Per garantir un ús adequat d'aquestes bandes, cada país estableix una sèrie de limitacions legals. Aquestes limitacions poden variar d'un país a un altre, i és important tenir-les en compte a l'hora de dissenyar un sistema de comunicació LoRa. 
+
+Pel que fa a la Unió Europea, l'entitat responsable de la regulació de les comunicacions és l'\acro{etsi} (\est{European Telecommunications Standards Institute}). Estableix l'ús de LoRa en les freqüències entre \SI{863}{\MHz} i \SI{870}{\MHz}, amb un ample de banda màxim de \SI{250}{\kHz}.
+
+A més, estableix un límit de potència màxima de transmissió, i un màxim d'utilització del canal. Aquestes limitacions depenen de la sub-banda utilitzada (dins el rang anteriorment mencionat), però de forma genèrica es considera una potència màxima de \SI{16}{\deci\bel\text{m}}, i una utilització màxima del canal (conegut com a \emph{duty cyle}) de l¡\SI{1}{\%}. Així, per cada hora de funcionament, poden transmetre un màxim de 36 segons. Tots els detalls sobre les limitacions legals a la Unió Europea es poden consultar a \cite{noauthor_httpswwwetsiorgdeliveretsi_en300200_30029930022002030201_60en_30022002v030201ppdf_nodate}.
+
+Si s'utilitza un servidor de xarxa públic com \emph{The Things Network}, és important tenir en compte que aquest també pot aplicar limitacions addicionals. Pel que fa a \acro{ttn}, estableix una política d'ús just (\emph{fair use policy}) que limita l'ús del canal en 30 segons per dispositiu final i dia. A més, s'estableix un límit de deu \est{downlinks} per dispositiu i dia. És important tenir aquestes limitacions en compte en dissenyar un sistema; en cas d'incumpliment, el servidor de xarxa podria bloquejar l'accés del dispositiu final.
+
 \section{Treballs relacionats}
 % \subsection{Meshtastic, LoRaMesher i altres solucions}
 % \subsection{Limitacions en consum i compatibilitat}
+Existeixen diversos projectes amb un objectiu similar al d'aquest treball, com ara \emph{Meshtastic} o \emph{LoRaMesher}. Tots dos projectes utilitzen LoRa per crear xarxes de comunicació entre dispositius finals, però presenten limitacions importants. En aquest apartat es presenten 
 
 \chapter{Desenvolupament del protocol de comunicació}
 \section{Disseny per capes}
