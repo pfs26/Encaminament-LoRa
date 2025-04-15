@@ -70,6 +70,8 @@
 \section{Objectius}
 \section{Limitacions i abast del treball}
 \section{Estructura de la memòria}
+% primera part on es fa disseny d'un protocol genèric i NO centrat en baix consum, sinó en generalització i nodes amb taules estàtiques
+% segona part on es fa un disseny centrat en baix consum i sincronització temporal
 
 \chapter{Antecedents}
 \section{Protocols de comunicació: capes i modularitat}
@@ -116,6 +118,7 @@ Tots aquests paràmetres estan relacionats entre ells, i és important trobar un
 Amb una configuració adequada, es poden aconseguir comunicacions de fins a quinze quilòmetres en entorns rurals, i amb una vida útil de les bateries de diversos mesos i anys, com especifica Semtech a \cite{noauthor_lora_2024}.
 
 \subsection{LoRaWAN}
+% TODO: QUEDA EXPLICAR JOIN (OTAA I ABP)
 Pel que fa a LoRaWAN, es tracta d'una definició de l'arquitectura d'un sistema \acro{LPWAN} (\est{Low Power Wide Area Network}), desenvolupada i mantenida per la \href{https://lora-alliance.org}{LoRa Alliance}. Defineix el protocol de comunicació i l'arquitectura de la xarxa, així com els mecanismes de seguretat i gestió de la xarxa. 
 
 Utilitzant l'estructura per capes vista a la \autoref{sec:protocols}, LoRaWAN opera principalment a nivell d'enllaç, malgrat que també implementa característiques d'altres capes (com ara el control de sessions). A nivell físic, utilitza la modulació LoRa.
@@ -155,6 +158,7 @@ A més, estableix un límit de potència màxima de transmissió, i un màxim d'
 Si s'utilitza un servidor de xarxa públic com \emph{The Things Network}, és important tenir en compte que aquest també pot aplicar limitacions addicionals. Pel que fa a \acro{ttn}, estableix una política d'ús just (\emph{fair use policy}) que limita l'ús del canal en 30 segons per dispositiu final i dia. A més, s'estableix un límit de deu \est{downlinks} per dispositiu i dia. És important tenir aquestes limitacions en compte en dissenyar un sistema; en cas d'incumpliment, el servidor de xarxa podria bloquejar l'accés del dispositiu final.
 
 \section{Treballs relacionats}
+\label{sec:treballs_relacionats}
 Existeixen diversos projectes amb un objectiu similar al d'aquest treball, com ara \emph{Meshtastic} o \emph{LoRaMesher}. Tots dos projectes utilitzen LoRa per crear xarxes de comunicació entre dispositius finals, però presenten diferencies amb els objectius d'aquest treball. A més, consten també de limitacions, a les qual se'ls vol donar solució. En aquest apartat es presenten ambdós projectes, amb les seves característiques i limitacions, així com diferències vers el treball presentat. 
 
 \subsection{Meshtastic}
@@ -178,16 +182,60 @@ Cada dispositiu consta d'una taula d'encaminament, on es defineixen quin és el 
 Aquesta solució resol el problema de la «inundació controlada» presentat anteriorment, ja que únicament els nodes que es troben a la ruta reenvien el missatge. Malgrat això, presenta un dels inconvenients vists prèviament: tots els dispositius han d'estar sempre actius i en mode de recepció. Com s'ha mencionat, això provoca un consum elevat, reduint la viabilitat d'ús en aplicacions de monitoratge.
 
 \chapter{Desenvolupament del protocol de comunicació}
+En aquest capítol es presenta el disseny i implementació del protocol de comunicació. S'ha dissenyat amb l'objectiu de ser flexible, eficient, aplicable a una àmpla varietat de xarxes LoRa, i amb compatibilitat amb xarxes LoRaWAN. 
+
+En un primer moment es fa un anàlisi de les característiques del protocol, així com la seva estructura. A continuació, es descriu l'entorn de desenvolupament i llibreries utilitzades. Seguidament, es presenta el disseny per capes del protocol, seguint l'estructura vista a la \autoref{sec:protocols}. Finalment, es mostra la implementació del protocol en un dispositiu real, i les verificacions realitzades per validar el funcionament.
+
+El codi desenvolupat es pot consultar a \url{https://github.com/pfs26/Encaminament-LoRa/tree/main/firmware}. En aquesta secció no es farà referència a la implementació específica de cada funcionalitat, sinó més bé als criteris de disseny adoptats i les decisions preses. 
+
+\section{Característiques}
+El disseny del protocol està fortament influenciat pel model \acro{tcp/ip}, presentat a la \autoref{sec:protocols}. El protocol presentat es basa en una pila de protocols, on cada capa s'encarrega d'una part específica del procés de comunicació. Això permet un disseny modular, i la possibilitat de modificar les funcionalitats d'una capa sense afectar la resta.
+
+Es basa en una xarxa de dispositius estàtics, una característica habitual en sistemes de monitoratge. Aquest fet permet prescindir de mecanismes d'encaminament dinàmic, com els presentats a la \autoref{sec:treballs_relacionats}, ja que la xarxa no canvia amb el temps, permetent simplificar el protocol. Per altra banda, això implica que la topologia de la xarxa ha de ser dissenyada abans de la seva implementació, definint les taules d'encaminament de cada dispositiu.
+
+En utilitzar la modulació LoRa, que com s'ha dit anteriorment utilitza freqüències \acro{ism}, intenta maximitzar l'eficiència d'ús del canal. Això redueix la generació d'interferències amb altres dispositius que utilitzin el mateix canal, el nombre de retransmissions, i un menor consum energètic.
+
+Ofereix compatibilitat amb LoRaWAN, permetent que dispositius amb connexió a \est{gateways} puguin alternar entre l'ús del protocol dissenyat o LoRaWAN. Això ofereix la possibilitat a dispositius que no tenen connexió directe a \est{gateways} de comunicar-s'hi a través de dispositius que sí que en tenen. 
+
+Finalment, el protocol incorpora mecanismes per tal d'assegurar la correcta transmissió dels missatges a través de retransmissions automàtiques i reconeixements de missatges, semblants al protocol \acro{tcp}.
+
+S'ha pensat per tal que totes les funcionalitats siguin configurables, permetent adaptar el protocol a les necessitats de cada aplicació. Això inclou la possibilitat d'activar o desactivar la retransmissió automàtica, així com la configuració dels paràmetres de LoRa, o intervals de temps entre retransmissions.
+
+\section{Arquitectura del codi i comunicació entre capes}
+% explicar bucle LOOP 
+\section{Biblioteques i entorn de desenvolupament}
+
 \section{Disseny per capes}
+Com en la majoria de protocols moderns, s'ha dissenyat seguint un model per capes. L'estructura es basa en el model \acro{tcp/ip}, amb la diferència de la capa física, que el model \acro{tcp/ip} no contempla de forma explícita. 
+A continuació es descriuen les diferents capes del protocol, des de la capa física fins a la capa d’aplicació, indicant-ne les funcions principals, i les decisions de disseny adoptades per optimitzar el rendiment i la simplicitat del sistema.
+
 \subsection{Capa física}
+La capa física és l'encarregada de transmetre la informació proporcionada per la capa superior a través del medi físic, en aquest cas, LoRa. Tot i no ser una capa que s'implementa directament en el protocol, ja que això ho realitza el transductor LoRa, s'ha considerat oportú incloure-la per una única raó: un dispositiu amb connexió amb un \est{gateway} (es considerarà «amb capacitats LoRaWAN») pot utilitzar el transductor a través de dues interfícies diferents, el protocol definit i LoRaWAN.
+
+A causa de l'existència d'aquestes dues interfícies, és important que existeix-hi un mecanisme de sincronització entre les dues. En cas contrari, es podria voler realitzar una transmissió a través de LoRa quan el transductor està configurat per a LoRaWAN, o viceversa, fent que la transmissió sigui errònia.
+
+La seva implementació és senzilla, exposant únicament dues interfícies que permeten configurar el transductor en mode LoRa o LoRaWAN, i dues més que permeten inicialitzar o deinicialitzar el transductor. La implementació es pot consultar a \fitx{lora.cpp}. 
+
+\subsubsection{Abstracció LoRa}
+Per respectar l'estructura per capes i el model de \est{callbacks} establert, s'ha dissenyat una abstracció de la llibreria RadioLib per comunicar-se entre dispositius a través de LoRa, sense utilitzar LoRaWAN.
+
+Fent això s'obté una interfície senzilla i ben definida per a la capa superior. A més, ofereix la possibilitat de modificar el transductor utilitzat sense afectar la resta del protocol. 
+
+La part més complexa és l'abstracció de la recepció de missatges: una recepció es pot produir en qualsevol moment, i no es pot controlar quan es realitzarà. La llibreria RadioLib ofereix la possibilitat de configurar interrupcions, fent que quan es rep un missatge es generi una interrupció en el microcontrolador. L'inconvenient de les interrupcions és que han de realitzar tasques ràpides i senzilles, per tal de no bloquejar el fil d'execució principal (si no podrien, per exemple, interrompre una transmissió en curs). La solució emprada és que la interrupció únicament guarda en un \est{flag} que s'ha produït una recepció. El fil principal, que s'executa de forma periòdica, comprova si s'ha produït una recepció i, en cas afirmatiu, l'obté i la processa. Realment, aquesta comprovació la realitza una tasca del gestor de tasques, amb un interval configurable. Es pot llegir més sobre aquest a la \autoref{sec:altres_serveis}.
+
+Pel que fa a les transmissions a través de LoRa, aquestes s'han hagut de dissenyar de forma bloquejant. Això implica que, quan s'utilitza la interfície de transmissió, el fil d'execució queda bloquejat fins que la transmissió s'ha completat (ja sigui correcta o incorrectament). En un primer moment es va provar de fer-ho de forma no bloquejant, fent que el transductor notifiqués quan la transmissió havia acabat a través d'una interrupció. A causa del fet que el transductor únicament permetia configurar una interrupció, es va decidir que la millor solució era fer-ho de forma bloquejant, i configurar la interrupció per a la recepció de missatges, la qual no es pot controlar.
+
+Altres mètodes que exposa la interfície permete conèixer l'estat del canal, així com establir els paràmetres de LoRa (com ara \acro{sf} o \acro{bw}). La implementació completa es pot consultar a \fitx{loraraw.cpp}.
+
 \subsection{Accés al medi}
+\subsubsection{LoRaWAN}
 \subsection{Encaminament estàtic}
 \subsection{Capa de transport}
 \subsection{Capa d’aplicació}
-\section{Implementació}
-\subsection{Arquitectura del codi i comunicació entre capes}
-\subsection{Biblioteques i entorn de desenvolupament}
-\subsection{Proves i validació funcional}
+\section{Altres serveis}
+\label{sec:altres_serveis}
+\subsection{Gestor de tasques}
+\section{Proves i validació funcional}
 
 \chapter{Adaptació a entorns de baix consum}
 \section{Descripció de l’escenari: xarxa lineal de sensors}
@@ -307,10 +355,6 @@ Aquesta solució resol el problema de la «inundació controlada» presentat ant
     \caption{Model sense missatge de sincronització, amb dades acumulatives}
     \label{fig:noSyncAcumulatiu}
 \end{figure}
-
-\autoref{chap:intro}
-\autoref{sec:objectius}
-\autoref{tab:noSyncAcumulatiu}
 
 \listoftables
 \listoffigures
