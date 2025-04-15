@@ -1,5 +1,5 @@
 \documentclass{tfgitic}[2024/07/01]
-
+% « »
 % Aqui carregueu packages complementaris que necessiteu
 \usepackage{biblatex}
 % \usepackage[table,xcdraw]{xcolor}
@@ -101,7 +101,7 @@ El nom de \emph{LoRa} prové de l'anglès \est{Long Range}. És una tecnologia d
 
 Utilitza freqüència sub-GHz en bandes \acro{ism} ---\emph{Industrial, Scientific and Medical}---, que són bandes de freqüència lliures de llicència. Això permet que qualsevol persona pugui utilitzar la tecnologia sense necessitat d'obtenir una llicència. Malgrat això, existeixen limitacions legals, com la potència màxima de transmissió o la quantitat de dades que es poden transmetre en un període de temps determinat. Per a més informació, es pot consultar \ref{subsec:limitacions_legals}.
 
-Per assolir una comunicació de llarg abast, LoRa utilitza modulació de \emph{chirp spread spectrum} (\acro{css}), que permet una comunicació robusta i fiable en entorns amb interferències. Aquesta modulació es basa en codificar cada símbol com un senyal que s'escampa per tot l'ample de banda disponible, augmentant (o disminuint) de forma lineal la freqüència al llarg del temps. Gràcies a que la freqüència varia de forma lineal, també és resistent a l'efecte \emph{Doppler}, com s'ha estudiat a \cite{doroshkin_experimental_2019}.
+Per assolir una comunicació de llarg abast, LoRa utilitza modulació de \emph{chirp spread spectrum} (\acro{css}), que permet una comunicació robusta i fiable en entorns amb interferències. Aquesta modulació es basa en codificar cada símbol com un senyal que s'escampa per tot l'ample de banda disponible, augmentant (o disminuint) de forma lineal la freqüència al llarg del temps. Gràcies a que la freqüència varia de forma lineal, també és resistent a l'efecte \emph{Doppler}, com s'ha estudiat a \cite{doroshkin_experimental_2019}. Una representació visual del funcionament de la modulació \acro{css} es pot veure a \cite{richard_wenner_lora_2017}.
 
 Consta de diversos paràmetres que es poden ajustar per adaptar la comunicació a diferents necessitats:
 \begin{itemize}
@@ -150,14 +150,32 @@ Com s'ha comentat anteriorment, LoRa utilitza bandes de freqüència lliures de 
 
 Pel que fa a la Unió Europea, l'entitat responsable de la regulació de les comunicacions és l'\acro{etsi} (\est{European Telecommunications Standards Institute}). Estableix l'ús de LoRa en les freqüències entre \SI{863}{\MHz} i \SI{870}{\MHz}, amb un ample de banda màxim de \SI{250}{\kHz}.
 
-A més, estableix un límit de potència màxima de transmissió, i un màxim d'utilització del canal. Aquestes limitacions depenen de la sub-banda utilitzada (dins el rang anteriorment mencionat), però de forma genèrica es considera una potència màxima de \SI{16}{\deci\bel\text{m}}, i una utilització màxima del canal (conegut com a \emph{duty cyle}) de l¡\SI{1}{\%}. Així, per cada hora de funcionament, poden transmetre un màxim de 36 segons. Tots els detalls sobre les limitacions legals a la Unió Europea es poden consultar a \cite{noauthor_httpswwwetsiorgdeliveretsi_en300200_30029930022002030201_60en_30022002v030201ppdf_nodate}.
+A més, estableix un límit de potència màxima de transmissió, i un màxim d'utilització del canal. Aquestes limitacions depenen de la sub-banda utilitzada (dins el rang anteriorment mencionat), però de forma genèrica es considera una potència màxima de \SI{16}{\deci\bel\text{m}}, i una utilització màxima del canal (conegut com a \emph{duty cyle}) de l'\SI{1}{\%}. Així, per cada hora de funcionament, poden transmetre un màxim de 36 segons. Tots els detalls sobre les limitacions legals a la Unió Europea es poden consultar a \cite{etsi_etsi_nodate}.
 
 Si s'utilitza un servidor de xarxa públic com \emph{The Things Network}, és important tenir en compte que aquest també pot aplicar limitacions addicionals. Pel que fa a \acro{ttn}, estableix una política d'ús just (\emph{fair use policy}) que limita l'ús del canal en 30 segons per dispositiu final i dia. A més, s'estableix un límit de deu \est{downlinks} per dispositiu i dia. És important tenir aquestes limitacions en compte en dissenyar un sistema; en cas d'incumpliment, el servidor de xarxa podria bloquejar l'accés del dispositiu final.
 
 \section{Treballs relacionats}
-% \subsection{Meshtastic, LoRaMesher i altres solucions}
-% \subsection{Limitacions en consum i compatibilitat}
-Existeixen diversos projectes amb un objectiu similar al d'aquest treball, com ara \emph{Meshtastic} o \emph{LoRaMesher}. Tots dos projectes utilitzen LoRa per crear xarxes de comunicació entre dispositius finals, però presenten limitacions importants. En aquest apartat es presenten 
+Existeixen diversos projectes amb un objectiu similar al d'aquest treball, com ara \emph{Meshtastic} o \emph{LoRaMesher}. Tots dos projectes utilitzen LoRa per crear xarxes de comunicació entre dispositius finals, però presenten diferencies amb els objectius d'aquest treball. A més, consten també de limitacions, a les qual se'ls vol donar solució. En aquest apartat es presenten ambdós projectes, amb les seves característiques i limitacions, així com diferències vers el treball presentat. 
+
+\subsection{Meshtastic}
+Es tracta d'un projecte de codi obert que té com a objectiu crear una xarxa de comunicació descentralitzada, i pensada per a ser utilitzada en dispositius de baix consum i cost. El seu repositori es troba disponible a \href{https://github.com/meshtastic}{GitHub}.
+
+Utilitza comunicació LoRa per a transmetre missatges entre dispositius, evitant dependre d'altres infraestructures com internet. Per tal d'aconseguir-ho, tots els dispositius actuen com a encaminadors: quan reben un missatge que no està destinat a ells, el reenvien, permetent que altres dispositius puguin repetir l'encaminament fins arribar al destí final. Una característica molt interessant d'aquest projecte és que ofereix aplicacions mòbils i web per interactuar amb els dispositius de la xarxa, permetent enviar missatges de forma molt senzilla.
+
+L'estratègia d'encaminament que utilitza es basa en «inundació» (\est{flooding}), on cada dispositiu reenvia tots els missatges que rep, sempre que no sigui ell el destinetari, sense tenir en compte si ja els ha rebut o no. Aquest disseny tampoc considera la ubicació del destí final, fent que el missatge es transmeti per tota la xarxa. Aquests fets poden provocar un sobreús del canal, i un augment del consum energètic dels dispositius. 
+
+Per intentar reduir aquest efecte, implementa un estil d'«inundació controlada». Quan un dispositiu rep un missatge, espera un temps proporcional a la relació senyal soroll (\acro{snr}) del missatge rebut abans de retransmetre, i cance\l.la l'enviament si un node realitza la transmissió abans. Així, un dispositiu més proper a l'origen (major \acro{snr}) esperarà més temps que un de llunyà i, per tant, el missatge el retransmetrà únicament el dispositiu llunyà. És cert que això redueix el nombre de transmissions que realitza cada dispositiu, però no evita que el missatge es retransmeti per tota la xarxa. 
+
+Un altre inconvenient és que, a causa que els dispositius no saben quan altres dispositius realitzaran una transmissió, hagin d'estar sempre actius i en mode de recepció. Això provoca que el consum energètic dels dispositius sigui elevat (de l'ordre dels \SI{10}{\milli\watt}), fent-los poc adequats per aplicacions de monitoratge.
+
+Durant el desenvolupament d'aquest treball, Meshtastic ha iniciat la implementació d'un protocol d'encaminament per a missatges entre dos únics dispositius. La idea d'aquest protocol és descobrir la ruta més òptima entre dos dispositius utilitzant el mecanisme d'«inundació controlada»; un cop el destí rep el missatge, respon amb un nou missatge amb la informació de la ruta, que conté tots els dispositius que han de retransmetre el missatge per arribar fins a ell. En el procés de fer arribar aquesta resposta al transmissor del missatge, tots els nodes intermedis poden generar la seva taula de rutes. En les següents transmissions, si es coneix la ruta, els missatges els reenvien únicament els nodes de la ruta. Els detalls de la implementació i funcionament d'aquest protocol es poden consultar a \cite{open_source_mesh_nodate}.
+
+\section{LoRaMesher}
+Es tracta d'una llibreria que implementa un protocol d'encaminament per a ser utilitzat en xarxes basades en LoRa. 
+
+Cada dispositiu consta d'una taula d'encaminament, on es defineixen quin és el següent dispositiu a qui han d'enviar un missatge per fer-lo arribar al destí final. De forma periòdica, cada node transmet informació sobre la seva taula d'encaminament; els nodes que es troben a l'abast reben el missatge i actualitzen la seva taula d'encaminament amb la informació rebuda, no només coneixent informació sobre els seus veïns directes, sinó també sobre els veïns dels seus veïns, i així successivament. Es poden consultar els detalls d'aquesta implementació a \cite{sole_implementation_2022}.
+
+Aquesta solució resol el problema de la «inundació controlada» presentat anteriorment, ja que únicament els nodes que es troben a la ruta reenvien el missatge. Malgrat això, presenta un dels inconvenients vists prèviament: tots els dispositius han d'estar sempre actius i en mode de recepció. Com s'ha mencionat, això provoca un consum elevat, reduint la viabilitat d'ús en aplicacions de monitoratge.
 
 \chapter{Desenvolupament del protocol de comunicació}
 \section{Disseny per capes}
