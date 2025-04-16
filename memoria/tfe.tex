@@ -99,6 +99,8 @@ Per a l'estàndard complet i més detall, es pot consultar \cite{braden_requirem
 Els termes \emph{LoRa} i \emph{LoRaWAN} sovint es confonen i s'utilitzen ambdós termes indistintament. Mentre que el primer és una tecnologia propietària, el segon és mantingut per una associació sense ànim de lucre. En aquest apartat es presenten ambdues tecnologies, indicant-ne les seves característiques i limitacions.
 
 \subsection{LoRa}
+% TODO: Explicar estructura missatge LoRa? Preambul?
+% Mencionar mida màxima de les dades?
 El nom de \emph{LoRa} prové de l'anglès \est{Long Range}. És una tecnologia de comunicació sense fils, de llarg abast, i de baix consum, fent que sigui especialment útil per a aplicacions d'Internet de les Coses (\acro{iot}). Va ser desenvolupada per \emph{Cycleo}, que va ser adquirida per \emph{Semtech} el 2012.
 
 Utilitza freqüència sub-GHz en bandes \acro{ism} ---\emph{Industrial, Scientific and Medical}---, que són bandes de freqüència lliures de llicència. Això permet que qualsevol persona pugui utilitzar la tecnologia sense necessitat d'obtenir una llicència. Malgrat això, existeixen limitacions legals, com la potència màxima de transmissió o la quantitat de dades que es poden transmetre en un període de temps determinat. Per a més informació, es pot consultar \ref{subsec:limitacions_legals}.
@@ -109,13 +111,20 @@ Consta de diversos paràmetres que es poden ajustar per adaptar la comunicació 
 \begin{itemize}
     \item \emph{Ample de banda}. És l'ample de banda (\acro{bw}) del canal de transmissió, sovint de \SI{125}{\kHz}, però també pot ser de \SI{250}{\kHz} o \SI{500}{\kHz}. Un ample de banda més gran permet una major velocitat de transmissió, però redueix la sensibilitat de recepció i, per tant, el rang de comunicació.
     \item \emph{Data rate}. És la velocitat de transmissió de dades (\acro{dr}), que depèn de l'ample de banda i del factor d'espargiment. Un data rate més alt permet una major velocitat de transmissió, però redueix la sensibilitat de recepció i, per tant, el rang de comunicació.
-    \item \emph{Spreading Factor}. El factor d'espargiment (\acro{sf}) defineix la durada dels símbols i, per tant, la velocitat de transmissió. Un \acro{sf} més alt permet una major sensibilitat de recepció, ja que cada símbol ocupa més temps i, per tant, és més fàcil de detectar. Això permet una comunicació a llarg abast, però redueix la velocitat de transmissió. Els valors possibles de \acro{sf} són entre 7 i 12 i, per cada increment de 1 d'\acro{sf}, es redueix la velocitat de transmissió a la meitat. Una característica molt important és que els diferents \acro{sf} són ortogonals entre ells. Això implica que senyals modulats amb diferents \acro{sf} i en un mateix canal no interfereixin entre ells. 
+    \item \emph{Spreading Factor}. El factor d'espargiment (\acro{sf}) defineix la durada dels símbols i, per tant, la velocitat de transmissió. Es correspon amb la quantitat de bits d'informació que codifica cada símbol. Un \acro{sf} més alt permet una major sensibilitat de recepció, ja que cada símbol ocupa més temps i, per tant, és més fàcil de detectar. Això permet una comunicació a llarg abast, però redueix la velocitat de transmissió. Els valors possibles de \acro{sf} són entre 7 i 12 i, per cada increment de 1 d'\acro{sf}, es redueix la velocitat de transmissió a la meitat. Una característica molt important és que els diferents \acro{sf} són ortogonals entre ells. Això implica que senyals modulats amb diferents \acro{sf} i en un mateix canal no interfereixin entre ells. 
     \item \emph{Coding Rate}. La taxa de codificació (\acro{cr}) defineix la proporció d'informació útil que es transmet en comparació amb la quantitat total de dades enviades. Els possibles valors són $\frac{4}{5}$, $\frac{4}{6}$, $\frac{4}{7}$ i $\frac{4}{8}$. Així, per un \acro{cr} de $\frac{4}{5}$, per cada quatre bits d'informació útil, se n'afegeix un de redundància.
 \end{itemize}
 
 Tots aquests paràmetres estan relacionats entre ells, i és important trobar un equilibri entre ells per aconseguir la millor comunicació possible. Per exemple, si es vol obtenir una comunicació a llarg abast, es pot augmentar el \acro{sf} i el \acro{cr}. Això reduirà la velocitat de transmissió i, per tant, augmentarà el consum energètic, ja que serà necessari estar transmetent més temps. En canvi, si es vol una comunicació ràpida, es pot reduir el \acro{sf} i augmentar el \acro{bw}, però això reduirà el rang de comunicació.
 
 Amb una configuració adequada, es poden aconseguir comunicacions de fins a quinze quilòmetres en entorns rurals, i amb una vida útil de les bateries de diversos mesos i anys, com especifica Semtech a \cite{noauthor_lora_2024}.
+
+Per tal que el transmissor i el receptor es puguin sincronitzar, LoRa utilitza un preàmbul de sincronització. Aquest preàmbul és un senyal de referència que permet al receptor detectar l'inici d'una transmissió i sincronitzar-se amb el transmissor. La durada del preàmbul és configurable, però sovint s'estableix de vuit símbols. Una durada major ofereix més garenties que el receptor pugui detectar la transmissió, però augmenta el temps total de transmissió i, per tant, el consum energètic.
+
+Després de transmetre el preàmbul, es transmeten les dades del missatge. Un fet a tenir en compte és que, ja que està pensat per a ser utilitzat en dispositius de baix consum, i a la baixa velocitat de transmissió, la quantitat màxima de dades que molts transductors permeten enviar és de \SI{255}{\byte}.
+
+Per assegurar la integritat de les dades rebudes, LoRa ofereix la possibilitat d'incloure un codi de detecció d'errors (\acro{crc}). Aquest codi es calcula a partir de les dades del missatge i s'afegeix al final del missatge. El receptor pot utilitzar aquest codi per verificar si les dades rebudes són correctes. Si el codi no coincideix amb les dades rebudes, el receptor pot descartar el missatge.
+
 
 \subsection{LoRaWAN}
 % TODO: QUEDA EXPLICAR JOIN (OTAA I ABP)
@@ -186,7 +195,7 @@ En aquest capítol es presenta el disseny i implementació del protocol de comun
 
 En un primer moment es fa un anàlisi de les característiques del protocol, així com la seva estructura. A continuació, es descriu l'entorn de desenvolupament i llibreries utilitzades. Seguidament, es presenta el disseny per capes del protocol, seguint l'estructura vista a la \autoref{sec:protocols}. Finalment, es mostra la implementació del protocol en un dispositiu real, i les verificacions realitzades per validar el funcionament.
 
-El codi desenvolupat es pot consultar a \url{https://github.com/pfs26/Encaminament-LoRa/tree/main/firmware}. En aquesta secció no es farà referència a la implementació específica de cada funcionalitat, sinó més bé als criteris de disseny adoptats i les decisions preses. 
+No es farà especial menció a la implementació específica en codi de cada funcionalitat, si no que més bé es detallaran els criteris de disseny adoptats i les decisions preses. Es considera que, amb un disseny ben definit, la implementació del protocol és una tasca trivial. Malgrat això, es pot consultar la total del codi a \url{https://github.com/pfs26/Encaminament-LoRa/tree/main/firmware}.
 
 \section{Característiques}
 El disseny del protocol està fortament influenciat pel model \acro{tcp/ip}, presentat a la \autoref{sec:protocols}. El protocol presentat es basa en una pila de protocols, on cada capa s'encarrega d'una part específica del procés de comunicació. Això permet un disseny modular, i la possibilitat de modificar les funcionalitats d'una capa sense afectar la resta.
@@ -203,6 +212,7 @@ S'ha pensat per tal que totes les funcionalitats siguin configurables, permetent
 
 \section{Arquitectura del codi i comunicació entre capes}
 % explicar bucle LOOP 
+% Explicar gestor de tasques aqui potser?
 \section{Biblioteques i entorn de desenvolupament}
 
 \section{Disseny per capes}
@@ -221,14 +231,66 @@ Per respectar l'estructura per capes i el model de \est{callbacks} establert, s'
 
 Fent això s'obté una interfície senzilla i ben definida per a la capa superior. A més, ofereix la possibilitat de modificar el transductor utilitzat sense afectar la resta del protocol. 
 
-La part més complexa és l'abstracció de la recepció de missatges: una recepció es pot produir en qualsevol moment, i no es pot controlar quan es realitzarà. La llibreria RadioLib ofereix la possibilitat de configurar interrupcions, fent que quan es rep un missatge es generi una interrupció en el microcontrolador. L'inconvenient de les interrupcions és que han de realitzar tasques ràpides i senzilles, per tal de no bloquejar el fil d'execució principal (si no podrien, per exemple, interrompre una transmissió en curs). La solució emprada és que la interrupció únicament guarda en un \est{flag} que s'ha produït una recepció. El fil principal, que s'executa de forma periòdica, comprova si s'ha produït una recepció i, en cas afirmatiu, l'obté i la processa. Realment, aquesta comprovació la realitza una tasca del gestor de tasques, amb un interval configurable. Es pot llegir més sobre aquest a la \autoref{sec:altres_serveis}.
+La part més complexa és l'abstracció de la recepció de missatges: una recepció es pot produir en qualsevol moment, i no es pot controlar quan es realitzarà. La llibreria RadioLib ofereix la possibilitat de configurar interrupcions, fent que quan es rep un missatge es generi una interrupció en el microcontrolador. L'inconvenient de les interrupcions és que han de realitzar tasques ràpides i senzilles, per tal de no bloquejar el fil d'execució principal (si no podrien, per exemple, interrompre una transmissió en curs). La solució emprada és que la interrupció únicament guarda en un \est{flag} que s'ha produït una recepció. El fil principal, que s'executa de forma periòdica, comprova aquest \est{flag} per saber si s'ha produït una recepció i, en cas afirmatiu, l'obté i la processa. Realment, aquesta comprovació la realitza una tasca del gestor de tasques, amb un interval configurable. Es pot llegir més sobre aquest a la \autoref{sec:altres_serveis}.
 
-Pel que fa a les transmissions a través de LoRa, aquestes s'han hagut de dissenyar de forma bloquejant. Això implica que, quan s'utilitza la interfície de transmissió, el fil d'execució queda bloquejat fins que la transmissió s'ha completat (ja sigui correcta o incorrectament). En un primer moment es va provar de fer-ho de forma no bloquejant, fent que el transductor notifiqués quan la transmissió havia acabat a través d'una interrupció. A causa del fet que el transductor únicament permetia configurar una interrupció, es va decidir que la millor solució era fer-ho de forma bloquejant, i configurar la interrupció per a la recepció de missatges, la qual no es pot controlar.
+Pel que fa a les transmissions a través de LoRa, aquestes s'han hagut de dissenyar de forma bloquejant. Això implica que, quan s'utilitza la interfície de transmissió, el fil d'execució queda bloquejat fins que la transmissió s'ha completat (ja sigui correcta o incorrectament). En un primer moment es va provar de fer-ho de forma no bloquejant, fent que el transductor notifiqués quan la transmissió havia finalitzat a través d'una interrupció. A causa del fet que el transductor escollit (\acro{sx1262}) únicament permet configurar una interrupció, es va decidir que la millor solució era fer-ho de forma bloquejant, i configurar la interrupció per a la recepció de missatges, la qual no es pot controlar.
 
-Altres mètodes que exposa la interfície permete conèixer l'estat del canal, així com establir els paràmetres de LoRa (com ara \acro{sf} o \acro{bw}). La implementació completa es pot consultar a \fitx{loraraw.cpp}.
+Altres mètodes que exposa la interfície permeten conèixer l'estat del canal ---si està ocupat o no---, així com establir els paràmetres de LoRa (com ara \acro{sf} o \acro{bw}) o configurar el \est{callback} de recepció. La implementació completa es pot consultar a \fitx{loraraw.cpp}.
 
 \subsection{Accés al medi}
+La funció d'aquesta capa és la gestió de l'accés al medi físic, i la comunicació entre dispositius de forma directa; és a dir, que no han d'utilitzar dispositius intermedis per comunicar-se. Un bon disseny d'aquesta capa és fonamental per garantir un ús eficient del canal, evitar interferències entre dispositius, i reduir el consum energètic. A més, és l'encarregada d'intentar garantir la integritat de les dades; és a dir, que arribin correctament al seu destí, i que les dades rebudes siguin iguals a les enviades, que no s'hagin produit errors. 
+
+Aquesta capa es comunica amb la capa d'abstracció LoRa, rebent notificacions de recepció a través de \est{callback}, i utilitzant les seves interfícies.
+
+\subsubsection{Estructura de les trames}
+% « »
+Una tasca important en qualsevol protocol és definir la forma de les dades, la «sintaxi». Així, es defineix els camps que contindrà cada missatge, i la seva longitud i posició. Per facilitat, s'ha decidit anomenar «trama» als missatges enviats per la capa d'accés al medi, sent aquest el mateix nom que s'utilitza en el model \acro{tcp/ip}.
+
+Dos camps essencials són el \emph{receptor} i l'\emph{emissor}, que indiquen respectivament les adreces del dispositiu que rep i envia el missatge. S'ha decidit utilitzar adreces d'\SI{1}{\byte}, oferint un total de 256 adreces diferents. Malgrat això, únicament 253 són utilitzables, reservant l'adreça \fitx{0x01} per representar el \est{gateway}, la \fitx{0xFF} per un possible ús de difusió (\emph{broadcast}), i la \fitx{0x00}, PERQUE. Aquesta quantitat de dispositius es considera suficient per a la majoria d'aplicacions de monitoratge, evitant l'ús innecessari de dades i, per tant, minimitzant el temps de transmissió i el consum energètic.
+% TODO: PERQUÈ S'HA DECIDIT NO UTILITZAR 0X00? BUSCA RUN MOTIU
+
+Per tal de poder identificar cada trama, s'ha inclòs un camp d'\emph{identificador} (\emph{id}), que conté un número aleatori generat per l'emissor. Aquest camp permet que el receptor pugui identificar trames duplicades i no processar-les de nou. S'ha considerat utilitzar una longitud de \SI{2}{\byte}, permetent 65536 identificadors diferents. Tot i això, s'ha reservat l'identificador \fitx{0x0000}; la utilitat d'aquest s'exposarà a la \autoref{subsubsec:mac_lorawan}. En el pitjor dels casos, si 252 dispositius transmetessin a un mateix receptor, la probabilitat d'una co\l.lisió és, aproximadament, d'un 38\%. Es tracta d'un problema similar al del «problema dels aniversaris» \cite{noauthor_birthday_2025}.
+
+Tot i semblar una probabilitat molt elevada, no es considera un fet greu: es tracta del pitjor dels casos, on 252 dispositius transmeten al mateix destí, i on el receptor recorda tots els identificadors rebuts. En aplicacions reals, la quantitat d'identificadors guardats és limitada (per exemple als últims 10), reduint la probabilitat de co\l.lisió. Si ho repetim en un cas més realista, on hi ha un receptor comú i 5 transmissors, obtenim una probabilitat de col\l.lisió del 0.015\%, i del 0.068\% si considerem 10 transmissors. Així, s'ha considerant escaient una longitud de \SI{2}{\byte}, buscant minimitzar el consum energètic i el temps de transmissió, sense afectar greument el funcionament.
+% TODO: LA FINESTRA DE RECEPCIÓ HAURIA DE GUARDAR ELS IDS JUSTOS ENTRE RETRANSMISSIONS (COSA RAPIDA A MAC)
+
+Un altre camp important és el dels \est{flags}, que conté informació sobre el missatge. En concret, s'ha definit un camp de \SI{1}{\byte} amb els següents bits:
+\begin{itemize}
+    \item \emph{ACK}. Té la longitud d'un únic bit. Indica si el missatge es tracta d'un reconeixement. Si està actiu, significa que el receptor ha rebut les dades correctament, i envia aquesta informació al transmissor. En cas contrari, el missatge es considera un missatge de dades.
+    \item \emph{Retry}. Té la longitud de dos bits, i indica el nombre de reintent de transmissió actual. Així, si té un valor de zero, significa que és la primera transmissió. S'ha considerat que una longitud de dos bits és suficient, permetent un màxim de quatre reintents. Es pot llegir més informació a \autoref{subsubsec:mac_reintents}.
+    \item \emph{Reservats}. Els cinc bits restants s'han reservat per a un possible ús futur. En el disseny actual no s'ha definit cap funcionalitat, però s'ha considerat oportú reservar-los per tal de poder afegir noves funcionalitats sense haver de modificar l'estructura de la trama.
+\end{itemize}
+
+També s'ha inclòs un camp de \emph{longitud}, que indica la longitud de les dades del missatge. Això permet al receptor saber quants bytes ha de llegir, i evitar llegir més bytes dels necessaris. Tenint en compte que la mida màxima d'un missatge LoRa és de \SI{255}{\byte}, podem utilitzar un únic byte per codificar la longitud.
+
+Seguidament, es troba el camp de \emph{dades}, que conté la informació a transmetre. La seva longitud és variable, i depèn del valor del camp de longitud.
+
+Per acabar, al final de la trama s'ha inclòs un camp de \acro{crc}, per intentar assegurar la integritat de les dades. S'ha optat per utilitzar un \acro{crc} de \SI{1}{\byte}, ja que la quantitat de dades que es transmeten és reduïda. De nou, saquesta decisió intenta reduir la mida del missatge final. S'ha decidit ubicar-lo al final de la trama, facilitant la tasca de càlcul i verificació: cal iterar de forma lineal la trama, sense necessitat de fer salts en memòria. A la \autoref{fig:trama_mac} es pot veure un diagrama amb l'estructura de la trama.
+
+% http://interactive.blockdiag.com/packetdiag/image?compression=deflate&encoding=base64&src=eJwdzTEPgjAQBeCdX3GjDk2gRYpNHAw6GJ1YjTGVVmgC1JQTY4z_3avj-97l3icBaHz_cgY72EBWUB69sdfOurZDIskTspRJBfvBTZMPFEuWrRTUtrEP_ENWMJEpOBg7oru7Rps_C85EEQ8nG2aNUyTJRBkJwzvGtYJtdYRz8KjR0iCX6YWKPGU5bZ782Dp8miglk7Sx06hhMTijYdbB6Vtvl9RKziT9quoq-f4AzfQ6VA
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{imatges/Trama_MAC.png}
+    \caption{Estructura de la trama MAC.}
+    \label{fig:trama_mac}
+\end{figure}
+
+\subsubsection{Transmissió}
+Quan un dispositiu vol transmetre un missatge, és primordial que no interrompi una transmissió en curs. En cas contrari, es podria produir una interferència entre ambdues transmissions, provocant que cap dels missatges arribi al seu destí. 
+
+Per evitar-ho, es pot fer ús d'una funcionalitat de molts transductors LoRa: escolta del canal, conegut com a \acro{cad} (\est{Channel Activity Detection}). En concret, el transmissor \acro{sx1262} utilitzat en aquest treball ofereix la possibilitat de configurar un \est{callback} que s'executi quan el canal estigui ocupat. Això permet que, quan un dispositiu vol transmetre, primer escolti el canal durant un temps determinat. Si el canal està ocupat, no es realitza la transmissió. En cas contrari, es realitza la transmissió.
+
+\subsubsection{Integritat}
+% Parlar que lora incorpora CRC. S'inclou per tal que sempre s'utilitzi CRC, fins i tot si s'utilitza lora sense CRC.
+
+\subsubsection{Reintents}
+\label{subsubsec:mac_reintents}
+% PARLAR DE PERQUÈ 3 REINTENTS (4 TX TOTALS) ES CONSIDEREN SUFICIENTS
+% SI no ha pogut enviar correctament amb 4 tx, espaiades en temps, probablement no ho farà amb 10. Millor cancel.lar i no gastar més energia
+
 \subsubsection{LoRaWAN}
+\label{subsubsec:mac_lorawan}
+
 \subsection{Encaminament estàtic}
 \subsection{Capa de transport}
 \subsection{Capa d’aplicació}
