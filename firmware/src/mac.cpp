@@ -484,7 +484,7 @@ static void _setup_ack_reception(void) {
     
     // Calcula i programa timeout
     long airtime_us = LoRaRAW_getTimeOnAir(txPDU.dataLength + MAC_PDU_HEADER_SIZE);
-    uint32_t timeout_ms = 2 * MAC_ACK_TIMEOUT_FACTOR * airtime_us / 1000;
+    uint32_t timeout_ms = 3 * MAC_ACK_TIMEOUT_FACTOR * airtime_us / 1000;
     txTimeoutTask = scheduler_once(_mac_fsm_event_tout_ack, timeout_ms);
     _PI("[MAC] Timeout d'ACK: %dms (%dus airtime)", timeout_ms, airtime_us);
 }
