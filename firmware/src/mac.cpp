@@ -175,7 +175,7 @@ void MAC_onTxFailed(mac_tx_callback_t cb) { onTxFailed = cb; }
 
 static void _send_ack(const mac_pdu_t * const refPdu) {
     mac_pdu_t ackPDU;
-    _preparePDU(&ackPDU, 0x00, (uint8_t*)"", 0, 0, true, refPdu);
+    _preparePDU(&ackPDU, refPdu->tx, (uint8_t*)"", 0, 0, true, refPdu);
     _send_pdu(&ackPDU);
 }
 
@@ -196,7 +196,8 @@ static mac_err_t _send_pdu(const mac_pdu_t* const pdu) {
 static void _preparePDU(mac_pdu_t* pdu, node_address_t rx, const mac_data_t data, size_t length, uint8_t retry, bool isAck, const mac_pdu_t * const PDUtoACK) {
     pdu->tx = self;
     pdu->rx = rx;
-    pdu->id = isAck ? PDUtoACK->id+self : (retry > 0 ? txPDU.id : _getRandomID()); // si ACK, utilitzem PDU donada; si retry > 0, no modifiquem ID
+    pdu->id = isAck ? PDUtoACK->id : (retry > 0 ? txPDU.id : _getRandomID()); // si ACK, utilitzem PDU donada; si retry > 0, no modifiquem ID
+    // pdu->id = isAck ? PDUtoACK->id+self : (retry > 0 ? txPDU.id : _getRandomID()); // versió anterior on ID = ID + ID_rx
     pdu->flags.isACK = isAck;
     pdu->flags.retry = retry;
     pdu->flags.reserved = 0b11111;
@@ -265,10 +266,11 @@ static mac_id_t _getRandomID() { return (mac_id_t)random(1, (1 << (8 * sizeof(ma
 
 // Verifica si l'ACK de la PDU donada és vàlid
 // És vàlid si té flag d'ACK, el transmisor és el receptor de l'últim que hem enviat
-// i l'ID del frame és l'ID que haviem enviat més l'adreça de TX (anterior nostre RX)
-// A més, és necessari que l'estat de capa MAC no sigui esperant ACK
+// i l'ID del frame és l'ID de la trama que s'està transmetent
+// A més, és necessari que l'estat de capa MAC sigui esperant ACK
 static bool _is_ack_valid(const mac_pdu_t * const pdu) {
-    return pdu->flags.isACK && pdu->tx == txPDU.rx && pdu->id == txPDU.id + txPDU.rx && fsmState == mac_state_t::WAIT_ACK_S;
+    return pdu->flags.isACK && pdu->tx == txPDU.rx && pdu->id == txPDU.id && fsmState == mac_state_t::WAIT_ACK_S;
+    // return pdu->flags.isACK && pdu->tx == txPDU.rx && pdu->id == txPDU.id + txPDU.rx && fsmState == mac_state_t::WAIT_ACK_S;
 }
 
 /* *************************** */
@@ -322,13 +324,12 @@ static void _onLoraReceived(void) {
         _PI("[MAC] ID already received: %d", rcvID);
         _send_ack(&receivedPDU);
     }
-    else { // No l'hem vist: pot ser ACK, dades, o no per nosaltres
-        _PI("[MAC] New id received: %d", rcvID);
+    else if (receivedPDU.rx == self) {
         if (_is_ack_valid(&receivedPDU)) { // Si és ACK, generem esdeveniment a FSM; no s'ha d'enviar ACK
             _PI("[MAC] ACK Received from 0x%02X", receivedPDU.tx);
             _mac_fsm(mac_event_t::RX_ACK_E);
         }
-        else if (receivedPDU.rx == self) { // Si no és ACK, filtrem que sigui per nosaltres
+        else { // Si no és ACK, són dades
             lastFramesIDs.enqueue(rcvID);
             framesReceived++;
             _PI("[MAC] Frame for higher layer");
@@ -341,9 +342,9 @@ static void _onLoraReceived(void) {
             // @todo: Potser es pot programar amb scheduler per sortir-ne abans?
             _received_mac(); // Notificar capa superior de nova recepció
         }
-        else {
-            _PI("[MAC] Frame not for self (rx=0x%02X)", receivedPDU.rx);
-        }
+    }
+    else {
+        _PI("[MAC] Frame not for self (rx=0x%02X)", receivedPDU.rx);
     }
 }
 

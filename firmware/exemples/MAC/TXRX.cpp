@@ -17,9 +17,9 @@ void onSend(mac_id_t id) {
     Serial.printf("MAC frame sent (%d)\n", id);
     delay(5000);
     mac_data_t data = "Hola!";
-    mac_id_t id;
-    MAC_send(0x02, data, 5, &id);
-    Serial.printf("Sent %d\n", id);
+    mac_id_t id2;
+    MAC_send(0x02, data, 5, &id2);
+    Serial.printf("Sent %d\n", id2);
 }
 
 void onErr(mac_id_t id) {
@@ -39,7 +39,7 @@ void onRcv() {
 }
 
 void setup() {
-    Serial.begin(115200);
+    Serial.begin(921600);
 
     Serial.print(F("[SX1262] Initializing ... "));
     Serial.print("Model: "); Serial.println(ESP.getChipModel());
@@ -53,7 +53,7 @@ void setup() {
     #else
     node_address_t addr = 0x02;
     #endif
-    if(!MAC_init(addr, false)) {
+    if(!MAC_init(addr)) {
         _PE("ERR");
         while(1);
     }
