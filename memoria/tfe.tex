@@ -10,6 +10,9 @@
 
 \usepackage{bytefield}
 
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, calc}
+
 \renewcommand{\figureautorefname}{figura}
 \renewcommand{\tableautorefname}{taula}
 \renewcommand{\sectionautorefname}{secció}
@@ -345,6 +348,76 @@ La implementació d'aquesta capa es pot trobar al fitxer \fitx{mac.cpp}, l'exten
 \label{subsubsec:mac_lorawan}
 
 \subsubsection{Situacions especials}
+
+% TX correcta + TX amb 1 reintent (no rep dades)
+\begin{tikzpicture}[
+    device/.style={draw=none, minimum width=1cm, minimum height=0.8cm},
+    msg/.style={-Stealth, thick},
+    ack/.style={-Stealth, thick, dashed},
+    timeout/.style={red, thick, dashed},
+    node distance=1cm and 3cm,
+    timeline/.style={draw, dashed, white},
+]
+
+% Devices
+\node[device] (dev1) at (0,0) {D1};
+\node[device, right=of dev1] (dev2) {D2};
+% \draw[msg] ($dev1.south$) -- ($(dev1.south)+(0,-3)$);
+\draw ($(dev1.south) + (0,0)$) -- ($(dev1.south) + (0,-5)$);
+\draw ($(dev2.south) + (0,0)$) -- ($(dev2.south) + (0,-5)$);
+
+% Time axis (optional)
+\foreach \i in {1,...,9} {
+    \draw[timeline] ($(dev1.south) + (0,-\i +0.5)$) -- ($(dev2.south) + (0,-\i +0.5)$);
+}
+
+% First message
+\draw[msg] ($(dev1.south)+(0,-0.5)$) -- ($(dev2.south)+(0,-1.0)$) node[midway, above] {\tiny{Trama 1}};
+\draw[ack] ($(dev2.south)+(0,-1.0)$) -- ($(dev1.south)+(0,-1.5)$) node[midway, below] {\tiny{\acro{ack} 1}};
+\draw[timeout] ($(dev1.south)+(0,-2)$) -- ++(-0.5,0) node[left] {\small{\acro{tout ack}}};
+
+% Second message (fails)
+\draw[msg] ($(dev1.south)+(0,-2.5)$) -- ($(dev2.south)+(0,-3)$) node[midway, above] {\tiny{Trama 2}};
+\draw[timeout] ($(dev1.south)+(0,-4)$) -- ++(-0.5,0) node[left] {\small{\acro{tout} 2}};
+
+% Retransmit message
+\draw[msg] ($(dev1.south)+(0,-4)$) -- ($(dev2.south)+(0,-4.5)$) node[midway, above] {\tiny{Trama 2 (reintent)}};
+\draw[ack] ($(dev2.south)+(0,-4.5)$) -- ($(dev1.south)+(0,-5)$) node[midway, below] {\tiny{\acro{ack} 2}};
+
+\end{tikzpicture}
+
+% TX incorrecte + 3 reintents - Fallada transmissió
+\begin{tikzpicture}[
+    device/.style={draw=none, minimum width=1cm, minimum height=0.8cm},
+    msg/.style={-Stealth, thick},
+    ack/.style={-Stealth, thick, dashed},
+    timeout/.style={red, thick, dashed},
+    node distance=1cm and 3cm,
+]
+
+% Devices
+\node[device] (dev1) at (0,0) {D1};
+\node[device, right=of dev1] (dev2) {D2};
+% \draw[msg] ($dev1.south$) -- ($(dev1.south)+(0,-3)$);
+\draw ($(dev1.south) + (0,0)$) -- ($(dev1.south) + (0,-5)$);
+\draw ($(dev2.south) + (0,0)$) -- ($(dev2.south) + (0,-5)$);
+
+% First message
+\draw[msg] ($(dev1.south)+(0,-0.5)$) -- ($(dev2.south)+(0,-1.0)$) node[midway, above] {\tiny{Trama 1}};
+% \draw[ack] ($(dev2.south)+(0,-1.0)$) -- ($(dev1.south)+(0,-1.5)$) node[midway, below] {\tiny{\acro{ack} 1}};
+\draw[timeout] ($(dev1.south)+(0,-1.5)$) -- ++(-0.5,0) node[left] {\small{\acro{tout ack}}};
+
+\draw[msg] ($(dev1.south)+(0,-1.5)$) -- ($(dev2.south)+(0,-2)$) node[midway, above] {\tiny{Trama 1 (reintent 1)}};
+\draw[timeout] ($(dev1.south)+(0,-2.5)$) -- ++(-0.5,0) node[left] {\small{\acro{tout ack}}};
+\draw[msg] ($(dev1.south)+(0,-2.5)$) -- ($(dev2.south)+(0,-3)$) node[midway, above] {\tiny{Trama 1 (reintent 2)}};
+\draw[timeout] ($(dev1.south)+(0,-3.5)$) -- ++(-0.5,0) node[left] {\small{\acro{tout ack}}};
+\draw[msg] ($(dev1.south)+(0,-3.5)$) -- ($(dev2.south)+(0,-4)$) node[midway, above] {\tiny{Trama 1 (reintent 3)}};
+\draw[timeout] ($(dev1.south)+(0,-4.5)$) -- ++(-0.5,0) node[left] {\small{\acro{tout ack}}};
+
+\node[right] at ($(dev1.south)+(0,-4.5)$) {\tiny{Trama 1 - Fallada}};
+
+\end{tikzpicture}
+
 
 \subsection{Encaminament estàtic}
 \subsection{Capa de transport}
