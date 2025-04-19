@@ -11,7 +11,7 @@
 \usepackage{bytefield}
 
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta, positioning, calc}
+\usetikzlibrary{arrows.meta, positioning, calc, decorations.markings}
 
 \renewcommand{\figureautorefname}{figura}
 \renewcommand{\tableautorefname}{taula}
@@ -20,6 +20,22 @@
 \renewcommand{\subsubsectionautorefname}{subapartat}
 \renewcommand{\chapterautorefname}{capítol}
 
+
+\tikzset{
+  cross at end/.style={
+    postaction={
+      decorate,
+      decoration={
+        markings,
+        mark=at position 1 with {
+          \draw[solid, line width=0.6pt, color=black]
+            (-2pt,-2pt) -- (2pt,2pt)
+            (-2pt,2pt) -- (2pt,-2pt);
+        }
+      }
+    }
+  }
+}
 
 % Indica quines bd bibliografiques usarem
 \addbibresource{tfe.bib}
@@ -335,6 +351,8 @@ Un aspecte important d’aquesta cua és la gestió dels reconeixements. Si un \
 
 Pel que fa a la recepció, també s’ha implementat una cua. Un cop processada una trama rebuda, explicat anteriorment, aquesta es guarda a la cua i es notifica la seva arribada a la capa superior. S’hi exposen dues interfícies: una permet conèixer el nombre de trames emmagatzemades, i l’altra, obtenir les dades de la primera trama. Aquesta implementació proporciona més flexibilitat a la capa superior per gestionar els missatges rebuts, evitant el risc de sobrescriure dades rebudes prèviament.
 
+La implementació de la cua de transmissió introdueix un problema: en notificar a la capa superior que s'ha transmès un missatge, aquesta no coneix quin missatge s'ha enviat. Per solucionar-ho, quan la capa superior inicia una transmissió, se li retorna l'identificador de la trama. Un cop s'ha enviat, el \est{callback} de fi de transmissió rep com a paràmetre l'identificador de la trama, permetent així a la capa superior saber quin missatge ha estat enviat. A més, s'afegeix un \est{callback} de transmissió errònia, que notifica a la capa superior quan no s'ha pogut realitzar una transmissió (per exemple, per esgotament de reintents), proporcionant també l'identificador de la trama.
+
 \subsubsection{Detalls d'implementació}
 La implementació d'aquesta capa s'ha realitzat mitjançant una màquina d'estats finita (\acro{fsm}). Això permet tenir un control més precís sobre l'estat de la capa, i el flux de les dades. El seu disseny, basat en les explicacions anteriors, es pot veure a la \autoref{fig:mac_fsm}.
 
@@ -346,8 +364,23 @@ La implementació d'aquesta capa es pot trobar al fitxer \fitx{mac.cpp}, l'exten
 
 \subsubsection{LoRaWAN}
 \label{subsubsec:mac_lorawan}
+LoRaWAN ja defineix els mecanismes d'accés al medi i, per tant, no aplica els detalls comentats anteriorment. Malgrat això, s'ha decidit implementar una capa d'abstracció per tal de poder-la utilitzar fàcilment, i integrar-la amb l'estructura de la resta del protocol.
+
+S'utilitzen dispositius LoRaWAN de classe A, i la definició 1.1 del protocol LoRaWAN, la qual afegeix millores de seguretat respecte les versions \acro{1.0.x} anteriors. Es pot consultar l'especificació completa a \cite{noauthor_lorawan_2023}.
+
+Una millora de seguretat important és que no permet la reutilització de \est{nonces}, un mecanisme que permet garantir la unicitat de les connexions a la xarxa. És a dir, evita que un tercer pugui escoltar un missatge de connexió i transmetre'l de nou, fent-se passar pel transmissor original. En les versions \acro{1.0.x} s'implementava com un valor aleatori; en la versió \acro{1.1} s'implementa com un comptador que incrementa per cada unió a la xarxa, que tant dispositiu com \est{gateway} han de recordar. Si el dispositiu utilitza un \est{nonce} ja utilitzat, el servidor de la xarxa rebutjarà la connexió. 
+
+Aquesta millora implica la utilització de memòria no volàtil en el dispositiu, per tal de poder guardar el valor del comptador fins i tot després de reiniciar-se. Gràcies a la capa d'abstracció, la implementació d'aquest mecanisme és trivial: quan la capa superior utilitza la interfície exposada per iniciar la connexió, la capa LoRaWAN inicia la connexió, i guarda el \est{nonce} a la memòria no volàtil.
+
+A causa de la possibilitat d'utilitzar LoRa o LoRaWAN, si després d'utilitzar LoRaWAN es canvia al mode LoRa, una següent connexió a LoRaWAN implicaria un nou procés d'inici de connexió, que pot ser lent. Per evitar-ho, després de cada transmissió es guarden els valors de sessió, que contenen comptadors d'\est{uplinks} i \est{downlinks}, i claus per encriptar els missatges, generades en unir-se a la xarxa. Els valors de sessió no s'emmagatzemen a memòria no volàtil i, per tant, després de reiniciar-se es forçarà una nova unió a la xarxa. Així, el que s'aconsegueix guardant la sessió és que els canvis entre LoRa i LoRaWAN siguin molt més ràpids, no requerint un nou procés d'unió, però sense perdre la seguretat de LoRaWAN, requerint noves unions després de reiniciar-se (com si fos un dispositiu que únicament implementa LoRaWAN).
+
+En utilitzar dispositius de classe A, la recepció es produeix únicament després d'una transmissió. Això implica que, si una capa superior utilitza la interfície per enviar un missatge a través de LoRaWAN, aquesta també hauria de retornar les possibles dades rebudes. Aquest comportament és totalment diferent a l'establert en la resta de capes, on la capa inferior notifica a través de \est{callbacks}. Per solucionar-ho, es simula aquest comportament, i si després de realitzar una transmissió s'ha rebut un missatge, es programa una tasca ---a través del gestor de tasques--- que executarà el \est{callback} de recepció de la capa superior tan aviat com sigui possible. 
+
+Com que LoRaWAN no utilitza el protocol d'accés al medi exposat anteriorment, l'identificador que s'assigna a les transmissions és el \fitx{0x0000}. Utilitzar sempre aquest identificador és segur, ja que com que no utilitza el protocol d'accés al medi exposat, tampoc implementa cues, i les transmissions són bloquejants, fent que no hi pugui haver dues transmissions amb el mateix identificador a la vegada. A més, cal recordar que s'havia reservat aquest identificador i, per tant, no serà mai assignat pel protocol d'accés al medi a cap trama.
 
 \subsubsection{Situacions especials}
+En aquest subapartat es descriuen diferents situacions que poden produir-se durant l'ús del protocol de transmissió, juntament amb el comportament esperat del sistema en cada cas. Conèixer aquestes situacions teòriques permet determinar si es comporta de forma adequada en situacions reals.
+
 
 % TX correcta + TX amb 1 reintent (no rep dades)
 \begin{tikzpicture}[
@@ -357,6 +390,7 @@ La implementació d'aquesta capa es pot trobar al fitxer \fitx{mac.cpp}, l'exten
     timeout/.style={red, thick, dashed},
     node distance=1cm and 3cm,
     timeline/.style={draw, dashed, white},
+    fail/.style={thick, cross at end}
 ]
 
 % Devices
@@ -366,18 +400,14 @@ La implementació d'aquesta capa es pot trobar al fitxer \fitx{mac.cpp}, l'exten
 \draw ($(dev1.south) + (0,0)$) -- ($(dev1.south) + (0,-5)$);
 \draw ($(dev2.south) + (0,0)$) -- ($(dev2.south) + (0,-5)$);
 
-% Time axis (optional)
-\foreach \i in {1,...,9} {
-    \draw[timeline] ($(dev1.south) + (0,-\i +0.5)$) -- ($(dev2.south) + (0,-\i +0.5)$);
-}
-
 % First message
 \draw[msg] ($(dev1.south)+(0,-0.5)$) -- ($(dev2.south)+(0,-1.0)$) node[midway, above] {\tiny{Trama 1}};
 \draw[ack] ($(dev2.south)+(0,-1.0)$) -- ($(dev1.south)+(0,-1.5)$) node[midway, below] {\tiny{\acro{ack} 1}};
 \draw[timeout] ($(dev1.south)+(0,-2)$) -- ++(-0.5,0) node[left] {\small{\acro{tout ack}}};
 
 % Second message (fails)
-\draw[msg] ($(dev1.south)+(0,-2.5)$) -- ($(dev2.south)+(0,-3)$) node[midway, above] {\tiny{Trama 2}};
+% \draw[fail] ($(dev1.south)+(0,-2.5)$) -- ($(dev2.south)+(0,-3)$) node[midway, above] {\tiny{Trama 2}};
+\draw[fail] ($(dev1.south)+(0,-2.5)$) -- ($ (dev1.south) !0.5! (dev2.south) + (0,-2.75) - (0,0) $) node[midway, above] {\tiny{Trama 2}};
 \draw[timeout] ($(dev1.south)+(0,-4)$) -- ++(-0.5,0) node[left] {\small{\acro{tout} 2}};
 
 % Retransmit message
@@ -387,36 +417,56 @@ La implementació d'aquesta capa es pot trobar al fitxer \fitx{mac.cpp}, l'exten
 \end{tikzpicture}
 
 % TX incorrecte + 3 reintents - Fallada transmissió
-\begin{tikzpicture}[
-    device/.style={draw=none, minimum width=1cm, minimum height=0.8cm},
-    msg/.style={-Stealth, thick},
-    ack/.style={-Stealth, thick, dashed},
-    timeout/.style={red, thick, dashed},
-    node distance=1cm and 3cm,
-]
+\begin{figure}
+    \centering
+    \begin{tikzpicture}[
+        node distance=1cm and 3cm,
+        device/.style={draw=none, minimum width=1cm, minimum height=0.8cm},
+        msg/.style={-Stealth, thick},
+        ack/.style={-Stealth, thick, dashed},
+        timeout/.style={red, thick, dashed},
+        fail/.style={thick, cross at end},
+        failAck/.style={thick, cross at end, dashed},
+    ]
 
-% Devices
-\node[device] (dev1) at (0,0) {D1};
-\node[device, right=of dev1] (dev2) {D2};
-% \draw[msg] ($dev1.south$) -- ($(dev1.south)+(0,-3)$);
-\draw ($(dev1.south) + (0,0)$) -- ($(dev1.south) + (0,-5)$);
-\draw ($(dev2.south) + (0,0)$) -- ($(dev2.south) + (0,-5)$);
+        % Devices
+        \node[device] (dev1) at (0,0) {Dispositiu 1};
+        \node[device, right=of dev1] (dev2) {Dispositiu 2};
+        % \draw[msg] ($dev1.south$) -- ($(dev1.south)+(0,-3)$);
+        \draw ($(dev1.south) + (0,0)$) -- ($(dev1.south) + (0,-5)$);
+        \draw ($(dev2.south) + (0,0)$) -- ($(dev2.south) + (0,-5)$);
 
-% First message
-\draw[msg] ($(dev1.south)+(0,-0.5)$) -- ($(dev2.south)+(0,-1.0)$) node[midway, above] {\tiny{Trama 1}};
-% \draw[ack] ($(dev2.south)+(0,-1.0)$) -- ($(dev1.south)+(0,-1.5)$) node[midway, below] {\tiny{\acro{ack} 1}};
-\draw[timeout] ($(dev1.south)+(0,-1.5)$) -- ++(-0.5,0) node[left] {\small{\acro{tout ack}}};
+        % First message
+        \draw[fail] ($(dev1.south)+(0,-0.5)$) -- ($ (dev1.south) !0.5! (dev2.south) + (0,-0.75) - (0,0) $) node[midway, above] {\tiny{Trama 1}};
+        \draw[timeout] ($(dev1.south)+(0,-1.5)$) -- ++(-0.5,0) node[left] {\small{\acro{tout ack}}};
+        \node[right] at ($(dev2.south)+(0,-0.5)$) {\tiny{D1. Inici transmissió trama 1}};
+        
+        \draw[fail] ($(dev1.south)+(0,-1.5)$) -- ($ (dev1.south) !0.5! (dev2.south) + (0,-1.75) - (0,0) $) node[midway, above] {\tiny{Trama 1}};
+        \draw[timeout] ($(dev1.south)+(0,-2.5)$) -- ++(-0.5,0) node[left] {\small{\acro{tout ack}}};
+        \node[right] at ($(dev2.south)+(0,-1.5)$) {\tiny{D1. Fi espera recepció \acro{ack}. Retransmissió 1}};
 
-\draw[msg] ($(dev1.south)+(0,-1.5)$) -- ($(dev2.south)+(0,-2)$) node[midway, above] {\tiny{Trama 1 (reintent 1)}};
-\draw[timeout] ($(dev1.south)+(0,-2.5)$) -- ++(-0.5,0) node[left] {\small{\acro{tout ack}}};
-\draw[msg] ($(dev1.south)+(0,-2.5)$) -- ($(dev2.south)+(0,-3)$) node[midway, above] {\tiny{Trama 1 (reintent 2)}};
-\draw[timeout] ($(dev1.south)+(0,-3.5)$) -- ++(-0.5,0) node[left] {\small{\acro{tout ack}}};
-\draw[msg] ($(dev1.south)+(0,-3.5)$) -- ($(dev2.south)+(0,-4)$) node[midway, above] {\tiny{Trama 1 (reintent 3)}};
-\draw[timeout] ($(dev1.south)+(0,-4.5)$) -- ++(-0.5,0) node[left] {\small{\acro{tout ack}}};
+        \draw[msg] ($(dev1.south)+(0,-2.5)$) -- ($ (dev2.south) + (0,-3) $) node[midway, above] {\tiny{Trama 1}};
+        \draw[failAck] ($(dev2.south)+(0,-3)$) -- ($(dev1.south) !0.5! (dev2.south)+(0,-3.25)$) node[midway, below] {\tiny{\acro{ack} 1}};
+        \draw[timeout] ($(dev1.south)+(0,-3.5)$) -- ++(-0.5,0) node[left] {\small{\acro{tout ack}}};
+        \node[right] at ($(dev2.south)+(0,-2.5)$) {\tiny{D1. Fi espera recepció \acro{ack}. Retransmissió 2}};
+        \node[right] at ($(dev2.south)+(0,-2.9)$) {\tiny{D2. Recepció trama 1. Notifica capa superior}};
+        \node[right] at ($(dev2.south)+(0,-3.1)$) {\tiny{\hspace{2em}Transmet \acro{ack}}};
 
-\node[right] at ($(dev1.south)+(0,-4.5)$) {\tiny{Trama 1 - Fallada}};
+        % \node[align=left] {\tiny{This is a\\demonstration.}};
 
-\end{tikzpicture}
+        \draw[msg] ($(dev1.south)+(0,-3.5)$) -- ($ (dev2.south) + (0,-4) $) node[midway, above] {\tiny{Trama 1}};
+        \draw[failAck] ($(dev2.south)+(0,-4)$) -- ($(dev1.south) !0.5! (dev2.south)+(0,-4.25)$) node[midway, below] {\tiny{\acro{ack} 1}};
+        \draw[timeout] ($(dev1.south)+(0,-4.5)$) -- ++(-0.5,0) node[left] {\small{\acro{tout ack}}};
+        \node[right] at ($(dev2.south)+(0,-3.5)$) {\tiny{D1. Fi espera recepció \acro{ack}. Retransmissió 3}};
+        \node[right] at ($(dev2.south)+(0,-3.9)$) {\tiny{D2. Recepció trama 1. No notifica capa superior}};
+        \node[right] at ($(dev2.south)+(0,-4.1)$) {\tiny{\hspace{2em}Transmet \acro{ack}}};
+
+        \node[right] at ($(dev2.south)+(0,-4.5)$) {\tiny{D1. Fi espera recepció \acro{ack}. Reintents esgotats}};
+        \node[right] at ($(dev2.south)+(0,-4.7)$) {\tiny{\hspace{2em}Trama 1 fallada. Notifica capa superior}};
+
+    \end{tikzpicture}
+    \caption{Transmissió considerada fallida, rebuda correctament per receptor.}
+\end{figure}
 
 
 \subsection{Encaminament estàtic}
