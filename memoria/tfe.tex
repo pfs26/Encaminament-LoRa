@@ -378,46 +378,63 @@ En utilitzar dispositius de classe A, la recepció es produeix únicament despr�
 
 Com que LoRaWAN no utilitza el protocol d'accés al medi exposat anteriorment, l'identificador que s'assigna a les transmissions és el \fitx{0x0000}. Utilitzar sempre aquest identificador és segur, ja que com que no utilitza el protocol d'accés al medi exposat, tampoc implementa cues, i les transmissions són bloquejants, fent que no hi pugui haver dues transmissions amb el mateix identificador a la vegada. A més, cal recordar que s'havia reservat aquest identificador i, per tant, no serà mai assignat pel protocol d'accés al medi a cap trama.
 
+Es pot consultar la implementació d'aquesta capa al fitxer \fitx{lorawan.cpp}.
+
 \subsubsection{Situacions especials}
 En aquest subapartat es descriuen diferents situacions que poden produir-se durant l'ús del protocol de transmissió, juntament amb el comportament esperat del sistema en cada cas. Conèixer aquestes situacions teòriques permet determinar si es comporta de forma adequada en situacions reals.
 
-
 % TX correcta + TX amb 1 reintent (no rep dades)
-\begin{tikzpicture}[
-    device/.style={draw=none, minimum width=1cm, minimum height=0.8cm},
-    msg/.style={-Stealth, thick},
-    ack/.style={-Stealth, thick, dashed},
-    timeout/.style={red, thick, dashed},
-    node distance=1cm and 3cm,
-    timeline/.style={draw, dashed, white},
-    fail/.style={thick, cross at end}
-]
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[
+        device/.style={draw=none, minimum width=1cm, minimum height=0.8cm},
+        msg/.style={-Stealth, thick},
+        ack/.style={-Stealth, thick, dashed},
+        timeout/.style={red, thick, dashed},
+        node distance=1cm and 3cm,
+        timeline/.style={draw, dashed, white},
+        fail/.style={thick, cross at end}
+    ]
+    
+    % Devices
+    \node[device] (dev1) at (0,0) {Dispositiu 1};
+    \node[device, right=of dev1] (dev2) {Dispositiu 2};
+    % \draw[msg] ($dev1.south$) -- ($(dev1.south)+(0,-3)$);
+    \draw ($(dev1.south) + (0,0)$) -- ($(dev1.south) + (0,-5)$);
+    \draw ($(dev2.south) + (0,0)$) -- ($(dev2.south) + (0,-5)$);
+    
+    % First message
+    \draw[msg] ($(dev1.south)+(0,-0.5)$) -- ($(dev2.south)+(0,-1.0)$) node[midway, above] {\tiny{Trama 1}};
+    \draw[ack] ($(dev2.south)+(0,-1.0)$) -- ($(dev1.south)+(0,-1.5)$) node[midway, below] {\tiny{\acro{ack} 1}};
+    \draw[timeout] ($(dev1.south)+(0,-2)$) -- ++(-0.5,0) node[left] {\small{\acro{tout ack 1}}};
+    \node[right] at ($(dev2.south)+(0,-0.5)$) {\tiny{D1. Inici transmissió trama 1}};
+    \node[right] at ($(dev2.south)+(0,-0.9)$) {\tiny{D2. Recepció trama 1. Notifica capa superior}};
+    \node[right] at ($(dev2.south)+(0,-1.1)$) {\tiny{\hspace{2em}Transmet \acro{ack}}};
+    \node[right] at ($(dev2.south)+(0,-1.4)$) {\tiny{D1. Recepció \acro{ack}. Fi transmissió}};
+    \node[right] at ($(dev2.south)+(0,-1.6)$) {\tiny{\hspace{2em}Notifica capa superior}};
 
-% Devices
-\node[device] (dev1) at (0,0) {D1};
-\node[device, right=of dev1] (dev2) {D2};
-% \draw[msg] ($dev1.south$) -- ($(dev1.south)+(0,-3)$);
-\draw ($(dev1.south) + (0,0)$) -- ($(dev1.south) + (0,-5)$);
-\draw ($(dev2.south) + (0,0)$) -- ($(dev2.south) + (0,-5)$);
+    
+    % Second message (fails)
+    % \draw[fail] ($(dev1.south)+(0,-2.5)$) -- ($(dev2.south)+(0,-3)$) node[midway, above] {\tiny{Trama 2}};
+    \draw[fail] ($(dev1.south)+(0,-2.5)$) -- ($ (dev1.south) !0.5! (dev2.south) + (0,-2.75) - (0,0) $) node[midway, above] {\tiny{Trama 2}};
+    \draw[timeout] ($(dev1.south)+(0,-4)$) -- ++(-0.5,0) node[left] {\small{\acro{tout ack} 2}};
+    \node[right] at ($(dev2.south)+(0,-2.5)$) {\tiny{D1. Inici transmissió trama 2}};
+    
+    % Retransmit message
+    \draw[msg] ($(dev1.south)+(0,-4)$) -- ($(dev2.south)+(0,-4.5)$) node[midway, above] {\tiny{Trama 2}};
+    \draw[ack] ($(dev2.south)+(0,-4.5)$) -- ($(dev1.south)+(0,-5)$) node[midway, below] {\tiny{\acro{ack} 2}};
+    \node[right] at ($(dev2.south)+(0,-4)$) {\tiny{D1. Fi espera recepció \acro{ack}. Retransmissió 1}};
+    \node[right] at ($(dev2.south)+(0,-4.4)$) {\tiny{D2. Recepció trama 2. Notifica capa superior}};
+    \node[right] at ($(dev2.south)+(0,-4.6)$) {\tiny{\hspace{2em}Transmet \acro{ack}}};
+    \node[right] at ($(dev2.south)+(0,-4.9)$) {\tiny{D1. Recepció \acro{ack}. Fi transmissió}};
+    \node[right] at ($(dev2.south)+(0,-5.1)$) {\tiny{\hspace{2em}Notifica capa superior}};
 
-% First message
-\draw[msg] ($(dev1.south)+(0,-0.5)$) -- ($(dev2.south)+(0,-1.0)$) node[midway, above] {\tiny{Trama 1}};
-\draw[ack] ($(dev2.south)+(0,-1.0)$) -- ($(dev1.south)+(0,-1.5)$) node[midway, below] {\tiny{\acro{ack} 1}};
-\draw[timeout] ($(dev1.south)+(0,-2)$) -- ++(-0.5,0) node[left] {\small{\acro{tout ack}}};
-
-% Second message (fails)
-% \draw[fail] ($(dev1.south)+(0,-2.5)$) -- ($(dev2.south)+(0,-3)$) node[midway, above] {\tiny{Trama 2}};
-\draw[fail] ($(dev1.south)+(0,-2.5)$) -- ($ (dev1.south) !0.5! (dev2.south) + (0,-2.75) - (0,0) $) node[midway, above] {\tiny{Trama 2}};
-\draw[timeout] ($(dev1.south)+(0,-4)$) -- ++(-0.5,0) node[left] {\small{\acro{tout} 2}};
-
-% Retransmit message
-\draw[msg] ($(dev1.south)+(0,-4)$) -- ($(dev2.south)+(0,-4.5)$) node[midway, above] {\tiny{Trama 2 (reintent)}};
-\draw[ack] ($(dev2.south)+(0,-4.5)$) -- ($(dev1.south)+(0,-5)$) node[midway, below] {\tiny{\acro{ack} 2}};
-
-\end{tikzpicture}
+    \end{tikzpicture}
+    \caption{Transmissió correcta, i segona transmissió correcta després de reintent.}
+\end{figure}
 
 % TX incorrecte + 3 reintents - Fallada transmissió
-\begin{figure}
+\begin{figure}[h]
     \centering
     \begin{tikzpicture}[
         node distance=1cm and 3cm,
