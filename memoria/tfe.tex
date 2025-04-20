@@ -382,7 +382,10 @@ Es pot consultar la implementació d'aquesta capa al fitxer \fitx{lorawan.cpp}.
 
 \subsubsection{Situacions especials}
 En aquest subapartat es descriuen diferents situacions que poden produir-se durant l'ús del protocol de transmissió, juntament amb el comportament esperat del sistema en cada cas. Conèixer aquestes situacions teòriques permet determinar si es comporta de forma adequada en situacions reals.
+% \\
+% \\
 
+A la \autoref{fig:mac_tx_correcte_reintent} s'observa un exemple de transmissió correcta, amb una següent transmissió també satisfactòria després d'un reintent. Es tractaria d'una situació considerada comú, i on l'estat final dels dos dispositius és l'esperat: el dispositiu 1 realitza 2 transmissions que considera satisfactòries (ja que rep \acro{ack}), i el dispositiu 2 les ha rebut correctament.
 % TX correcta + TX amb 1 reintent (no rep dades)
 \begin{figure}[h]
     \centering
@@ -431,7 +434,10 @@ En aquest subapartat es descriuen diferents situacions que poden produir-se dura
 
     \end{tikzpicture}
     \caption{Transmissió correcta, i segona transmissió correcta després de reintent.}
+    \label{fig:mac_tx_correcte_reintent}
 \end{figure}
+
+Una situació més excepcional és la representada a la \autoref{fig:mac_tx_considerat_fallida}, on el dispositiu 1 realitza una transmissió, sense rebre en cap retransmissió el missatge de reconeixement. Malgrat això, el dispositiu 2 sí que havia rebut la trama, generant l'\acro{ack} corresponent, el qual no arriba al dispositiu 1. S'observa com en la segona recepció de la trama, el dispositiu 2 no notifica a la capa superior, ja que ja s'havia processat prèviament. En aquesta situació, el dispositiu 1 considera que la transmissió no ha estat satisfactòria, malgrat que el dispositiu 2 sí que havia rebut la trama.
 
 % TX incorrecte + 3 reintents - Fallada transmissió
 \begin{figure}[h]
@@ -483,8 +489,65 @@ En aquest subapartat es descriuen diferents situacions que poden produir-se dura
 
     \end{tikzpicture}
     \caption{Transmissió considerada fallida, rebuda correctament per receptor.}
+    \label{fig:mac_tx_considerat_fallida}
 \end{figure}
 
+Per acabar es mostra una situació més complexa i completa, representada a la \autoref{fig:mac_tx_complet}. Es representen tres dispositius, amb la primera transmissió del dispositiu 2 completada després d'un reintent. En el procés d'espera de recepció de reconeixement, es mostra com aquest rep una trama, enviada pel dispositiu 1, i genera el corresponent \acro{ack}. Per acabar, es representa el comportament de la cua de transmissió, on el dispositiu 2 inicia una nova transmissió just després de rebre el missatge de reconeixement.
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[
+        node distance=1cm and 3cm,
+        device/.style={draw=none, minimum width=1cm, minimum height=0.8cm},
+        msg/.style={-Stealth, thick},
+        ack/.style={-Stealth, thick, dashed},
+        timeout/.style={thick, red, dashed},
+        fail/.style={thick, cross at end},
+        failAck/.style={thick, cross at end, dashed},
+    ]
+
+        % Devices
+        \node[device] (dev1) at (0,0) {D1};
+        \node[device, right=of dev1] (dev2) {D2};
+        \node[device, right=of dev2] (dev3) {D3};
+        \draw ($(dev1.south) + (0,0)$) -- ($(dev1.south) + (0,-5)$);
+        \draw ($(dev2.south) + (0,0)$) -- ($(dev2.south) + (0,-5)$);
+        \draw ($(dev3.south) + (0,0)$) -- ($(dev3.south) + (0,-5)$);
+
+        \draw[fail] ($(dev2.south)+(0,-0.5)$) -- ($ (dev2.south) !0.5! (dev3.south) + (0,-0.75) - (0,0) $) node[midway, above] {\tiny{Trama \fitx{0x3E8F}}};
+        \draw[timeout] ($(dev2.south)+(0,-2)$) -- ++(-0.5,0) node[left] {\small{\acro{\tiny{tout}}}};
+        \node[right] at ($(dev3.south)+(0,-0.5)$) {\tiny{D2. Inici transmissió trama \fitx{0x3E8F}}};
+
+        \draw[msg] ($(dev1.south)+(0,-1)$) -- ($(dev2.south) + (0,-1.5) - (0,0) $) node[midway, above] {\tiny{Trama \fitx{0x73D1}}};
+        \draw[timeout] ($(dev1.south)+(0,-2.5)$) -- ++(-0.5,0) node[left] {\small{\acro{\tiny{tout}}}};
+        \node[right] at ($(dev3.south)+(0,-1)$) {\tiny{D1. Inici transmissió trama \fitx{0x73D1}}};
+
+        \draw[ack] ($(dev2.south)+(0,-1.5)$) -- ($(dev1.south)+(0,-2)$) node[midway, above] {\tiny{\acro{ack} \fitx{0x73D1}}};
+        \node[right] at ($(dev3.south)+(0,-1.4)$) {\tiny{D2. Recepció trama \fitx{0x73D1}. Notifica}};
+        \node[right] at ($(dev3.south)+(0,-1.6)$) {\tiny{\hspace{2em}capa superior. Transmet \acro{ack}}};
+        \node[right] at ($(dev3.south)+(0,-1.9)$) {\tiny{D1. Fi TX \fitx{0x73D1}. Notifica capa superior}};
+        
+        \draw[msg] ($(dev2.south)+(0,-2)$) -- ($(dev3.south) + (0,-2.5) - (0,0) $) node[midway, above] {\tiny{Trama \fitx{0x3E8F}}};
+        \draw[ack] ($(dev3.south)+(0,-2.5)$) -- ($(dev2.south)+(0,-3)$) node[midway, above] {\tiny{\acro{ack} \fitx{0x3E8F}}};
+        \draw[timeout] ($(dev2.south)+(0,-3.5)$) -- ++(-0.5,0) node[left] {\small{\acro{\tiny{tout}}}};
+        \node[right] at ($(dev3.south)+(0,-2.1)$) {\tiny{D2. Fi espera recepció \acro{ack} \fitx{0x3E8F}. Retransmissió 1}};
+        \node[right] at ($(dev3.south)+(0,-2.4)$) {\tiny{D3. Recepció trama \fitx{0x3E8F}. Notifica}};
+        \node[right] at ($(dev3.south)+(0,-2.6)$) {\tiny{\hspace{2em}capa superior. Transmet \acro{ack}}};
+
+        \draw[msg] ($(dev2.south)+(0,-3)$) -- ($(dev1.south) + (0,-3.5) - (0,0) $) node[midway, above] {\tiny{Trama \fitx{0x8EE5}}};
+        \draw[ack] ($(dev1.south)+(0,-3.5)$) -- ($(dev2.south)+(0,-4)$) node[midway, above] {\tiny{\acro{ack} \fitx{0x8EE5}}};
+        \draw[timeout] ($(dev2.south)+(0,-4.5)$) -- ++(-0.5,0) node[left] {\small{\acro{\tiny{tout}}}};
+        \node[right] at ($(dev3.south)+(0,-2.9)$) {\tiny{D2. Fi TX \fitx{0x3E8F}. Notifica capa superior}};
+        \node[right] at ($(dev3.south)+(0,-3.1)$) {\tiny{\hspace{2em}Inici TX des de cua \fitx{0x8EE5}}};
+        \node[right] at ($(dev3.south)+(0,-3.4)$) {\tiny{D1. Recepció trama \fitx{0x8EE5}. Notifica}};
+        \node[right] at ($(dev3.south)+(0,-3.6)$) {\tiny{\hspace{2em}capa superior. Transmet \acro{ack}}};
+        \node[right] at ($(dev3.south)+(0,-4)$) {\tiny{D2. Fi TX \fitx{0x8EE5}. Notifica capa superior}};
+
+
+    \end{tikzpicture}
+    \caption{Transmissió considerada fallida, rebuda correctament per receptor.}
+    \label{fig:mac_tx_complet}
+\end{figure}
 
 \subsection{Encaminament estàtic}
 \subsection{Capa de transport}
