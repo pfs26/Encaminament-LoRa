@@ -302,7 +302,6 @@ Per acabar, al final de la trama s'ha inclòs un camp de \acro{crc}, per intenta
     \caption{Estructura de la trama de la capa d'accés al medi.}
     \label{fig:trama_mac}
 \end{figure}
-
 \subsubsection{Transmissió}
 % « »
 Quan un dispositiu vol transmetre un missatge, és primordial que no interrompi una transmissió en curs. En cas contrari, es podria produir una interferència entre ambdues transmissions, provocant que cap dels missatges arribi al seu destí. 
@@ -312,7 +311,6 @@ Per tal d’evitar co\l.lisions en l’accés al canal, es pot utilitzar una est
 Mitjançant aquesta funcionalitat, el dispositiu comprova, a través de la interfície proporcionada per la capa d'abstracció LoRa, si hi ha una transmissió en curs. Si el canal està lliure, s'inicia la transmissió, proporcionant el missatge a la capa inferior; en cas contrari, s'aplica un mecanisme d'espera aleatori conegut com a \est{Binary Exponential Backoff} (\acro{beb}). Aquest consisteix a esperar un temps aleatori que depèn del nombre de reintents d'accés previs, multiplicant per dos el temps màxim d'espera per cada intent. Així, el rang de possibles valors ve donat per l'expressió $[0, 2^r-1]\cdot K$, on ${r}$ és el nombre de reintents realitzats, i ${K}$ una constant de temps, coneguda com a  «temps d'\est{slot}». Per exemple, si és el segon reintent d'accés al canal, i la constant és de \SI{100}{\milli\second}, el rang de temps d'espera és $[0, 2^2-1]\cdot100=[0, 300]\cdot K$ mi\l.lisegons. 
 
 El principal avantatge d'aplicar \acro{beb} és que distribueix en el temps els reintents d'accés al canal. Això redueix la probabilitat que dos dispositius que volien accedir al canal ho reintentin en el mateix moment. Si s'utilitzés un temps d'espera constant, o que incrementés de forma lineal, es produirien co\l.lisions recurrents entre dispositius, ja que es podrien sincronitzar els temps d'accés. A més, gràcies a augmentar el possible temps d'espera exponencialment, aconseguim un mecanisme que s'adapta a l'estat del canal: en moments de molt trànsit, es distribueixen molt els temps; en canals poc ocupats, el temps d'espera és reduït.
-
 \subsubsection{Integritat}
 \label{subsubsec:integritat}
 % Parlar que lora incorpora CRC. S'inclou per tal que sempre s'utilitzi CRC, fins i tot si s'utilitza lora sense CRC.
@@ -332,7 +330,6 @@ S'ha inclòs el mecanisme de detecció d'errors \acro{crc}, d'un byte de longitu
 Tot i que LoRa ofereix la possibilitat d'incorporar un \acro{crc}, s'ha decidit implementar un \acro{crc} propi, per tal de garantir que sempre s'utilitzi, independentment de la configuració dels transductor LoRa, millorant la integritat de les dades. 
 
 Finalment, per evitar processar missatges duplicats, el receptor guarda en una cua els identificadors de les trames destinades a ell i que no contenen errors. Si rep un missatge amb un identificador que ja havia rebut, atura el processament de la trama, i únicament envia el missatge de reconeixement. La mida de la cua és configurable, però s'hauria de considerar el nombre màxim de reintents i el temps d'espera de recepció de reconeixement: si és massa petita, una retransmissió d'una trama ja rebuda es podria considerar un missatge nou, ja que el nombre d'altres trames vàlides rebudes entre ambdues transmissions és podria ser major a la capacitat de la cua; si és molt gran, es podrien produïr co\l.lisions d'identificadors, on dos missatges vàlids diferents tenen el mateix identificador i, com que el receptor encara recorda el primer, considera el segon com a duplicat. 
-
 \subsubsection{Recepció}
 % « »
 La recepció de trames es realitza mitjançant el \est{callback} de la capa d'abstracció LoRa. En rebre una trama, es verifica el \acro{crc}; si no és correcte, s'ignora el missatge, ja que no podem assegurar que cap de les dades rebudes sigui correcta.
@@ -340,7 +337,6 @@ La recepció de trames es realitza mitjançant el \est{callback} de la capa d'ab
 Seguidament es verifica si el dispositiu és el destinetari de la trama. Si no ho és, no és necessari continuar; en cas afirmatiu, es determina si la trama és de reconeixement, comprovant el bit d'\acro{ack} dels \emph{flags}, i comparant l'identificador de la trama rebuda amb el de l'enviada. Si no s'havia realitzat cap transmissió prèvia, el missatge es considera un error, i s'ignora. En cas contrari, es considera que la transmissió ha estat correcta, i es notifica a la capa superior a través d'un \est{callback}. Si el missatge rebut no és un missatge de reconeixement, es guarda l'identificador a la cua de trames rebudes, i es notifica a la capa superior a través d'un \est{callback}.
 
 S'exposa una interfície que permet a la capa superior obtenir les dades de la trama rebuda, la qual únicament s'hauria d'utilitzar després que s'hagi notificat a través de l'anterior \est{callback}. En cas contrari, les dades que s'obtinguin podrien ser incorrectes o duplicades.
-
 \subsubsection{Cues de transmissió i recepció}
 % « »
 Sense la implementació d'una cua de transmissió, després d'iniciar un enviament, no seria possible realitzar-ne cap altre fins que aquest finalitzés, ja sigui per la recepció d’un \acro{ack} o per esgotament dels reintents. Això faria que la interfície de transmissió exposada a la capa superior quedés bloquejada. En conseqüència, si una capa superior volgués iniciar una nova transmissió, també hauria de quedar-se bloquejada, propagant el bloqueig cap amunt, o bé descartar l’enviament.
@@ -352,7 +348,6 @@ Un aspecte important d’aquesta cua és la gestió dels reconeixements. Si un \
 Pel que fa a la recepció, també s’ha implementat una cua. Un cop processada una trama rebuda, explicat anteriorment, aquesta es guarda a la cua i es notifica la seva arribada a la capa superior. S’hi exposen dues interfícies: una permet conèixer el nombre de trames emmagatzemades, i l’altra, obtenir les dades de la primera trama. Aquesta implementació proporciona més flexibilitat a la capa superior per gestionar els missatges rebuts, evitant el risc de sobrescriure dades rebudes prèviament.
 
 La implementació de la cua de transmissió introdueix un problema: en notificar a la capa superior que s'ha transmès un missatge, aquesta no coneix quin missatge s'ha enviat. Per solucionar-ho, quan la capa superior inicia una transmissió, se li retorna l'identificador de la trama. Un cop s'ha enviat, el \est{callback} de fi de transmissió rep com a paràmetre l'identificador de la trama, permetent així a la capa superior saber quin missatge ha estat enviat. A més, s'afegeix un \est{callback} de transmissió errònia, que notifica a la capa superior quan no s'ha pogut realitzar una transmissió (per exemple, per esgotament de reintents), proporcionant també l'identificador de la trama.
-
 \subsubsection{Detalls d'implementació}
 La implementació d'aquesta capa s'ha realitzat mitjançant una màquina d'estats finita (\acro{fsm}). Això permet tenir un control més precís sobre l'estat de la capa, i el flux de les dades. El seu disseny, basat en les explicacions anteriors, es pot veure a la \autoref{fig:mac_fsm}.
 
@@ -361,7 +356,6 @@ Com la resta del protocol, s'ha implementat de forma no bloquejant ---amb l'exce
 Pel que fa a la implementació de la cua, s'ha utilitzat una cua enllaçada (mitjançant una {\emph{linked list}), que permet afegir i eliminar elements de forma dinàmica, sense necessitat de conèixer prèviament la mida màxima de la cua. Aquesta implementació permet una millor gestió de la memoria, utilitzant únicament la quanitat necessària en cada moment. A més, és més eficient que una llista basada en vectors, ja que no requereix moure tots els elements quan se n'afegeix o se n'elimina un. L'única limitació és la memòria disponible del microcontrolador; de forma experimental, s'ha observat una disponibiltiat d'uns \SI{300}{\kilo\byte} en el microcontrolador ESP32-WROOM-32, que permetria emmagatzemar més de \num{3000} trames de \SI{255}{\byte} (mida màxima de la trama, comptant capçalera).
 
 La implementació d'aquesta capa es pot trobar al fitxer \fitx{mac.cpp}, l'extensió de la capa amb funcionalitats de cua al \fitx{mac_buffer.cpp}, i la de cua enllaçada a \fitx{utils/LinkedFIFO.hpp}.
-
 \subsubsection{LoRaWAN}
 \label{subsubsec:mac_lorawan}
 LoRaWAN ja defineix els mecanismes d'accés al medi i, per tant, no aplica els detalls comentats anteriorment. Malgrat això, s'ha decidit implementar una capa d'abstracció per tal de poder-la utilitzar fàcilment, i integrar-la amb l'estructura de la resta del protocol.
@@ -379,7 +373,6 @@ En utilitzar dispositius de classe A, la recepció es produeix únicament despr�
 Com que LoRaWAN no utilitza el protocol d'accés al medi exposat anteriorment, l'identificador que s'assigna a les transmissions és el \fitx{0x0000}. Utilitzar sempre aquest identificador és segur, ja que com que no utilitza el protocol d'accés al medi exposat, tampoc implementa cues, i les transmissions són bloquejants, fent que no hi pugui haver dues transmissions amb el mateix identificador a la vegada. A més, cal recordar que s'havia reservat aquest identificador i, per tant, no serà mai assignat pel protocol d'accés al medi a cap trama.
 
 Es pot consultar la implementació d'aquesta capa al fitxer \fitx{lorawan.cpp}.
-
 \subsubsection{Situacions especials}
 En aquest subapartat es descriuen diferents situacions que poden produir-se durant l'ús del protocol de transmissió, juntament amb el comportament esperat del sistema en cada cas. Conèixer aquestes situacions teòriques permet determinar si es comporta de forma adequada en situacions reals.
 % \\
@@ -550,6 +543,36 @@ Per acabar es mostra una situació més complexa i completa, representada a la \
 \end{figure}
 
 \subsection{Encaminament estàtic}
+La funció d'aquesta capa és la de determinar quin és el següent dispositiu a qui s'ha d'enviar un missatge per fer-lo arribar al destí final. Com s'ha comentat, s'utilitza encaminament estàtic i, per tant, les taules que defineixen les rutes s'han de definir prèviament. És també responsable de gestionar i accedir a la taula. 
+
+Una altra tasca important que realitza és la de commutar entre utilitzar el protocol definit, a través de la capa d'accés al medi, o utilitzar LoRaWAN, a través de la capa d'abstracció de LoRaWAN prèviament comentada. Així, aquesta capa es comunica amb la capa d'accés al medi, rebent notificacions de fi de transmissió i de recepció de missatges a través del protocol personalitzat, i amb la capa d'abstracció de LoRaWAN, rebent notificacions de recepció de missatges a través de LoRaWAN.
+
+\subsubsection{Estructura de les trames}
+És necessari que aquesta capa pugui saber quin és el destí final del missatge, per tal de determinar quin és el següent dispositiu a qui s'ha d'enviar. Per tant, ha de contenir un camp amb l'adreça del dispositiu de \emph{destí}. També s'inclou l'adreça del dispositiu \emph{emissor}, permetent saber d'on s'ha originat el missatge. Aquests camps tenen la mateixa longitud que els camps d'adreça de la capa d'accés al medi, d'\SI{1}{\byte}, per tal de poder utilitzar la mateixa adreça en ambdues capes, simplificant la implementació.
+
+Per tal d'evitar transmissions infinites, per exemple si una ruta resulta en un bucle, s'inclou un camp de \acro{ttl} (\est{Time To Live}), que indica el nombre màxim de salts que pot fer un missatge abans de ser descartat. Per exemple, si l'emissor genera un missatge amb un \acro{ttl} d'1, el missatge només es transmetrà al següent dispositiu de la ruta. S'ha definit d'una longitud màxima d'\SI{1}{\byte}, permetent un màxim de 255 salts. Amb aquest límit, podria recórrer tots els dispositius de la xarxa (limitats a 253), així que no és necessaria una longitud major.
+
+Per acabar, s'ha inclòs un camp de \emph{longitud}, que indica la longitud de les dades del missatge. Com en el protocol d'accés al medi, permet saber quants bytes s'han de llegir per obtenir les dades. Es reserva també un byte, ja que la longitud màxima de les dades del protocol d'accés al medi és de \SI{248}{\byte}. Així, les \emph{dades} podran tenir una longitud màxima de \SI{243}{\byte}, sent els \SI{4}{\byte} restants per a la resta de camps.
+
+Seguint el model \acro{tcp/ip}, el missatges d'aquesta capa s'anomenen \emph{paquets}. La seva estructura, amb els camps prèviament mencionats, es pot observar a la \autoref{fig:paquet_encaminament}.
+
+\begin{figure}
+    \centering
+    \begin{bytefield}[bitwidth=1.2em]{16}
+        \bitheader{0,7,8,15} \\
+        \bitbox{8}{Origen} & \bitbox{8}{Destí} \\
+        \bitbox{8}{TTL} & \bitbox{8}{Longitud} \\
+        \wordbox[lr]{2}{Data \tiny {(màx. \SI{247}{\byte})}}
+    \end{bytefield}
+    \caption{Estructura de la trama de la capa d'accés al medi.}
+    \label{fig:paquet_encaminament}
+\end{figure}
+
+\subsubsection{Gestió de la taula d'encaminament}
+% comentar que implementa interfície per afegir/eliminar taules, per si mai es defineix un mecanisme d'encaminament dinàmic
+\subsubsection{Transmissió}
+\subsubsection{Recepció}
+
 \subsection{Capa de transport}
 \subsection{Capa d’aplicació}
 \section{Altres serveis}
