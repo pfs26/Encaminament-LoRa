@@ -11,7 +11,12 @@
 \usepackage{bytefield}
 
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta, positioning, calc, decorations.markings}
+\usetikzlibrary{arrows.meta, positioning, calc, decorations.markings, shapes.geometric}
+
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=2cm, minimum height=1cm,text centered, draw=black, fill=gray!30]
+\tikzstyle{process} = [rectangle, minimum width=2, minimum height=1cm, text centered, draw=black, fill=blue!20]
+\tikzstyle{decision} = [diamond, minimum width=2.5cm, minimum height=1cm, text centered, draw=black, fill=orange!30]
+\tikzstyle{arrow} = [thick,->,>=stealth]
 
 \renewcommand{\figureautorefname}{figura}
 \renewcommand{\tableautorefname}{taula}
@@ -296,7 +301,7 @@ Per acabar, al final de la trama s'ha inclòs un camp de \acro{crc}, per intenta
         \bitbox{8}{Emissor} & \bitbox{8}{Receptor} \\
         \bitbox{16}{Identificador} \\
         \bitbox{5}{\tiny Reservats} & \bitbox{2}{\tiny Retry} & \bitbox{1}{\rotatebox{90}{\tiny ACK}} & \bitbox{8}{Longitud}\\
-        \wordbox[lr]{2}{Data \tiny {(màx. \SI{247}{\byte})}} \\
+        \wordbox[lr]{2}{Data \tiny {(màx. \SI{248}{\byte})}} \\
         \bitbox[lrb]{8}{} & \bitbox{8}{CRC}
     \end{bytefield}
     \caption{Estructura de la trama de la capa d'accés al medi.}
@@ -543,18 +548,18 @@ Per acabar es mostra una situació més complexa i completa, representada a la \
 \end{figure}
 
 \subsection{Encaminament estàtic}
-La funció d'aquesta capa és la de determinar quin és el següent dispositiu a qui s'ha d'enviar un missatge per fer-lo arribar al destí final. Com s'ha comentat, s'utilitza encaminament estàtic i, per tant, les taules que defineixen les rutes s'han de definir prèviament. És també responsable de gestionar i accedir a la taula. 
+La funció d'aquesta capa és la de determinar quin és el següent dispositiu a qui s'ha d'enviar un missatge perquè arribi al destí final. Tal com s’ha comentat anteriorment, s’utilitza un encaminament estàtic, de manera que les taules que defineixen les rutes s’han de configurar prèviament. Aquesta capa també és responsable de gestionar i accedir a aquestes taules quan sigui necessari.
 
-Una altra tasca important que realitza és la de commutar entre utilitzar el protocol definit, a través de la capa d'accés al medi, o utilitzar LoRaWAN, a través de la capa d'abstracció de LoRaWAN prèviament comentada. Així, aquesta capa es comunica amb la capa d'accés al medi, rebent notificacions de fi de transmissió i de recepció de missatges a través del protocol personalitzat, i amb la capa d'abstracció de LoRaWAN, rebent notificacions de recepció de missatges a través de LoRaWAN.
+Una altra tasca important que duu a terme és la de commutar entre l’ús del protocol definit, a través de la capa d’accés al medi, i l’ús de LoRaWAN, mitjançant la capa d’abstracció de LoRaWAN comentada anteriorment. D’aquesta manera, la capa d’encaminament es comunica amb la capa d’accés al medi, rebent notificacions de final de transmissió i de recepció de missatges a través del protocol personalitzat, i també amb la capa d’abstracció de LoRaWAN, rebent notificacions de recepció de missatges a través de LoRaWAN.
 
 \subsubsection{Estructura de les trames}
-És necessari que aquesta capa pugui saber quin és el destí final del missatge, per tal de determinar quin és el següent dispositiu a qui s'ha d'enviar. Per tant, ha de contenir un camp amb l'adreça del dispositiu de \emph{destí}. També s'inclou l'adreça del dispositiu \emph{emissor}, permetent saber d'on s'ha originat el missatge. Aquests camps tenen la mateixa longitud que els camps d'adreça de la capa d'accés al medi, d'\SI{1}{\byte}, per tal de poder utilitzar la mateixa adreça en ambdues capes, simplificant la implementació.
+És necessari que aquesta capa pugui saber quin és el destí final del missatge, per tal de determinar quin és el següent dispositiu a qui s'ha d'enviar. Per tant, ha de contenir un camp amb l'adreça del dispositiu de \emph{destí}. També s'inclou l'adreça del dispositiu \emph{emissor}, permetent saber d'on s'ha originat el missatge. Ambdós camps tenen la mateixa longitud que els de la capa d’accés al medi, és a dir, \SI{1}{\byte}, la qual cosa permet reutilitzar les mateixes adreces en les dues capes i simplifica la implementació.
 
-Per tal d'evitar transmissions infinites, per exemple si una ruta resulta en un bucle, s'inclou un camp de \acro{ttl} (\est{Time To Live}), que indica el nombre màxim de salts que pot fer un missatge abans de ser descartat. Per exemple, si l'emissor genera un missatge amb un \acro{ttl} d'1, el missatge només es transmetrà al següent dispositiu de la ruta. S'ha definit d'una longitud màxima d'\SI{1}{\byte}, permetent un màxim de 255 salts. Amb aquest límit, podria recórrer tots els dispositius de la xarxa (limitats a 253), així que no és necessaria una longitud major.
+Per tal d'evitar transmissions infinites ---per exemple, si ruta resulta en un bucle--- s'afegeix un camp de \acro{ttl} (\est{Time To Live}), que indica el nombre màxim de salts que pot fer un missatge abans de ser descartat. Per exemple, si l'emissor genera un missatge amb un \acro{ttl} d'1, aquest només podrà ser transmès al següent dispositiu de la ruta. El camp \acro{ttl} ocupa \SI{1}{\byte}, permetent un màxim de 255 salts. Tenint en compte que la xarxa està limitada a un màxim de 253 dispositius, aquesta longitud és suficient, ja que no haurien d'existir rutes de longitud superior al màxim de dispositius.
 
-Per acabar, s'ha inclòs un camp de \emph{longitud}, que indica la longitud de les dades del missatge. Com en el protocol d'accés al medi, permet saber quants bytes s'han de llegir per obtenir les dades. Es reserva també un byte, ja que la longitud màxima de les dades del protocol d'accés al medi és de \SI{248}{\byte}. Així, les \emph{dades} podran tenir una longitud màxima de \SI{243}{\byte}, sent els \SI{4}{\byte} restants per a la resta de camps.
+Per acabar, s'ha inclòs un camp de \emph{longitud}, que indica la longitud de les dades del missatge. Com en el protocol d'accés al medi, permet saber quants bytes s'han de llegir per obtenir les dades. Es reserva també un byte, ja que la longitud màxima de les dades del protocol d'accés al medi és de \SI{248}{\byte}. Així, les \emph{dades} podran tenir una longitud màxima de \SI{244}{\byte}, sent els \SI{4}{\byte} restants per a la resta de camps.
 
-Seguint el model \acro{tcp/ip}, el missatges d'aquesta capa s'anomenen \emph{paquets}. La seva estructura, amb els camps prèviament mencionats, es pot observar a la \autoref{fig:paquet_encaminament}.
+Seguint el model \acro{tcp/ip}, el missatges d'aquesta capa s'anomenen \emph{paquets}. La seva estructura, amb els camps prèviament esmentats, es pot observar a la \autoref{fig:paquet_encaminament}.
 
 \begin{figure}
     \centering
@@ -562,16 +567,98 @@ Seguint el model \acro{tcp/ip}, el missatges d'aquesta capa s'anomenen \emph{paq
         \bitheader{0,7,8,15} \\
         \bitbox{8}{Origen} & \bitbox{8}{Destí} \\
         \bitbox{8}{TTL} & \bitbox{8}{Longitud} \\
-        \wordbox[lr]{2}{Data \tiny {(màx. \SI{247}{\byte})}}
+        \wordbox{3}{Data \tiny {(màx. \SI{244}{\byte})}}
     \end{bytefield}
-    \caption{Estructura de la trama de la capa d'accés al medi.}
+    \caption{Estructura del paquet de la capa d'encaminament estàtic.}
     \label{fig:paquet_encaminament}
 \end{figure}
-
 \subsubsection{Gestió de la taula d'encaminament}
 % comentar que implementa interfície per afegir/eliminar taules, per si mai es defineix un mecanisme d'encaminament dinàmic
+La taula d'encaminament és l'encarregada de definir quin és el següent dispositiu al qual s’ha d’enviar un paquet per tal que arribi al seu destí final. Per simplicitat, s’ha optat per permetre una única ruta per a cada dispositiu, establint així una relació un a un entre cada adreça de destí i el següent salt. Això limita la mida màxima de la taula d’encaminament a 254 entrades (253 dispositius i un \est{gateway}). A la \autoref{fig:taula_encaminament} es mostra un exemple de taula d'encaminament, on es pot veure que el dispositiu té comunicació directa amb els dispositius \fitx{0x4E} i \fitx{0xA1}, i si es vol enviar un paquet al \est{gateway}, aquest s’ha de fer arribar a través de \fitx{0x4E}.
+
+\begin{table}
+    \centering
+    \begin{tabular}{p{3cm}<{\centering}p{3cm}<{\centering}}
+        \toprule
+        Destí & Següent salt \\
+        \midrule
+        \fitx{0x01} & \fitx{0x4E} \\
+        \fitx{0x4E} & \fitx{0x4E} \\
+        \fitx{0x12} & \fitx{0xA1} \\
+        \fitx{0xA1} & \fitx{0xA1} \\
+        \bottomrule    
+    \end{tabular}
+    \caption{Exemple taula d'encaminament.}
+    \label{fig:taula_encaminament}
+\end{table}
+
+\begin{figure}
+    \centering
+    \begin{bytefield}[bitwidth=0.5em]{32}
+        \bitheader{0,7,15,23,31,39} \\
+        \bitbox{8}{\fitx{0x01}} & \bitbox{8}{\fitx{0x4E}} & \bitbox{8}{\fitx{0x4E}} & 
+        \bitbox{8}{\fitx{0x4E}} & \bitbox{8}{\fitx{0x12}} & \bitbox{8}{\dots} 
+    \end{bytefield}
+    \caption{Representació emmagatzematge de la taula d'encaminament.}
+    \label{fig:emmgatzematge_taula_encaminament}
+\end{figure}
+
+Una propietat important de la taula d'encaminament és que aquesta ha de ser persistent. Això vol dir que si el dispositiu es reinicia, aquest ha de poder recuperar la taula d'encaminament anteriorment configurada. En cas contrari, com que no es genera de forma dinàmica, aquesta capa quedaria inoperativa. Per evitar-ho, s'utilitza de nou la memòria no volàtil \acro{NVS}. La mida màxima de la taula serà de \SI{508}{\byte} (254 entrades, 2 adreces d'\SI{1}{\byte} per entrada), fet que no és problema en el dispositiu utilitzat (ESP32).
+
+Per evitar fer lectures a la memòria \acro{nvs} per a cada consulta de ruta, es carrega tota la taula a la memòria volàtil en inicialitzar la capa, fent que les lectures siguin molt més ràpides. El format d’emmagatzematge consisteix en una seqüència de bytes, on cada parell representa una entrada: el primer byte indica l’adreça de destí i el segon, el següent salt. Aquest format facilita el bolcat de la taula entre memòria volàtil i no volàtil, ja que no cal fer cap conversió. A la \autoref{fig:emmgatzematge_taula_encaminament} es pot observar com s'emmagatzemaria part de la taula d'encaminament representada anteriorment. 
+
+S’han implementat interfícies per afegir, eliminar i actualitzar entrades de la taula d’encaminament. Tot i que no són estrictament necessàries per al protocol d’encaminament estàtic, poden resultar útils si en el futur es vol implementar un encaminament dinàmic. En aquest cas, després de fer una modificació de la taula de rutes, s'actualitza la taula a la memòria \acro{nvs}, per tal de garantir la seva persistència.
+
+La implementació s'ha fet en un mòdul independent, consultable al fitxer \fitx{routing_table.cpp}, permetent que sigui reutilitzable en altres possibles protocols d'encaminament.
 \subsubsection{Transmissió}
+\label{subsubsec:routing_tx}
+Quan es vol realitzar una transmissió d'un paquet a un destí final, es realitza una consulta a la taula d'encaminament per determinar quin és el següent salt:
+\begin{itemize}
+    \item Si el següent salt és el \est{gateway}, representat amb l'adreça \fitx{0x01}, es realitza la transmissió del paquet a través de la capa d'abstracció de LoRaWAN.
+    \item Si el següent salt és un altre dispositiu, es realitza la transmissió a través de la capa d'accés al medi.
+\end{itemize}
+
+Pel que fa al valor de \acro{ttl}, s'assigna el valor configurat per defecte (definit en temps de compilació), que depèn de la mida de la xarxa i de cada situació, però que cal recordar que està limitat a 255.
+
+És important recordar que la capa d'accés al medi implementa una cua de transmissió, i que notifica a la capa d'encaminament quan la transmissió ha acabat. Per aquest motiu, la capa d'encaminament ofereix també la possibilitat de notificar a la capa superior de la finalització d'una transmissió, proporcionant de nou l'identificador. Aquestes notificacions (generades a través de \est{callback}) únicament es generaran per transmissions originades per la capa superior. És a dir, si la capa d'encaminament inicia una transmissió (per exemple, per encaminar un paquet rebut a través de la capa d'accés al medi), no es notificarà a la capa superior, ja que aquesta transmissió no s'hi ha originat. Aquest filtrat es pot realitzar guardant l'identificador de les trames transmeses (obtingut a través de la capa d'accés al medi) en una cua únicament si s'originen per la capa superior.
+
 \subsubsection{Recepció}
+\label{subsubsec:routing_rx}
+% « »
+Quan la capa d’accés al medi notifica a la capa d’encaminament la recepció d’un paquet, mitjançant el \est{callback} corresponent, aquesta rep el paquet i verifica quin és el seu destí final. Si n'és el destí final, es notifica a la capa superior perquè el processi i es dona per finalitzat el procés. En canvi, si el paquet no és per a ell, es consulta la taula d’encaminament per determinar quin és el següent salt.
+
+Si no existeix cap entrada a la taula per a l’adreça de destí del paquet rebut, aquest es descarta. Encara que podria semblar lògic generar un missatge de «no-reconeixement» per informar l’emissor, s’ha decidit no implementar aquest mecanisme. Fer-ho implicaria assignar tasques a la capa d’encaminament, que van més enllà de determinar la ruta del paquet. A més, aquest tipus de notificació incrementaria el nombre de transmissions, fet no desitjat en un protocol de baix consum. Tampoc hauria de ser necessari si la configuració de les taules d’encaminament s'ha realitzat correctament, ja que les rutes no canvien dinàmicament.
+
+Si el valor del \acro{ttl} del paquet rebut és 1 (i el paquet no és per ell, verificat prèviament), es descarta el paquet, ja que no pot fer més salts. En cas contrari, es decrementa el valor del \acro{ttl} i es transmet el paquet al següent salt a través de la capa d'accés al medi o de LoRaWAN, segons correspongui.
+
+Gràcies a la capa d'abstracció de LoRaWAN, que implementa la recepció de paquets a través de notificacions per \est{callback}, no hi ha diferència entre la recepció d'un paquet a través de LoRaWAN o a través del protocol personalitzat. En ambdós casos, la capa d'encaminament rep el paquet i realitza les mateixes operacions, explicades anteriorment.
+
+Com s'ha comentat anteriorment, la finalització de la transmissió d'aquest paquet encaminat no es notificarà a la capa superior, ja que no s'hi ha originat.
+
+\subsubsection{Detalls d'implementació}
+La implementació d’aquesta capa no s’ha basat en una màquina d’estats perquè no és necessari mantenir cap estat entre transmissions ni recepcions. En aquest cas, el comportament de la capa d’encaminament és totalment síncron, permetent basar la implementació com una seqüència de mètodes i condicions. Basar la implementació en una \acro{fsm} requeriria un disseny més complex, sense aportar cap avantatge. 
+
+A la \autoref{fig:routing_logica_tx} i a la \autoref{fig:routing_logica_rx} es mostren dos diagrames de flux, representant la transmissió i recepció de paquets respectivament. Ambdós diagrames es basen en el disseny exposat en els subapartats anteriors.
+
+
+\begin{figure}
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{imatges/Routing_FluxTX.drawio.pdf}
+    \end{minipage}
+    \begin{minipage}{0.45\textwidth}        
+        \includegraphics[width=\linewidth]{imatges/Routing_FluxRX.drawio.pdf}
+    \end{minipage}
+    \caption{Diagrama de flux de la transmissió (esquerra) i recepció (dreta).}
+    \label{fig:routing_flux}
+\end{figure}
+
+\begin{figure}
+    \centering
+        \includegraphics[width=\linewidth]{imatges/Routing_FluxOnTX.drawio.pdf}
+    \caption{Diagrama de flux de la transmissió (esquerra) i recepció (dreta).}
+    \label{fig:routing_flux}
+\end{figure}
 
 \subsection{Capa de transport}
 \subsection{Capa d’aplicació}
