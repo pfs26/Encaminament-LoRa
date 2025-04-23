@@ -638,26 +638,29 @@ Com s'ha comentat anteriorment, la finalització de la transmissió d'aquest paq
 \subsubsection{Detalls d'implementació}
 La implementació d’aquesta capa no s’ha basat en una màquina d’estats perquè no és necessari mantenir cap estat entre transmissions ni recepcions. En aquest cas, el comportament de la capa d’encaminament és totalment síncron, permetent basar la implementació com una seqüència de mètodes i condicions. Basar la implementació en una \acro{fsm} requeriria un disseny més complex, sense aportar cap avantatge. 
 
-A la \autoref{fig:routing_logica_tx} i a la \autoref{fig:routing_logica_rx} es mostren dos diagrames de flux, representant la transmissió i recepció de paquets respectivament. Ambdós diagrames es basen en el disseny exposat en els subapartats anteriors.
+A la \autoref{fig:routing_flux_tx} i a la \autoref{fig:routing_flux_rx} es mostren dos diagrames de flux, representant la transmissió i recepció de paquets respectivament. Ambdós diagrames es basen en el disseny exposat en els subapartats anteriors. A la \autoref{fig:routing_flux_txdone} es mostra el diagrama de flux de la transmissió completada, on es pot observar la notificació a la capa superior si aquesta s'hi havia originat. 
 
+De nou, es vol destacar la diferència per evitar notificar a la capa superior d'una transmissió d'un paquet encaminat ---no generat localment---. En la transmissió d'un paquet (\autoref{fig:routing_flux_tx}), es guarda l'identificador generat per la capa d'accés al medi; en el cas d'un encaminament, no.
 
 \begin{figure}
     \centering
-    \begin{minipage}{0.45\textwidth}
-        \includegraphics[width=\linewidth]{imatges/Routing_FluxTX.drawio.pdf}
-    \end{minipage}
-    \begin{minipage}{0.45\textwidth}        
-        \includegraphics[width=\linewidth]{imatges/Routing_FluxRX.drawio.pdf}
-    \end{minipage}
-    \caption{Diagrama de flux de la transmissió (esquerra) i recepció (dreta).}
-    \label{fig:routing_flux}
+        \includegraphics[width=0.9\linewidth]{imatges/Routing_FluxTX.drawio.pdf}
+    \caption{Diagrama de flux de transmissió.}
+    \label{fig:routing_flux_tx}
 \end{figure}
 
 \begin{figure}
     \centering
-        \includegraphics[width=\linewidth]{imatges/Routing_FluxOnTX.drawio.pdf}
-    \caption{Diagrama de flux de la transmissió (esquerra) i recepció (dreta).}
-    \label{fig:routing_flux}
+        \includegraphics[width=0.9\linewidth]{imatges/Routing_FluxRX.drawio.pdf}
+    \caption{Diagrama de flux de recepció.}
+    \label{fig:routing_flux_rx}
+\end{figure}
+
+\begin{figure}
+    \centering
+        \includegraphics[width=0.35\linewidth]{imatges/Routing_FluxOnTX.drawio.pdf}
+    \caption{Diagrama de flux de transmissió completada.}
+    \label{fig:routing_flux_txdone}
 \end{figure}
 
 \subsection{Capa de transport}

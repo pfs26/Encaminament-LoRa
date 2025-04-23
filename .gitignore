@@ -6,6 +6,10 @@
 .env/*
 decoder/
 
+*.bkp
+*.drawio.pdf
+hardware/*
+
 # Prerequisites
 *.d
 
