@@ -622,6 +622,10 @@ Pel que fa al valor de \acro{ttl}, s'assigna el valor configurat per defecte (de
 
 És important recordar que la capa d'accés al medi implementa una cua de transmissió, i que notifica a la capa d'encaminament quan la transmissió ha acabat. Per aquest motiu, la capa d'encaminament ofereix també la possibilitat de notificar a la capa superior de la finalització d'una transmissió, proporcionant de nou l'identificador. Aquestes notificacions (generades a través de \est{callback}) únicament es generaran per transmissions originades per la capa superior. És a dir, si la capa d'encaminament inicia una transmissió (per exemple, per encaminar un paquet rebut a través de la capa d'accés al medi), no es notificarà a la capa superior, ja que aquesta transmissió no s'hi ha originat. Aquest filtrat es pot realitzar guardant l'identificador de les trames transmeses (obtingut a través de la capa d'accés al medi) en una cua únicament si s'originen per la capa superior.
 
+A més, cal també tenir en compte que la capa d'accés al medi implementa notificacions per transmissions fallides. De nou, aquesta notificació únicament es propagarà a la capa superior si el paquet s'hi havia originat, i no és una transmissió fallida d'un paquet encaminat. 
+
+És també important recordar que les transmissions mitjançant LoRaWAN són bloquejants. Així, l'estat de la transmissió es coneix en el mateix moment en que s'inicia la transmissió a través de la capa d'abstracció. Per mantenir la coherència amb la resta de capes, s'implementen notificacions de transmissió simulades, programant les notificacions de transmissió correcta i fallida a través del gestor de tasques.
+
 \subsubsection{Recepció}
 \label{subsubsec:routing_rx}
 % « »
@@ -637,7 +641,7 @@ Com s'ha comentat anteriorment, la finalització de la transmissió d'aquest paq
 
 \subsubsection{Detalls d'implementació}
 La implementació d’aquesta capa no s’ha basat en una màquina d’estats perquè no és necessari mantenir cap estat entre transmissions ni recepcions. En aquest cas, el comportament de la capa d’encaminament és totalment síncron, permetent basar la implementació com una seqüència de mètodes i condicions. Basar la implementació en una \acro{fsm} requeriria un disseny més complex, sense aportar cap avantatge. 
-
+ 
 A la \autoref{fig:routing_flux_tx} i a la \autoref{fig:routing_flux_rx} es mostren dos diagrames de flux, representant la transmissió i recepció de paquets respectivament. Ambdós diagrames es basen en el disseny exposat en els subapartats anteriors. A la \autoref{fig:routing_flux_txdone} es mostra el diagrama de flux de la transmissió completada, on es pot observar la notificació a la capa superior si aquesta s'hi havia originat. 
 
 De nou, es vol destacar la diferència per evitar notificar a la capa superior d'una transmissió d'un paquet encaminat ---no generat localment---. En la transmissió d'un paquet (\autoref{fig:routing_flux_tx}), es guarda l'identificador generat per la capa d'accés al medi; en el cas d'un encaminament, no.
@@ -664,6 +668,11 @@ De nou, es vol destacar la diferència per evitar notificar a la capa superior d
 \end{figure}
 
 \subsection{Capa de transport}
+\subsubsection{Estructura de les trames}
+\subsubsection{Transmissió}
+\subsubsection{Recepció}
+\subsubsection{Detalls d'implementació}
+
 \subsection{Capa d’aplicació}
 \section{Altres serveis}
 \label{sec:altres_serveis}
@@ -689,74 +698,6 @@ De nou, es vol destacar la diferència per evitar notificar a la capa superior d
 % \section{Suport a topologies més complexes}
 % \section{Optimització del consum energètic}
 % \section{Integració amb LoRaWAN o altres protocols}
-
-
-% \chapter{Introducció}
-% \label{chap:intro}
-% \section{Objectius}
-% \label{sec:objectius}
-% \section{Limitacions del treball}
-% \section{Organització de la memòria}
-
-% \chapter{Antecedents}
-% \section{Introducció a LoRa i LoRaWAN}
-% % Mencionar limitacions legals de TTN i EU868
-% \section{Sobre els protocols de comunicació}
-% \section{Treballs relacionats}
-% % meshtastic -> xarxa mesh però sense baix consum, broadcasts podent afectar communicació, etc.
-% % tampoc permeten compatibilitat amb lorawan
-% % \section{Solucions existents}
-% % loramesher -> sense broadcast, però requereixen descobriment de rutes previs
-% % Cap dels dos permeten baix consum i modes de deep sleep
-
-% % Aqui van els capitols especifics del treball
-% \chapter{Disseny del protocol de comunicació} % no es veu afectat per material
-% \section{Medi físic}
-% \subsection{LoRa}
-% \subsection{LoRaWAN}
-% % Uplinks es faran amb ACK o no depenent de define en compilar
-% % fet així per evitar que s'hagin de fer molts downlinks per ACKs
-% % ja que TTN limita (fair use policy) a 10 downlinks per dia
-% \section{Accés al medi}
-% % Mencionar que seria aquí on es faria limitació d'accés al medi
-% % Podent afegir un últim estat que "esperi" un temps fins següent TX
-% % Parlar llavors sobre les possibles limitacions que això podria comportar
-% % (per exemple si es limiten ACKs de capa MAC, o no es limiten, o es limiten ACKs de transport...)
-% \section{Encaminament}
-% \section{Transport}
-% \section{Aplicació}
-% \chapter{Implementació del protocol}
-% \section{Estructura}
-% \subsection{Organització del codi}
-% % S'ha implementat seguint model de capes, on cada capa és un mòdul.
-% % Cada capa inferior notifica a la superior a través de callbacks, 
-% % i cada capa superior notifica a la inferior a través de mètodes.
-% % S'ha intentat que no hi hagi mètodes bloquejants, amb excepció dels 
-% % mètodes "finals" com transmissió.
-% \subsection{Biblioteques i entorn de desenvolupament}
-% % platformio + radiolib (comentar radiohead + lmic)
-% \section{Protocol de comunicació}
-% \subsection{Capa física}
-% \subsection{Accés al medi}
-% \subsection{Encaminament}
-% \subsection{Transport}
-% \subsection{Aplicació}
-% \section{Validació del funcionament i resultats}
-
-% \chapter{Aplicació en entorns de baix consum}
-% % explicar avantatges i inconvenients d'utilitzar
-% % el protocol de sincronització genèric aqui. També s'hauria d'explicar el seu disseny
-
-% % quines son totes les opcions plantejades, avantatges i inconvenients, i perquè
-% \section{Descripció de la situació}
-% % Com és la xarxa, i què es vol aconseguir
-
-% % Per a cada iteració: avantatges i inconvenients. Què implicaria afegir nous nodes?
-% % Limitacions de temps? memòria?
-
-% \chapter{Conclusions}
-
-% \chapter{Treball futur}
 
 % https://www.latex-tables.com/
 % configurar amb opció de SCALE
