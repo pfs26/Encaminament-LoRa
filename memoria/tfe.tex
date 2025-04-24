@@ -324,7 +324,7 @@ Per tal d'assegurar la correcta transmissió del missatge, s'ha implementat un m
 
 El temps d'espera de recepció de l'\acro{ack} es determina a través de l'expressió $3 \cdot k \cdot t_{tx}$, on $t_{tx}$ és el temps de transmissió (també conegut com a \est{airtime}) del missatge, i $k$ és un factor constant major o igual a 1. Així, el temps d'espera serà, com a mínim, de tres vegades el temps de transmissió, permetent que el receptor tingui temps de rebre el missatge enviat (requerint un temps de recepció igual al de transmissió), enviar el missatge de reconeixement, i que el transmissor original tingui temps de rebre'l. El factor ${k}$ permet ajustar el marge que es vol deixar, per exemple per si el receptor no pot enviar el missatge de reconeixement immediatament; per exemple, si $k=2$, el temps d'espera seria el doble del necessari. És important mencionar que el temps de transmissió es pot determinar prèviament, coneixent l'ample de banda, el factor d'espargiment i la longitud del missatge.
 
-Una característica dels missatges de reconeixement és que l'identificador no és aleatori, sinó que és el mateix que el missatge que reconeix, l'«original». Això permet que el transmissor pugui identificar correctament l'\acro{ack}, i sapiga a quines dades fa referència. Si no fos així, el transmissor podria rebre un reconeixement d'una transmissió que havia considerat fallida, després d'haver-ne realitzat una altra; com que no sabria que fa referència a la primera, pensaria que la segona s'ha realitzat correctament. A més, el camp d'\acro{ack} dels \emph{flags} està actiu, i el camp de dades no conté informació.
+Una característica dels missatges de reconeixement és que l'identificador no és aleatori, sinó que és el mateix que el missatge que reconeix, l'«original». Això permet que el transmissor pugui identificar correctament l'\acro{ack}, i sapiga a quines dades fa referència. Si no fos així, el transmissor podria rebre un reconeixement d'una transmissió que havia considerat fallida, després d'haver-ne realitzat una altra; com que no sabria que fa referència a la primera, pensaria que la segona s'ha realitzat correctament. A més, el camp d'\acro{ack} dels \est{flags} està actiu, i el camp de dades no conté informació.
 
 Pel que fa al nombre màxim de retransmissions, s'ha considerat oportú limitar-les a un màxim de tres, permetent així fins a quatre transmissions. Aquest criteri s'ha establert considerant que cada retransmissió incrementa el consum energètic, i la utilització del canal. Si després de quatre transmissions no s'ha pogut realitzar correctament la transmissió, és molt probable que les causes no siguin degudes a interferències, sinó a un error en el receptor o transmissor. En aquest cas, es considera millor cance\l.lar la transmissió i no gastar més energia.
 
@@ -339,7 +339,7 @@ Finalment, per evitar processar missatges duplicats, el receptor guarda en una c
 % « »
 La recepció de trames es realitza mitjançant el \est{callback} de la capa d'abstracció LoRa. En rebre una trama, es verifica el \acro{crc}; si no és correcte, s'ignora el missatge, ja que no podem assegurar que cap de les dades rebudes sigui correcta.
 
-Seguidament es verifica si el dispositiu és el destinetari de la trama. Si no ho és, no és necessari continuar; en cas afirmatiu, es determina si la trama és de reconeixement, comprovant el bit d'\acro{ack} dels \emph{flags}, i comparant l'identificador de la trama rebuda amb el de l'enviada. Si no s'havia realitzat cap transmissió prèvia, el missatge es considera un error, i s'ignora. En cas contrari, es considera que la transmissió ha estat correcta, i es notifica a la capa superior a través d'un \est{callback}. Si el missatge rebut no és un missatge de reconeixement, es guarda l'identificador a la cua de trames rebudes, i es notifica a la capa superior a través d'un \est{callback}.
+Seguidament es verifica si el dispositiu és el destinetari de la trama. Si no ho és, no és necessari continuar; en cas afirmatiu, es determina si la trama és de reconeixement, comprovant el bit d'\acro{ack} dels \est{flags}, i comparant l'identificador de la trama rebuda amb el de l'enviada. Si no s'havia realitzat cap transmissió prèvia, el missatge es considera un error, i s'ignora. En cas contrari, es considera que la transmissió ha estat correcta, i es notifica a la capa superior a través d'un \est{callback}. Si el missatge rebut no és un missatge de reconeixement, es guarda l'identificador a la cua de trames rebudes, i es notifica a la capa superior a través d'un \est{callback}.
 
 S'exposa una interfície que permet a la capa superior obtenir les dades de la trama rebuda, la qual únicament s'hauria d'utilitzar després que s'hagi notificat a través de l'anterior \est{callback}. En cas contrari, les dades que s'obtinguin podrien ser incorrectes o duplicades.
 \subsubsection{Cues de transmissió i recepció}
@@ -580,7 +580,7 @@ La taula d'encaminament és l'encarregada de definir quin és el següent dispos
     \centering
     \begin{tabular}{p{3cm}<{\centering}p{3cm}<{\centering}}
         \toprule
-        Destí & Següent salt \\
+        \textbf{Destí} & \textbf{Següent salt} \\
         \midrule
         \fitx{0x01} & \fitx{0x4E} \\
         \fitx{0x4E} & \fitx{0x4E} \\
@@ -625,7 +625,6 @@ Pel que fa al valor de \acro{ttl}, s'assigna el valor configurat per defecte (de
 A més, cal també tenir en compte que la capa d'accés al medi implementa notificacions per transmissions fallides. De nou, aquesta notificació únicament es propagarà a la capa superior si el paquet s'hi havia originat, i no és una transmissió fallida d'un paquet encaminat. 
 
 És també important recordar que les transmissions mitjançant LoRaWAN són bloquejants. Així, l'estat de la transmissió es coneix en el mateix moment en que s'inicia la transmissió a través de la capa d'abstracció. Per mantenir la coherència amb la resta de capes, s'implementen notificacions de transmissió simulades, programant les notificacions de transmissió correcta i fallida a través del gestor de tasques.
-
 \subsubsection{Recepció}
 \label{subsubsec:routing_rx}
 % « »
@@ -638,13 +637,14 @@ Si el valor del \acro{ttl} del paquet rebut és 1 (i el paquet no és per ell, v
 Gràcies a la capa d'abstracció de LoRaWAN, que implementa la recepció de paquets a través de notificacions per \est{callback}, no hi ha diferència entre la recepció d'un paquet a través de LoRaWAN o a través del protocol personalitzat. En ambdós casos, la capa d'encaminament rep el paquet i realitza les mateixes operacions, explicades anteriorment.
 
 Com s'ha comentat anteriorment, la finalització de la transmissió d'aquest paquet encaminat no es notificarà a la capa superior, ja que no s'hi ha originat.
-
 \subsubsection{Detalls d'implementació}
 La implementació d’aquesta capa no s’ha basat en una màquina d’estats perquè no és necessari mantenir cap estat entre transmissions ni recepcions. En aquest cas, el comportament de la capa d’encaminament és totalment síncron, permetent basar la implementació com una seqüència de mètodes i condicions. Basar la implementació en una \acro{fsm} requeriria un disseny més complex, sense aportar cap avantatge. 
  
 A la \autoref{fig:routing_flux_tx} i a la \autoref{fig:routing_flux_rx} es mostren dos diagrames de flux, representant la transmissió i recepció de paquets respectivament. Ambdós diagrames es basen en el disseny exposat en els subapartats anteriors. A la \autoref{fig:routing_flux_txdone} es mostra el diagrama de flux de la transmissió completada, on es pot observar la notificació a la capa superior si aquesta s'hi havia originat. 
 
 De nou, es vol destacar la diferència per evitar notificar a la capa superior d'una transmissió d'un paquet encaminat ---no generat localment---. En la transmissió d'un paquet (\autoref{fig:routing_flux_tx}), es guarda l'identificador generat per la capa d'accés al medi; en el cas d'un encaminament, no.
+
+La implementació d'aquesta capa es troba disponible al fitxer \fitx{routing.cpp}.
 
 \begin{figure}
     \centering
@@ -668,9 +668,109 @@ De nou, es vol destacar la diferència per evitar notificar a la capa superior d
 \end{figure}
 
 \subsection{Capa de transport}
+La funció d'aquesta capa és la de gestionar la transmissió de missatges entre el dispositiu transmissor, l'origen, i el receptor final, el destí. A més, també ofereix la possibilitat d'implementar un mecanisme de fiabilitat, intentant garantir que el missatge arribi correctament al destí final, i que no es rebin missatges duplicats. 
+
+Cal diferenciar aquest mecanisme de fiabilitat del que ofereix la capa d'accés al medi, que únicament intenta garantir que el missatge arribi correctament al següent salt. Després de realitzar els intents màxims de retransmissió, el missatge es descarta si no s'ha pogut transmetre. La capa de transport, en canvi, incorpora mecanismes de fiabilitat amb una visió global, indiferentment dels mètodes que apliquen les capes inferiors.
+
+La gestió de la recepció de missatges duplicats és també una qüestió important en xarxes encaminades. La transmissió d'un missatge es podria realitzar a través de diferents rutes, arribant al destí final per múltiples camins. És essencial poder identificar cada missatge i descartar els duplicats, assegurant així una comunicació coherent. 
+
+A més, s'encarrega també de gestionar els missatges de les diferents aplicacions que poden existir a la capa d'aplicació, redirigint cada missatge a la seva aplicació corresponent.
+% TODO: AQUI NO ES SERIA NECESSARI PERQUE LA RUTA SEMPRE ÉS LA MATEIXA!
+
+
 \subsubsection{Estructura de les trames}
+Seguint l'estructura del model \acro{tcp/ip}, els missatges d'aquesta capa s'anomenen \emph{segments}, permetent diferenciar-los dels paquets de la capa d'encaminament, o de les trames de la capa d'accés al medi. 
+
+Per tal de poder identificar cada missatge, i evitar duplicitats, s'inclou un \emph{identificador} de missatge. S'ha dissenyat d'una longitud de \SI{2}{\byte}, permetent així un màxim de \num{65535} missatges diferents. La distinció entre aquest identificador i el de la capa d'accés al medi és que aquest és global, mantenint-se des de l'emissor fins al receptor final. En canvi, l'identificador de la capa d'accés al medi és local, i es reinicia cada vegada que es realitza una nova transmissió. Així, la probabilitat de co\l.lisió d'identificadors és menor que en la capa d'accés al medi, ja que la quantitat d'identificadors generats és menor. Malgrat això, s'ha optat per mantenir la mateixa longitud d'identificador, reduïnt la probabilitat de co\l.isió d'identifiadors en aquesta capa, incrementant així la fiabilitat d'extrem a extrem. 
+
+El mecanisme de fiabilitat és semblant a l'implementat a la capa d'accés al medi, on el receptor reconeix la recepció del missatge a través d'un missatge de reconeixement. Així, és necessari disposar d'un camp d'\acro{ack}. Per oferir la possibilitat d'utilitzar o no aquest mecanisme, s'ha inclòs un camp que indica la so\l.licitud del reconeixement. Ambdós camps d'han implementat com un únic bit, inclosos dins un camp de \est{flags}. Així, el camp de \est{flags} ocupa \SI{1}{\byte}, utilitzant un bit pel camp \emph{ACKRequest}, i un per \emph{ACKResponse}.
+
+Per gestionar el redireccionament de segments cap a l'aplicació corresponent de la capa superior s'ha inclòs un camp per identificar l'aplicació, conegut com a \emph{port} en el model \acro{tcp/ip}. Per tal d'aprofitar l'espai disponible del segment, s'han utilitzat els sis bits restants del camp de \est{flags}, permetent un màxim de 64 aplicacions diferents. 
+
+Per acabar, inclou els camps de \emph{longitud} i de \emph{dades}. Tenint en compte que un paquet pot tenir una longitud màxima de dades de \SI{244}{\byte}, i que el segment formarà part d'aquestes dades, la longitud màxima del segment serà de \SI{240}{\byte}. Així, el camp de dades, té una longitud màxima de \SI{240}{\byte}, sent els \SI{4}{\byte} restants per a la resta de camps. La longitud del camp de \emph{longitud} és d'\SI{1}{\byte}, suficient per a representar aquesta longitud màxima.
+
+A la \autoref{fig:segment_transport} es pot observar l'estructura del segment de la capa de transport, amb els camps comentats anteriorment.
+
+\begin{figure}
+    \centering
+    \begin{bytefield}[bitwidth=1.2em]{16}
+        \bitheader{0,7,8,15} \\
+        \bitbox{16}{Identificador} \\
+    \bitbox{6}{Port} & \bitbox{1}{\tiny \rotatebox{90}{ACK}\rotatebox{90}{Req}} & \bitbox{1}{\tiny \rotatebox{90}{ACK}\rotatebox{90}{Resp}} & \bitbox{8}{Longitud} \\
+    \wordbox{3}{Data \tiny {(màx. \SI{240}{\byte})}}
+    \end{bytefield}
+    \caption{Estructura del segment de la capa de transport.}
+    \label{fig:segment_transport}
+\end{figure}
+
 \subsubsection{Transmissió}
+Com en la capa d'encaminament, la transmissió en la capa de transport és simple: utilitza la interfície exposada per la capa d'encaminament. En finalitzar la transmissió, la capa d'encaminament notificarà a través d'un \est{callback} aquesta finalització. Com en la capa d'accés al medi, el mètode de generació de l'identificador és aleatori.
+
+La complexitat recau en la gestió de la fiabilitat. La transmissió d'un segment es pot realitzar de forma no fiable o fiable. En el primer cas, el dispositiu no espera cap reconeixement, i únicament utilitza la interfície de la capa d'encaminament per realitzar la transmissió, despreocupant-se del resultat. En el segon cas, el dispositiu espera rebre un segment de reconeixement, transmès pel receptor final. En cas de no rebre'l en un temps determinat, es retransmet de nou el segment. 
+
+A causa de la cua de transmissió a la capa d'accés al medi, l'inici del temps d'espera de recepció del reconeixement no es pot iniciar després d'utilitzar la interfície de la capa inferior, ja que la transmissió no té per què produir-se immediatament. Així, només es pot iniciar el temporitzador quan la capa inferior notifica la transmissió del segment, a través del \est{callback} corresponent.
+
+Per permetre aquest comportament, es guarda informació addicional d'una transmissió fiable, en una estructura de metadades:
+\begin{itemize}
+    \item \emph{PDU}. Conté el \emph{Protocol Data Unit}, és a dir, el segment complet, incloent les dades i capçaleres.
+    \item \emph{ID}. L'identificador assignat per la capa d'accés al medi, amb el qual es podrà identificar la transmissió en els esdeveniments de fi de transmissió o de transmissió errònia.
+    \item \emph{RX}. L'adreça del receptor del segment. \textcolor{red}{TODO: AIXÒ NO ÉS NECESSARI, VEURE ISSUE A GITHUB}
+    \item \emph{Longitud}. Longitud de les dades. \textcolor{red}{TODO: AIXÒ NO ÉS NECESSARI, VEURE ISSUE A GITHUB}
+    \item \emph{isSent}. Un booleà per indicar si el segment ja s'ha enviat o no. S'actualitza quan es rep la notificació de fi de transmissió.
+    \item \emph{ackTimeout}. Indica l'instant de temps en mi\l.lisegons en què finalitza l'espera de reconeixement. 
+    \item \emph{Reintents}. Indica el nombre de reintents de transmissió que s'han realitzat per un segment.
+    \item \emph{Tasca}. Tasca del gestor de tasques que s'encarrega de gestionar el temporitzador d'espera del reconeixement. Permet cance\l.lar la tasca si es rep el reconeixement.
+\end{itemize}
+
+Així, quan finalitza la transmissió d'un segment fiable, es determina en quin instant finalitza el temps d'espera de recepció de l'\acro{ack}, i es guarda a les metadades. A més, es crea una tasca que generarà l'esdeveniment de fi d'espera d'\acro{ack} quan es compleixi el temps d'espera, la qual també es guarda a les metadades, permetent cance\l.lar-la si es produeix el reconeixement. Més informació sobre la fiabilitat es pot trobar al \autoref{subsubsec:transport_fiabilitat}.
+
 \subsubsection{Recepció}
+Es produeix una recepció d'un segment quan la capa inferior, la d'encaminament, ho notifica a través del \est{callback} configurat. Quan es rep un segment, es verifica el camp \emph{ACKRequest} dels \est{flags}. En cas que el segment rebut so\l.liciti un reconeixement, es genera un segment amb el camp \emph{ACKResponse} actiu, i es transmet cap al transmissor de l'anterior segment, utilitzant el mecanisme exposat en el subapartat anterior.
+
+Seguidament es verifica si el segment s'havia rebut anteriorment, consultant el camp d'identificador del segment rebut amb els identificadors dels últims segments rebuts. Aquest disseny és similar a l'utilitzat a la capa d'accés al medi, on es guarden les últimes trames rebudes. De nou, la mida d'aquesta cua és configurable, però s'ha de tenir en compte que si és massa petita, es poden produir falsos positius, i si és massa gran, hi podrien haver co\l.lisions d'identificadors de segments diferents.
+
+Si ja s'havia rebut anteriorment l'identificador, ja que existeix a la cua de segments rebuts, s'atura el processament del segment, i es descarta. En cas contrari, es guarda l'identificador a la cua, i es notifica a la capa superior de la recepció d'un nou segment.
+
+\subsubsection{Gestió de múltiples aplicacions}
+% hi poden haver múltiples capes superiors (aplicacions)
+% A quina cal enviar les notificacions?
+Una característica d'aquesta capa és que pot disposar de múltiples capes superiors, o aplicacions. Això permet que cada aplicació pugui gestionar els seus propis missatges, els quals poden tenir estructures diferents, sense interferir entre elles. 
+
+Per a implementar aquest comportament, és necessari que la capa de transport conegui les interfícies a través de les quals notificar la recepció o transmissió d'un missatge per a cada aplicació. Per fer-ho, es dissenya una taula de ports, on cada port s'associa a les funcions de notificació específiques per a cada aplicació. Aquesta taula permet utilitzar múltiples \emph{callbacks} per gestionar la recepció i la fi de transmissió de segments, amb un \emph{callback} dedicat a cada aplicació. A la \autoref{tab:taula_ports} es pot observar un exemple de taula de ports, on es pot veure com tres aplicacions diferents poden gestionar la recepció i transmissió de segments a través de les seves propies interfícies.
+
+\begin{table}
+    \begin{tabular}{ccc}
+        \toprule
+        \textbf{Port} & \textbf{Transmissió} & \textbf{Recepció} \\
+        \midrule
+        \fitx{00} & \fitx{TxDone1()} & \fitx{Rx1()} \\
+        \fitx{17} & \fitx{TxDone2()} & \fitx{Rx2()} \\
+        % \multicolumn{3}{c}{\dots} \\
+        \fitx{63} & \fitx{TxDoneN()} & \fitx{RxN()} \\
+        \bottomrule
+    \end{tabular}
+    \centering
+    \caption{Exemple de taula de ports.}
+    \label{tab:taula_ports}
+\end{table}
+
+Així, quan es rep un segment amb el port 17, la capa de transport utilitzarà la interfície \fitx{Rx2} per notificar la recepció del segment únicament a l'aplicació interessada.
+
+La taula de ports pot tenir fins a un màxima de 64 entrades, una per cada possible port. Per cada un d'aquests, es pot assignar únicament una interfície de notificació, garantint així que una única aplicació sigui notificada. En cas que no s'hagi assignat cap interfície a un port, la capa de transport no podrà notificar-ho, fent que l'esdeveniment es perdi.
+
+Un altre problema de disposar de múltiples capes superiors és que cada aplicació pot intentar inicialitzar la capa de transport. Per evitar-ho, és important que la capa de transport guardi l'estat d'inicialització i, en cas que es vulgui inicialitzar de nou, simplement ho «simuli», sense realitzar cap acció addicional.
+
+\subsubsection{Fiabilitat}
+\label{subsubsec:transport_fiabilitat}
+% « »
+Com s'ha comentat anteriorment, la implementació de la fiabilitat es basa en un mecanisme de reconeixement, similar al de la capa d'accés al medi.
+Quan s'ha realitzat la transmissió d'un segment fiable, s'inicia un temporitzador a través del gestor de tasques, que genera un esdeveniment quan finalitza el temps d'espera d'\acro{ack}. Quan es produeix aquest esdeveniment, s'obtenen les metadades de la transmissió, i es reintenta la transmissió de nou, repetint el procediment.
+
+El temps d'espera de recepció del reconeixement no és fix, sinó que depèn del nombre de retransmissions que s'han realitzat anteriorment, seguint una funció exponencial. Aquest temps ve determinat per l'expressió $k\cdot 2^r$, on \emph{k} és un valor constant i configurable, i \emph{r} el nombre de reintents realitzats.
+% EXPLICAR COM S'HAURIA DE DEFINIR K (tenitn en compte dispositius a la xarxa, llargada màxima de la ruta, salts màxims, transmissió més lenta per WAN, etc.)
+
+En aquest moment, es verifica si s'ha rebut el reconeixement. Si no s'ha rebut, es torna a transmetre el segment, incrementant el nombre de reintents. Si s'ha arribat al nombre màxim de reintents, es descarta el segment i es notifica a la capa superior.
+
 \subsubsection{Detalls d'implementació}
 
 \subsection{Capa d’aplicació}
