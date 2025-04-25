@@ -176,7 +176,18 @@ void MAC_onTxFailed(mac_tx_callback_t cb) { onTxFailed = cb; }
 static void _send_ack(const mac_pdu_t * const refPdu) {
     mac_pdu_t ackPDU;
     _preparePDU(&ackPDU, refPdu->tx, (uint8_t*)"", 0, 0, true, refPdu);
+
+    // Establim potència de transmissió de l'ACK segons el nombre de reintents que s'han fet
+    // per rebre el frame. No té sentit que quan rebem frame sigui perquè la potència era màxima
+    // però que enviem ACK amb potència mínima: receptor probablement NO rebrà ACK així.
+    int power = LORA_TX_POW + (refPdu->flags.retry * MAC_TX_POW_STEP);
+    LoRaRAW_setTxPower(power);
+
+    // Enviem ACK
     _send_pdu(&ackPDU);
+
+    // Reestablim potència a la mínima per no afectar següents transmissions
+    LoRaRAW_setTxPower(LORA_TX_POW);
 }
 
 // Envia una PDU per LoRa, convertint de PDU a dades lora.
