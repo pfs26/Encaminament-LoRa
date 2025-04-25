@@ -27,7 +27,7 @@ typedef struct {
     transport_pdu_t pdu;
     uint16_t id;
     node_address_t rx;
-    size_t dataLength;
+    // size_t dataLength;
     bool isSent = false;
     long ackTimeout = -1;
     uint8_t retries = 0;
@@ -45,6 +45,7 @@ size_t _buildAck(transport_pdu_t* pdu, node_address_t rx, transport_id_t id);
 void _printSegment(const transport_pdu_t* const pdu);
 void _segmentReceived(transport_port_t port);
 void _segmentSent(transport_port_t port);
+void _segmentSentError(transport_port_t port);
 void _ackReceived(transport_pdu_t* pdu);
 void _checkTxQueueMetadata(void);
 void _resendSegment(transport_tx_metadata* meta);
@@ -75,18 +76,17 @@ bool Transport_init(node_address_t selfAddr, bool is_gateway) {
 }
 
 void Transport_deinit(transport_port_t port) {
-    // Pre-decrement, així només es desinicialitza quan totes les aplicacions ho hagin fet
-    if(--initCount > 0) {
-        _PI("[TRANSPORT] Still initialized, removing callbacks for port %d", port);
-        appHandlers[port].onReceive = appHandlers[port].onSend = nullptr;
-        return;
-    }
+    // Netejar handlers del port que desconnectem
+    appHandlers[port] = transport_app_handlers{};
 
-    // La resta d'apphandlers ja seran nullptr, ja que ho farà a IF anterior
-    appHandlers[port].onReceive = appHandlers[port].onSend = nullptr;
-    txQueue.clear();
-    Routing_deinit();
-    _PI("[TRANSPORT] De-initialized");
+    // Pre-decrement, així només es desinicialitza quan totes les aplicacions ho hagin fet
+    if (--initCount > 0) {
+        _PI("[TRANSPORT] Still initialized, removing callbacks for port %d", port);
+    } else {
+        txQueue.clear();
+        Routing_deinit();
+        _PI("[TRANSPORT] De-initialized");
+    }
 }
 
 transport_err_t Transport_send(node_address_t rx, transport_port_t port, const transport_data_t data, size_t length, bool ackRequested) {
@@ -121,18 +121,17 @@ transport_err_t Transport_send(node_address_t rx, transport_port_t port, const t
     }
 
     // Només ens interessa guardar info si demana ACK
-    if (ackRequested) {
-        transport_tx_metadata pduMeta;
-        pduMeta.pdu = pdu;
-        pduMeta.id = segmentID;
-        pduMeta.rx = rx;
-        pduMeta.dataLength = length;
-        pduMeta.isSent = false;
-        
-        // Guardem a llista
-        txQueue.push_back(pduMeta);
-    }
-    
+
+    // Guardem metadades per poder notificar sobre esdeveniments a capa superior
+    transport_tx_metadata pduMeta;
+    pduMeta.pdu = pdu;
+    pduMeta.id = segmentID;
+    pduMeta.rx = rx;
+    pduMeta.isSent = false;
+    txQueue.push_back(pduMeta);
+
+    _PI("[TRANSPORT] Scheduled to send segment (Segment ID: %d, Frame ID: %d)", pdu.ID, segmentID);
+
     return TRANSPORT_SUCCESS;
 }
 
@@ -144,14 +143,20 @@ node_address_t Transport_receive(transport_port_t* port, transport_data_t* data,
     return NODE_ADDRESS_NULL;
 }
 
-bool Transport_onEvent(transport_port_t port, transport_callback_t onReceive, transport_callback_t onSend, transport_callback_t onSendError) {
+bool Transport_onEvent(transport_port_t port,
+                        transport_callback_t onReceive, 
+                        transport_callback_t onSend, 
+                        transport_callback_t onSendError) {
     if(port > TRANSPORT_MAX_PORT) {
         _PW("[TRANSPORT] Invalid port (%d)", port);
         return false;
     }
 
-    // AND, ja que potser una aplicació només vol registrar un esdeveniment
-    if(appHandlers[port].onReceive != nullptr || appHandlers[port].onSend != nullptr) {
+    transport_app_handlers handler = appHandlers[port];
+
+    if(handler.onReceive || handler.onSend || handler.onSendError) {
+    // if(handler.onReceive || handler.onSendTCP || handler.onSendErrorTCP || 
+    //    handler.onSendUDP || handler.onSendErrorUDP) {
         _PW("[TRANSPORT] Port %d already in use", port);
         return false;
     }
@@ -231,6 +236,14 @@ void _onRoutingSent(uint16_t id) {
         // Per referència (com si fos un punter) per modificar-ho directament a cua
         transport_tx_metadata& meta = txQueue[i];
         if(meta.id == id) {
+            // Si és UDP, notifiquem directament capa superior de TX "completada" (només sabem que s'ha pogut enviar a següent node, no final)
+            if(!meta.pdu.flags.ACKRequest) {
+                _PI("[TRANSPORT] TX done for UDP segment %d (frame %d)", meta.pdu.ID, id);
+                txQueue.erase(txQueue.begin() + i);
+                _segmentSent(meta.pdu.flags.port); // Notificar a capa superior de fi TX
+                return;
+            }
+            // Si és TCP, esperem ACK 
             long toutDuration_ms = TRANSPORT_RETRY_DELAY*(1 << meta.retries);
             // TOUT amb marge per evitar que poca precisió de millis() afecti (o scheduler, etc.)
             long toutInstant = millis() + toutDuration_ms - 5; // 5ms de marge
@@ -240,17 +253,9 @@ void _onRoutingSent(uint16_t id) {
             meta.ackTask = scheduler_once(_checkTxQueueMetadata, toutDuration_ms);
             _PI("[TRANSPORT] Frame %d sent. Waiting %d ms for ACK. Running at %dms", id, toutDuration_ms, toutInstant);
             return;
-
-            // long ackTimeout_ms = millis() + TRANSPORT_RETRY_DELAY*1000;
-            // meta.isSent = true;
-            // meta.ackTimeout = ackTimeout_ms*(1 << meta.retries);
-            // meta.retries++;
-            // meta.ackTask = scheduler_once(_checkTxQueueMetadata, ackTimeout_ms);
-            return;
         }
     }
-    // Si no es troba és perquè no s'esperava ACK (UDP)
-    _PI("[TRANSPORT] Frame with ID %d sent without expecting ACK", id);
+    _PE("[TRANSPORT] TX done for frame %d. Was not found on transport's send list. This is right if you are a gateway", id);
 }
 
 void _onRoutingTxError(uint16_t id) {
@@ -264,6 +269,22 @@ void _onRoutingTxError(uint16_t id) {
         // Per referència (com si fos un punter) per modificar-ho directament a cua
         transport_tx_metadata& meta = txQueue[i];
         if(meta.id == id) {
+            // Si és UDP, notifiquem directament capa superior de TX fallida
+            if(!meta.pdu.flags.ACKRequest) {
+                _PW("[TRANSPORT] TX Error for UDP segment %d (frame %d)", meta.pdu.ID, id);
+                txQueue.erase(txQueue.begin() + i);
+                _segmentSentError(meta.pdu.flags.port); // Notificar a capa superior que no s'ha pogut enviar
+                return;
+            }
+            // Si s'han esgotat intents, no té sentit esperar TOUT (txerror implica que no s'ha pogut ni enviar, tampoc rebrem ack)
+            if(meta.retries >= TRANSPORT_MAX_RETRIES) {
+                _PW("[TRANSPORT] TX Error for TCP segment %d (frame %d). Max retries reached", meta.pdu.ID, id);
+                txQueue.erase(txQueue.begin() + i);
+                _segmentSentError(meta.pdu.flags.port); // Notificar a capa superior que no s'ha pogut enviar
+                return;
+            }
+            // En altres casos (TCP i intents pendents), generem un TOUT com si esperessim rebre ACK
+
             long toutDuration_ms = TRANSPORT_RETRY_DELAY*(1 << meta.retries);
             // TOUT amb marge per evitar que poca precisió de millis() afecti (o scheduler, etc.)
             long toutInstant = millis() + toutDuration_ms - 5; // 5ms de marge
@@ -275,7 +296,8 @@ void _onRoutingTxError(uint16_t id) {
             return;
         }
     }
-    _PW("[TRANSPORT] TX Error for frame %d. ACK was not expected, transmission will not succeed", id);
+    _PE("[TRANSPORT] TX Error for frame %d. Was not found on transport's send list. This is right if you are a gateway", id);
+    // _PW("[TRANSPORT] TX Error for frame %d. ACK was not expected, transmission will not succeed", id);
 }
 
 /* Executat per callback programar amb scheduler_once quan es produeix un ack timeout
@@ -297,7 +319,7 @@ void _checkTxQueueMetadata(void) {
                 return;
             }
             _PI("[TRANSPORT] ACK timeout for segment %d. Retrying... (retry %d)", meta.id, meta.retries);
-            _resendSegment(&txQueue[pos]); // Pass the address of the actual element in the vector
+            _resendSegment(&txQueue[pos]);
             return;
         }
     }
@@ -308,7 +330,7 @@ void _resendSegment(transport_tx_metadata* meta) {
     meta->isSent = false;
     meta->ackTimeout = -1;
     uint16_t segmentID;
-    routing_err_t state = Routing_send(meta->rx, (const uint8_t*) &meta->pdu, meta->dataLength+TRANSPORT_HEADER_SIZE, &segmentID);
+    routing_err_t state = Routing_send(meta->rx, (const uint8_t*) &meta->pdu, meta->pdu.dataLength+TRANSPORT_HEADER_SIZE, &segmentID);
 
     if(state != ROUTING_SUCCESS) {
         _PW("[TRANSPORT] Error re-sending segment (state: %d)", state);
@@ -337,12 +359,6 @@ void _printSegment(const transport_pdu_t* const pdu) {
     // Mostra info de PDU en format maco.
     _PI("[TRANSPORT] SEGMENT: ID=%d PORT=%d ACKreq=%d ACKResp=%d D-LEN=%d DATA=%.*s", 
         pdu->ID, pdu->flags.port, pdu->flags.ACKRequest, pdu->flags.ACKResponse, pdu->dataLength, pdu->dataLength, pdu->data);
-
-    // Serial.printf("===== SEGMENT =====\nID\t%d\nPORT\t%d\nACKReq\t%d\nACKResp\t%d\nD-LEN\t%d\nDATA\t%.*s\nD-HEX\t", 
-    // pdu->ID, pdu->flags.port, pdu->flags.ACKRequest, pdu->flags.ACKResponse, pdu->dataLength, pdu->dataLength, pdu->data);
-    // for (int i = 0; i < pdu->dataLength; i++) 
-    //     Serial.printf("%02X ", pdu->data[i]); 
-    // Serial.print("\n===================\n");
 }
 #else
 void _printSegment(const transport_pdu_t* const pdu) {}
