@@ -229,11 +229,21 @@ void _onRoutingSent(uint16_t id) {
         // Per referència (com si fos un punter) per modificar-ho directament a cua
         transport_tx_metadata& meta = txQueue[i];
         if(meta.id == id) {
-            long ackTimeout_ms = millis() + TRANSPORT_RETRY_DELAY*1000;
+            long toutDuration_ms = TRANSPORT_RETRY_DELAY*(1 << meta.retries);
+            // TOUT amb marge per evitar que poca precisió de millis() afecti (o scheduler, etc.)
+            long toutInstant = millis() + toutDuration_ms - 5; // 5ms de marge
             meta.isSent = true;
-            meta.ackTimeout = ackTimeout_ms*(1 << meta.retries);
+            meta.ackTimeout = toutInstant;
             meta.retries++;
-            meta.ackTask = scheduler_once(_checkTxQueueMetadata, ackTimeout_ms);
+            meta.ackTask = scheduler_once(_checkTxQueueMetadata, toutDuration_ms);
+            _PI("[TRANSPORT] Frame %d sent. Waiting %d ms for ACK. Running at %dms", id, toutDuration_ms, toutInstant);
+            return;
+
+            // long ackTimeout_ms = millis() + TRANSPORT_RETRY_DELAY*1000;
+            // meta.isSent = true;
+            // meta.ackTimeout = ackTimeout_ms*(1 << meta.retries);
+            // meta.retries++;
+            // meta.ackTask = scheduler_once(_checkTxQueueMetadata, ackTimeout_ms);
             return;
         }
     }
@@ -255,7 +265,7 @@ void _onRoutingTxError(uint16_t id) {
             long toutDuration_ms = TRANSPORT_RETRY_DELAY*(1 << meta.retries);
             // TOUT amb marge per evitar que poca precisió de millis() afecti (o scheduler, etc.)
             long toutInstant = millis() + toutDuration_ms - 5; // 5ms de marge
-            meta.isSent = true;
+            meta.isSent = true; // cal establir-ho a `true` per poder verificar la fi d'ACK (només comprova els que s'han enviat)
             meta.ackTimeout = toutInstant;
             meta.retries++;
             meta.ackTask = scheduler_once(_checkTxQueueMetadata, toutDuration_ms);
