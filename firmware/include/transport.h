@@ -40,6 +40,9 @@ bool Transport_init(node_address_t selfAddr, bool is_gateway);
 void Transport_deinit(transport_port_t port);
 transport_err_t Transport_send(node_address_t rx, transport_port_t port, const transport_data_t data, size_t length, bool ackRequested);
 node_address_t Transport_receive(transport_port_t* port, transport_data_t* data, size_t* length);
-bool Transport_onEvent(transport_port_t port, transport_callback_t onReceive, transport_callback_t onSend);
+bool Transport_onEvent(transport_port_t port, 
+                       transport_callback_t onReceive = nullptr, 
+                       transport_callback_t onSend = nullptr, 
+                       transport_callback_t onSendError = nullptr);
 
 #endif

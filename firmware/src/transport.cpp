@@ -11,6 +11,7 @@ static RingBuffer lastIds(TRANSPORT_QUEUE_SIZE);
 struct transport_app_handlers {
     transport_callback_t onReceive = nullptr;
     transport_callback_t onSend = nullptr;
+    transport_callback_t onSendError = nullptr;
 };
 
 static uint8_t initCount = 0;
@@ -143,7 +144,7 @@ node_address_t Transport_receive(transport_port_t* port, transport_data_t* data,
     return NODE_ADDRESS_NULL;
 }
 
-bool Transport_onEvent(transport_port_t port, transport_callback_t onReceive, transport_callback_t onSend) {
+bool Transport_onEvent(transport_port_t port, transport_callback_t onReceive, transport_callback_t onSend, transport_callback_t onSendError) {
     if(port > TRANSPORT_MAX_PORT) {
         _PW("[TRANSPORT] Invalid port (%d)", port);
         return false;
@@ -157,6 +158,7 @@ bool Transport_onEvent(transport_port_t port, transport_callback_t onReceive, tr
 
     appHandlers[port].onReceive = onReceive;
     appHandlers[port].onSend = onSend;
+    appHandlers[port].onSendError = onSendError;
 
     _PI("[TRANSPORT] Registered event(s) for port %d", port);
     return true;
@@ -274,7 +276,6 @@ void _onRoutingTxError(uint16_t id) {
         }
     }
     _PW("[TRANSPORT] TX Error for frame %d. ACK was not expected, transmission will not succeed", id);
-
 }
 
 /* Executat per callback programar amb scheduler_once quan es produeix un ack timeout
@@ -291,6 +292,7 @@ void _checkTxQueueMetadata(void) {
             if(meta.retries > TRANSPORT_MAX_RETRIES) {
                 _PW("[TRANSPORT] Max retries for segment %d reached", meta.id);
                 txQueue.erase(txQueue.begin() + pos);
+                _segmentSentError(meta.pdu.flags.port); // Notificar a capa superior que no s'ha pogut enviar
                 // @todo: potser caldria notificar a capa superior que no s'ha pogut enviar?
                 return;
             }
@@ -358,5 +360,11 @@ void _segmentReceived(transport_port_t port) {
 void _segmentSent(transport_port_t port) {
     if(appHandlers[port].onSend != nullptr) {
         appHandlers[port].onSend();
+    }
+}
+
+void _segmentSentError(transport_port_t port) {
+    if(appHandlers[port].onSendError != nullptr) {
+        appHandlers[port].onSendError();
     }
 }
