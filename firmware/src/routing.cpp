@@ -104,26 +104,53 @@ routing_err_t Routing_send(node_address_t dst, const routing_data_t data, size_t
     
     // Si som gateway i destí és gateway, enviar a través de lorawan
     // Només hauria de passar si capa superior vol enviar alguna cosa?
-    if (isGateway && dst == NODE_ADDRESS_GATEWAY) {
+    // if (isGateway && dst == NODE_ADDRESS_GATEWAY) {
+    //     state = _sendThroughLoRaWAN(&txPDU, &packetID);
+    // }
+    // else {
+    //     // En altres casos, el paquet és per la mateixa xarxa, i s'envia a través de MAC
+    //     node_address_t nextHop = RoutingTable_getRoute(dst);
+    //     if(nextHop == 0x00) {
+    //         _PW("[ROUTING] No route to 0x%02X", dst);
+    //         return ROUTING_ERR_NO_ROUTE;
+    //     }
+
+    //     mac_err_t err = MAC_send(nextHop, (uint8_t*)&txPDU, length+ROUTING_HEADERS_SIZE, &packetID);
+    //     state = err == MAC_SUCCESS ? ROUTING_SUCCESS : ROUTING_ERR;
+
+    //     // Si s'ha pogut enviar, afegir a llista de paquets que cal notificar a capa superior
+    //     // És responabilitat de capa superior guardar-se ID per si vol actuar sobre aquest paquet i event
+    //     // Només guardem si és per MAC; per LW ID serà sempre 0, ja que no hi ha retard entre ordre TX - TX - RX
+    //     // Simplement és per formalitat i mantenir estructura d'esdeveniments a capa superior
+    //     higherLayerPackets.push_back(packetID);
+    // }
+
+    // Obtenim següent salt. Si no existeix ruta, descartem
+    node_address_t nextHop = RoutingTable_getRoute(dst);
+    if(nextHop == 0x00) {
+        _PW("[ROUTING] No route to 0x%02X", dst);
+        return ROUTING_ERR_NO_ROUTE;
+    }
+
+    // Si tenim connexió amb gateway, i el següent salt és gateway
+    // transmetem utilitzant WAN
+    // Permet taules de ruta com 0x04 -> 0x01, permetent que gateway pugui notificar a un servidor,
+    // i que aquest pugui generar un nou paquet per una altra xarxa, per exemple.
+    if (isGateway && nextHop == NODE_ADDRESS_GATEWAY) {
         state = _sendThroughLoRaWAN(&txPDU, &packetID);
     }
-    else {
-        // En altres casos, el paquet és per la mateixa xarxa, i s'envia a través de MAC
-        node_address_t nextHop = RoutingTable_getRoute(dst);
-        if(nextHop == 0x00) {
-            _PW("[ROUTING] No route to 0x%02X", dst);
-            return ROUTING_ERR_NO_ROUTE;
-        }
-
+    else { // En altres casos, és per la mateixa xarxa, i s'envia a través de RAW
         mac_err_t err = MAC_send(nextHop, (uint8_t*)&txPDU, length+ROUTING_HEADERS_SIZE, &packetID);
         state = err == MAC_SUCCESS ? ROUTING_SUCCESS : ROUTING_ERR;
-
+    
         // Si s'ha pogut enviar, afegir a llista de paquets que cal notificar a capa superior
         // És responabilitat de capa superior guardar-se ID per si vol actuar sobre aquest paquet i event
         // Només guardem si és per MAC; per LW ID serà sempre 0, ja que no hi ha retard entre ordre TX - TX - RX
         // Simplement és per formalitat i mantenir estructura d'esdeveniments a capa superior
-        higherLayerPackets.push_back(packetID);
+        if (state == ROUTING_SUCCESS)
+            higherLayerPackets.push_back(packetID);   
     }
+
 
     // Filtrem errors de TX
     if(state == ROUTING_ERR) {
