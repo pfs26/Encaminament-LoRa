@@ -93,38 +93,6 @@ routing_err_t Routing_send(node_address_t dst, const routing_data_t data, size_t
     uint16_t packetID;
     routing_err_t state = ROUTING_ERR;
 
-    // if (dst == self) {
-    //     // Si destí és nosaltres mateixos, no cal enviar-ho a capa MAC
-    //     // Només cal notificar capa superior
-    //     _PI("[ROUTING] Trying to send packet to itself");
-    //     scheduler_once(_WANPacketSent);
-    //     _packetReceived();
-    //     return ROUTING_SUCCESS;
-    // }
-    
-    // Si som gateway i destí és gateway, enviar a través de lorawan
-    // Només hauria de passar si capa superior vol enviar alguna cosa?
-    // if (isGateway && dst == NODE_ADDRESS_GATEWAY) {
-    //     state = _sendThroughLoRaWAN(&txPDU, &packetID);
-    // }
-    // else {
-    //     // En altres casos, el paquet és per la mateixa xarxa, i s'envia a través de MAC
-    //     node_address_t nextHop = RoutingTable_getRoute(dst);
-    //     if(nextHop == 0x00) {
-    //         _PW("[ROUTING] No route to 0x%02X", dst);
-    //         return ROUTING_ERR_NO_ROUTE;
-    //     }
-
-    //     mac_err_t err = MAC_send(nextHop, (uint8_t*)&txPDU, length+ROUTING_HEADERS_SIZE, &packetID);
-    //     state = err == MAC_SUCCESS ? ROUTING_SUCCESS : ROUTING_ERR;
-
-    //     // Si s'ha pogut enviar, afegir a llista de paquets que cal notificar a capa superior
-    //     // És responabilitat de capa superior guardar-se ID per si vol actuar sobre aquest paquet i event
-    //     // Només guardem si és per MAC; per LW ID serà sempre 0, ja que no hi ha retard entre ordre TX - TX - RX
-    //     // Simplement és per formalitat i mantenir estructura d'esdeveniments a capa superior
-    //     higherLayerPackets.push_back(packetID);
-    // }
-
     // Obtenim següent salt. Si no existeix ruta, descartem
     node_address_t nextHop = RoutingTable_getRoute(dst);
     if(nextHop == 0x00) {
@@ -214,12 +182,18 @@ void _processReceivedPacket(size_t length) {
     // Actualitzar TTL
     rxPDU.ttl--;
 
+    node_address_t nextHop = RoutingTable_getRoute(rxPDU.dst);
+    if(nextHop == 0x00) {
+        _PW("[ROUTING] No route to 0x%02X", rxPDU.dst);
+        return;
+    }
+
     // Si som gateway i destí és gateway, enviar a través de lorawan
     // Passem a capa superior per si cal gestionar ACK!
     // Cuidado amb els temps! Si es fa un envio a LoRaWAN amb confirmació el temps de TX és, marcat per estàndard, 
     // mínim (2+/-1 segons aleatoris) + tx + rx + processament! Si TOUT ACK transport és inferior a això hi haurà retransmissió!
     // No només això, finestres de recepció separades per 1 segon, fent que temps de TX sigui en qualsevol cas major a aquest!
-    if (isGateway && rxPDU.dst == NODE_ADDRESS_GATEWAY) {
+    if (isGateway && nextHop == NODE_ADDRESS_GATEWAY) {
         _PI("[ROUTING] Received packet for gateway. Forwarding to LoRaWAN");
         routing_err_t state = _sendThroughLoRaWAN(&rxPDU);
         if (state == ROUTING_SUCCESS) {
@@ -227,17 +201,11 @@ void _processReceivedPacket(size_t length) {
         }
         return;
     }
-
-    // Si no som gateway, o destí no és gateway, enviar a través de MAC (lora raw)
-    // obtenint següent hop de taula de rutes
-    node_address_t nextHop = RoutingTable_getRoute(rxPDU.dst);
-    if(nextHop == NODE_ADDRESS_NULL) {
-        _PW("[ROUTING] No route to 0x%02X", rxPDU.dst);
-        return;
+    else { // En altres casos, és per la mateixa xarxa, i s'envia a través de RAW
+        // Reenviem amb MAC_send, i ens despreocupem de si s'acaba enviant o no; MAC ja ho intentarà gestionar tant bé com pugui (reintents, BEB, etc.)
+        mac_err_t err = MAC_send(nextHop, (uint8_t*)&rxPDU, length); // MAClength no hauria de canviar si únicament es canvia TTL
     }
 
-    // Reenviem amb MAC_send, i ens despreocupem de si s'acaba enviant o no; MAC ja ho intentarà gestionar tant bé com pugui (reintents, BEB, etc.)
-    mac_err_t err = MAC_send(nextHop, (uint8_t*)&rxPDU, length); // MAClength no hauria de canviar si únicament es canvia TTL
     _PI("[ROUTING] Forwarded packet to 0x%02X", rxPDU.dst);
 }
 
@@ -323,11 +291,6 @@ void _printPacket(const routing_pdu_t* const pdu) {
     _PI("[ROUTING] PACKET: SRC=%02X DST=%02X TTL=%d D-LEN=%d DATA=%.*s", 
         pdu->src, pdu->dst, pdu->ttl, pdu->dataLength, pdu->dataLength, pdu->data);
 
-    // Serial.printf("===== PACKET =====\nSRC\t%d\nDST\t%d\nTTL\t%d\nD-LEN\t%d\nDATA\t%.*s\nD-HEX\t", 
-    // pdu->src, pdu->dst, pdu->ttl, pdu->dataLength, pdu->dataLength, pdu->data);
-    // for (int i = 0; i < pdu->dataLength; i++) 
-    //     Serial.printf("%02X ", pdu->data[i]); 
-    // Serial.print("\n==================\n");
 }
 #else
 void _printPacket(const routing_pdu_t* const pdu) {}
