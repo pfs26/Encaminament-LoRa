@@ -701,7 +701,6 @@ A la \autoref{fig:segment_transport} es pot observar l'estructura del segment de
     \caption{Estructura del segment de la capa de transport.}
     \label{fig:segment_transport}
 \end{figure}
-
 \subsubsection{Transmissió}
 Com en la capa d'encaminament, la transmissió en la capa de transport és simple: utilitza la interfície exposada per la capa d'encaminament. En finalitzar la transmissió, la capa d'encaminament notificarà a través d'un \est{callback} aquesta finalització. Com en la capa d'accés al medi, el mètode de generació de l'identificador és aleatori.
 
@@ -731,14 +730,12 @@ Les notificacions implementades en aquesta capa són similars a les de la capa d
     \item En segments no fiables, la notificació de fi de transmissió es genera quan la capa d'accés al medi ha pogut lliurar el segment al següent salt. Aquesta notificació no garanteix la recepció del segment per part del receptor final, i únicament indica que s'ha pogut transmetre. D'altra banda, si la capa d'accés al medi notifica que no s'ha pogut transmetre, es genera un notificació d'error de transmissió, indicant que el segment no s'ha pogut transmetre ni al següent salt.
 \end{itemize}
 Aplicar notificacions en un segment no fiable pot semblar contradictori, però pot ser útil per a les aplicacions que volen saber si el segment, com a mínim, s'ha pogut transmetre des del dispositiu. Utilitzant LoRa, les transmissions poder ser lentes, i aquest tipus de notificacions poden oferir una alternativa més llegura.
-
 \subsubsection{Recepció}
 Es produeix una recepció d'un segment quan la capa inferior, la d'encaminament, ho notifica a través del \est{callback} configurat. Quan es rep un segment, es verifica el camp \emph{ACKRequest} dels \est{flags}. En cas que el segment rebut so\l.liciti un reconeixement, es genera un segment amb el camp \emph{ACKResponse} actiu, i es transmet cap al transmissor de l'anterior segment, utilitzant el mecanisme exposat en el subapartat anterior.
 
 Seguidament es verifica si el segment s'havia rebut anteriorment, consultant el camp d'identificador del segment rebut amb els identificadors dels últims segments rebuts. Aquest disseny és similar a l'utilitzat a la capa d'accés al medi, on es guarden les últimes trames rebudes. De nou, la mida d'aquesta cua és configurable, però s'ha de tenir en compte que si és massa petita, es poden produir falsos positius, i si és massa gran, hi podrien haver co\l.lisions d'identificadors de segments diferents.
 
 Si ja s'havia rebut anteriorment l'identificador, ja que existeix a la cua de segments rebuts, s'atura el processament del segment, i es descarta. En cas contrari, es guarda l'identificador a la cua, i es notifica a la capa superior de la recepció d'un nou segment.
-
 \subsubsection{Gestió de múltiples aplicacions}
 % hi poden haver múltiples capes superiors (aplicacions)
 % A quina cal enviar les notificacions?
@@ -766,7 +763,6 @@ Així, quan es rep un segment amb el port 17, la capa de transport utilitzarà l
 La taula de ports pot tenir fins a un màxima de 64 entrades, una per cada possible port. Per cada un d'aquests, es pot assignar únicament una interfície de notificació, garantint així que una única aplicació sigui notificada. En cas que no s'hagi assignat cap interfície a un port, la capa de transport no podrà notificar-ho, fent que l'esdeveniment es perdi.
 
 Un altre problema de disposar de múltiples capes superiors és que cada aplicació pot intentar inicialitzar la capa de transport. Per evitar-ho, és important que la capa de transport guardi l'estat d'inicialització i, en cas que es vulgui inicialitzar de nou, simplement ho «simuli», sense realitzar cap acció addicional.
-
 \subsubsection{Fiabilitat}
 \label{subsubsec:transport_fiabilitat}
 % « »
@@ -784,10 +780,19 @@ Aquest temps ve determinat per l'expressió $k\cdot 2^r$, on \emph{k} és un val
 Aquest criteri estableix el temps mínim d'espera, considerant que per a cada dispositiu de la ruta es requereix únicament una transmissió, i que el retard de processametn és nul. Si s'estableix un temps mínim d'espera menor a aquest, és segur que es produiran \est{timeouts} prematurs.
 
 Establir un límit superior pel temps d'espera no és trivial. Caldria tenir en compte el nombre de retransmissions màximes de la capa d'accés al medi, i la congestió de la xarxa, que pot introduir retards a causa del \acro{beb} aplicat. 
-
 \subsubsection{Detalls d'implementació}
+La implementació de la cua dels últims identificadors de segments rebuts s'ha realitzat a través d'una cua circular, de mida màxima configurable. Gràcies a l'ús d'aquesta, la capa de transport únicament s'encarrega d'afegir nous elements, i la cua circular elimina de forma automàtica els més antics. La seva implementació es pot consultar a \fitx{utils/RingBuffer.cpp}.
+
+Apareix una qüestió important en els missatges de reconeixement quan el destí és el \est{gateway}. Com s'ha mencionat anteriorment, aquests s'encarreguen de retransmetre els missatges rebuts al servidor de xarxa LoRaWAN, i no tenen capacitat de generar missatges. Així, hauria de ser un servidor d'aplicació qui processés el missatge rebut i, llavors, programés l'enviament d'un \est{downlink} amb el segment de reconeixement a través del \est{gateway}.
+Malgrat semblar una solució vàlida, cal recordar que s'utilitzen dispositius de classe A, els quals només poden rebre missatges després de realitzar una transmissió. Així, l'enviament del missatge de reconeixement no es realitzaria fins que el dispositiu transmetés un nou missatge, un \est{uplink}. Aquest comportament afegeix molta latència, i faria dependre el missatge de reconeixement de la transmissió d'un nou missatge.
+
+La solució que s'ha implementat és considerar el dispositiu amb capacitats LoRaWAN ---es pot comunicar amb el \est{gateway}--- com una «extensió» del \est{gateway}. Així, quan aquest fa una retransmissió a través de LoRaWAN, la capa d'encaminament genera també l'esdeveniment de recepció de nou segment, permetent a la capa de transport processar el segment prèviament rebut, i generar el missatge de reconeixement si és necessari.
+
+Aquesta solució no és la més elegant, i implica que un dispositiu que no és el destí final processi el segment rebut. No obstant això, si es veu el dispositiu amb capacitats LoRaWAN com un dispositiu diferent a la resta, considerant-lo, com s'ha dit anteriorment, com una «extensió» del \est{gateway}, la solució és vàlida per evitar que la correcta transmissió d'un segment depengui de la transmissió d'un de diferent.
+
 
 \subsection{Capa d’aplicació}
+% « »
 \section{Altres serveis}
 \label{sec:altres_serveis}
 \subsection{Gestor de tasques}
