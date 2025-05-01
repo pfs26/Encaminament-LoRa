@@ -819,26 +819,6 @@ A més, es requereix també un servidor d'aplicació, encarregat de processar el
     \draw[wan] ($(dev3.south)+(0,-2.1)$) -- ($(gw.south)+(0,-2.1)$) node[midway, above] {\tiny{pkt3(dst=\fitx{0x02}, ttl=3)}};
     \draw[blue] ($(gw.south)+(0,-2.1)$) node[left] {\tiny{\acro{programa downlink pkt3}}};
     \draw[wan] ($(gw.south)+(0,-2.3)$) -- ($(dev3.south)+(0,-2.3)$) node[midway, below] {\tiny{pkt2(dst=\fitx{0x04}, ttl=1)}};
-    % \draw[blue] ($(gw.south)+(0,-0.5)$) node[left] {\tiny{\acro{programa downlink}}};
-
-    % \draw[msg] ($(dev1.south)+(0,-0.5)$) -- ($(dev2.south)+(0,-0.5)$) node[midway, above] {\tiny{pkt(dst=\fitx{0x04}, ttl=3)}};
-    % \draw[msg] ($(dev2.south)+(0,-0.7)$) -- ($(dev3.south)+(0,-0.7)$) node[midway, above] {\tiny{pkt(dst=\fitx{0x04}, ttl=2)}};
-
-    % \draw[msg] ($(dev1.south)+(0,-1.4)$) -- ($(dev2.south)+(0,-1.4)$) node[midway, above] {\tiny{pkt(dst=\fitx{0x01}, ttl=3)}};
-    % \draw[msg] ($(dev2.south)+(0,-1.6)$) -- ($(dev3.south)+(0,-1.6)$) node[midway, above] {\tiny{pkt(dst=\fitx{0x01}, ttl=2)}};
-    % \draw[wan] ($(dev3.south)+(0,-1.8)$) -- ($(gw.south)+(0,-1.8)$) node[midway, above] {\tiny{pkt(dst=\fitx{0x01}, ttl=1)}};
-    % \draw[wan] ($(gw.south)+(0,-2)$) -- ($(dev3.south)+(0,-2)$) node[midway, below] {\tiny{pkt(dst=\fitx{0x03}, ttl=3)}};
-    % \draw[msg] ($(dev3.south)+(0,-2.2)$) -- ($(dev2.south)+(0,-2.2)$) node[midway, below] {\tiny{pkt(dst=\fitx{0x03}, ttl=2)}};
-
-    % \draw[msg] ($(dev1.south)+(0,-3.5)$) -- ($(dev2.south)+(0,-3.5)$) node[midway, above] {\tiny{pkt(dst=\fitx{0x01}, ttl=2)}};
-    % \draw[msg] ($(dev2.south)+(0,-3.7)$) -- ($(dev3.south)+(0,-3.7)$) node[midway, above] {\tiny{pkt(dst=\fitx{0x01}, ttl=1)}};
-    
-    % \draw[red] ($(dev3.south)+(0,-3.7)$) node[right] {\tiny{\acro{ttl = 1}}};
-
-    % \draw[msg] ($(dev1.south)+(0,-4.2)$) -- ($(dev2.south)+(0,-4.2)$) node[midway, above] {\tiny{pkt(dst=\fitx{0x05}, ttl=3)}};
-
-    % \draw[red] ($(dev2.south)+(0,-4.2)$) node[right] {\tiny{\acro{sense ruta}}};
-
     \end{tikzpicture}
     \caption{Exemple encaminament entre xarxes separades per \est{gateway} LoRaWAN.}
     \label{fig:routing_encaminament_complex_gateway}
@@ -965,7 +945,7 @@ La implementació de la cua dels últims identificadors de segments rebuts s'ha 
 Apareix una qüestió important en els missatges de reconeixement quan el destí és el \est{gateway}. Com s'ha mencionat anteriorment, aquests s'encarreguen de retransmetre els missatges rebuts al servidor de xarxa LoRaWAN, i no tenen capacitat de generar missatges. Així, hauria de ser un servidor d'aplicació qui processés el missatge rebut i, llavors, programés l'enviament d'un \est{downlink} amb el segment de reconeixement a través del \est{gateway}.
 Malgrat semblar una solució vàlida, cal recordar que s'utilitzen dispositius de classe A, els quals només poden rebre missatges després de realitzar una transmissió. Així, l'enviament del missatge de reconeixement no es realitzaria fins que el dispositiu transmetés un nou missatge, un \est{uplink}. Aquest comportament afegeix molta latència, i faria dependre el missatge de reconeixement de la transmissió d'un nou missatge.
 
-La solució que s'ha implementat és considerar el dispositiu amb capacitats LoRaWAN ---es pot comunicar amb el \est{gateway}--- com una «extensió» del \est{gateway}. Així, quan aquest fa una retransmissió a través de LoRaWAN, la capa d'encaminament genera també l'esdeveniment de recepció de nou segment, permetent a la capa de transport processar el segment prèviament rebut, i generar el missatge de reconeixement si és necessari.
+La solució que s'ha implementat és considerar el dispositiu amb capacitats LoRaWAN ---es pot comunicar amb el \est{gateway}--- com una «extensió» del \est{gateway}. Així, quan aquest fa un encaminament a través de LoRaWAN, la capa d'encaminament genera també l'esdeveniment de recepció de nou segment, permetent a la capa de transport processar el segment prèviament rebut, i generar el missatge de reconeixement en cas de ser necessari.
 
 Aquesta solució no és la més elegant, i implica que un dispositiu que no és el destí final processi el segment rebut. No obstant això, si es veu el dispositiu amb capacitats LoRaWAN com un dispositiu diferent a la resta, considerant-lo, com s'ha dit anteriorment, com una «extensió» del \est{gateway}, la solució és vàlida per evitar que la correcta transmissió d'un segment depengui de la transmissió d'un de diferent.
 
