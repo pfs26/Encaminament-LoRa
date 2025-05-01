@@ -680,33 +680,51 @@ En aquest subapartat es presenten dos exemples de comunicació de la capa d'enca
 
 En ambdós exemples es representen tres dispositius, on el tercer té capacitats LoRaWAN i comunicació amb un \est{gateway}. Per simplicitat, no es representen els missatges de reconeixement, ni els reintents de transmissió, ja que aquests són responsabilitat de la capa d'accés al medi, com s'ha vist en els seus diagrames. Tampoc s'han representat els retards de transmissió dels paquets, considerant-los un aspecte del comportament del canal i, per tant, de la capa d'accés al medi.
 
-Les taules d'encaminament de cada dispositiu es representen a la \autoref{tab:routing_taula_enc_exemples}.
+Les taules d'encaminament de cada dispositiu i exemple es representen a la \autoref{tab:routing_taula_enc_exemples}.
 
 % \caption{Exemple taula d'encaminament.}
 % \label{tab:routing_taula_enc_exemples}
 
 
 
-\begin{table}
+\begin{table}[h!]
     \centering
-    \begin{tabular}{r|ccccc}
-        \multicolumn{1}{c|}{\vcell{}} & \vcell{\textbf{0x01}} & \vcell{\textbf{0x02}} & \vcell{\textbf{0x03}} & \vcell{\textbf{0x04}} & \vcell{\textbf{0x05}} \\[-\rowheight]
-        \multicolumn{1}{c|}{\printcellmiddle} & \printcellbottom & \printcellbottom & \printcellbottom & \printcellbottom & \printcellbottom \\ 
-        \hline
-        \textbf{0x01} & - & 0x04 & 0x04 & 0x04 & - \\
-        \textbf{0x02} & 0x03 & - & 0x03 & 0x03 & 0x03 \\
-        \textbf{0x03} & 0x04 & 0x02 & - & 0x04 & - \\
-        \textbf{0x04} & 0x01 & 0x03 & 0x03 & - & -
+    \begin{tabular}{c c}
+        \begin{tabular}{r|ccccc}
+            \multicolumn{6}{c}{\small Exemple 1} \\
+            \hline
+            \multicolumn{1}{c|}{\vcell{}} & \vcell{\textbf{0x01}} & \vcell{\textbf{0x02}} & \vcell{\textbf{0x03}} & \vcell{\textbf{0x04}} & \vcell{\textbf{0x05}} \\[-\rowheight]
+            \multicolumn{1}{c|}{\printcellmiddle} & \printcellbottom & \printcellbottom & \printcellbottom & \printcellbottom & \printcellbottom \\ 
+            \hline
+            \textbf{0x01} & - & 0x04 & 0x04 & 0x04 & - \\
+            \textbf{0x02} & 0x03 & - & 0x03 & 0x03 & 0x03 \\
+            \textbf{0x03} & 0x04 & 0x02 & - & 0x04 & - \\
+            \textbf{0x04} & 0x01 & 0x03 & 0x03 & - & -
+        \end{tabular}
+        &
+        \begin{tabular}{r|cccc}
+            \multicolumn{5}{c}{\small Exemple 2} \\
+            \hline
+            \multicolumn{1}{c|}{\vcell{}} & \vcell{\textbf{0x01}} & \vcell{\textbf{0x02}} & \vcell{\textbf{0x03}} & \vcell{\textbf{0x04}} \\
+            [-\rowheight]
+            \multicolumn{1}{c|}{\printcellmiddle} & \printcellbottom & \printcellbottom & \printcellbottom & \printcellbottom  \\ 
+            \hline
+            \textbf{0x01} & -    & 0x03 & 0x03 & 0x04 \\
+            \textbf{0x02} & 0x03 & -    & 0x03 & 0x03 \\
+            \textbf{0x03} & 0x01 & 0x02 & -    & 0x01 \\
+            \textbf{0x04} & 0x01 & 0x01 & 0x01 & -
+        \end{tabular}
     \end{tabular}
-    \caption{Matriu d'encaminament dels dispositius d'exemple. La ce\l.la $(x, y)$ indica el dispositiu que $x$ ha d'utilitzar per enviar un paquet a $y$.}
+    \caption{Matrius d'encaminament d'exemple. La cel·la $(x, y)$ indica el dispositiu que $y$ ha d'utilitzar per enviar un paquet a $x$.}
     \label{tab:routing_taula_enc_exemples}
 \end{table}
 
+
 A la \autoref{fig:routing_encaminament_basic_gateway} es mostra un exemple bàsic. Primerament el dispositiu \fitx{0x02} vol enviar un paquet al \fitx{0x04}: obté la ruta per aquest, transmetent-ho a \fitx{0x03}. Aquest rep el paquet, verifica el \acro{ttl}, i obté la següent ruta, que és \fitx{0x04}, el qual rep el paquet, comprova que és el destí final, i ho notifica a la capa superior. 
 
-Un segon exemple de transmissió es realitza quan \fitx{0x02} vol enviar un paquet al \est{gateway}. 
+Un segon exemple de transmissió es realitza quan \fitx{0x02} vol enviar un paquet al \est{gateway}. El dispositiu 2 consulta la taula d'encaminament i veu que el següent salt és el dispositiu 3. Aquest rep el paquet i consulta la seva taula, veient que el següent salt és el \est{gateway}. En rebre el paquet a través de LoRaWAN, realitza la transmissió dels paquets en les finestres de recepció que el dispositiu \fitx{0x04} obre, en tractar-se d'un dispositiu de classe A. Es realitza l'encaminament d'aquest nou paquet, amb el mateix mecanisme que anteriorment.
 
-El dispositiu 2 consulta la taula d'encaminament i veu que el següent salt és el dispositiu 3. Aquest rep el paquet i consulta la seva taula, veient que el següent salt és el \est{gateway}. El dispositiu 3 transmet el paquet al \est{gateway}, que a la vegada l'envia al dispositiu 4.
+Per acabar, es representa també com un paquet amb fi de temps de vida (\acro{ttl}) és descartat, de la mateixa manera que un paquet que no pot ser encaminat, ja que no existeix cap entrada a la taula d'encaminament del dispositiu. 
 
 \begin{figure}[h]
     \centering
@@ -728,13 +746,12 @@ El dispositiu 2 consulta la taula d'encaminament i veu que el següent salt és 
 
     \node[above] at ($(gw.south)+(0,-0.1)$) {\tiny(\est{gateway})};
 
-    \draw ($(dev1.south) + (0,0)$) -- ($(dev1.south) + (0,-5)$);
-    \draw ($(dev2.south) + (0,0)$) -- ($(dev2.south) + (0,-5)$);
-    \draw ($(dev3.south) + (0,0)$) -- ($(dev3.south) + (0,-5)$);
-    \draw ($(gw.south) + (0,0)$) -- ($(gw.south) + (0,-5)$);
+    \draw ($(dev1.south) + (0,0)$) -- ($(dev1.south) + (0,-4.5)$);
+    \draw ($(dev2.south) + (0,0)$) -- ($(dev2.south) + (0,-4.5)$);
+    \draw ($(dev3.south) + (0,0)$) -- ($(dev3.south) + (0,-4.5)$);
+    \draw ($(gw.south) + (0,0)$) -- ($(gw.south) + (0,-4.5)$);
 
     
-    % First message
     \draw[msg] ($(dev1.south)+(0,-0.5)$) -- ($(dev2.south)+(0,-0.5)$) node[midway, above] {\tiny{pkt(dst=\fitx{0x04}, ttl=3)}};
     \draw[msg] ($(dev2.south)+(0,-0.7)$) -- ($(dev3.south)+(0,-0.7)$) node[midway, above] {\tiny{pkt(dst=\fitx{0x04}, ttl=2)}};
 
@@ -746,8 +763,12 @@ El dispositiu 2 consulta la taula d'encaminament i veu que el següent salt és 
 
     \draw[msg] ($(dev1.south)+(0,-3.5)$) -- ($(dev2.south)+(0,-3.5)$) node[midway, above] {\tiny{pkt(dst=\fitx{0x01}, ttl=2)}};
     \draw[msg] ($(dev2.south)+(0,-3.7)$) -- ($(dev3.south)+(0,-3.7)$) node[midway, above] {\tiny{pkt(dst=\fitx{0x01}, ttl=1)}};
+    
+    \draw[red] ($(dev3.south)+(0,-3.7)$) node[right] {\tiny{\acro{ttl = 1}}};
 
     \draw[msg] ($(dev1.south)+(0,-4.2)$) -- ($(dev2.south)+(0,-4.2)$) node[midway, above] {\tiny{pkt(dst=\fitx{0x05}, ttl=3)}};
+
+    \draw[red] ($(dev2.south)+(0,-4.2)$) node[right] {\tiny{\acro{sense ruta}}};
 
     % \node[right] at ($(dev2.south)+(0,-1.6)$) {\tiny{\hspace{2em}Notifica capa superior}};
 
@@ -756,6 +777,73 @@ El dispositiu 2 consulta la taula d'encaminament i veu que el següent salt és 
     \caption{Exemple encaminament bàsic amb \est{gateway} LoRaWAN.}
     \label{fig:routing_encaminament_basic_gateway}
 \end{figure}
+
+Una altra situació més complexa es pot produir quan la xarxa es troba separada en dues xarxes, amb un \est{gateway} LoRaWAN al mig. En aquest cas, el comportament és similar a l'observat anteriorment, on el \est{gateway} fa les transmissions dels paquets únicament després de rebre'n un altre, ja que es tracten de dispositius de classe A. Així, si un dispositiu vol enviar un paquet a un dispositiu de la xarxa contrària, la correcta transmissió d'aquest paquet dependrà de la transmissió d'un altre paquet originat a la xarxa contraria, per tal que pugui obrir la finestra de recepció necessària.
+
+A més, es requereix també un servidor d'aplicació, encarregat de processar els paquets que el \est{gateway} rep, i generar els \est{downlinks} corresponents. Malgrat aquests requisits, aquest exemple permet i\l.lustrar les capacitats d'encaminament de la capa, que no tenen perquè estar limitades a una única xarxa. El seu diagrama es pot trobar representat a la \autoref{fig:routing_encaminament_complex_gateway}.
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[
+        device/.style={draw=none, minimum width=1cm, minimum height=0.8cm},
+        msg/.style={-Stealth, thick},
+        wan/.style={-Stealth, thick, dashed},
+        timeout/.style={red, thick, dashed},
+        node distance=1cm and 3cm,
+        timeline/.style={draw, dashed, white},
+        fail/.style={thick, cross at end}
+    ]
+    
+    % Devices
+    \node[device] (dev1) at (0,0) {\fitx{0x02}};
+    \node[device, right=of dev1] (dev2) {\fitx{0x03}};
+    \node[device, right=of dev2] (gw) {\fitx{0x01}};
+    \node[device, right=of gw] (dev3) {\fitx{0x04}};
+
+    \node[above] at ($(gw.south)+(0,-0.1)$) {\tiny(\est{gateway})};
+
+    \draw ($(dev1.south) + (0,0)$) -- ($(dev1.south) + (0,-2.5)$);
+    \draw ($(dev2.south) + (0,0)$) -- ($(dev2.south) + (0,-2.5)$);
+    \draw ($(gw.south) + (0,0)$) -- ($(gw.south) + (0,-2.5)$);
+    \draw ($(dev3.south) + (0,0)$) -- ($(dev3.south) + (0,-2.5)$);
+
+
+    \draw[wan] ($(dev3.south)+(0,-0.5)$) -- ($(gw.south)+(0,-0.5)$) node[midway, above] {\tiny{pkt1(dst=\fitx{0x03}, ttl=3)}};
+    \draw[blue] ($(gw.south)+(0,-0.5)$) node[left] {\tiny{\acro{programa downlink pkt1}}};
+    
+    \draw[msg] ($(dev1.south)+(0,-0.9)$) -- ($(dev2.south)+(0,-0.9)$) node[midway, above] {\tiny{pkt2(dst=\fitx{0x04}, ttl=3)}};
+    \draw[wan] ($(dev2.south)+(0,-1.1)$) -- ($(gw.south)+(0,-1.1)$) node[midway, above] {\tiny{pkt2(dst=\fitx{0x04}, ttl=2)}};
+    \draw[blue] ($(gw.south)+(0,-1.1)$) node[right] {\tiny{\acro{programa downlink pkt2}}};
+    \draw[wan] ($(gw.south)+(0,-1.3)$) -- ($(dev2.south)+(0,-1.3)$) node[midway, below] {\tiny{pkt1(dst=\fitx{0x03}, ttl=2)}};
+
+    \draw[wan] ($(dev3.south)+(0,-2.1)$) -- ($(gw.south)+(0,-2.1)$) node[midway, above] {\tiny{pkt3(dst=\fitx{0x02}, ttl=3)}};
+    \draw[blue] ($(gw.south)+(0,-2.1)$) node[left] {\tiny{\acro{programa downlink pkt3}}};
+    \draw[wan] ($(gw.south)+(0,-2.3)$) -- ($(dev3.south)+(0,-2.3)$) node[midway, below] {\tiny{pkt2(dst=\fitx{0x04}, ttl=1)}};
+    % \draw[blue] ($(gw.south)+(0,-0.5)$) node[left] {\tiny{\acro{programa downlink}}};
+
+    % \draw[msg] ($(dev1.south)+(0,-0.5)$) -- ($(dev2.south)+(0,-0.5)$) node[midway, above] {\tiny{pkt(dst=\fitx{0x04}, ttl=3)}};
+    % \draw[msg] ($(dev2.south)+(0,-0.7)$) -- ($(dev3.south)+(0,-0.7)$) node[midway, above] {\tiny{pkt(dst=\fitx{0x04}, ttl=2)}};
+
+    % \draw[msg] ($(dev1.south)+(0,-1.4)$) -- ($(dev2.south)+(0,-1.4)$) node[midway, above] {\tiny{pkt(dst=\fitx{0x01}, ttl=3)}};
+    % \draw[msg] ($(dev2.south)+(0,-1.6)$) -- ($(dev3.south)+(0,-1.6)$) node[midway, above] {\tiny{pkt(dst=\fitx{0x01}, ttl=2)}};
+    % \draw[wan] ($(dev3.south)+(0,-1.8)$) -- ($(gw.south)+(0,-1.8)$) node[midway, above] {\tiny{pkt(dst=\fitx{0x01}, ttl=1)}};
+    % \draw[wan] ($(gw.south)+(0,-2)$) -- ($(dev3.south)+(0,-2)$) node[midway, below] {\tiny{pkt(dst=\fitx{0x03}, ttl=3)}};
+    % \draw[msg] ($(dev3.south)+(0,-2.2)$) -- ($(dev2.south)+(0,-2.2)$) node[midway, below] {\tiny{pkt(dst=\fitx{0x03}, ttl=2)}};
+
+    % \draw[msg] ($(dev1.south)+(0,-3.5)$) -- ($(dev2.south)+(0,-3.5)$) node[midway, above] {\tiny{pkt(dst=\fitx{0x01}, ttl=2)}};
+    % \draw[msg] ($(dev2.south)+(0,-3.7)$) -- ($(dev3.south)+(0,-3.7)$) node[midway, above] {\tiny{pkt(dst=\fitx{0x01}, ttl=1)}};
+    
+    % \draw[red] ($(dev3.south)+(0,-3.7)$) node[right] {\tiny{\acro{ttl = 1}}};
+
+    % \draw[msg] ($(dev1.south)+(0,-4.2)$) -- ($(dev2.south)+(0,-4.2)$) node[midway, above] {\tiny{pkt(dst=\fitx{0x05}, ttl=3)}};
+
+    % \draw[red] ($(dev2.south)+(0,-4.2)$) node[right] {\tiny{\acro{sense ruta}}};
+
+    \end{tikzpicture}
+    \caption{Exemple encaminament entre xarxes separades per \est{gateway} LoRaWAN.}
+    \label{fig:routing_encaminament_complex_gateway}
+\end{figure}
+
 
 
 \subsection{Capa de transport}
