@@ -26,6 +26,9 @@ bool LoRaRAW_sleep();
 bool LoRaRAW_wakeup();
 bool LoRaRAW_setFrequency(float frequency);
 bool LoRaRAW_setTxPower(int power);
+
+/// @brief Retorna el temps de transmissió d'un paquet en `us`, a partir del BW, SF, CR...
+/// @param length Mida del paquet a transmetre
 long LoRaRAW_getTimeOnAir(int length);
 
 void LoRaRAW_startReceiving();
