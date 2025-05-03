@@ -1,69 +1,70 @@
-// /*
-//     Capa aplicació per gestió de baix consum.
-
-//     Funcionament:
-//         1. En iniciar estan en mode de recepció. No envien res. Només esperen el missatge "SYNC" de forma INDEFINIDA.
-//            És el pas de sincronització inicial.
-//         2. En rebre missatge "SYNC", el reenvien a uns nodes determinats i coneguts (Llista `forwardCmdTo`)
-//         3. Després de reenviar i deixar un temps de marge Gt (Guard Time), està en mode de funcionament normal.
-//         4. Manté mode de funcionament normal durant Wt (Work Time), espera Gt, i després es torna a posar en mode sleep.
-//         5. Manté mode sleep durant St (Sleep Time), i després es torna a despertar. Es desperta a T0.
-//         6. Espera a rebre el missatge "SYNC" durant SyT (Sync Time).
-//             6.1. Si no rep missatge "SYNC" manté funcionament normal durant Wt i es torna a adormir.
-//                  Redueix St en un 1% -> Despertarà abans, intentant rebre llavors "SYNC". Sempre dins d'un límit mínim.
-
-//                  Si en qualsevol moment de funcionament normal rep el missatge de Sync (a temps T1) **i no havia sincronitzat**
-//                  és que s'ha despertat massa d'hora. Augmentar St tal que `St = St + (T1-T0) / 2`
-//             6.2. Si rep el "SYNC" a T1, augmentarà St tal que `St = St + (T1-T0) / 2`.
-//                  Això farà que es desperti més tard, però sempre abans que quan rebi "SYNC".
-//                  Intenta augmentar temps sleep per reduir consum
-//         7. Repeteix passos 2-6 indefinidament.
-// */
-
 #include <Arduino.h>
 #include "scheduler.h"
 #include "utils.h"
 #include "sleep.h"
 
-void onSyncReceived();
-void goToSleep();
-void forwardCMD(sleep_command_t cmd);
-void onWakeup();
-void received();
+static void decodePDU();
+static void onSyncReceived();
+static void goToSleep();
+static void syncTimeout();
+static void received();
+static void sent();
+static void sendError();
+static long computeDeltaTime();
+static void forwardSync();
 
-static node_address_t forwardCmdTo[SLEEP_MAX_FORWARD_NODES]; // Nodes a qui reenviar el SYNC
+static node_address_t forwardCmdTo = NODE_ADDRESS_NULL; // Nodes a qui reenviar el SYNC
 
-// Temps de sleep en `milisegons`. A memòria RTC per mantenir-lo en deep sleep. S'actualitza a partir de "controlador P"
-static RTC_DATA_ATTR uint64_t sleepTime = SLEEP_SLEEP_TIME;
-// Temps de treball en `milisegons`. A memòria RTC per mantenir-lo en deep sleep. S'actualitza a partir de "controlador P"
-// Augmenta a mesura que es redueix sleepTime; en rebre SYNC, es reinicia a `SLEEP_WORK_TIME`
-static RTC_DATA_ATTR uint64_t workTime = SLEEP_WORK_TIME;
+// PDU rebuda
+static sleep_pdu_t receivedPDU; 
+
 // Control si està sincronitzat a la xarxa o no
-static RTC_DATA_ATTR bool isSync = false;
+static RTC_DATA_ATTR bool isFirstSync = true;
+static bool isSync = false;
 
-static Task* workToutTask = nullptr;
+// Temps entre primer SYNC vàlid, i últim SYNC vàlid (els dos extrem: el 1r si tots els nodes envien a la 1a; 
+// el segon si tots fan servir tots els intents, + percentatge de CSMA)
+static RTC_DATA_ATTR uint64_t deltaTime;
+
+static Task* timeoutTask = nullptr;
 
 static sleep_callback_t onSync = nullptr;
 static sleep_callback_t onBeforeSleep = nullptr;
 
 // Instant en que s'ha rebut el SYNC, en `milisegons`
-// Permet ajustar temps de sleep amb control
-static long tempsRecepcioSync = -1;
+static unsigned long tempsSync = 0;
+
+// Quantitat de nodes que hi ha anteriors a aquest
+static RTC_DATA_ATTR uint8_t nodesPrevis = 0;
+static RTC_DATA_ATTR uint16_t syncCount = 0;
+static RTC_DATA_ATTR uint64_t syncTimeSum = 0;
+static RTC_DATA_ATTR uint16_t bootCount = 0;
+static RTC_DATA_ATTR uint64_t doneTimeSum = 0;
 
 bool Sleep_init(void) {
     // REQUEREIX TRANSPORT INICIALITZAT!
     // No s'inicialitza aquí per evitar haver de conèixer @ node.
     // Programa principal és qui hauria d'inicialitzar el protocol
+    if(!isFirstSync) {
+        long deltaTime = computeDeltaTime();
+        long timeout_ms = 2*deltaTime + SLEEP_CLOCK_CORRECTION + SLEEP_EXTRA_TIME;
+        timeoutTask = scheduler_once(syncTimeout, timeout_ms);
 
-    // Executar mètode inicial per configurar tasques de sleep inicials
-    // `onWakeup`, ja que s'executa després de cada inicialització o wakeup
-    onWakeup();
-    _PI("[SLEEP] Init: %.2f minutes sleep (default: %.2f), %.2f minutes work (default: %.2f)", MS_TO_MIN(sleepTime), MS_TO_MIN(SLEEP_SLEEP_TIME), MS_TO_MIN(workTime), MS_TO_MIN(SLEEP_WORK_TIME));
+        _PI("[SLEEP] Init. Already synchronized.");
+        _PI("        Delta time: %.2f seconds. Nodes before: %d", deltaTime, nodesPrevis);
+        _PI("        Timeout in %.2f seconds.", MS_TO_S(timeout_ms));
+    }
+    else {
+        _PI("[SLEEP] Init. Not synchronized. Waiting for first sync.");
+    }
 
-    Transport_onEvent(SLEEP_PORT, received, nullptr);
+    Transport_onEvent(SLEEP_PORT, received, sent, sendError);
 
     // Si som iniciadors, simulem que hem rebut SYNC per enviar i iniciar funcionament normal
     if (SLEEP_IS_INITIATOR) {
+        _PI("[SLEEP] Initiator. Making PDU and sending.");
+        receivedPDU.command = SLEEP_CMD_SYNC;
+        receivedPDU.dataLen = 0;
         onSyncReceived();
     }
 
@@ -75,169 +76,145 @@ void Sleep_deinit(void) {
     onSync = nullptr;
     onBeforeSleep = nullptr;
     // Cancel·lem tasques programades
-    if(workToutTask != nullptr) {
-        scheduler_stop(workToutTask);
-        workToutTask = nullptr;
+    if(timeoutTask != nullptr) {
+        scheduler_stop(timeoutTask);
+        timeoutTask = nullptr;
     }
-    // Temps per defecte
-    sleepTime = SLEEP_SLEEP_TIME;
-    workTime = SLEEP_WORK_TIME;
+    isFirstSync = true;
     isSync = false;
     // Deshabilitem transport a port de SLEEP
     Transport_deinit(SLEEP_PORT);
 }
 
-bool Sleep_setForwardNodes(node_address_t* nodes, size_t numNodes) {
-    if(numNodes > SLEEP_MAX_FORWARD_NODES) {
-        _PW("[SLEEP] Too many nodes to forward to. Max: %d", SLEEP_MAX_FORWARD_NODES);
-        return false;
-    }
-    for(int i = 0; i < SLEEP_MAX_FORWARD_NODES; ++i) {
-        forwardCmdTo[i] = i < numNodes ? nodes[i] : NODE_ADDRESS_NULL;
-    }
-    _PI("[SLEEP] Modified `forwardCmdTo` nodes");
-    return true;
+bool Sleep_setForwardNode(node_address_t node) {
+    forwardCmdTo = node;
+    _PI("[SLEEP] Set forward node to %d", node);
+    return true; // sempre true, de moment. Si fos més d'un node, canviaria la cosa
 }
-
 
 void Sleep_onSync(sleep_callback_t cb) { onSync = cb; }
 
-void Sleep_onBeforeSleep(sleep_callback_t cb) { onBeforeSleep = cb; }
-
-void _onBeforeSleep() {
-    if(onBeforeSleep != nullptr) {
-        onBeforeSleep();
-    }
-}
-
-/*
-    Potser seria interessant introduir un temps aleatori;
-    aquest faria separar intents de transmissió entre dos nodes, 
-    ja que segurament voldrien intentar enviar a la vegada
-*/
-void _onSync() {
-    if(onSync != nullptr) {
-        onSync();
-    }
+static long computeDeltaTime() {
+    deltaTime = nodesPrevis * MAC_MAX_RETRIES * MAC_ACK_TIMEOUT_FACTOR * US_TO_MS(LoRaRAW_getTimeOnAir(LORA_MAX_SIZE));
+    deltaTime = deltaTime * 1.25; // 25% marge per CSMA
+    return deltaTime;
 }
 
 // Descodifica una PDU de Sleep i la processa.
 // Poca utilitat actualment (únicament ordre SYNC)
 // però es manté per si es volen afegir més ordres
-void decodePDU(sleep_pdu_t* pdu) {
-    _PI("[SLEEP] Decoding PDU. Command: %d, data: %s", pdu->command, (char*)pdu->data);
-    switch(pdu->command) {
+static void decodePDU() {
+    _PI("[SLEEP] Decoding PDU. Command: %d, data: %s", receivedPDU.command, (char*)receivedPDU.data);
+    switch(receivedPDU.command) {
         case SLEEP_CMD_SYNC:
             onSyncReceived();
             break;
         default:
-            _PW("[SLEEP] Unknown command: %d", pdu->command);
+            _PW("[SLEEP] Unknown command: %d", receivedPDU.command);
             break;
-    }
-}
-
-// Reenvia una ordre `CMD` als nodes de la llista `forwardCmdTo`
-// De moment poc útil, ja que només es fa servir per reenviar SYNC
-// que no té dades al camp de dades.
-// Caldria afegir un paràmetre de dades per altres ordres si es volgués
-void forwardCMD(sleep_command_t cmd) {
-    sleep_pdu_t data;
-    data.command = cmd;
-    memcpy(data.data, "", 1);
-    for(int i = 0; i < SLEEP_MAX_FORWARD_NODES; i++) {
-        if(forwardCmdTo[i] == NODE_ADDRESS_NULL) break;
-        transport_err_t state = Transport_send(forwardCmdTo[i], SLEEP_PORT, (uint8_t*)&data, strlen((char*)data.data)+1 , false);
-        if(state == TRANSPORT_ERR) {
-            _PW("[SLEEP] Error forwarding command %d to node %d", cmd, forwardCmdTo[i]);
-        } else {
-            _PI("[SLEEP] Command %d forwarded to node %d", cmd, forwardCmdTo[i]);
-        }
     }
 }
 
 // Executat en rebre missatge de sincronització.
 // Si tasca de 1r boot establerta, la cancel·la.
 // Reenvia missatge de sincronització a nodes de la llista `forwardCmdTo`.
-void onSyncReceived() {
-    if(tempsRecepcioSync != -1) {
-        _PI("[SLEEP] Sync already received");
+static void onSyncReceived() {
+    if(isSync) {
+        _PW("[SLEEP] Sync already received");
         return;
     }
     _PI("[SLEEP] Sync received");
 
-    // Si és primera sincronització, marquem recepció SYNC a instant 0
-    // per tal que no afecti retard inicial al càlcul de cicle de sleep
-    tempsRecepcioSync = isSync ? millis() : 0;
+    // Si és primera sincronització, marquem recepció SYNC a instant 0 per tal que no afecti retard inicial al càlcul de cicle de sleep
+    // Si és iniciador, també marquem SYNC a 0 perquè no afecti retard inicialització a cicle
+    // tempsSync = isFirstSync || SLEEP_IS_INITIATOR ? 0 : millis();
+    tempsSync = SLEEP_IS_INITIATOR ? 0 : millis();
 
-    // En qualsevol cas el node ja estarà sincronitzat a la xarxa
-    isSync = true;
-
-    // Si hi havia una tasca programada (tasca de treball inicial per si no es rep SYNC)
-    // la parem i n'iniciem una de nova després de rebre SYNC
-    if(workToutTask != nullptr) {
-        scheduler_stop(workToutTask);
-        workToutTask = nullptr;
+    // Aturem tasca de timeout si configurada
+    if(timeoutTask != nullptr) {
+        scheduler_stop(timeoutTask);
+        timeoutTask = nullptr;
         _PI("[SLEEP] Cancelled sleep timeout");
     }
 
-    // Programar sleep ABANS de reenviar SYNC, per tal que això no afecti a sincronització amb altres nodes
-    // Si un node ho ha de reenviar a molts, potser triga molt temps, dorm més tard del compte i NO rep següent sync
-    // WORK TIME inclou temps de reenviament de SYNC
-    workTime = SLEEP_WORK_TIME;
-    sleepTime = SLEEP_SLEEP_TIME; // @todo: veure si hauria de ser així! En rebre sync fem reset de temps de sleep
-    workToutTask = scheduler_once(goToSleep, workTime);
+    // Actualizem nombre de nodes previs a aquest
+    nodesPrevis = receivedPDU.dataLen / SLEEP_DATASIZE_PER_NODE;
+    _PI("[SLEEP] Nodes before self: %d", nodesPrevis);
 
-    // Reenviar SYNC a nodes de la llista
-    forwardCMD(SLEEP_CMD_SYNC);
+    if (!isFirstSync) {
+        syncTimeSum += tempsSync;
+        syncCount++;
+    }
 
-    // Programem notificació de recepció de sync. S'executarà
-    // després de fer transmissions a forwardToNodes
-    scheduler_once(_onSync, SLEEP_GUARD_TIME);
-    _PI("[SLEEP] Scheduling sleep in %.2f minutes", MS_TO_MIN(workTime));
+    // En qualsevol cas el node ja estarà sincronitzat a la xarxa
+    isSync = true;
+    isFirstSync = false;
+
+    // Enviem SYNC
+    forwardSync();
+}
+
+static void forwardSync() {
+    if (receivedPDU.dataLen + SLEEP_DATASIZE_PER_NODE <= SLEEP_MAX_DATA_SIZE) {
+        if (onSync != nullptr) {
+            uint8_t* data = receivedPDU.data + receivedPDU.dataLen; // Pointer to the correct position in the buffer
+            onSync(data);
+            
+            // Copiem les dades que afegeix onSync() a les dades de la PDU
+            // i incrementem la mida de les dades
+            memcpy(receivedPDU.data + receivedPDU.dataLen, data, SLEEP_DATASIZE_PER_NODE);
+        }
+        else {
+            _PE("[SLEEP] No callback set. No data can be added to PDU. 0x00 bytes will be added");
+            // Posem 0x00 a les dades de la PDU
+            memset(receivedPDU.data + receivedPDU.dataLen, 0x00, SLEEP_DATASIZE_PER_NODE);
+        }
+        // Incrementem la mida de les dades
+        receivedPDU.dataLen += SLEEP_DATASIZE_PER_NODE;
+    }
+    else {
+        _PW("[SLEEP] Data length exceeded. No data will be added to PDU. Forwarding.");
+    }
+
+    // Reenviem missatge de sincronització a següent node, amb dades modificades
+    if(forwardCmdTo != NODE_ADDRESS_NULL) {
+        transport_err_t state = Transport_send(forwardCmdTo, SLEEP_PORT, (uint8_t*)&receivedPDU, receivedPDU.dataLen + SLEEP_HEADER_SIZE, false);
+        if(state == TRANSPORT_ERR) {
+            _PW("[SLEEP] Error forwarding sync to node %d. Going to sleep.", forwardCmdTo);
+            goToSleep();
+        } else {
+            _PI("[SLEEP] Sync forwarded to node %d", forwardCmdTo);
+        }
+    }
+    else { // Si no hi ha adreça definida, dormir en rebre SYNC. No podem fer-hi res.
+        _PW("[SLEEP] No forward node set. Sync not forwarded");
+        goToSleep();
+    }
+
+    // Quan es generi esdeveniment `sent`, s'anirà a dormir
 }
 
 // Posa el microcontrolador i ràdio en mode de baix consum
-// Determina el temps de sleep a partir de l'instant de recepció de SYNC,
-// augmentant el temps de sleep si s'ha rebut després d'estona d'haver despertat,
-// o disminuint-lo si no s'ha rebut, augmentant així la finestra de recepció.
-void goToSleep() {
-    // Si som inicialitzadors, el cicle de sleep no s'ha de modificar
-    if(!SLEEP_IS_INITIATOR) {
-        // Si encara no s'ha sincronitzat inicialment a la xarxa, no modificar temps de sleep
-        // (criteri marcat per evitar reduir encara més temps de sleep, en teoria temps despert s
-        // si no sincronitzat hauria de ser major que sincronitzat)
-        if(!isSync) {
-            _PI("[SLEEP] Not yet synchronized with network. Sleeping won't be modified");
-        }
-        // Si no s'ha rebut SYNC en el temps de treball, reduir el temps de sleep, despertant abans per si es rep SYNC
-        else if(tempsRecepcioSync == -1) {
-            uint64_t reduccio = sleepTime*SLEEP_SLEEP_TIME_FACTOR_NSYNC;
-            sleepTime -= reduccio;
-            if(sleepTime < SLEEP_MIN_SLEEP_TIME) {
-                sleepTime = SLEEP_MIN_SLEEP_TIME;
-            } else {
-                workTime += reduccio; // Augmentar temps de treball de següent cicle -> estarà més temps despert INICIALMENT
-                _PI("[SLEEP] Sync not received. Sleep time reduced by %.2f%% (%llu ms)", (SLEEP_SLEEP_TIME_FACTOR_NSYNC*100), reduccio);
-            }
-        }
-        else { // S'ha rebut sync. Intentem augmentar temps de sleep si s'ha rebut després d'estona
-            uint64_t increment = tempsRecepcioSync  * SLEEP_SLEEP_TIME_FACTOR_SYNC; // ms
-            uint64_t diferencia = tempsRecepcioSync - increment; // ms
-            // Limitem increment per tal que minim hi hagi `SLEEP_MIN_TIME_BEFORE_SYNC` entre despertar i recepció esperada SYNC
-            if (increment < SLEEP_MIN_TIME_BEFORE_SYNC) {
-                increment = increment - SLEEP_MIN_TIME_BEFORE_SYNC + diferencia;
-                _PI("[SLEEP] Sync received. Sleep time limited");
-            }
-            else {
-                _PI("[SLEEP] Sync received. Sleep time increased by %llu ms", increment);
-            }
-            sleepTime += increment;
-        }
+// la durada del sleep depen del temps en que s'ha rebut sync, i quan
+// el node ha finalitzat la seva tasca
+static void goToSleep() {
+    uint64_t sleepTime = 0;
+    unsigned long tempsDone = millis();
+    _PI("[SLEEP] Time done: %d ms", tempsDone);
+    if (!SLEEP_IS_INITIATOR) {
+        // el temps d'una transmissió del node ANTERIOR a ell, que és la que aqeust ha de rebre,
+        // és les dades que aquest ha transmes (nodes * size) més els headers de totes les capes (mida màxima lora - sleep data,
+        // la resta són headers)
+        uint8_t expectedRcvSize = nodesPrevis * SLEEP_DATASIZE_PER_NODE + LORA_MAX_SIZE - SLEEP_MAX_DATA_SIZE;
+        long transmitTime = US_TO_MS(LoRaRAW_getTimeOnAir(expectedRcvSize));
+        sleepTime = SLEEP_CYCLE_DURATION - (tempsDone - tempsSync) - SLEEP_CLOCK_CORRECTION - transmitTime - deltaTime - SLEEP_EXTRA_TIME;
+        sleepTime = MAX((int64_t) sleepTime, 0);
+        _PI("[SLEEP] Expected reception: %d B, Transmission time: %lu ms, sleeping for %.2f seconds", expectedRcvSize, transmitTime, MS_TO_S(sleepTime));
+        _PI("[SLEEP] Sync time: %lu ms, Done time: %lu ms", tempsSync, tempsDone);
     }
-
-    // Notifiquem que s'anirà a dormir, per si es volen realitzar accions
-    // Haurien de ser accions ràpides, per no afectar temps de dormir
-    _onBeforeSleep();
+    else {
+        sleepTime = SLEEP_CYCLE_DURATION - tempsDone;
+    }
 
     // Activar wakeup a partir de timer
     esp_sleep_enable_timer_wakeup(MS_TO_US(sleepTime));
@@ -245,37 +222,50 @@ void goToSleep() {
     LoRaRAW_sleep();
     _PI("[SLEEP] Going to sleep for %.2f minutes", MS_TO_MIN(sleepTime));
     // Iniciar sleep
+
+    if (syncCount > 0) {
+        bootCount++;
+        doneTimeSum += tempsDone;
+    }
+
+    _PI("[SLEEP-STATS] Sync: %d\tSleep time: %llu ms\tSync time: %lu ms\tDone time: %lu ms\tDelta Time: %llu ms\tSync AVG: %.2f ms\tDone AVG: %.2f ms\tSync count: %d\tBoot count: %d",
+        isSync, sleepTime, tempsSync, tempsDone, deltaTime, syncTimeSum / (float) syncCount, doneTimeSum / (float) bootCount, syncCount, bootCount);
     esp_deep_sleep_start();
 }
 
+static void syncTimeout() {
+    _PW("[SLEEP] Sync timeout. Making new PDU, and sending to next node");
+    receivedPDU.command = SLEEP_CMD_SYNC;
+    receivedPDU.dataLen = 0;
+
+    // El temps de SYNC és 0, no s'ha sincronitzat
+    tempsSync = 0;
+
+    // Simulem recepció de SYNC. Com que receivedPDU està inicialitzada, ja posarà les seves dades allà
+    forwardSync();
+    // onSyncReceived();
+}
+
 // Processat en rebre dades d'aplicació SLEEP
-void received() {
-    sleep_pdu_t data;
+static void received() {
+    // sleep_pdu_t data;
     size_t datalen;
     transport_port_t port;
-    Transport_receive(&port, (transport_data_t*)&data, &datalen);
+    Transport_receive(&port, (transport_data_t*)&receivedPDU, &datalen);
     if(port != SLEEP_PORT) {
         _PE("[SLEEP] Received data on wrong port: %d. Check transport layer handlers", port);
         return;
     }
 
-    decodePDU(&data);
+    decodePDU();
 }
 
-// Mètode executat en despertar. En despertar de deepsleep `millis() == 0`.
-// Programa sleep de nou al cap de `workTime` segons, que depèn de `SLEEP_WORK_TIME`
-// i de temps de recepcions de SYNC anteriors
-void onWakeup() {
-    _PI("[SLEEP] Wake up");
-    if(isSync) {
-        workToutTask = scheduler_once(goToSleep, workTime);
-        _PI("[SLEEP] Scheduling sleep in %.2f minutes", MS_TO_MIN(workTime));
-    }
-    else {
-        workToutTask = scheduler_once(goToSleep, SLEEP_FIRST_BOOT_TOUT);
-        _PI("[SLEEP] Scheduling init timeout in %.2f minutes", MS_TO_MIN(SLEEP_FIRST_BOOT_TOUT));
-    }
-    // Programa sleep de nou al cap de `workTime` segons per si no es rep SYNC.
-    // Si es rep SYNC, s'iniciarà de nou i `workTime` passarà a ser `SLEEP_WORK_TIME`
-    // per mantenir el cicle de funcionament normal.
+static void sent() {
+    _PI("[SLEEP] Forwarded data");
+    goToSleep();
+}
+
+static void sendError() {
+    _PI("[SLEEP] Error forwarding data. Going to sleep.");
+    goToSleep();
 }
