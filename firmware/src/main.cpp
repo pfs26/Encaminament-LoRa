@@ -6,86 +6,31 @@
 #include "sleep.h"
 #include <stdlib.h> // For rand()
 
-#if IS_GATEWAY
+#if true
+// #if IS_GATEWAY
     #define NODE_ADDRESS 0x02
 #else
     #define NODE_ADDRESS 0x03
 #endif
 
 // Únicament per mostrar informació del test
-bool RTC_DATA_ATTR firstBoot = true;
+uint16_t RTC_DATA_ATTR bootCount = 0;
+uint16_t RTC_DATA_ATTR syncCount = 0;
 
-// Comptadors de transmissions
-int RTC_DATA_ATTR TCPsent = 0; // segments TCP enviats (ACK rebut)
-int RTC_DATA_ATTR TCPtries = 0; // segments TCP totals enviats (també els que encara no s'ha rebut ACK)
-int RTC_DATA_ATTR UDPsent = 0;  // segments UDP totals enviats
-
-
-#define ACK_CHANCE 0.25 // Probabilitat d'enviar amb ACK
-#define SEND_CHANCE 0.5 // Probabilitat d'enviar un missatge en despertar
-
-
-void onReceive() {
-    transport_port_t port;
-    transport_data_t data;
-    size_t datalen;
-    Transport_receive(&port, &data, &datalen);
-    data[datalen] = '\0'; // Null-terminate the string
-    Serial.printf("Received data on port: %d\tLenght: %d\tData: %s\n", port, datalen, (char*)data);
-}
-
-void onSend() {
-    // Executat quan s'ha enviat un missatge i s'ha rebut ACK
-    // NO s'executa si s'envia sense esperar ACK
-    Serial.println("Data sent with ACK reception");
-    TCPsent++;
-}
-
-void beforeSleeping() {
-    Serial.printf("[%d] Going to sleep...\n", millis());
-    Serial.printf("TCP sent: %d\tTCP tries: %d\tUDP sent: %d\n", TCPsent, TCPtries, UDPsent);
-}
-
-void ready() {
-    Serial.printf("[%d] Ready to send data\n", millis());
-    
-    if ((float)esp_random() / UINT32_MAX < SEND_CHANCE) {
-        // Adreces a qui enviar possibles
-        #if IS_GATEWAY
-            node_address_t nodes[] = {0x03, 0x01}; 
-        #else
-            node_address_t nodes[] = {0x02, 0x01}; 
-        #endif
-
-        // Escollir node aleatori
-        size_t nodeCount = sizeof(nodes) / sizeof(node_address_t);
-        node_address_t targetNode = nodes[esp_random() % nodeCount];
-
-        // Escollir si s'ha d'enviar amb ACK o sense
-        bool ackRequested = ((float)esp_random() / UINT32_MAX < ACK_CHANCE);
-
-        // Enviar missatge. Dades és el número de transmissió actual (TCP + UDP + 1)
-        transport_data_t message = {TCPtries + UDPsent + 1};
-        transport_err_t result = Transport_send(targetNode, 63, message, 1, ackRequested);
-        if (result == TRANSPORT_SUCCESS) {
-            if (ackRequested) {
-                TCPtries++;
-            } else {
-                UDPsent++;
-            }
-            Serial.printf("Message sent to node 0x%02X with%s ACK\n", targetNode, ackRequested ? "" : "out");
-        } else {
-            Serial.printf("Failed to send message to node 0x%02X. Error: %d\n", targetNode, result);
-        }
-    } else {
-        Serial.println("No message sent this cycle");
+void getData(uint8_t* data) {
+    Serial.printf("[%d] Ready to send data: ", millis());
+    syncCount++;
+    for(int i = 0; i < SLEEP_DATASIZE_PER_NODE; i++) {
+        data[i] = esp_random() % 256;
+        Serial.printf("%02X ", data[i]);
     }
+    Serial.println();
 }
 
 void setup() {
     Serial.begin(921600);
     
-    if(firstBoot) {
+    if(bootCount++ == 0) {
         Serial.println("===========================");
         Serial.print("Model: "); Serial.println(ESP.getChipModel());
         Serial.print("CPU: "); Serial.println(ESP.getCpuFreqMHz());
@@ -93,33 +38,34 @@ void setup() {
         Serial.print("Flash: "); Serial.println(ESP.getFlashChipSize());
         Serial.print("Flash speed: "); Serial.println(ESP.getFlashChipSpeed());
         Serial.print("Flash mode: "); Serial.println(ESP.getFlashChipMode());
+        Serial.print("Reset reason: "); Serial.println(esp_reset_reason());
         Serial.println("===========================");
         Serial.println("RANDOM OPERATION SLEEP TEST");
         Serial.println("===========================");
         Serial.printf("Node address: 0x%02X\tGateway: %d\n", NODE_ADDRESS, IS_GATEWAY);
-        Serial.printf("ACK chance: %.2f\tSend chance: %.2f\n", ACK_CHANCE, SEND_CHANCE);
-        Serial.println("===========================");
-        firstBoot = false;
     }
-        
+    
+    Serial.println("===========================");
+    Serial.printf("Boot: %d\tSync: %d\n", bootCount, syncCount);
+    
     if(!Transport_init(NODE_ADDRESS, IS_GATEWAY)) {
         Serial.println("Transport init failed");
         while(1) delay(1);
     }
 
-    // configurem callbacks capa transport per aplicació personalitzada (aleatòria)
-    Transport_onEvent(63, onReceive, onSend);
-    Sleep_onBeforeSleep(beforeSleeping);
-    Sleep_onSync(ready);
+    Sleep_onSync(getData);
 
     // Configurem nodes a qui notificar missatges de sincronització
     #if IS_GATEWAY
-        node_address_t nodes[] = {0x03};
+        node_address_t node = 0x00;
     #else
-        node_address_t nodes[] = {};
-    #endif
-    if(!Sleep_setForwardNodes(nodes, sizeof(nodes)/sizeof(node_address_t))) {
-        Serial.println("Sleep set forward nodes failed");
+        node_address_t node = 0x02;
+        #endif
+        
+    RoutingTable_addRoute(node, node);
+    
+    if(!Sleep_setForwardNode(node)) {
+        Serial.println("Sleep set forward node failed");
         while(1) delay(1);
     }
 

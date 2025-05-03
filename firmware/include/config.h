@@ -35,8 +35,9 @@
 #define MAC_MAX_BEB_RETRY 10
 // Slots de temps en ms per BEB. Per MAC_MAX_BEB_RETRY, el temps màxim serà MAC_BEB_SLOT_MS * 2^MAC_MAX_BEB_RETRY
 #define MAC_BEB_SLOT_MS 100 
-// Factor de temps addicional per recepció d'ACK, en funció de time on air de les dades enviades
-// Si factor és 5 i time on air és 1ms, el timeout serà de 10 ms (dues vegades el temps esperat, anada+tornada)
+// Factor de temps addicional per recepció d'ACK, en funció de time on air de la mida d'un ACK enviat (mida headers MAC)
+// Si factor és 5 i time on air és 1ms, el timeout serà de 5 ms (dues vegades el temps esperat, anada+tornada)
+// Inici de TOUT es genera després de realitzat la transmissió
 #define MAC_ACK_TIMEOUT_FACTOR 3
 // Número d'IDs de frames anteriors rebuts guardats (per si cal enviar "ACK")
 #define MAC_QUEUE_SIZE 5
@@ -62,7 +63,7 @@ After each retry, the delay is doubled, applying an exponential backoff; thus, i
 is set to 5 (6 total attempts), and the initial timeout is 1second, on the last attempt the timeout
 will be set to 1*2^(6-1) sec. The real timeout follows `tout(attempt) = tout_base * 2^(attempt-1)` 
 Value is specified in ms! */
-#define TRANSPORT_RETRY_DELAY 5000 
+#define TRANSPORT_RETRY_DELAY 10000 
 
 // Mida de cua d'últims segments rebuts, per filtrar repeticions
 #define TRANSPORT_QUEUE_SIZE 10
@@ -71,52 +72,19 @@ Value is specified in ms! */
 /* ========= */
 /*   SLEEP   */
 /* ========= */
-// Defineix si és un node "iniciador" de xarxa.
-// Enviarà SYNC sense esperar a rebre'l. Haurien de ser-ho els nodes amb rol de gateway, mantenint
-// així la responsabilitat. Aquests són també els que tenen inicialització més crítica (LWAN)
-#define SLEEP_IS_INITIATOR IS_GATEWAY
 
-// Temps de sleep mínim que controlador P no superarà, en el cas que no rebi SYNC, en `ms`.
-// Utilitzat per limitar el temps de sleep a un mínim, evitant consumir excessivament
-#define SLEEP_MIN_SLEEP_TIME S_TO_MS(15)
-
-// Durada d'un cicle de funcionament, en `ms`
-#define SLEEP_CYCLE_DURATION MIN_TO_MS(1)
-// Temps de funcionament normal, després de rebre SYNC, en `ms`
-#define SLEEP_WORK_TIME S_TO_MS(30)
-// Temps en espera després de rebre SYNC abans no inicia funcionament normal
-// per evitar inicar TX quan nodes veins encara no han processat SYNC
-#define SLEEP_GUARD_TIME S_TO_MS(2)
-
-// Factor de reducció del temps de sleep en cada cicle si no rep SYNC
-// Si és 0.1, el temps de sleep es reduirà un 10% cada cicle si no rep SYNC.
-#define SLEEP_SLEEP_TIME_FACTOR_NSYNC 0.1
-// Factor de "controlador P" en rebre SYNC. Si és 0.5, el temps de sleep
-// augmentarà la meitat del temps de recepció de SYNC.
-#define SLEEP_SLEEP_TIME_FACTOR_SYNC 0.5
-
-// Temps mínim que volem que estigui despert abans de rebre SYNC, en
-// `milisegons` Evita que controlador P augmenti massa el temps de sleep, i
-// deixa un marge de mínim aquest temps entre despertar i rebre SYNC (basant-se
-// en temps SYNC anterior)
-// **IMPORTANT** que deixi suficient marge per tal que la recepció de SYNC no es
-// perdi Valors d'algun segon semblen ser adequats
-#define SLEEP_MIN_TIME_BEFORE_SYNC S_TO_MS(2)
-
-// Temps màxim d'espera per primera sincronització a la xarxa, en `ms`
-// Com a últim recurs per evitar deixar ràdio + ESP actius permanentment
-// Dormirà durant `SLEEP_SLEEP_TIME`
-#define SLEEP_FIRST_BOOT_TOUT MIN_TO_MS(2)
 
 /* =========== */
 /*   GENERAL   */
 /* =========== */
-#define LOG_LEVEL 2 // "4 = none; 1 = info; 2 = warn; 3 = err"
+#define LOG_LEVEL 1 // "4 = none; 1 = info; 2 = warn; 3 = err"
 
 #define SELF_ADDRESS 0x03 // Adreça per defecte del node (uint8_t) - Modificable
-#define IS_GATEWAY true  // Es un gateway? (true/false) - Modificable  
+#define IS_GATEWAY false  // Es un gateway? (true/false) - Modificable  
 
 #define WIFI_SSID "LORA"       // Nom de la xarxa que genera el dispositiu
 #define WIFI_PASSWORD NULL     // Contrasenya; NULL si és obert; sinó, de més de 8 caràcters en string ("12345678")
+
+#define SLEEP_RANDOM_TEST_PROB 25 // Probabilitat de no acceptar un frame rebut a MAC (per simular error). En `%`
 
 #endif
