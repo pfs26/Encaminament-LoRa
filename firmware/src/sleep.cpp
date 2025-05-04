@@ -47,11 +47,12 @@ bool Sleep_init(void) {
     // Programa principal és qui hauria d'inicialitzar el protocol
     if(!isFirstSync) {
         long deltaTime = computeDeltaTime();
-        long timeout_ms = 2*deltaTime + SLEEP_CLOCK_CORRECTION + SLEEP_EXTRA_TIME;
+        long timeout_ms = 3*deltaTime + SLEEP_CLOCK_CORRECTION + SLEEP_EXTRA_TIME;
+        // long timeout_ms = 2*deltaTime + SLEEP_CLOCK_CORRECTION + SLEEP_EXTRA_TIME;
         timeoutTask = scheduler_once(syncTimeout, timeout_ms);
 
         _PI("[SLEEP] Init. Already synchronized.");
-        _PI("        Delta time: %.2f seconds. Nodes before: %d", deltaTime, nodesPrevis);
+        _PI("        Delta time: %.2f seconds. Nodes before: %d", MS_TO_S(deltaTime), nodesPrevis);
         _PI("        Timeout in %.2f seconds.", MS_TO_S(timeout_ms));
     }
     else {
@@ -201,20 +202,22 @@ static void goToSleep() {
     uint64_t sleepTime = 0;
     unsigned long tempsDone = millis();
     _PI("[SLEEP] Time done: %d ms", tempsDone);
-    if (!SLEEP_IS_INITIATOR) {
+    if (!SLEEP_IS_INITIATOR || !isSync) {
         // el temps d'una transmissió del node ANTERIOR a ell, que és la que aqeust ha de rebre,
         // és les dades que aquest ha transmes (nodes * size) més els headers de totes les capes (mida màxima lora - sleep data,
         // la resta són headers)
         uint8_t expectedRcvSize = nodesPrevis * SLEEP_DATASIZE_PER_NODE + LORA_MAX_SIZE - SLEEP_MAX_DATA_SIZE;
         long transmitTime = US_TO_MS(LoRaRAW_getTimeOnAir(expectedRcvSize));
         sleepTime = SLEEP_CYCLE_DURATION - (tempsDone - tempsSync) - SLEEP_CLOCK_CORRECTION - transmitTime - deltaTime - SLEEP_EXTRA_TIME;
-        sleepTime = MAX((int64_t) sleepTime, 0);
         _PI("[SLEEP] Expected reception: %d B, Transmission time: %lu ms, sleeping for %.2f seconds", expectedRcvSize, transmitTime, MS_TO_S(sleepTime));
         _PI("[SLEEP] Sync time: %lu ms, Done time: %lu ms", tempsSync, tempsDone);
+        sleepTime = MAX((int64_t) sleepTime, 0);
     }
     else {
         sleepTime = SLEEP_CYCLE_DURATION - tempsDone;
     }
+
+    sleepTime = MAX((int64_t) sleepTime, 0);
 
     // Activar wakeup a partir de timer
     esp_sleep_enable_timer_wakeup(MS_TO_US(sleepTime));
