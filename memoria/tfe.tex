@@ -1,6 +1,7 @@
 \documentclass{tfgitic}[2024/07/01]
 % « »
 % Aqui carregueu packages complementaris que necessiteu
+\usepackage[utf8]{inputenc}
 \usepackage{biblatex}
 % \usepackage[table,xcdraw]{xcolor}
 \usepackage{colortbl}
@@ -9,7 +10,6 @@
 \usepackage{caption}
 \usepackage{bytefield}
 
-\usepackage[utf8]{inputenc}
 
 \usepackage{makecell}
 \usepackage{array}
@@ -582,7 +582,7 @@ Seguint el model \acro{tcp/ip}, el missatges d'aquesta capa s'anomenen \emph{paq
 \end{figure}
 \subsubsection{Gestió de la taula d'encaminament}
 % comentar que implementa interfície per afegir/eliminar taules, per si mai es defineix un mecanisme d'encaminament dinàmic
-La taula d'encaminament és l'encarregada de definir quin és el següent dispositiu al qual s’ha d’enviar un paquet per tal que arribi al seu destí final. Per simplicitat, s’ha optat per permetre una única ruta per a cada dispositiu, establint així una relació un a un entre cada adreça de destí i el següent salt. Això limita la mida màxima de la taula d’encaminament a 254 entrades (253 dispositius i un \est{gateway}). A la \autoref{fig:taula_encaminament} es mostra un exemple de taula d'encaminament, on es pot veure que el dispositiu té comunicació directa amb els dispositius \fitx{0x4E} i \fitx{0xA1}, i si es vol enviar un paquet al \est{gateway}, aquest s’ha de fer arribar a través de \fitx{0x4E}.
+La taula d'encaminament és l'encarregada de definir quin és el següent dispositiu al qual s’ha d’enviar un paquet per tal que arribi al seu destí final. Per simplicitat, s’ha optat per permetre una única ruta per a cada dispositiu, establint així una relació un a un entre cada adreça de destí i el següent salt. Això limita la mida màxima de la taula d’encaminament a 254 entrades (253 dispositius i un \est{gateway}). A la \autoref{tab:taula_encaminament} es mostra un exemple de taula d'encaminament, on es pot veure que el dispositiu té comunicació directa amb els dispositius \fitx{0x4E} i \fitx{0xA1}, i si es vol enviar un paquet al \est{gateway}, aquest s’ha de fer arribar a través de \fitx{0x4E}.
 
 \begin{table}
     \centering
@@ -678,14 +678,9 @@ La implementació d'aquesta capa es troba disponible al fitxer \fitx{routing.cpp
 \subsubsection{Exemples de comunicació}
 En aquest subapartat es presenten dos exemples de comunicació de la capa d'encaminament, on es representen els mecanismes prèviament explicats. Com en el cas de la capa d'accés al medi, saber quin ha de ser el comportament teòric a través de representacions gràfiques ajuda a entendre millor el funcionament, i a detectar possibles errors en la implementació. 
 
-En ambdós exemples es representen tres dispositius, on el tercer té capacitats LoRaWAN i comunicació amb un \est{gateway}. Per simplicitat, no es representen els missatges de reconeixement, ni els reintents de transmissió, ja que aquests són responsabilitat de la capa d'accés al medi, com s'ha vist en els seus diagrames. Tampoc s'han representat els retards de transmissió dels paquets, considerant-los un aspecte del comportament del canal i, per tant, de la capa d'accés al medi.
+En ambdós exemples es representen tres dispositius, on el tercer té capacitats LoRaWAN i comunicació amb un \est{gateway}. Per simplicitat, no es representen els missatges de reconeixement, ni els reintents de transmissió, ja que aquests són responsabilitat de la capa d'accés al medi, com s'ha vist en els seus diagrames. Tampoc s'han representat els retards de transmissió dels paquets, considerant-los un aspecte del comportament del canal i, per tant, de la capa d'accés al medi. Per distingir una transmissió a través de la capa d'accés al medi i una a través de LoRaWAN, s'ha utilitzat una línia contínua per a la primera i una línia discontínua per a la segona.
 
 Les taules d'encaminament de cada dispositiu i exemple es representen a la \autoref{tab:routing_taula_enc_exemples}.
-
-% \caption{Exemple taula d'encaminament.}
-% \label{tab:routing_taula_enc_exemples}
-
-
 
 \begin{table}[h!]
     \centering
@@ -921,7 +916,7 @@ Així, quan es rep un segment amb el port 17, la capa de transport utilitzarà l
 
 La taula de ports pot tenir fins a un màxima de 64 entrades, una per cada possible port. Per cada un d'aquests, es pot assignar únicament una interfície de notificació, garantint així que una única aplicació sigui notificada. En cas que no s'hagi assignat cap interfície a un port, la capa de transport no podrà notificar-ho, fent que l'esdeveniment es perdi.
 
-Un altre problema de disposar de múltiples capes superiors és que cada aplicació pot intentar inicialitzar la capa de transport. Per evitar-ho, és important que la capa de transport guardi l'estat d'inicialització i, en cas que es vulgui inicialitzar de nou, simplement ho «simuli», sense realitzar cap acció addicional.
+Un altre problema de disposar de múltiples capes superiors és que cada aplicació pot intentar inicialitzar la capa de transport. Per evitar-ho, és important que la capa de transport guardi l'estat d'inicialització i, en cas que es vulgui inicialitzar de nou, simplement ho «simuli», sense realitzar cap acció addicional. Aquest mateix mecanisme cal aplicar-lo també a la deinicialització: en cas que una aplicació intenti deinicialitzar la capa de transport, cal verificar que no hi ha cap altra aplicació que la utilitzi, i en cas que sí, no realitzar cap acció addicional. Així, es garanteix que la capa de transport es pot inicialitzar i deinicialitzar múltiples vegades, sense interferir amb les aplicacions que la utilitzin.
 \subsubsection{Fiabilitat}
 \label{subsubsec:transport_fiabilitat}
 % « »
@@ -929,6 +924,8 @@ Com s'ha comentat anteriorment, la implementació de la fiabilitat es basa en un
 Quan s'ha realitzat la transmissió d'un segment fiable, s'inicia un temporitzador a través del gestor de tasques, que genera un esdeveniment quan finalitza el temps d'espera d'\acro{ack}. Quan es produeix aquest esdeveniment, s'obtenen les metadades de la transmissió, i es reintenta la transmissió de nou, repetint el procediment.
 
 És important destacar que, si no es pot realitzar la transmissió del segment (per exemple, perquè la capa d'accés al medi no pot transmetre), s'aplicarà el mateix mecanisme. En aquest cas, la capa inferior ho notifica a través del \est{callback} de transmissió errònia, en lloc del de fi de transmissió.
+
+Per tal de poder identificar quin segment un missatge de reconeixement ---aquell que té el camp \emph{ackResponse} actiu--- reconeix, s'estableix que l'identificador d'aquests segments sigui el mateix que el del segment original, el que reconeixen. Així, en rebre un recnoeixement, la capa de transport pot consultar la llista de metadades, que conté l'identificador del segment original, i així poder identificar el segment i aturar el temporitzador d'espera d'\acro{ack}.
 
 El temps d'espera de recepció del reconeixement no és fix, sinó que depèn del nombre de retransmissions que s'han realitzat anteriorment, seguint una funció exponencial. Gràcies a això, el temps d'espera s'incrementa com més reintents s'han realitzat, ajustant-se a les condicions de la xarxa.
 Aquest temps ve determinat per l'expressió $k\cdot 2^r$, on \emph{k} és un valor constant i configurable, i \emph{r} el nombre de reintents realitzats. El valor de \emph{k} cal configurar-lo adequadament per evitar generar \est{timeouts} prematurs, i per evitar un excés de temps d'espera:
@@ -947,17 +944,91 @@ Malgrat semblar una solució vàlida, cal recordar que s'utilitzen dispositius d
 
 La solució que s'ha implementat és considerar el dispositiu amb capacitats LoRaWAN ---es pot comunicar amb el \est{gateway}--- com una «extensió» del \est{gateway}. Així, quan aquest fa un encaminament a través de LoRaWAN, la capa d'encaminament genera també l'esdeveniment de recepció de nou segment, permetent a la capa de transport processar el segment prèviament rebut, i generar el missatge de reconeixement en cas de ser necessari.
 
-Aquesta solució no és la més elegant, i implica que un dispositiu que no és el destí final processi el segment rebut. No obstant això, si es veu el dispositiu amb capacitats LoRaWAN com un dispositiu diferent a la resta, considerant-lo, com s'ha dit anteriorment, com una «extensió» del \est{gateway}, la solució és vàlida per evitar que la correcta transmissió d'un segment depengui de la transmissió d'un de diferent.
+Aquesta solució no és la més elegant, i implica que un dispositiu que no és el destí final processi el segment rebut. No obstant això, si es veu el dispositiu amb capacitats LoRaWAN com un dispositiu diferent a la resta, considerant-lo, com s'ha dit anteriorment, com una «extensió» del \est{gateway}, la solució és vàlida per evitar que la correcta transmissió d'un segment depengui de la transmissió d'un de diferent. Gràcies a la llibreria de RadioLib, que ja incorpora mecanismes de fiabilitat a través de LoRaWAN ---també mitjançant reconeixements---, no és necessari implementar-ho manualment.
+
+\subsubsection{Exemples de comunicació}
+En aquest subapartat es presenta un exemple de comunicació, representant les característiques d'aquesta capa. Per simplicitat, es dona per suposat que les taules d'encaminament es troben ben definides i, com en els exemples d'encaminament, no es representen els temps de propagació ni de transmissió, així com els missatges de reconeixement de la capa d'accés al medi. A més, tampoc s'inclouen els identificadors dels ports de cada segment, ja que no són rellevants per a les situacions exposades, i únicament s'utilitzen en les notificacions a la capa superior.
+
+A la \autoref{fig:transport_exemple_1} es representa el diagrama de l'exemple. El dispositiu \fitx{0x02} inicia una transmissió fiable cap al dispositiu \fitx{0x03}; aquest no rep el reconeixement, i aplica fins a un màxim de 2 reintents addicionals. És important destacar com el temps d'espera de recepció del reconeixement incrementa exponencialment per cada transmissió, i com la notificació de transmissió fallida es produeix després d'aplicar aquest temps. 
+
+Para\l.lelament, el dispositiu \fitx{0x03} realitza una transmissió fiable cap al dispositiu \fitx{0x01}, el \est{gateway}. En aquest cas, és el dispositiu amb capacitats LoRaWAN, \fitx{0x04}, qui rep el segment, notifica la capa superior, i genera el segment de reconeixement, sent aquesta la solució exposada al problema dels dispositius de classe A. Quan \fitx{0x03} rep el reconeixement, la capa de transport notifica la fi de transmissió a la capa superior.
+Es vol destacar que la transmissió a través de LoRaWAN (línia discontínua) és independent de la capa de transport, i que únicament s'ha representat per poder mostrar aquesta situació característica, on no és el dispositiu final (\est{gateway}) qui genera el reconeixement.
+
+Seguidament, el dispositiu \fitx{0x03} realitza dues transmissions no fiables cap a \fitx{0x01} i \fitx{0x04}. La primera d'elles és satisfactòria, i el dispositiu genera la notificació de fi de transmissió després de finalitzar la transmissió al següent dispositiu, que no té perquè ser el destí final. La segona transmissió no es pot realitzar, i el dispositiu genera la notificació d'error de transmissió després del primer intent, sense aplicar temps d'espera.
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[
+        device/.style={draw=none, minimum width=1cm, minimum height=0.8cm},
+        msg/.style={-Stealth, thick},
+        wan/.style={-Stealth, thick, dashed},
+        timeout/.style={red, thick, dashed},
+        node distance=3.3cm,
+        timeline/.style={draw, dashed, white},
+        fail/.style={thick, cross at end}
+    ]
+    
+    % Devices
+    \node[device] (dev1) at (0,0) {\fitx{0x02}};
+    \node[device, right=of dev1] (dev2) {\fitx{0x03}};
+    \node[device, right=of dev2] (dev3) {\fitx{0x04}};
+    \node[device, right=of dev3] (gw) {\fitx{0x01}};
+
+    \node[above] at ($(gw.south)+(0,-0.1)$) {\tiny(\est{gateway})};
+
+    \draw ($(dev1.south) + (0,0)$) -- ($(dev1.south) + (0,-4.5)$);
+    \draw ($(dev2.south) + (0,0)$) -- ($(dev2.south) + (0,-4.5)$);
+    \draw ($(gw.south) + (0,0)$) -- ($(gw.south) + (0,-4.5)$);
+    \draw ($(dev3.south) + (0,0)$) -- ($(dev3.south) + (0,-4.5)$);
+
+    \draw[msg] ($(dev2.south)+(0,-0.5)$) -- ($(dev3.south)+(0,-0.5)$) node[midway, above] {\tiny{seg(id=\fitx{0x1234}, ackreq=\fitx{1}), dst=\fitx{0x01}}};
+    \draw[wan] ($(dev3.south)+(0,-0.7)$) -- ($(gw.south)+(0,-0.7)$) node[midway, above] {\tiny{seg(id=\fitx{0x1234}, \dots)}};
+    \draw[msg] ($(dev3.south)+(0,-0.9)$) -- ($(dev2.south)+(0,-0.9)$) node[midway, below] {\tiny{seg(id=\fitx{0x1234}, ackresp=\fitx{1}), dst=\fitx{0x03}}};
+    \draw[blue] ($(dev2.south)+(0,-0.9)$) node[left] {\tiny{\acro{tx}}};
+    \draw[blue] ($(dev3.south)+(0,-0.5)$) node[right] {\tiny{\acro{rx}}};
+    
+    \draw[fail] ($(dev1.south)+(0,-0.5)$) -- ($ (dev1.south) !0.5! (dev2.south) + (0, -0.5)$) node[above] {\tiny{seg(id=\fitx{0xABCD}, ackreq=\fitx{1}}), dst=\fitx{0x03}};
+    \draw[fail] ($(dev1.south)+(0,-1)$) -- ($ (dev1.south) !0.5! (dev2.south) + (0, -1)$) node[above] {\tiny{seg(id=\fitx{0xABCD}, \dots)}};
+    \draw[fail] ($(dev1.south)+(0,-2)$) -- ($ (dev1.south) !0.5! (dev2.south) + (0, -2)$) node[above] {\tiny{seg(id=\fitx{0xABCD}, \dots)}};
+    % \draw[fail] ($(dev1.south)+(0,-4)$) -- ($ (dev1.south) !0.5! (dev2.south) + (0, -4)$) node[above] {\tiny{seg(id=\fitx{0xABCD}, \dots)}};
+    \draw[blue] ($(dev1.south)+(0,-4)$) node[left] {\tiny{\acro{txerr}}};
+
+    \draw[msg] ($(dev2.south)+(0,-2.5)$) -- ($(dev3.south)+(0,-2.5)$) node[midway, above] {\tiny{seg(id=\fitx{0x9876}, ackreq=\fitx{0}), dst=\fitx{0x04}}};
+    \draw[wan] ($(dev3.south)+(0,-2.7)$) -- ($(gw.south)+(0,-2.7)$) node[midway, above] {\tiny{seg(id=\fitx{0x9876}, \dots)}};
+    \draw[blue] ($(dev2.south)+(0,-2.5)$) node[left] {\tiny{\acro{tx}}};
+    \draw[blue] ($(dev3.south)+(0,-2.5)$) node[right] {\tiny{\acro{rx}}};
+
+    \draw[fail] ($(dev2.south)+(0,-3.5)$) -- ($ (dev2.south) !0.5! (dev3.south) + (0, -3.5)$) node[above] {\tiny{seg(id=\fitx{0x0001}, ackreq=\fitx{0}), dst=\fitx{0x04}}};
+    \draw[blue] ($(dev2.south)+(0,-3.5)$) node[left] {\tiny{\acro{txerr}}};
+
+    \end{tikzpicture}
+    \caption{Exemple de comunicació entre }
+    \label{fig:transport_exemple_1}
+\end{figure}
+
 
 
 \subsection{Capa d’aplicació}
-% « »
+La capa d'aplicació és la més alta del protocol, i s'encarrega de gestionar les aplicacions que l'utilitzen. Tot i que no forma part del protocol, actua com a interfície entre aquest i les aplicacions, permetent que cada aplicació pugui definir i implementar la seva pròpia capa d'aplicació de manera independent, sense interferir amb la resta. 
+
+En ser independent, poden coexistir múltiples aplicacions, on cadascuna defineix la seva pròpia estructura de dades. Tal com s'ha vist en la capa de transport, cada aplicació s'identifica mitjançant un port, que ha de ser únic. Gràcies a la implementació de la capa de transport, les aplicacions només són notificades dels missatges que els corresponen, de manera que no cal que cada una filtri els missatges rebuts.
+
+Així, el desenvolupament de la capa d'aplicació és una tasca de l'usuari final, i dependrà completament dels requisits i característiques específiques de cada cas. A continuació s'indiquen, com a exemple, alguns protocols de capa d'aplicació que podrien existir:
+\begin{itemize}
+    \item \emph{Configuració dinàmica}. Permet modificar paràmetres del protocol durant el seu funcionament, com ara la potència de transmissió, el nombre d’intents de retransmissió o el temps d’espera per a la recepció dels \acro{ack} de la capa d’accés al medi.
+    \item \emph{Gestió de la xarxa}. Ofereix la possibilitat d'afegir o eliminar nodes i, per tant, de modificar les taules de rutes dels dispositius.
+    \item \emph{Baix consum}. Gestiona els modes de baix consum dels nodes, proporcionant mecanismes de sincronització amb la resta de dispositius per evitar la pèrdua de funcionalitat d’encaminament.
+\end{itemize}
+
+Al \autoref{chap:adaptacio_baix_consum} es detalla la implementació de l'últim exemple, definint la situació d'ús i els mecanismes utilitzats.
+
 \section{Altres serveis}
 \label{sec:altres_serveis}
 \subsection{Gestor de tasques}
 \section{Proves i validació funcional}
 
 \chapter{Adaptació a entorns de baix consum}
+\label{chap:adaptacio_baix_consum}
 \section{Descripció de l’escenari: xarxa lineal de sensors}
 \section{Limitacions del protocol sense optimitzacions energètiques}
 % \section{Estratègies de sincronització i activació temporal}
