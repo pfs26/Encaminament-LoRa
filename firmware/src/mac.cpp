@@ -341,6 +341,13 @@ static void _onLoraReceived(void) {
             _mac_fsm(mac_event_t::RX_ACK_E);
         }
         else { // Si no és ACK, són dades
+
+            // PER RECEPTOR I PROVES ALEATORIES
+            if (esp_random() % 100 < SLEEP_RANDOM_TEST_PROB) {
+                _PE("[MAC] Simulated error");
+                return;
+            }
+
             lastFramesIDs.enqueue(rcvID);
             framesReceived++;
             _PI("[MAC] Frame for higher layer");
@@ -495,10 +502,13 @@ static void _setup_ack_reception(void) {
     LoRaRAW_startReceiving();
     
     // Calcula i programa timeout
-    long airtime_us = LoRaRAW_getTimeOnAir(txPDU.dataLength + MAC_PDU_HEADER_SIZE);
-    uint32_t timeout_ms = 3 * MAC_ACK_TIMEOUT_FACTOR * airtime_us / 1000;
+    // long airtime_us = LoRaRAW_getTimeOnAir(txPDU.dataLength + MAC_PDU_HEADER_SIZE);
+    long ack_airtime_us = LoRaRAW_getTimeOnAir(MAC_PDU_HEADER_SIZE);
+
+    // uint32_t timeout_ms = 3 * MAC_ACK_TIMEOUT_FACTOR * ack_airtime_us / 1000;
+    uint32_t timeout_ms = MAC_ACK_TIMEOUT_FACTOR * ack_airtime_us / 1000;
     txTimeoutTask = scheduler_once(_mac_fsm_event_tout_ack, timeout_ms);
-    _PI("[MAC] Timeout d'ACK: %dms (%dus airtime)", timeout_ms, airtime_us);
+    _PI("[MAC] Timeout d'ACK: %dms (%dus airtime)", timeout_ms, ack_airtime_us);
 }
 
 // Mètodes per generar esdeveniments a FSM a través de scheduler
