@@ -46,7 +46,7 @@ bool Sleep_init(void) {
     // No s'inicialitza aquí per evitar haver de conèixer @ node.
     // Programa principal és qui hauria d'inicialitzar el protocol
     if(!isFirstSync) {
-        long deltaTime = computeDeltaTime();
+        computeDeltaTime();
         long timeout_ms = 3*deltaTime + SLEEP_CLOCK_CORRECTION + SLEEP_EXTRA_TIME;
         // long timeout_ms = 2*deltaTime + SLEEP_CLOCK_CORRECTION + SLEEP_EXTRA_TIME;
         timeoutTask = scheduler_once(syncTimeout, timeout_ms);
@@ -142,6 +142,8 @@ static void onSyncReceived() {
     nodesPrevis = receivedPDU.dataLen / SLEEP_DATASIZE_PER_NODE;
     _PI("[SLEEP] Nodes before self: %d", nodesPrevis);
 
+    computeDeltaTime();
+
     if (!isFirstSync) {
         syncTimeSum += tempsSync;
         syncCount++;
@@ -202,7 +204,8 @@ static void goToSleep() {
     uint64_t sleepTime = 0;
     unsigned long tempsDone = millis();
     _PI("[SLEEP] Time done: %d ms", tempsDone);
-    if (!SLEEP_IS_INITIATOR || !isSync) {
+    // Nomes calculem cicle si no som iniciadors i hem rebut sincronització
+    if (!SLEEP_IS_INITIATOR && isSync) {
         // el temps d'una transmissió del node ANTERIOR a ell, que és la que aqeust ha de rebre,
         // és les dades que aquest ha transmes (nodes * size) més els headers de totes les capes (mida màxima lora - sleep data,
         // la resta són headers)
@@ -213,7 +216,7 @@ static void goToSleep() {
         _PI("[SLEEP] Sync time: %lu ms, Done time: %lu ms", tempsSync, tempsDone);
         sleepTime = MAX((int64_t) sleepTime, 0);
     }
-    else {
+    else { // SI som iniciadors o no hem rebut SYNC, dormim el temps restant de cicle
         sleepTime = SLEEP_CYCLE_DURATION - tempsDone;
     }
 
