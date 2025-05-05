@@ -245,14 +245,35 @@ Finalment, el protocol incorpora mecanismes per tal d'assegurar la correcta tran
 S'ha pensat per tal que totes les funcionalitats siguin configurables, permetent adaptar el protocol a les necessitats de cada aplicació. Això inclou la possibilitat d'activar o desactivar la retransmissió automàtica, així com la configuració dels paràmetres de LoRa, o intervals de temps entre retransmissions.
 
 \section{Arquitectura del codi i comunicació entre capes}
-% explicar bucle LOOP 
-% Explicar gestor de tasques aqui potser?
-% Fitxer de configuració
+El codi s'ha intentat organitzar de forma modular, amb la intenció de facilitar-ne la seva comprensió, manteniment, i millora, implementant cada capa del protocol com un mòdul independent. Això permet que cada capa pugui ser modificada o substituïda sense afectar la resta del protocol, facilitant la seva extensió i adaptació a diferents necessitats.
+
+El codi es divideix en dues seccions: els fitxers de capçalera (\est{headers}) i els fitxers de codi (\est{.cpp}). Els primers contenen la definició de les funcions (consultable a la ruta \fitx{firmware/include}), mentre que els segons contenen la implementació d'aquestes funcions (\fitx{firmware/src}).
+
+En els microcontroladors, el codi s'executa de forma cíclica, amb un bucle principal que s'executa de forma contínua. Un gran inconvenient és que no permet realitzar múltiples tasques en para\l.lel, una característica important, ja que cada capa podria haver de realitzar funcions diferents al mateix temps. Per tal d'aconseguir-ho, s'ha implementat un gestor de tasques, el qual permet executar tasques de forma periòdica, després d'un cert temps, o tan bon punt sigui possible. Malgrat no permetre l'execució para\l.lela real, aquesta solució permet simular-ho.
+Amb aquesta solució, tota l'execució del protocol es realitza a través de tasques generades amb el gestor, i en el bucle principal únicament s'executa el gestor de tasques, que verifica en cada cicle l'estat de cada tasca, executant les que ho requereixen (\fitx{src/utils/scheduler.cpp}).
+
+S'ha establert que la comunicació entre capes es realitzi a través de \est{callbacks}. Així, cada capa ofereix mètodes per permetre a una altra capa configurar una funció que s'executarà quan es produeixi un esdeveniment. Per exemple, la capa d'encaminament pot configurar una funció a la capa d'accés al medi per tal que s'executi quan es rebi un missatge. Aquesta implementació ofereix més flexibilitat, i no requereix que les capes coneguin la implementació de les altres.
+
+Finalment, per facilitar la configuració de tot el protocol, s'ha definit un únic fitxer de configuració (\fitx{config.h}), on es poden configurar tots els paràmetres del protocol, evitant-ne la seva dispersió en diverses parts del codi.
+
 \section{Biblioteques i entorn de desenvolupament}
+Per realitzar el desenvolupament, s'han utilitzat dues llibreries externes:
+\begin{itemize}
+    \item \est{RadioLib}. Una llibreria que permet la comunicació sense fils a través de múltiples protocols i modulacions, incloent LoRa i LoRaWAN. Aquesta llibreria s'ha utilitzat per implementar la capa física del protocol a través de LoRa, i per comunicar-se amb \est{gateways} a través de LoRaWAN. La seva documentació es pot consultar a \cite{jan_gromes_radiolib_nodate}. 
+    \item \est{TaskScheduler}. Permet la creació de tasques periòdiques, amb prioritats, o amb retard inicial, així com la seva gestió. Aquesta llibreria s'ha utilitzat per implementar el gestor de tasques, que ofereix una interfície més simple i centralitzada de la llibreria. La seva documentació es pot consultar a \cite{arkhipenko_taskscheduler_nodate}.
+\end{itemize}
 
 \section{Disseny per capes}
 Com en la majoria de protocols moderns, s'ha dissenyat seguint un model per capes. L'estructura es basa en el model \acro{tcp/ip}, amb la diferència de la capa física, que el model \acro{tcp/ip} no contempla de forma explícita. 
 A continuació es descriuen les diferents capes del protocol, des de la capa física fins a la capa d’aplicació, indicant-ne les funcions principals, i les decisions de disseny adoptades per optimitzar el rendiment i la simplicitat del sistema.
+
+A la \autoref{fig:diagrama_protocols} es pot observar, de forma introductòria, com s'estructura el protocol amb les diverses capes, les quals s'explicaran amb més detall en els seus respectius apartats. 
+\begin{figure}
+    \centering
+    \includegraphics[width=0.4\linewidth]{imatges/capesprotocol.drawio.pdf}
+    \caption{Estructura per capes del protocol}
+    \label{fig:diagrama_protocols}
+\end{figure}
 
 \subsection{Capa física}
 La capa física és l'encarregada de transmetre la informació proporcionada per la capa superior a través del medi físic, en aquest cas, LoRa. Tot i no ser una capa que s'implementa directament en el protocol, ja que això ho realitza el transductor LoRa, s'ha considerat oportú incloure-la per una única raó: un dispositiu amb connexió amb un \est{gateway} (es considerarà «amb capacitats LoRaWAN») pot utilitzar el transductor a través de dues interfícies diferents, el protocol definit i LoRaWAN.
@@ -281,8 +302,7 @@ Aquesta capa es comunica amb la capa d'abstracció LoRa, rebent notificacions de
 % « »
 Una tasca important en qualsevol protocol és definir la forma de les dades, la «sintaxi». Així, es defineix els camps que contindrà cada missatge, i la seva longitud i posició. Per facilitat, s'ha decidit anomenar «trama» als missatges enviats per la capa d'accés al medi, sent aquest el mateix nom que s'utilitza en el model \acro{tcp/ip}.
 
-Dos camps essencials són el \emph{receptor} i l'\emph{emissor}, que indiquen respectivament les adreces del dispositiu que rep i envia el missatge. S'ha decidit utilitzar adreces d'\SI{1}{\byte}, oferint un total de 256 adreces diferents. Malgrat això, únicament 253 són utilitzables, reservant l'adreça \fitx{0x01} per representar el \est{gateway}, la \fitx{0xFF} per un possible ús de difusió (\emph{broadcast}), i la \fitx{0x00}, PERQUE. Aquesta quantitat de dispositius es considera suficient per a la majoria d'aplicacions de monitoratge, evitant l'ús innecessari de dades i, per tant, minimitzant el temps de transmissió i el consum energètic.
-% TODO: PERQUÈ S'HA DECIDIT NO UTILITZAR 0X00? BUSCA RUN MOTIU
+Dos camps essencials són el \emph{receptor} i l'\emph{emissor}, que indiquen respectivament les adreces del dispositiu que rep i envia el missatge. S'ha decidit utilitzar adreces d'\SI{1}{\byte}, oferint un total de 256 adreces diferents. Malgrat això, únicament 253 són utilitzables, reservant l'adreça \fitx{0x01} per representar el \est{gateway}, la \fitx{0xFF} per un possible ús de difusió (\emph{broadcast}), i la \fitx{0x00}, per indicar l'abscència d'adreça. Aquesta quantitat de dispositius es considera suficient per a la majoria d'aplicacions de monitoratge, evitant l'ús innecessari de dades i, per tant, minimitzant el temps de transmissió i el consum energètic.
 
 Per tal de poder identificar cada trama, s'ha inclòs un camp d'\emph{identificador} (\emph{id}), que conté un número aleatori generat per l'emissor. Aquest camp permet que el receptor pugui identificar trames duplicades i no processar-les de nou. S'ha considerat utilitzar una longitud de \SI{2}{\byte}, permetent 65536 identificadors diferents. Tot i això, s'ha reservat l'identificador \fitx{0x0000}; la utilitat d'aquest s'exposarà al \autoref{subsubsec:mac_lorawan}. En el pitjor dels casos, si 252 dispositius transmetessin a un mateix receptor, la probabilitat d'una co\l.lisió és, aproximadament, d'un 38\%. Es tracta d'un problema similar al del «problema dels aniversaris» \cite{noauthor_birthday_2025}.
 
@@ -867,7 +887,6 @@ Per permetre aquest comportament, es guarda informació addicional d'una transmi
     \item \emph{PDU}. Conté el \emph{Protocol Data Unit}, és a dir, el segment complet, incloent les dades i capçaleres.
     \item \emph{ID}. L'identificador assignat per la capa d'accés al medi, amb el qual es podrà identificar la transmissió en els esdeveniments de fi de transmissió o de transmissió errònia.
     \item \emph{RX}. L'adreça del receptor del segment.
-    % \item \emph{Longitud}. Longitud de les dades. \textcolor{red}{TODO: AIXÒ NO ÉS NECESSARI, VEURE ISSUE A GITHUB}
     \item \emph{isSent}. Un booleà per indicar si el segment ja s'ha enviat o no. S'actualitza quan es rep la notificació de fi de transmissió.
     \item \emph{ackTimeout}. Indica l'instant de temps en mi\l.lisegons en què finalitza l'espera de reconeixement. 
     \item \emph{Reintents}. Indica el nombre de reintents de transmissió que s'han realitzat per un segment.
@@ -930,8 +949,8 @@ Per tal de poder identificar quin segment un missatge de reconeixement ---aquell
 El temps d'espera de recepció del reconeixement no és fix, sinó que depèn del nombre de retransmissions que s'han realitzat anteriorment, seguint una funció exponencial. Gràcies a això, el temps d'espera s'incrementa com més reintents s'han realitzat, ajustant-se a les condicions de la xarxa.
 Aquest temps ve determinat per l'expressió $k\cdot 2^r$, on \emph{k} és un valor constant i configurable, i \emph{r} el nombre de reintents realitzats. El valor de \emph{k} cal configurar-lo adequadament per evitar generar \est{timeouts} prematurs, i per evitar un excés de temps d'espera:
 \begin{itemize}
-    \item Hauria de verificar $k\ge 2n-1$, on \emph{n} és el nombre de dispositius en la ruta més llarga de la xarxa, sense incloure el dispositiu emissor. És així ja que cada node ha de realitzar una transmissió al següent salt del segment (d'aquí el factor \emph{n}), i també haurà de fer-ho pel missatge de reconeixement del receptor final (d'aquí el factor \emph{2}). A més, cal recordar que l'inici del temps d'espera s'inicia després de transmetre el segment al següent salt, d'aquí el terme \emph{-1}.
-    \item Hauria de considerar el temps d'una transmissió a través de LoRaWAN. Aquest temps depèn de la configuració del canal i de l'\acro{adr}, fent que sigui difícil d'establir ja que no es coneix prèviament. De forma experimental, s'ha observat com pot introduir un retard de múltiples segons, sent adequat deixar un marge de mínim 5 segons.
+    \item Hauria de verificar $k\ge (2n-1)\cdot t_{tx}$, on \emph{n} és el nombre de dispositius en la ruta més llarga de la xarxa, sense incloure el dispositiu emissor. És així ja que cada node ha de realitzar una transmissió al següent salt del segment (d'aquí el factor \emph{n}), i també haurà de fer-ho pel missatge de reconeixement del receptor final (d'aquí el factor \emph{2}). A més, cal recordar que l'inici del temps d'espera s'inicia després de transmetre el segment al següent salt, d'aquí el terme \emph{-1}.
+    \item Hauria de considerar el temps d'una transmissió a través de LoRaWAN. Si la transmissió d'un segment té com a destí el \est{gateway}, el dispositiu amb capacitats LoRaWAN haurà, abans de generar el segment de reconeixement, transmetre les dades a través de LoRaWAN. Aquest temps depèn de la configuració del canal i de l'\acro{adr}, fent que sigui difícil d'establir ja que no es coneix prèviament. De forma experimental, s'ha observat com pot introduir un retard de múltiples segons, sent adequat deixar un marge de mínim 5 segons. 
 \end{itemize}
 Aquest criteri estableix el temps mínim d'espera, considerant que per a cada dispositiu de la ruta es requereix únicament una transmissió, i que el retard de processametn és nul. Si s'estableix un temps mínim d'espera menor a aquest, és segur que es produiran \est{timeouts} prematurs.
 
@@ -1006,8 +1025,6 @@ Seguidament, el dispositiu \fitx{0x03} realitza dues transmissions no fiables ca
     \label{fig:transport_exemple_1}
 \end{figure}
 
-
-
 \subsection{Capa d’aplicació}
 La capa d'aplicació és la més alta del protocol, i s'encarrega de gestionar les aplicacions que l'utilitzen. Tot i que no forma part del protocol, actua com a interfície entre aquest i les aplicacions, permetent que cada aplicació pugui definir i implementar la seva pròpia capa d'aplicació de manera independent, sense interferir amb la resta. 
 
@@ -1022,10 +1039,7 @@ Així, el desenvolupament de la capa d'aplicació és una tasca de l'usuari fina
 
 Al \autoref{chap:adaptacio_baix_consum} es detalla la implementació de l'últim exemple, definint la situació d'ús i els mecanismes utilitzats.
 
-\section{Altres serveis}
-\label{sec:altres_serveis}
-\subsection{Gestor de tasques}
-\section{Proves i validació funcional}
+\section{Proves i validació del protocol}
 
 \chapter{Adaptació a entorns de baix consum}
 \label{chap:adaptacio_baix_consum}
