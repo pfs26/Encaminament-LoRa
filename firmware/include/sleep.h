@@ -33,7 +33,8 @@
 // #define SLEEP_WORK_TIME S_TO_MS(30)
 
 // Error del clock, en `ppm`
-#define SLEEP_CLOCK_ERROR (8000)
+// Expirementalment s'ha vist com, passats 15 minuts teòrics, s'ha despertat 20 segons abans
+#define SLEEP_CLOCK_ERROR (25000)
 // Temps de correcció d'error del clock, en `ms`
 // TODO: Potser hauria de ser per dos? Si un dispositiu té el clock amb +5000ppm, i l'altre amb -5000ppm, 
 // l'error total és de 10000ppm, i no de 5000ppm
