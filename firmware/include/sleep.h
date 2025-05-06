@@ -27,14 +27,17 @@
 #define SLEEP_IS_INITIATOR false
 
 // Durada d'un cicle de funcionament, en `ms`
-#define SLEEP_CYCLE_DURATION S_TO_MS(30)
+// #define SLEEP_CYCLE_DURATION S_TO_MS(30)
+#define SLEEP_CYCLE_DURATION MIN_TO_MS(15)
 // Temps de funcionament normal, després de rebre SYNC, en `ms`
 // #define SLEEP_WORK_TIME S_TO_MS(30)
 
 // Error del clock, en `ppm`
-#define SLEEP_CLOCK_ERROR 10
+#define SLEEP_CLOCK_ERROR (8000)
 // Temps de correcció d'error del clock, en `ms`
-#define SLEEP_CLOCK_CORRECTION (SLEEP_CYCLE_DURATION * SLEEP_CLOCK_ERROR / 1000000.0)
+// TODO: Potser hauria de ser per dos? Si un dispositiu té el clock amb +5000ppm, i l'altre amb -5000ppm, 
+// l'error total és de 10000ppm, i no de 5000ppm
+#define SLEEP_CLOCK_CORRECTION (2*(SLEEP_CYCLE_DURATION * SLEEP_CLOCK_ERROR / 1000000.0))
 
 // Temps extra d'espera de recepció de SYNC, i previ a primera recepció esperada, en `ms`
 // No hauria de ser molt gran; temps DELTA ja considera el temps màxim teòric
