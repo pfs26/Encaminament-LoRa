@@ -17,22 +17,20 @@
         0x03 -> 0x03
 */
 
-#include <Arduino.h>
 #include "transport.h"
 #include "routing_table.h"
 #include "scheduler.h"
-#include "utils.h"
 
 #define GATEWAY
 
 int count = 0;
 
 void onSend() {
-    Serial.println("Segment sent to LoRaWAN!");
+    Serial.println("Segment enviat a LoRaWAN!");
 }
 
 void onRcv() {
-    Serial.println("Segment received");
+    Serial.println("Segment rebut");
     transport_data_t data;
     size_t length;
     uint8_t port;
@@ -42,16 +40,10 @@ void onRcv() {
 }
 
 void setup() {
-    Serial.begin(115200);
-    delay(2000);
+    Serial.begin(921600);
     
-    Serial.print(F("[SX1262] Initializing ... "));
-    Serial.print("Model: "); Serial.println(ESP.getChipModel());
-    Serial.print("CPU: "); Serial.println(ESP.getCpuFreqMHz());
-    Serial.print("Heap: "); Serial.println(ESP.getFreeHeap());
-    Serial.println(esp_reset_reason());
     Serial.println("=================================");
-    Serial.println("LoRaWAN with Gateway routing test");
+    Serial.println("  LoRaWAN amb Gateway i routing");
     Serial.println("=================================");
 
 
@@ -64,11 +56,11 @@ void setup() {
     #endif
 
     if(!Transport_init(addr, is_gateway)) {
-        _PE("ERR");
+        Serial.println("Error inicialitzant transport");
         while(1);
     }
 
-    Transport_onEvent(0x01, onRcv, nullptr);
+    Transport_onEvent(0x01, onRcv, onSend, nullptr);
 
     RoutingTable_clear();
     #ifdef GATEWAY
@@ -79,6 +71,7 @@ void setup() {
         RoutingTable_addRoute(0x02, 0x02);
     #endif
 
+    // Si no és gateway, enviem segment amb destí el gateway
     #ifndef GATEWAY
         transport_data_t data = "Hola!";
         transport_err_t state = Transport_send(NODE_ADDRESS_GATEWAY, 0x01, data, 5, true);

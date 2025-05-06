@@ -17,20 +17,22 @@
            capa transport té el mateix identificador de segment
         3. Cal que node 0x02 generi un uplink per tal de poder rebre els downlinks
 
+    El segment que es programa com a downlink ha de tenir el port 0x01, l'utilitzat
+    en aquest exemple. Si no, no funcionarà correctament, ja que receptor no tindrà
+    cap aplicació en aquest port
 */
 
-#include <Arduino.h>
 #include "transport.h"
 #include "routing_table.h"
 #include "scheduler.h"
-#include "utils.h"
 
+// Si és 1, el node té capacitats LoRaWAN
 #define GATEWAY 0
 
 #if GATEWAY
-#define NODE_ADDRESS 0x02
+    #define NODE_ADDRESS 0x02
 #else
-#define NODE_ADDRESS 0x03
+    #define NODE_ADDRESS 0x03
 #endif
 
 int count = 0;
@@ -54,20 +56,9 @@ void onReceive() {
     }
 }
 
-void callback() {
-    Serial.println(millis());
-}
-
-
 void setup() {
     Serial.begin(921600);
-    delay(2000);
     
-    Serial.print(F("[SX1262] Initializing ... "));
-    Serial.print("Model: "); Serial.println(ESP.getChipModel());
-    Serial.print("CPU: "); Serial.println(ESP.getCpuFreqMHz());
-    Serial.print("Heap: "); Serial.println(ESP.getFreeHeap());
-    Serial.println(esp_reset_reason());
     Serial.println("============================");
     Serial.println("Gateway to node routing test");
     Serial.println("============================");
@@ -79,10 +70,12 @@ void setup() {
 
     Transport_onEvent(0x01, onReceive, nullptr);
 
+    // Si és el node amb rol de gateway, ha de fer un uplink per poder rebre el 
+    // downlink prèviament programat a través de TTN
     #if GATEWAY
-    delay(1000);
-    Serial.println("Sending data...");
-    Transport_send(0x01, 0x01, (uint8_t*)"", 0, false);
+        delay(1000);
+        Serial.println("Sending data...");
+        Transport_send(0x01, 0x01, (uint8_t*)"", 0, false);
     #endif
 
 }
