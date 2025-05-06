@@ -1,48 +1,45 @@
-#include <Arduino.h>
+/*
+    Exemple bàsic LoRa:
+        - Dos dispositius, un transmissor i un receptor
+        - El transmissor envia un missatge cada 10 segons, 
+          programant enviament del següent després d'enviar-ne un
+        - El receptor espera missatges i els imprimeix per pantalla, mostrant SNR i RSSI
+*/
+
 #include "lora.h"
 #include "scheduler.h"
-#include "utils.h"
 
-#define SENDER1
+// Si descomentant, el dispositiu és qui enviarà
+#define SENDER
 
 void Send() {
-    #ifdef SENDER1
-        lora_data_t data = "Hola 0x02!";
-    #else
-        lora_data_t data = "Hola 0x01!";
-    #endif
-    while(LoRa_send(data, 10) != LORA_SUCCESS);
+    lora_data_t data = "Hola mon!";
+    while(LoRaRAW_send(data, 9) != LORA_SUCCESS);
 
-    #ifdef SENDER1
-        scheduler_once(Send, 10000);
-    #else
-        scheduler_once(Send, 250);
-    #endif
+    scheduler_once(Send, 10000);
 }
 
 void onRcv() {
     Serial.println("Data received");
     lora_data_t data;
-    uint8_t length;
-    LoRa_receive(data, &length);
-    data[length] = '\0';
-    Serial.printf("\tData: %s\tLength: %d\tSNR: %d\tRSSI: %d\n\n", data, length, LoRa_getLastSNR(), LoRa_getLastRSSI());
+    size_t length;
+    LoRaRAW_receive(data, &length);
+    data[length] = '\0'; // Acabem amb nul, suposant que les dades enviades són ASCII
+    Serial.printf("\tData: %s\tLength: %d\tSNR: %d\tRSSI: %d\n\n", data, length, LoRaRAW_getLastSNR(), LoRaRAW_getLastRSSI());
 }
 
 void setup() {
     Serial.begin(115200);
-    Serial.print(F("[SX1262] Initializing ... "));
-    Serial.print("Model: "); Serial.println(ESP.getChipModel());
-    Serial.print("CPU: "); Serial.println(ESP.getCpuFreqMHz());
-    Serial.print("Heap: "); Serial.println(ESP.getFreeHeap());
-	Serial.print("\n\nCompiled at " __DATE__ " " __TIME__);
+    Serial.println("====================");
+    Serial.println(" Exemple TX/RX LoRa");
+    Serial.println("====================");
 
-    if(!LoRa_init()) {
+    if(!LoRa_init() || !LoRaRAW_init()) {
         Serial.println("LoRa init failed");
         while(1);
     }
 
-    LoRa_onReceive(onRcv);
+    LoRaRAW_onReceive(onRcv);
 
     scheduler_once(Send);
 }
