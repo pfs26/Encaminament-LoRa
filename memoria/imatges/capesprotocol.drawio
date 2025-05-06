@@ -1,0 +1,28 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.2.2 Chrome/134.0.6998.178 Electron/35.1.2 Safari/537.36" version="26.2.2">
+  <diagram name="Page-1" id="g16hq8ZeH8TeaPlCU7o7">
+    <mxGraphModel dx="398" dy="268" grid="1" gridSize="9.8425" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="xKrB0nxLNKHjkaHpamlU-7" value="Aplicació" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Computer Modern;" vertex="1" parent="1">
+          <mxGeometry x="255.92000000000002" y="206.69" width="236.22" height="29.49" as="geometry" />
+        </mxCell>
+        <mxCell id="xKrB0nxLNKHjkaHpamlU-8" value="Transport" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Computer Modern;" vertex="1" parent="1">
+          <mxGeometry x="255.91000000000003" y="236.18" width="236.22" height="29.57" as="geometry" />
+        </mxCell>
+        <mxCell id="xKrB0nxLNKHjkaHpamlU-9" value="Accés al medi" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Computer Modern;" vertex="1" parent="1">
+          <mxGeometry x="255.92000000000002" y="265.75" width="118.11" height="29.57" as="geometry" />
+        </mxCell>
+        <mxCell id="xKrB0nxLNKHjkaHpamlU-10" value="LoRaWAN" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Computer Modern;" vertex="1" parent="1">
+          <mxGeometry x="374.03" y="265.75" width="118.11" height="59.05" as="geometry" />
+        </mxCell>
+        <mxCell id="xKrB0nxLNKHjkaHpamlU-11" value="Abstracció LoRa" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Computer Modern;" vertex="1" parent="1">
+          <mxGeometry x="255.91250000000002" y="295.23249999999996" width="118.11" height="29.57" as="geometry" />
+        </mxCell>
+        <mxCell id="xKrB0nxLNKHjkaHpamlU-12" value="Modulació LoRa" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Computer Modern;" vertex="1" parent="1">
+          <mxGeometry x="255.93" y="324.8" width="236.21" height="29.57" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

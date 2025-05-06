@@ -1,10 +1,26 @@
 /*
-    Exemple amb dos nodes: un és transmissor i l'altre receptor.
+    TRANSMISSOR I RECEPTOR
+    ======================
     El transmissor envia frames cada 5 segons. El retard del tansmissor és bloquejant (fet amb delay())
     El receptor imprimeix les dades rebudes per pantalla, i envia ACK si li toca.
 
+    CUA TX
+    ======
     El transmissor, abans de la primera transmissió, realitza múltiples `MAC_send()`,
-    comprovant el funcionament de la cua de transmissió
+    comprovant el funcionament de la cua de transmissió.
+
+    Reintents i increment de potència
+    =================================
+    És interessant observar el comportament si s'atura el node receptor, però no el transmissor.
+      - El transmissor enviarà frames, no rebrà ACK, i reintentarà enviar el missatge de nou
+      - Per a cada reintent, s'ha d'observar com es modifica la potència de transmissió a través de la traça
+
+    Ajustament de potència en enviar ACK
+    ====================================
+    De forma manual, també es pot connectar *DURANT* la retransmissió d'un frame el node receptor.
+      - El receptor despertarà ràpid, rebrà el frame reintentat, i enviarà ACK.
+      - S'hauria de veure com el receptor que envia ACK modifica la potència de transmissió, per 
+        adaptar-la a la potència de transmissió que ha utilitzat el transmissor en aquell reintent. 
 */
 
 #include <Arduino.h>

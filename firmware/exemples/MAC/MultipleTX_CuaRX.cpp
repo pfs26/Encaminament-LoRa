@@ -1,10 +1,12 @@
 /*
-    Exemple de comunicació MAC entre dos nodes.
-
+    MÚLTIPLES TRANSMISSORS EN UNA XARXA
+    ===================================
     - Un node envia frames cada 2,5s (`SENDER1`), l'altre cada 10s.
     - Es reintenta en cas d'error.
     - Els missatges rebuts es mostren per pantalla.
 
+    CUA RECEPCIÓ
+    ============
     Es representa també el funcionament de la cua de recepció, on la capa superior (en aquest cas, l'exemple)
     controla quan processar-los. Es processen els missatges després d'haver-ne rebut 5.
 */
