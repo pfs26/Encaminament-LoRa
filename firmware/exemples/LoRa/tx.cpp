@@ -29,7 +29,7 @@ void onRcv() {
 }
 
 void setup() {
-    Serial.begin(115200);
+    Serial.begin(921600);
     Serial.println("====================");
     Serial.println(" Exemple TX/RX LoRa");
     Serial.println("====================");
