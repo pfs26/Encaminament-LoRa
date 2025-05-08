@@ -24,25 +24,30 @@
 // Defineix si és un node "iniciador" de xarxa.
 // Enviarà SYNC sense esperar a rebre'l. 
 // #define SLEEP_IS_INITIATOR !IS_GATEWAY
-#define SLEEP_IS_INITIATOR false
+#define SLEEP_IS_INITIATOR true
 
 // Durada d'un cicle de funcionament, en `ms`
 // #define SLEEP_CYCLE_DURATION S_TO_MS(30)
-#define SLEEP_CYCLE_DURATION MIN_TO_MS(15)
+#define SLEEP_CYCLE_DURATION H_TO_MS(1)
 // Temps de funcionament normal, després de rebre SYNC, en `ms`
 // #define SLEEP_WORK_TIME S_TO_MS(30)
 
 // Error del clock, en `ppm`
-// Expirementalment s'ha vist com, passats 15 minuts teòrics, s'ha despertat 20 segons abans
-#define SLEEP_CLOCK_ERROR (25000)
+// Expirementalment s'ha vist com, passats 15 minuts teòrics, s'ha despertat 25 segons abans
+
+// AMB PROVES S'HA VIST COM LA VELLA TÉ DE MITJANA -5660, I LA NOVA -4777
+#define SLEEP_CLOCK_ERROR (-4777)
 // Temps de correcció d'error del clock, en `ms`
 // TODO: Potser hauria de ser per dos? Si un dispositiu té el clock amb +5000ppm, i l'altre amb -5000ppm, 
 // l'error total és de 10000ppm, i no de 5000ppm
-#define SLEEP_CLOCK_CORRECTION (2*(SLEEP_CYCLE_DURATION * SLEEP_CLOCK_ERROR / 1000000.0))
+#define SLEEP_CLOCK_CORRECTION (((int64_t)SLEEP_CYCLE_DURATION * SLEEP_CLOCK_ERROR / 1000000.0))
 
 // Temps extra d'espera de recepció de SYNC, i previ a primera recepció esperada, en `ms`
 // No hauria de ser molt gran; temps DELTA ja considera el temps màxim teòric
-#define SLEEP_EXTRA_TIME S_TO_MS(5) 
+#define SLEEP_EXTRA_TIME MIN_TO_MS(3) 
+
+// Percentatge addicional que s'aplicarà a temps delta, per considerar CSMA, etc.
+#define SLEEP_DELTA_EXTRA 0.25
 
 // Temps màxim d'espera per primera sincronització a la xarxa, en `ms`
 // Com a últim recurs per evitar deixar ràdio + ESP actius permanentment

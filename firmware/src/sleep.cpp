@@ -41,22 +41,36 @@ static RTC_DATA_ATTR uint64_t syncTimeSum = 0;
 static RTC_DATA_ATTR uint16_t bootCount = 0;
 static RTC_DATA_ATTR uint64_t doneTimeSum = 0;
 
+long timeout_ms = 0;
+
 bool Sleep_init(void) {
     // REQUEREIX TRANSPORT INICIALITZAT!
     // No s'inicialitza aquí per evitar haver de conèixer @ node.
     // Programa principal és qui hauria d'inicialitzar el protocol
     if(!isFirstSync) {
+        esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
+        if (wakeup_reason == ESP_SLEEP_WAKEUP_TIMER)
+            _PW("[SLEEP] Wakeup reason: Timer");
+        else 
+            _PW("[SLEEP] Wakeup reason: %d", wakeup_reason);
+
         computeDeltaTime();
-        long timeout_ms = 3*deltaTime + SLEEP_CLOCK_CORRECTION + SLEEP_EXTRA_TIME;
-        // long timeout_ms = 2*deltaTime + SLEEP_CLOCK_CORRECTION + SLEEP_EXTRA_TIME;
+        // 2*extra per compensar el que hi ha davant, i el que volem deixar
+        timeout_ms = MAX(0, 2*deltaTime + 2*SLEEP_EXTRA_TIME);
+        // timeout_ms = MAX(0, 2*deltaTime + SLEEP_CLOCK_CORRECTION + 2*SLEEP_EXTRA_TIME);
+        // long timeout_ms = 2*deltaTime + SLEEP_CLOCK_CORRECTION + SLEEP_EXTRA_TIME; // AQUEST ÉS EL QUE HI HAVIA QUAN FUNCIONAVA!
         timeoutTask = scheduler_once(syncTimeout, timeout_ms);
 
-        _PI("[SLEEP] Init. Already synchronized.");
-        _PI("        Delta time: %.2f seconds. Nodes before: %d", MS_TO_S(deltaTime), nodesPrevis);
-        _PI("        Timeout in %.2f seconds.", MS_TO_S(timeout_ms));
+        _PW("[SLEEP] Init. Already synchronized.");
+        _PW("        Clock correction: %.2f seconds", MS_TO_S(SLEEP_CLOCK_CORRECTION)); 
+        _PW("        Delta time: %.2f seconds. Nodes before: %d", MS_TO_S(deltaTime), nodesPrevis);
+        _PW("        Timeout in %.2f seconds.", MS_TO_S(timeout_ms));
     }
     else {
         _PI("[SLEEP] Init. Not synchronized. Waiting for first sync.");
+        // if(SLEEP_CYCLE_DURATION - SLEEP_EXTRA_TIME - SLEEP_CLOCK_CORRECTION < 0) // AQUEST ÉS EL QUE HI HAVIA QUAN FUNCIONAVA!
+        if(SLEEP_CYCLE_DURATION - SLEEP_EXTRA_TIME < 0)
+            _PW("[SLEEP] Sleep cycle duration is too short. Device won't be able to sleep. Syncs are not guaranteed.");
     }
 
     Transport_onEvent(SLEEP_PORT, received, sent, sendError);
@@ -96,8 +110,19 @@ bool Sleep_setForwardNode(node_address_t node) {
 void Sleep_onSync(sleep_callback_t cb) { onSync = cb; }
 
 static long computeDeltaTime() {
-    deltaTime = nodesPrevis * MAC_MAX_RETRIES * MAC_ACK_TIMEOUT_FACTOR * US_TO_MS(LoRaRAW_getTimeOnAir(LORA_MAX_SIZE));
-    deltaTime = deltaTime * 1.25; // 25% marge per CSMA
+    // N per nodes anteriors, (R+1) pels intents totals de TX
+    // ACK_FACTOR per quant de temps de transmissió per rebre ACK es deixa
+    // AIRTIME pel temps de transmissió
+    // N · (R+1) dona transmissions totals
+    // N · (R+1) · TX dona temps TX total; N · (R+1) · ACK · TXACK dona temps espera ACK
+    // N · (R+1) · TX + N · (R+1) · ACK · TXACK = N · (R+1) · (TX + ACK · TXACK)
+    
+    uint64_t max_ack_time_ms = US_TO_MS(LoRaRAW_getTimeOnAir(MAC_PDU_HEADER_SIZE)); // Un ACK de MAC té mida del header
+    uint64_t tx_time_ms = US_TO_MS(LoRaRAW_getTimeOnAir(LORA_MAX_SIZE));
+    deltaTime = nodesPrevis * (MAC_MAX_RETRIES + 1) * (tx_time_ms + MAC_ACK_TIMEOUT_FACTOR * max_ack_time_ms);
+    // deltaTime = nodesPrevis * (MAC_MAX_RETRIES+1) * MAC_ACK_TIMEOUT_FACTOR * US_TO_MS(LoRaRAW_getTimeOnAir(LORA_MAX_SIZE));
+    deltaTime = deltaTime * (1 + SLEEP_DELTA_EXTRA); // 25% marge per CSMA
+    _PW("[SLEEP] Delta time compute: TX time = %llu ms + ACK time = %llu ms for %d nodes up to (%d+1) txs, with %.2f extra", tx_time_ms, max_ack_time_ms, nodesPrevis, MAC_MAX_RETRIES, SLEEP_DELTA_EXTRA);
     return deltaTime;
 }
 
@@ -128,7 +153,6 @@ static void onSyncReceived() {
 
     // Si és primera sincronització, marquem recepció SYNC a instant 0 per tal que no afecti retard inicial al càlcul de cicle de sleep
     // Si és iniciador, també marquem SYNC a 0 perquè no afecti retard inicialització a cicle
-    // tempsSync = isFirstSync || SLEEP_IS_INITIATOR ? 0 : millis();
     tempsSync = SLEEP_IS_INITIATOR ? 0 : millis();
 
     // Aturem tasca de timeout si configurada
@@ -202,41 +226,52 @@ static void forwardSync() {
 // el node ha finalitzat la seva tasca
 static void goToSleep() {
     uint64_t sleepTime = 0;
+
+    // Posar radio a dormir
+    LoRaRAW_sleep();
+
     unsigned long tempsDone = millis();
-    _PI("[SLEEP] Time done: %d ms", tempsDone);
     // Nomes calculem cicle si no som iniciadors i hem rebut sincronització
     if (!SLEEP_IS_INITIATOR && isSync) {
         // el temps d'una transmissió del node ANTERIOR a ell, que és la que aqeust ha de rebre,
         // és les dades que aquest ha transmes (nodes * size) més els headers de totes les capes (mida màxima lora - sleep data,
         // la resta són headers)
         uint8_t expectedRcvSize = nodesPrevis * SLEEP_DATASIZE_PER_NODE + LORA_MAX_SIZE - SLEEP_MAX_DATA_SIZE;
-        long transmitTime = US_TO_MS(LoRaRAW_getTimeOnAir(expectedRcvSize));
-        sleepTime = SLEEP_CYCLE_DURATION - (tempsDone - tempsSync) - SLEEP_CLOCK_CORRECTION - transmitTime - deltaTime - SLEEP_EXTRA_TIME;
-        _PI("[SLEEP] Expected reception: %d B, Transmission time: %lu ms, sleeping for %.2f seconds", expectedRcvSize, transmitTime, MS_TO_S(sleepTime));
-        _PI("[SLEEP] Sync time: %lu ms, Done time: %lu ms", tempsSync, tempsDone);
+        unsigned long transmitTime = US_TO_MS(LoRaRAW_getTimeOnAir(expectedRcvSize));
+
+        // AQUEST ÉS EL QUE HI HAVIA QUAN FUNCIONAVA!
+        // sleepTime = SLEEP_CYCLE_DURATION - (tempsDone - tempsSync) - SLEEP_CLOCK_CORRECTION - transmitTime - deltaTime - SLEEP_EXTRA_TIME;
+        
+        // sleep time intenta compensar l'error que el propi micro introdueix amb el clock. No podem predir el clock de l'anterior node
+        // s'ha vist com un dispositiu pot tenir 2000ppm, però un altre en pot tenir 25000ppm
+        sleepTime = SLEEP_CYCLE_DURATION - (tempsDone - tempsSync) - transmitTime - deltaTime - SLEEP_EXTRA_TIME - SLEEP_CLOCK_CORRECTION;
+        _PW("[SLEEP] Expected reception: %d B, Transmission time: %lu ms", expectedRcvSize, transmitTime);
         sleepTime = MAX((int64_t) sleepTime, 0);
     }
     else { // SI som iniciadors o no hem rebut SYNC, dormim el temps restant de cicle
-        sleepTime = SLEEP_CYCLE_DURATION - tempsDone;
+        // aplicant clock correction també: 
+        // Si PPM < 0, clock és més lent:
+        //      Per cada segon REAL, el microcontrolador dormirà 1 segon i una mica més
+        //      Per evitar-ho, cal dormir MENYS temps (1seg - D), fent que dormi realment 1 segon
+        // Si PPM > 0, clock és més ràpid:
+        //      Per cada segon REAL, el microcontrolador dormirà 1 segon i una mica menys
+        //      Per evitar-ho, cal dormir MÉS temps (1seg + D), fent que dormi realment 1 segon
+        
+        // sleepTime = SLEEP_CYCLE_DURATION - tempsDone; // AQUEST ÉS EL QUE HI HAVIA QUAN FUNCIONAVA!
+        sleepTime = SLEEP_CYCLE_DURATION - tempsDone - SLEEP_CLOCK_CORRECTION; // AQUEST HI HAVIA ABANS DE CANVIS EN CLOCK CORRECTION
     }
-
+    
     sleepTime = MAX((int64_t) sleepTime, 0);
 
-    // Activar wakeup a partir de timer
-    esp_sleep_enable_timer_wakeup(MS_TO_US(sleepTime));
-    // Posar radio a dormir
-    LoRaRAW_sleep();
     _PI("[SLEEP] Going to sleep for %.2f minutes", MS_TO_MIN(sleepTime));
-    // Iniciar sleep
+    // Activar wakeup a partir de timer
+    // esp_sleep_enable_timer_wakeup(MS_TO_US(sleepTime));
+    
 
-    if (syncCount > 0) {
-        bootCount++;
-        doneTimeSum += tempsDone;
-    }
-
-    _PI("[SLEEP-STATS] Sync: %d\tSleep time: %llu ms\tSync time: %lu ms\tDone time: %lu ms\tDelta Time: %llu ms\tSync AVG: %.2f ms\tDone AVG: %.2f ms\tSync count: %d\tBoot count: %d",
-        isSync, sleepTime, tempsSync, tempsDone, deltaTime, syncTimeSum / (float) syncCount, doneTimeSum / (float) bootCount, syncCount, bootCount);
-    esp_deep_sleep_start();
+    _PE("[SLEEP-STATS] Sync: %d\tSleep time: %llu ms\tSync time: %lu ms\tDone time: %lu ms\tDelta Time: %llu ms\tSync AVG: %.2f ms\tDone AVG: %.2f ms\tSync count: %d\tBoot count: %d\tTimeout:  %lu ms",
+        isSync, sleepTime, tempsSync, tempsDone, deltaTime, syncTimeSum / (float) syncCount, doneTimeSum / (float) bootCount, syncCount, bootCount, timeout_ms);
+    // esp_deep_sleep_start();
+    esp_deep_sleep(MS_TO_US(sleepTime));
 }
 
 static void syncTimeout() {
