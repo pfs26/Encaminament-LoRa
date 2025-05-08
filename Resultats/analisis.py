@@ -35,7 +35,7 @@ def plot_data(timestamps, sync_status, sleep_times, sync_times, done_times, sync
 
     # Plot sync status
     plt.subplot(4, 1, 1)
-    plt.plot(x, sync_status, label='Sync Status (1=Synced)', marker='o', color='blue')
+    plt.plot(x, sync_status, label='Sync Status (1=Synced)', marker='o', linestyle="", color='blue')
     plt.title('Sync Status Over Time')
     plt.xlabel('Entry Index')
     plt.ylabel('Sync Status')
@@ -43,8 +43,8 @@ def plot_data(timestamps, sync_status, sleep_times, sync_times, done_times, sync
 
     # Plot sync and done times
     plt.subplot(4, 1, 2)
-    plt.plot(x, sync_times, label='Sync Time', marker='o', color='green')
-    plt.plot(x, done_times, label='Done Time', marker='o', color='orange')
+    plt.plot(x, sync_times, label='Sync Time', marker='', color='green')
+    plt.plot(x, done_times, label='Done Time', marker='', color='orange')
     plt.title('Sync and Done Times')
     plt.xlabel('Entry Index')
     plt.ylabel('Time (ms)')
@@ -61,7 +61,7 @@ def plot_data(timestamps, sync_status, sleep_times, sync_times, done_times, sync
 
     # Plot sleep times
     plt.subplot(4, 1, 4)
-    plt.plot(x, sleep_times, label='Sleep Time', marker='o', color='purple')
+    plt.plot(x, sleep_times, label='Sleep Time', marker='', color='purple')
     plt.title('Sleep Time Over Time')
     plt.xlabel('Entry Index')
     plt.ylabel('Time (ms)')
@@ -71,6 +71,6 @@ def plot_data(timestamps, sync_status, sleep_times, sync_times, done_times, sync
     plt.show()
 
 if __name__ == "__main__":
-    log_file_path = "020525_sleep30sec2.log"  # Change this to the desired log file
+    log_file_path = "30sec_MACAcceptACKRandom/020525_sleep30secRANDOM.log"  # Change this to the desired log file
     timestamps, sync_status, sleep_times, sync_times, done_times, sync_avgs, done_avgs = parse_log_file(log_file_path)
     plot_data(timestamps, sync_status, sleep_times, sync_times, done_times, sync_avgs, done_avgs)

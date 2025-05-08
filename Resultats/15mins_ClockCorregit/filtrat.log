@@ -1,0 +1,177 @@
+[2025-05-07 19:15:55] Boot: 0	Sync: 0
+[2025-05-07 19:15:55] [W]       79 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-07 19:16:00] [W]     4986 sleep.cpp           : 119 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms for 1 nodes up to (3+1) txs, with 0 1.971322e-321xtra
+[2025-05-07 19:16:00] [4988] Ready to send data: B1 
+[2025-05-07 19:16:00] [W]     4989 mac.cpp             : 122 | [MAC] RX address (0x02) cannot be self (0x02)
+[2025-05-07 19:16:00] [W]     4989 routing.cpp         : 125 | [ROUTING] Error sending PDU
+[2025-05-07 19:16:00] [W]     4990 transport.cpp       : 119 | [TRANSPORT] Error sending segment (state: 1)
+[2025-05-07 19:16:00] [W]     4992 sleep.cpp           : 204 | [SLEEP] Error forwarding sync to node 2. Going to sleep.
+[2025-05-07 19:16:00] [E]     4993 sleep.cpp           : 266 | [SLEEP-STATS] Sync: 1	Sleep time: 17551 ms	Sync time: 4986 ms	Done time: 4992 ms	Delta Time: 2535 ms	Sync AVG: nan ms	Done AVG: nan ms	Sync count: 0	Boot count: 0	Timeout:  0 ms
+[2025-05-07 19:16:18] Boot: 0	Sync: 1
+[2025-05-07 19:16:18] [W]       79 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-07 19:16:18] [W]       80 sleep.cpp           : 119 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms for 1 nodes up to (3+1) txs, with 0 1.971322e-321xtra
+[2025-05-07 19:16:18] [W]       83 sleep.cpp           :  58 | [SLEEP] Init. Already synchronized.
+[2025-05-07 19:16:18] [W]       83 sleep.cpp           :  59 |         Clock correction: -0.14 seconds
+[2025-05-07 19:16:18] [W]       84 sleep.cpp           :  60 |         Delta time: 2.54 seconds. Nodes before: 1
+[2025-05-07 19:16:18] [W]       85 sleep.cpp           :  61 |         Timeout in 25.07 seconds.
+[2025-05-07 19:16:27] [W]     9085 sleep.cpp           : 119 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms for 1 nodes up to (3+1) txs, with 0 1.971322e-321xtra
+[2025-05-07 19:16:27] [9087] Ready to send data: 88 
+[2025-05-07 19:16:27] [W]     9087 mac.cpp             : 122 | [MAC] RX address (0x02) cannot be self (0x02)
+[2025-05-07 19:16:27] [W]     9089 routing.cpp         : 125 | [ROUTING] Error sending PDU
+[2025-05-07 19:16:27] [W]     9089 transport.cpp       : 119 | [TRANSPORT] Error sending segment (state: 1)
+[2025-05-07 19:16:27] [W]     9090 sleep.cpp           : 204 | [SLEEP] Error forwarding sync to node 2. Going to sleep.
+[2025-05-07 19:16:27] [E]     9094 sleep.cpp           : 266 | [SLEEP-STATS] Sync: 1	Sleep time: 17550 ms	Sync time: 9085 ms	Done time: 9092 ms	Delta Time: 2535 ms	Sync AVG: 9085.00 ms	Done AVG: 9092.00 ms	Sync count: 1	Boot count: 1	Timeout:  25070 ms
+[2025-05-07 19:16:44] Boot: 0	Sync: 2
+[2025-05-07 19:16:44] [W]       79 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-07 19:16:44] [W]       80 sleep.cpp           : 119 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms for 1 nodes up to (3+1) txs, with 0 1.971322e-321xtra
+[2025-05-07 19:16:44] [W]       83 sleep.cpp           :  58 | [SLEEP] Init. Already synchronized.
+[2025-05-07 19:16:44] [W]       83 sleep.cpp           :  59 |         Clock correction: -0.14 seconds
+[2025-05-07 19:16:44] [W]       84 sleep.cpp           :  60 |         Delta time: 2.54 seconds. Nodes before: 1
+[2025-05-07 19:16:44] [W]       85 sleep.cpp           :  61 |         Timeout in 25.07 seconds.
+[2025-05-07 19:17:09] [W]    25153 sleep.cpp           : 271 | [SLEEP] Sync timeout. Making new PDU, and sending to next node
+[2025-05-07 19:17:09] [25153] Ready to send data: D0 
+[2025-05-07 19:17:09] [W]    25154 mac.cpp             : 122 | [MAC] RX address (0x02) cannot be self (0x02)
+[2025-05-07 19:17:09] [W]    25155 routing.cpp         : 125 | [ROUTING] Error sending PDU
+[2025-05-07 19:17:09] [W]    25156 transport.cpp       : 119 | [TRANSPORT] Error sending segment (state: 1)
+[2025-05-07 19:17:09] [W]    25156 sleep.cpp           : 204 | [SLEEP] Error forwarding sync to node 2. Going to sleep.
+[2025-05-07 19:17:09] [E]    25159 sleep.cpp           : 266 | [SLEEP-STATS] Sync: 0	Sleep time: 4985 ms	Sync time: 0 ms	Done time: 25158 ms	Delta Time: 2535 ms	Sync AVG: 9085.00 ms	Done AVG: 17125.00 ms	Sync count: 1	Boot count: 2	Timeout:  25070 ms
+[2025-05-07 19:17:14] Boot: 0	Sync: 3
+[2025-05-07 19:17:14] [W]       79 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-07 19:17:14] [W]       80 sleep.cpp           : 119 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms for 1 nodes up to (3+1) txs, with 0 1.971322e-321xtra
+[2025-05-07 19:17:14] [W]       83 sleep.cpp           :  58 | [SLEEP] Init. Already synchronized.
+[2025-05-07 19:17:14] [W]       83 sleep.cpp           :  59 |         Clock correction: -0.14 seconds
+[2025-05-07 19:17:14] [W]       84 sleep.cpp           :  60 |         Delta time: 2.54 seconds. Nodes before: 1
+[2025-05-07 19:17:14] [W]       85 sleep.cpp           :  61 |         Timeout in 25.07 seconds.
+[2025-05-07 19:17:39] [W]    25153 sleep.cpp           : 271 | [SLEEP] Sync timeout. Making new PDU, and sending to next node
+[2025-05-07 19:17:39] [25153] Ready to send data: 91 
+[2025-05-07 19:17:39] [W]    25154 mac.cpp             : 122 | [MAC] RX address (0x02) cannot be self (0x02)
+[2025-05-07 19:17:39] [W]    25155 routing.cpp         : 125 | [ROUTING] Error sending PDU
+[2025-05-07 19:17:39] [W]    25156 transport.cpp       : 119 | [TRANSPORT] Error sending segment (state: 1)
+[2025-05-07 19:17:39] [W]    25156 sleep.cpp           : 204 | [SLEEP] Error forwarding sync to node 2. Going to sleep.
+[2025-05-07 19:17:39] [E]    25159 sleep.cpp           : 266 | [SLEEP-STATS] Sync: 0	Sleep time: 4985 ms	Sync time: 0 ms	Done time: 25158 ms	Delta Time: 2535 ms	Sync AVG: 9085.00 ms	Done AVG: 19802.67 ms	Sync count: 1	Boot count: 3	Timeout:  25070 ms
+[2025-05-07 19:17:44] Boot: 0	Sync: 4
+[2025-05-07 19:17:44] [W]       79 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-07 19:17:44] [W]       80 sleep.cpp           : 119 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms for 1 nodes up to (3+1) txs, with 0 1.971322e-321xtra
+[2025-05-07 19:17:44] [W]       83 sleep.cpp           :  58 | [SLEEP] Init. Already synchronized.
+[2025-05-07 19:17:44] [W]       83 sleep.cpp           :  59 |         Clock correction: -0.14 seconds
+[2025-05-07 19:17:44] [W]       84 sleep.cpp           :  60 |         Delta time: 2.54 seconds. Nodes before: 1
+[2025-05-07 19:17:44] [W]       85 sleep.cpp           :  61 |         Timeout in 25.07 seconds.
+[2025-05-07 19:18:09] [W]    25153 sleep.cpp           : 271 | [SLEEP] Sync timeout. Making new PDU, and sending to next node
+[2025-05-07 19:18:09] [25153] Ready to send data: 00 
+[2025-05-07 19:18:09] [W]    25154 mac.cpp             : 122 | [MAC] RX address (0x02) cannot be self (0x02)
+[2025-05-07 19:18:09] [W]    25155 routing.cpp         : 125 | [ROUTING] Error sending PDU
+[2025-05-07 19:18:09] [W]    25156 transport.cpp       : 119 | [TRANSPORT] Error sending segment (state: 1)
+[2025-05-07 19:18:09] [W]    25156 sleep.cpp           : 204 | [SLEEP] Error forwarding sync to node 2. Going to sleep.
+[2025-05-07 19:18:09] [E]    25159 sleep.cpp           : 266 | [SLEEP-STATS] Sync: 0	Sleep time: 4985 ms	Sync time: 0 ms	Done time: 25158 ms	Delta Time: 2535 ms	Sync AVG: 9085.00 ms	Done AVG: 21141.50 ms	Sync count: 1	Boot count: 4	Timeout:  25070 ms
+[2025-05-07 19:18:14] Boot: 0	Sync: 5
+[2025-05-07 19:18:14] [W]       79 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-07 19:18:14] [W]       80 sleep.cpp           : 119 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms for 1 nodes up to (3+1) txs, with 0 1.971322e-321xtra
+[2025-05-07 19:18:14] [W]       83 sleep.cpp           :  58 | [SLEEP] Init. Already synchronized.
+[2025-05-07 19:18:14] [W]       83 sleep.cpp           :  59 |         Clock correction: -0.14 seconds
+[2025-05-07 19:18:14] [W]       84 sleep.cpp           :  60 |         Delta time: 2.54 seconds. Nodes before: 1
+[2025-05-07 19:18:14] [W]       85 sleep.cpp           :  61 |         Timeout in 25.07 seconds.
+[2025-05-07 19:18:39] [W]    25153 sleep.cpp           : 271 | [SLEEP] Sync timeout. Making new PDU, and sending to next node
+[2025-05-07 19:18:39] [25153] Ready to send data: 10 
+[2025-05-07 19:18:39] [W]    25154 mac.cpp             : 122 | [MAC] RX address (0x02) cannot be self (0x02)
+[2025-05-07 19:18:39] [W]    25155 routing.cpp         : 125 | [ROUTING] Error sending PDU
+[2025-05-07 19:18:39] [W]    25156 transport.cpp       : 119 | [TRANSPORT] Error sending segment (state: 1)
+[2025-05-07 19:18:39] [W]    25156 sleep.cpp           : 204 | [SLEEP] Error forwarding sync to node 2. Going to sleep.
+[2025-05-07 19:18:39] [E]    25159 sleep.cpp           : 266 | [SLEEP-STATS] Sync: 0	Sleep time: 4985 ms	Sync time: 0 ms	Done time: 25158 ms	Delta Time: 2535 ms	Sync AVG: 9085.00 ms	Done AVG: 21944.80 ms	Sync count: 1	Boot count: 5	Timeout:  25070 ms
+[2025-05-07 19:18:44] Boot: 0	Sync: 6
+[2025-05-07 19:18:45] [W]       79 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-07 19:18:45] [W]       80 sleep.cpp           : 119 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms for 1 nodes up to (3+1) txs, with 0 1.971322e-321xtra
+[2025-05-07 19:18:45] [W]       83 sleep.cpp           :  58 | [SLEEP] Init. Already synchronized.
+[2025-05-07 19:18:45] [W]       83 sleep.cpp           :  59 |         Clock correction: -0.14 seconds
+[2025-05-07 19:18:45] [W]       84 sleep.cpp           :  60 |         Delta time: 2.54 seconds. Nodes before: 1
+[2025-05-07 19:18:45] [W]       85 sleep.cpp           :  61 |         Timeout in 25.07 seconds.
+[2025-05-07 19:19:10] [W]    25153 sleep.cpp           : 271 | [SLEEP] Sync timeout. Making new PDU, and sending to next node
+[2025-05-07 19:19:10] [25153] Ready to send data: 0B 
+[2025-05-07 19:19:10] [W]    25154 mac.cpp             : 122 | [MAC] RX address (0x02) cannot be self (0x02)
+[2025-05-07 19:19:10] [W]    25155 routing.cpp         : 125 | [ROUTING] Error sending PDU
+[2025-05-07 19:19:10] [W]    25156 transport.cpp       : 119 | [TRANSPORT] Error sending segment (state: 1)
+[2025-05-07 19:19:10] [W]    25156 sleep.cpp           : 204 | [SLEEP] Error forwarding sync to node 2. Going to sleep.
+[2025-05-07 19:19:10] [E]    25159 sleep.cpp           : 266 | [SLEEP-STATS] Sync: 0	Sleep time: 4985 ms	Sync time: 0 ms	Done time: 25158 ms	Delta Time: 2535 ms	Sync AVG: 9085.00 ms	Done AVG: 22480.33 ms	Sync count: 1	Boot count: 6	Timeout:  25070 ms
+[2025-05-07 19:19:15] Boot: 0	Sync: 7
+[2025-05-07 19:19:15] [W]       79 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-07 19:19:15] [W]       80 sleep.cpp           : 119 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms for 1 nodes up to (3+1) txs, with 0 1.971322e-321xtra
+[2025-05-07 19:19:15] [W]       83 sleep.cpp           :  58 | [SLEEP] Init. Already synchronized.
+[2025-05-07 19:19:15] [W]       83 sleep.cpp           :  59 |         Clock correction: -0.14 seconds
+[2025-05-07 19:19:15] [W]       84 sleep.cpp           :  60 |         Delta time: 2.54 seconds. Nodes before: 1
+[2025-05-07 19:19:15] [W]       85 sleep.cpp           :  61 |         Timeout in 25.07 seconds.
+[2025-05-07 19:19:40] [W]    25153 sleep.cpp           : 271 | [SLEEP] Sync timeout. Making new PDU, and sending to next node
+[2025-05-07 19:19:40] [25153] Ready to send data: 56 
+[2025-05-07 19:19:40] [W]    25154 mac.cpp             : 122 | [MAC] RX address (0x02) cannot be self (0x02)
+[2025-05-07 19:19:40] [W]    25155 routing.cpp         : 125 | [ROUTING] Error sending PDU
+[2025-05-07 19:19:40] [W]    25156 transport.cpp       : 119 | [TRANSPORT] Error sending segment (state: 1)
+[2025-05-07 19:19:40] [W]    25156 sleep.cpp           : 204 | [SLEEP] Error forwarding sync to node 2. Going to sleep.
+[2025-05-07 19:19:40] [E]    25159 sleep.cpp           : 266 | [SLEEP-STATS] Sync: 0	Sleep time: 4985 ms	Sync time: 0 ms	Done time: 25158 ms	Delta Time: 2535 ms	Sync AVG: 9085.00 ms	Done AVG: 22862.86 ms	Sync count: 1	Boot count: 7	Timeout:  25070 ms
+[2025-05-07 19:19:45] Boot: 0	Sync: 8
+[2025-05-07 19:19:45] [W]       79 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-07 19:19:45] [W]       80 sleep.cpp           : 119 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms for 1 nodes up to (3+1) txs, with 0 1.971322e-321xtra
+[2025-05-07 19:19:45] [W]       83 sleep.cpp           :  58 | [SLEEP] Init. Already synchronized.
+[2025-05-07 19:19:45] [W]       83 sleep.cpp           :  59 |         Clock correction: -0.14 seconds
+[2025-05-07 19:19:45] [W]       84 sleep.cpp           :  60 |         Delta time: 2.54 seconds. Nodes before: 1
+[2025-05-07 19:19:45] [W]       85 sleep.cpp           :  61 |         Timeout in 25.07 seconds.
+[2025-05-07 19:20:10] [W]    25153 sleep.cpp           : 271 | [SLEEP] Sync timeout. Making new PDU, and sending to next node
+[2025-05-07 19:20:10] [25153] Ready to send data: 7D 
+[2025-05-07 19:20:10] [W]    25154 mac.cpp             : 122 | [MAC] RX address (0x02) cannot be self (0x02)
+[2025-05-07 19:20:10] [W]    25155 routing.cpp         : 125 | [ROUTING] Error sending PDU
+[2025-05-07 19:20:10] [W]    25156 transport.cpp       : 119 | [TRANSPORT] Error sending segment (state: 1)
+[2025-05-07 19:20:10] [W]    25156 sleep.cpp           : 204 | [SLEEP] Error forwarding sync to node 2. Going to sleep.
+[2025-05-07 19:20:10] [E]    25159 sleep.cpp           : 266 | [SLEEP-STATS] Sync: 0	Sleep time: 4985 ms	Sync time: 0 ms	Done time: 25158 ms	Delta Time: 2535 ms	Sync AVG: 9085.00 ms	Done AVG: 23149.75 ms	Sync count: 1	Boot count: 8	Timeout:  25070 ms
+[2025-05-07 19:20:15] Boot: 0	Sync: 9
+[2025-05-07 19:20:15] [W]       79 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-07 19:20:15] [W]       80 sleep.cpp           : 119 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms for 1 nodes up to (3+1) txs, with 0 1.971322e-321xtra
+[2025-05-07 19:20:15] [W]       83 sleep.cpp           :  58 | [SLEEP] Init. Already synchronized.
+[2025-05-07 19:20:15] [W]       83 sleep.cpp           :  59 |         Clock correction: -0.14 seconds
+[2025-05-07 19:20:15] [W]       84 sleep.cpp           :  60 |         Delta time: 2.54 seconds. Nodes before: 1
+[2025-05-07 19:20:15] [W]       85 sleep.cpp           :  61 |         Timeout in 25.07 seconds.
+[2025-05-07 19:20:40] [W]    25153 sleep.cpp           : 271 | [SLEEP] Sync timeout. Making new PDU, and sending to next node
+[2025-05-07 19:20:40] [25153] Ready to send data: 3F 
+[2025-05-07 19:20:40] [W]    25154 mac.cpp             : 122 | [MAC] RX address (0x02) cannot be self (0x02)
+[2025-05-07 19:20:40] [W]    25155 routing.cpp         : 125 | [ROUTING] Error sending PDU
+[2025-05-07 19:20:40] [W]    25156 transport.cpp       : 119 | [TRANSPORT] Error sending segment (state: 1)
+[2025-05-07 19:20:40] [W]    25156 sleep.cpp           : 204 | [SLEEP] Error forwarding sync to node 2. Going to sleep.
+[2025-05-07 19:20:40] [E]    25159 sleep.cpp           : 266 | [SLEEP-STATS] Sync: 0	Sleep time: 4985 ms	Sync time: 0 ms	Done time: 25158 ms	Delta Time: 2535 ms	Sync AVG: 9085.00 ms	Done AVG: 23372.89 ms	Sync count: 1	Boot count: 9	Timeout:  25070 ms
+[2025-05-07 19:20:45] Boot: 0	Sync: 10
+[2025-05-07 19:20:45] [W]       79 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-07 19:20:45] [W]       80 sleep.cpp           : 119 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms for 1 nodes up to (3+1) txs, with 0 1.971322e-321xtra
+[2025-05-07 19:20:45] [W]       83 sleep.cpp           :  58 | [SLEEP] Init. Already synchronized.
+[2025-05-07 19:20:45] [W]       83 sleep.cpp           :  59 |         Clock correction: -0.14 seconds
+[2025-05-07 19:20:45] [W]       84 sleep.cpp           :  60 |         Delta time: 2.54 seconds. Nodes before: 1
+[2025-05-07 19:20:45] [W]       85 sleep.cpp           :  61 |         Timeout in 25.07 seconds.
+[2025-05-07 19:21:10] [W]    25153 sleep.cpp           : 271 | [SLEEP] Sync timeout. Making new PDU, and sending to next node
+[2025-05-07 19:21:10] [25153] Ready to send data: F7 
+[2025-05-07 19:21:10] [W]    25154 mac.cpp             : 122 | [MAC] RX address (0x02) cannot be self (0x02)
+[2025-05-07 19:21:10] [W]    25155 routing.cpp         : 125 | [ROUTING] Error sending PDU
+[2025-05-07 19:21:10] [W]    25156 transport.cpp       : 119 | [TRANSPORT] Error sending segment (state: 1)
+[2025-05-07 19:21:10] [W]    25156 sleep.cpp           : 204 | [SLEEP] Error forwarding sync to node 2. Going to sleep.
+[2025-05-07 19:21:10] [E]    25159 sleep.cpp           : 266 | [SLEEP-STATS] Sync: 0	Sleep time: 4985 ms	Sync time: 0 ms	Done time: 25158 ms	Delta Time: 2535 ms	Sync AVG: 9085.00 ms	Done AVG: 23551.40 ms	Sync count: 1	Boot count: 10	Timeout:  25070 ms
+[2025-05-07 19:21:15] Boot: 0	Sync: 11
+[2025-05-07 19:21:15] [W]       79 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-07 19:21:15] [W]       80 sleep.cpp           : 119 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms for 1 nodes up to (3+1) txs, with 0 1.971322e-321xtra
+[2025-05-07 19:21:15] [W]       83 sleep.cpp           :  58 | [SLEEP] Init. Already synchronized.
+[2025-05-07 19:21:15] [W]       83 sleep.cpp           :  59 |         Clock correction: -0.14 seconds
+[2025-05-07 19:21:15] [W]       84 sleep.cpp           :  60 |         Delta time: 2.54 seconds. Nodes before: 1
+[2025-05-07 19:21:15] [W]       85 sleep.cpp           :  61 |         Timeout in 25.07 seconds.
+[2025-05-07 19:21:40] [W]    25153 sleep.cpp           : 271 | [SLEEP] Sync timeout. Making new PDU, and sending to next node
+[2025-05-07 19:21:40] [25153] Ready to send data: F5 
+[2025-05-07 19:21:40] [W]    25154 mac.cpp             : 122 | [MAC] RX address (0x02) cannot be self (0x02)
+[2025-05-07 19:21:40] [W]    25155 routing.cpp         : 125 | [ROUTING] Error sending PDU
+[2025-05-07 19:21:40] [W]    25156 transport.cpp       : 119 | [TRANSPORT] Error sending segment (state: 1)
+[2025-05-07 19:21:40] [W]    25156 sleep.cpp           : 204 | [SLEEP] Error forwarding sync to node 2. Going to sleep.
+[2025-05-07 19:21:40] [E]    25159 sleep.cpp           : 266 | [SLEEP-STATS] Sync: 0	Sleep time: 4985 ms	Sync time: 0 ms	Done time: 25158 ms	Delta Time: 2535 ms	Sync AVG: 9085.00 ms	Done AVG: 23697.46 ms	Sync count: 1	Boot count: 11	Timeout:  25070 ms
+[2025-05-07 19:21:45] Boot: 0	Sync: 12
+[2025-05-07 19:21:45] [W]       79 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-07 19:21:45] [W]       80 sleep.cpp           : 119 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms for 1 nodes up to (3+1) txs, with 0 1.971322e-321xtra
+[2025-05-07 19:21:45] [W]       83 sleep.cpp           :  58 | [SLEEP] Init. Already synchronized.
+[2025-05-07 19:21:45] [W]       83 sleep.cpp           :  59 |         Clock correction: -0.14 seconds
+[2025-05-07 19:21:45] [W]       84 sleep.cpp           :  60 |         Delta time: 2.54 seconds. Nodes before: 1
+[2025-05-07 19:21:45] [W]       85 sleep.cpp           :  61 |         Timeout in 25.07 seconds.
+[2025-05-07 19:21:48] [W]     2645 sleep.cpp           : 119 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms for 1 nodes up to (3+1) txs, with 0 1.971322e-321xtra
+[2025-05-07 19:21:48] [2647] Ready to send data: 05 
+[2025-05-07 19:21:48] [W]     2647 mac.cpp             : 122 | [MAC] RX address (0x02) cannot be self (0x02)
+[2025-05-07 19:21:48] [W]     2649 routing.cpp         : 125 | [ROUTING] Error sending PDU
+[2025-05-07 19:21:48] [W]     2649 transport.cpp       : 119 | [TRANSPORT] Error sending segment (state: 1)
+[2025-05-07 19:21:48] [W]     2650 sleep.cpp           : 204 | [SLEEP] Error forwarding sync to node 2. Going to sleep.
+[2025-05-07 19:21:48] [E]     2654 sleep.cpp           : 266 | [SLEEP-STATS] Sync: 1	Sleep time: 17550 ms	Sync time: 2645 ms	Done time: 2652 ms	Delta Time: 2535 ms	Sync AVG: 5865.00 ms	Done AVG: 21943.67 ms	Sync count: 2	Boot count: 12	Timeout:  25070 ms

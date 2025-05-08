@@ -1,0 +1,25 @@
+[2025-05-07 18:15:13.993859] Boot: 0	Sync: 0
+[2025-05-07 18:15:14.057091] [W]       99 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-07 18:15:14.057227] [100] Ready to send data: EE 
+[2025-05-07 18:15:14.218885] [E]      260 sleep.cpp           : 265 | [SLEEP-STATS] Sync: 1	Sleep time: 904835 ms	Sync time: 0 ms	Done time: 259 ms	Delta Time: 0 ms	Sync AVG: nan ms	Done AVG: nan ms	Sync count: 0	Boot count: 0	Timeout:  0 ms
+[2025-05-07 18:15:14.219048] 
+[2025-05-07 18:30:10.173204] Boot: 0	Sync: 1
+[2025-05-07 18:30:10.235335] [W]       99 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-07 18:30:10.236333] [W]      100 sleep.cpp           :  58 | [SLEEP] Init. Already synchronized.
+[2025-05-07 18:30:10.237276] [W]      100 sleep.cpp           :  59 |         Clock correction: -5.09 seconds
+[2025-05-07 18:30:10.238253] [W]      102 sleep.cpp           :  60 |         Delta time: 0.00 seconds. Nodes before: 0
+[2025-05-07 18:30:10.239257] [W]      103 sleep.cpp           :  61 |         Timeout in 20.00 seconds.
+[2025-05-07 18:30:10.240161] [105] Ready to send data: 02 
+[2025-05-07 18:30:11.026104] [W]      892 mac.cpp             : 418 | [MAC] Max retries (3) reached, transmission failed
+[2025-05-07 18:30:11.027206] [W]      893 mac.cpp             : 555 | [MAC] TX error (1)
+[2025-05-07 18:30:11.034077] [W]      900 transport.cpp       : 274 | [TRANSPORT] TX Error for UDP segment 44460 (frame 45731)
+[2025-05-07 18:30:11.037195] [E]      901 sleep.cpp           : 265 | [SLEEP-STATS] Sync: 1	Sleep time: 904194 ms	Sync time: 0 ms	Done time: 900 ms	Delta Time: 0 ms	Sync AVG: 0.00 ms	Done AVG: 900.00 ms	Sync count: 1	Boot count: 1	Timeout:  20000 ms
+[2025-05-07 18:30:11.037381] 
+[2025-05-07 18:45:06.327639] Boot: 0	Sync: 2
+[2025-05-07 18:45:06.389614] [W]       99 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-07 18:45:06.390362] [W]      100 sleep.cpp           :  58 | [SLEEP] Init. Already synchronized.
+[2025-05-07 18:45:06.391464] [W]      100 sleep.cpp           :  59 |         Clock correction: -5.09 seconds
+[2025-05-07 18:45:06.392440] [W]      102 sleep.cpp           :  60 |         Delta time: 0.00 seconds. Nodes before: 0
+[2025-05-07 18:45:06.393492] [W]      103 sleep.cpp           :  61 |         Timeout in 20.00 seconds.
+[2025-05-07 18:45:06.393572] [105] Ready to send data: 8C 
+[2025-05-07 18:45:06.555494] [E]      263 sleep.cpp           : 265 | [SLEEP-STATS] Sync: 1	Sleep time: 904831 ms	Sync time: 0 ms	Done time: 263 ms	Delta Time: 0 ms	Sync AVG: 0.00 ms	Done AVG: 581.50 ms	Sync count: 2	Boot count: 2	Timeout:  20000 ms

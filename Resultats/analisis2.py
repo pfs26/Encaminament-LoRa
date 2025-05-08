@@ -6,11 +6,10 @@ from datetime import datetime
 # ----------------------
 # 1. Parse log file
 # ----------------------
-
 pattern = re.compile(
-    r'\[(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\].*?\[SLEEP-STATS\]'
+    r'\[(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{6})\].*?\[SLEEP-STATS\]'
     r'\s*Sync: (?P<sync_flag>\d+)'
-    r'.*?Sleep time: (?P<sleep_time>\d+)\s*ms'
+    r'\s*Sleep time: (?P<sleep_time>\d+)\s*ms'
     r'\s*Sync time: (?P<sync_time>\d+)\s*ms'
     r'\s*Done time: (?P<done_time>\d+)\s*ms'
     r'\s*Delta Time: (?P<delta_time>\d+)\s*ms'
@@ -18,47 +17,44 @@ pattern = re.compile(
     r'\s*Done AVG: (?P<done_avg>\d+\.\d+)\s*ms'
     r'\s*Sync count: (?P<sync_count>\d+)'
     r'\s*Boot count: (?P<boot_count>\d+)'
+    r'\s*Timeout:\s*(?P<timeout>\d+)\s*ms'
 )
+
 matches = []
-with open("30sec_MACAcceptACKRandom/020525_sleep30secRANDOM.log", "r") as f:
+with open("1h_ClockCorregit/filtrat.log", "r") as f:
     for line in f:
         match = pattern.search(line)
         if match:
             data = match.groupdict()
             # Convert types
-            data['timestamp'] = datetime.strptime(data['timestamp'], "%Y-%m-%d %H:%M:%S")
+            data['timestamp'] = datetime.strptime(data['timestamp'], "%Y-%m-%d %H:%M:%S.%f")
             for key in data:
                 if key != 'timestamp':
                     data[key] = float(data[key])
             matches.append(data)
 
-# Eliminem les primeres dues entrades (1r SYNC i quan no coneixem delta) per no afectar mitjana i std
-df = pd.DataFrame(matches)[2:]
+# Eliminem les primeres dues entrades (1r SYNC) per no afectar mitjana i std
+# NO, el primer ja no l'agafa ja que no verifica regex (hi ha valor `nan`)
+df = pd.DataFrame(matches)
 # df["timestamp"] = df.index
 
-# Rolling averages for smoother plots
-df["rolling_sync_time"] = df["sync_time"].rolling(window=5).mean()
-df["rolling_done_time"] = df["done_time"].rolling(window=5).mean()
-
-df["sync_std"] = df["sync_time"].rolling(window=5).std()
-df["done_std"] = df["done_time"].rolling(window=5).std()
-df["delta_std"] = df["delta_time"].rolling(window=5).std()
-
+on = df["sync_flag"] == 1
+sync_rate = on.sum() / len(df) * 100
+print(f"SYNC success rate: {on.sum() / len(df) * 100:.2f}%")
 
 # ----------------------
 # 2. Plot everything in subplots
 # ----------------------
-
-fig, axes = plt.subplots(nrows=3, ncols=1, figsize=(14, 18), sharex=True)
+fig, axes = plt.subplots(nrows=4, ncols=1, figsize=(14, 18), sharex=True)
 fig.suptitle("LoRa Sleep & SYNC Layer - Full Analysis", fontsize=16)
 
 
 # Subplot 2: SYNC flag (success/failure)
 axes[0].plot(df["timestamp"], df["sync_flag"], marker='o', linestyle='', color='green')
-axes[0].set_ylabel("SYNC OK")
+axes[0].set_ylabel("SYNC?")
 axes[0].set_yticks([0, 1])
 axes[0].grid(True)
-axes[0].set_title("SYNC Success (1) / Timeout (0)")
+axes[0].set_title(f"Sync status. Rate {sync_rate:.2f}%")
 
 # Subplot 1: Core timing metrics
 # axes[0].plot(df["timestamp"], df["sleep_time"], label="Sleep Time")
@@ -69,71 +65,24 @@ axes[1].legend()
 axes[1].grid(True)
 axes[1].set_title("Core Timing Metrics")
 
-# Subplot 3: Rolling averages
-axes[2].plot(df["timestamp"], df["rolling_sync_time"], label="Rolling Sync Time (5)")
-axes[2].plot(df["timestamp"], df["rolling_done_time"], label="Rolling Done Time (5)")
-axes[2].set_ylabel("Time (ms)")
+# plot the sum of sync, done and sleep times on axes[3]
+df["cycle_time"] = df["done_time"] + df["sleep_time"]
+axes[2].plot(df["timestamp"], df["cycle_time"], label="Cycle Time")
+# axes[3].plot(df["timestamp"], df["done_time"]+df["sleep_time"]-df["sync_time"], label="Total Time")
+axes[2].axhline(df["cycle_time"].mean(), color='red', linestyle='--', label="Mean")
 axes[2].legend()
 axes[2].grid(True)
-axes[2].set_title("Rolling Averages (5-cycle window)")
+axes[2].set_title("Cycle time")
 
-# Subplot 4: Logged moving averages
-# axes[3].plot(df["timestamp"], df["sync_avg"], label="Logged Sync AVG")
-# axes[3].plot(df["timestamp"], df["done_avg"], label="Logged Done AVG")
-# axes[3].set_ylabel("Time (ms)")
-# axes[3].legend()
-# axes[3].grid(True)
-# axes[3].set_title("Device-Logged Moving Averages")
 
-# # Subplot 5: Sync & Boot counts
-# axes[4].plot(df["timestamp"], df["sync_count"], label="Sync Count")
-# axes[4].plot(df["timestamp"], df["boot_count"], label="Boot Count")
-# axes[4].set_ylabel("Count")
-# axes[4].legend()
-# axes[4].grid(True)
-# axes[4].set_title("Sync & Boot Count Evolution")
-
-# Subplot 6: Delta Time Stability
-# axes[3].plot(df["timestamp"], df["delta_time"], color='orange', label="Delta Time")
-# axes[3].set_xlabel("Cycle #")
-# axes[3].set_ylabel("Delta (ms)")
-# axes[3].grid(True)
-# axes[3].legend()
-# axes[3].set_title("Delta Time Over Cycles")
-
-# axes[4].plot(df["timestamp"], df["sync_std"], label="Sync Time STD")
-# axes[4].plot(df["timestamp"], df["done_std"], label="Done Time STD")
-# axes[4].plot(df["timestamp"], df["delta_std"], label="Delta Time STD")
-# axes[4].set_ylabel("Std Dev (ms)")
-# axes[4].legend()
-# axes[4].grid(True)
-# axes[4].set_title("Rolling Std Dev (5-cycle window)")
-
-# Layout adjustments
-plt.tight_layout(rect=[0, 0, 1, 0.97])  # Leave space for suptitle
+EXPECTED_CYCLE = 3600 * 1000 # ms
+df["cycle_error"] = df["cycle_time"] - EXPECTED_CYCLE
+axes[3].plot(df["timestamp"], df["cycle_error"], label="Cycle Time Error")
+axes[3].axhline(df["cycle_error"].mean(), color='red', linestyle='--', label=f"Mean {df['cycle_error'].mean():.2f} ms")
+axes[3].legend()
+axes[3].grid(True)
+axes[3].set_title("Cycle time error")
 plt.show()
-
-# df[["sync_time", "done_time", "delta_time"]].hist(bins=50, figsize=(12, 6), layout=(1, 3))
-# plt.suptitle("Timing Distributions")
-# plt.tight_layout()
-# plt.show()
-
-# plt.figure(figsize=(10, 6))
-# plt.boxplot([df["sync_time"], df["done_time"], df["delta_time"]], labels=["Sync", "Done", "Delta"])
-# plt.title("Boxplot of Timing Metrics")
-# plt.ylabel("Milliseconds")
-# plt.grid(True)
-# plt.show()
-
-# df["sync_success_rate"] = df["sync_flag"].rolling(window=10).mean()
-# plt.figure(figsize=(10, 4))
-# plt.plot(df["timestamp"], df["sync_success_rate"], color="green")
-# plt.title("Rolling SYNC Success Rate (Window=10)")
-# plt.ylabel("Success Ratio")
-# plt.xlabel("Cycle")
-# plt.grid(True)
-# plt.ylim(0, 1.05)
-# plt.show()
 
 threshold = df["sync_time"].mean() + 2 * df["sync_time"].std()
 lower_threshold = df["sync_time"].mean() - 2 * df["sync_time"].std()
@@ -151,4 +100,28 @@ plt.ylabel("Sync Time (ms)")
 plt.legend()
 plt.grid(True)
 plt.tight_layout()
+
+mean_delta = df["delta_time"].mean()
+# PPM = 25000 
+# df["tout"] = 26.57 * 1000 # TOUT obtingut a partir de debug (imprès per consola)
+# plt.plot(df["timestamp"], df["tout"], label="Tout", color="purple")
+plt.figure(figsize=(12, 6))
+plt.plot(df["timestamp"], df["sync_time"], label="Sync Time", color="blue")
+plt.axhline(df["delta_time"].mean(), color="green", linestyle="--", label=f"Delta Time ({df['delta_time'].mean():.2f} ms)")
+plt.axhline(df["timeout"].mean(), color="red", linestyle="--", label=f"Timeout ({df["timeout"].mean():.2f} ms)")
+# plt.axhline(df["timeout"].mean()-8000, color="red", linestyle="--", label=f"Timeout ({df["tout"].mean()-8000:.2f} ms)")
+plt.axhline(df["sync_time"].mean(), color="blue", linestyle="--", label=f"Mean Sync ({df["sync_time"].mean():.2f} ms)")
+plt.axhline(df["sync_time"].max(), color="orange", linestyle="--", label=f"Max Sync ({df["sync_time"].max():.2f} ms)")
+plt.axhline(df["sync_time"].min(), color="orange", linestyle="--", label=f"Max Sync ({df["sync_time"].min():.2f} ms)")
+plt.legend()
+
+
+df["working_time"] = df["done_time"] - df["sync_time"]
+plt.figure(figsize=(12, 6))
+plt.plot(df["timestamp"], df["working_time"], label="Working Time", color="blue")
+plt.axhline(df["working_time"].mean(), color="green", linestyle="--", label=f"AVG ({df['working_time'].mean():.2f} ms)")
+plt.legend()
+plt.title("Working Time Consistency")
+
 plt.show()
+

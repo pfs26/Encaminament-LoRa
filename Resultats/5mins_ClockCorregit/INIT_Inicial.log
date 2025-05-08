@@ -1,0 +1,32 @@
+[2025-05-07 17:53:11.213535] Boot: 0	Sync: 0
+[2025-05-07 17:53:11.276477] [W]      100 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-07 17:53:11.276603] [101] Ready to send data: 6C 
+[2025-05-07 17:53:11.437607] [E]      259 sleep.cpp           : 265 | [SLEEP-STATS] Sync: 1	   Sleep time: 301440 ms	 Sync time: 0 ms	me: 258 ms	 Delta Time: 0 ms	 AVG: nan ms	    Done AVG: nan ms	    Sync count: 0	  Boot count: 0	     Timeout:  0.00 ms
+[2025-05-07 17:53:11.437705] 
+[2025-05-07 17:58:10.501091] Boot: 0	Sync: 1
+[2025-05-07 17:58:10.562242] [W]      100 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-07 17:58:10.563300] [W]      101 sleep.cpp           :  58 | [SLEEP] Init. Already synchronized.
+[2025-05-07 17:58:10.564303] [W]      101 sleep.cpp           :  59 |         Clock correction: -1.70 seconds
+[2025-05-07 17:58:10.565335] [W]      103 sleep.cpp           :  60 |         Delta time: 0.00 seconds. Nodes before: 0
+[2025-05-07 17:58:10.566420] [W]      103 sleep.cpp           :  61 |         Timeout in 20.00 seconds.
+[2025-05-07 17:58:10.566579] [105] Ready to send data: 87 
+[2025-05-07 17:58:10.728957] [E]      264 sleep.cpp           : 265 | [SLEEP-STATS] Sync: 1	   Sleep time: 301435 ms	 Sync time: 0 ms	me: 263 ms	 Delta Time: 0 ms	 AVG: 0.00 ms	    Done AVG: 263.00 ms	    Sync count: 1	  Boot count: 1	     Timeout:  0.00 ms
+[2025-05-07 17:58:10.729267] 
+[2025-05-07 18:03:09.711182] Boot: 0	Sync: 2
+[2025-05-07 18:03:09.773164] [W]      100 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-07 18:03:09.774182] [W]      101 sleep.cpp           :  58 | [SLEEP] Init. Already synchronized.
+[2025-05-07 18:03:09.775091] [W]      101 sleep.cpp           :  59 |         Clock correction: -1.70 seconds
+[2025-05-07 18:03:09.776206] [W]      103 sleep.cpp           :  60 |         Delta time: 0.00 seconds. Nodes before: 0
+[2025-05-07 18:03:09.777230] [W]      103 sleep.cpp           :  61 |         Timeout in 20.00 seconds.
+[2025-05-07 18:03:09.777405] [105] Ready to send data: 75 
+[2025-05-07 18:03:09.940163] [E]      265 sleep.cpp           : 265 | [SLEEP-STATS] Sync: 1Sleep time: 301434 ms	 time: 0 ms	ime: 264 ms	Delta Time: 0 ms	Sync AVG: 0.00 ms	ne AVG: 263.50 ms	nc count: 2	 count: 2	  Timeout:  0.00 ms
+[2025-05-07 18:03:09.940316] 
+[2025-05-07 18:08:09.138880] Boot: 0	Sync: 3
+[2025-05-07 18:08:09.201019] [W]      100 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-07 18:08:09.201942] [W]      101 sleep.cpp           :  58 | [SLEEP] Init. Already synchronized.
+[2025-05-07 18:08:09.202890] [W]      101 sleep.cpp           :  59 |         Clock correction: -1.70 seconds
+[2025-05-07 18:08:09.203896] [W]      103 sleep.cpp           :  60 |         Delta time: 0.00 seconds. Nodes before: 0
+[2025-05-07 18:08:09.204896] [W]      103 sleep.cpp           :  61 |         Timeout in 20.00 seconds.
+[2025-05-07 18:08:09.205906] [105] Ready to send data: BC 
+[2025-05-07 18:08:09.368891] [E]      265 sleep.cpp           : 265 | [SLEEP-STATS] Sync: 1	Sleep time: 301434 ms	Sync time: 0 ms	Done time: 264 ms	Delta Time: 0 ms	Sync AVG: 0.00 ms	Done AVG: 263.67 ms	Sync count: 3	Boot count: 3	Timeout:  0.00 ms
+[2025-05-07 18:08:09.369055]
