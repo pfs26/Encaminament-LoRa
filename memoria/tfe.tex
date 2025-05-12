@@ -1088,11 +1088,16 @@ En aquest capítol es presenta, primerament, les limitacions del protocol implem
 \section{Descripció de l’escenari: xarxa lineal de sensors}
 L'adaptació s'ha realitzat en un entorn concret i conegut, aprofitant les característiques de la xarxa per implementar i optimitzar la solució. Aquest fet permet que la solució sigui eficient en aquest context, però no garanteix que pugui ser aplicable en altres topologies. 
 
-L'escenari considerat és una xarxa lineal de dispositius, amb connectivitat a un \est{gateway} LoRaWAN a través d'un dels seus extrems. Per simplicitat, es considera també que cada dispositiu es pot comunicar únicament amb els dos veïns immediats. Això es pot assegurar mitjançant les taules d'encaminament, definint les rutes per tal que cada dispositiu utilitzi únicament els seus veïns.
+L'escenari considerat és una xarxa lineal de dispositius, amb connectivitat a un \est{gateway} LoRaWAN a través d'un dels seus extrems. Per simplicitat, es considera també que cada dispositiu es pot comunicar únicament amb els dos veïns immediats. Això es pot assegurar mitjançant les taules d'encaminament, definint les rutes per tal que cada dispositiu utilitzi únicament els seus veïns. 
 
-% // TODO: Afegir figura de la topologia
+\begin{figure}
+    \centering
+    \includegraphics[width=0.95\linewidth]{imatges/situacioBaixConsum.drawio.pdf}
+    \caption{Representació de la topologia considerada per a l'adaptació del protocol.}
+    \label{fig:topologia_baix_consum}
+\end{figure}
 
-Aquesta topologia pot ser útil en entorns agrícoles, on els sensors es poden co\l.locar al llarg d'una línia de cultiu, o en entorns ferroviaris, on els sensors es poden co\l.locar al llarg de les vies. 
+Aquesta topologia pot ser útil en entorns agrícoles, on els sensors es poden co\l.locar al llarg d'una línia de cultiu, o en entorns ferroviaris, on els sensors es poden trobar al llarg de les vies. 
 
 També s'ha limitat el comportament i les funcionalitats del protocol:
 \begin{itemize}
@@ -1101,12 +1106,22 @@ També s'ha limitat el comportament i les funcionalitats del protocol:
     \item Els dispositius coneixen l'interval de temps entre transmissions. Un cop transcorregut aquest temps, el dispositiu inicia una nova transmissió de la seva lectura cap al \est{gateway}.
 \end{itemize}
 
+A la \autoref{fig:topologia_baix_consum} es pot veure representada la situació exposada, on el dispositiu \fitx{D4} és l'únic dispositiu amb capacitats LoRaWAN.
+
+A més, es vol garantir en la mesura del possible la fiabilitat a llarg termini. És a dir, es prefereix que l'aplicació funcioni incorrectament durant un període de temps curt, i que després es recuperi, a que la comunicació sigui fiable durant un període de temps més llarg, però deixi de funcionar permanent després d'un error. És una característica important, sobretot en dispositius on no es pot garantir l'alimentació: si un dispositiu s'atura, és millor que després pugui recuperar les seves funcionalitats automàticament, que no pas que es quedi aturat indefinidament.
+
+
 \section{Limitacions del protocol sense optimitzacions energètiques}
-% Bàsicament és explicar el consum de bateria?
+Malgrat haver realitzat el disseny del protocol considerant el consum energètic, les optimitzacions realitzades no són suficients per fer-lo viable en entorns on el consum energètic és crític. Això és degut a que tots els dispositius han de trobar-se sempre en estat de recepció, per poder fer d'encaminadors d'altres dispositius. A causa d'això, existeix un consum energètic constant, que malgrat ser reduït, no és assumible per a dispositius que no disposen de subministrament energètic constant.
+
+Per posar-ho en context, s'ha observat de forma experimental com el consum de la placa de desenvolupament (que inclou el microcontrolador, reguladors de tensió, etc.) i de la ràdio en estat de recepció és, aproximadament, de \SI{75}{\milli\ampere}. Així, si considerem un dispositiu amb una bateria de \SI{2500}{\milli\ampere\hour}, una capacitat estàndard per bateries de mida física reduïda, el temps màxim d'ús del dispositiu és de 33.33 hores, poc més d'un dia.
+
+Podríem obtenir valors més optimistes si considerem únicament el consum del microcontrolador i de la ràdio, tenint en compte que es podrien utilitzar reguladors de tensió i perifèrics més eficients. A partir de dades de \cite{espressif_current_nodate}, s'obté que el microcontrolador consumeix de forma activa aproximadament \SI{20}{\milli\ampere}, i de \cite{semtech_sx1262_nodate} que el consum mínim de la ràdio en recepció és de \SI{5}{\milli\ampere}. Així, el consum total seria aproximadament de \SI{25}{\milli\ampere}, amb un temps màxim d'ús de 100 hores, poc més de 4 dies.
+
+Així, ni en el cas més optimista s'aconsegueix una temps de funcionament prolongat, fent que l'ús d'aquest protocol impliqués substitucions de bateries de forma regular, o bé l'ús de dispositius externs (com ara panells solars) per augmentar el temps de funcionament.
 
 % En el següent apartat parlar sobre sincronització
 
-% \section{Estratègies de sincronització i activació temporal}
 \section{Estratègies de sincronització}
 \subsection{Sincronització explícita}
 \subsection{Sincronització implícita}
