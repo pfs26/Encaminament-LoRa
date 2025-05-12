@@ -133,7 +133,7 @@ Per a l'estàndard complet i més detall, es pot consultar \cite{braden_requirem
 Els termes \emph{LoRa} i \emph{LoRaWAN} sovint es confonen i s'utilitzen ambdós termes indistintament. Mentre que el primer és una tecnologia propietària, el segon és mantingut per una associació sense ànim de lucre. En aquest apartat es presenten ambdues tecnologies, indicant-ne les seves característiques i limitacions.
 
 \subsection{LoRa}
-% TODO: Explicar estructura missatge LoRa? Preambul?
+% // TODO: Explicar estructura missatge LoRa? Preambul?
 % Mencionar mida màxima de les dades?
 El nom de \emph{LoRa} prové de l'anglès \est{Long Range}. És una tecnologia de comunicació sense fils, de llarg abast, i de baix consum, fent que sigui especialment útil per a aplicacions d'Internet de les Coses (\acro{iot}). Va ser desenvolupada per \emph{Cycleo}, que va ser adquirida per \emph{Semtech} el 2012.
 
@@ -161,7 +161,7 @@ Per assegurar la integritat de les dades rebudes, LoRa ofereix la possibilitat d
 
 
 \subsection{LoRaWAN}
-% TODO: QUEDA EXPLICAR JOIN (OTAA I ABP)
+% // TODO: QUEDA EXPLICAR JOIN (OTAA I ABP)
 Pel que fa a LoRaWAN, es tracta d'una definició de l'arquitectura d'un sistema \acro{LPWAN} (\est{Low Power Wide Area Network}), desenvolupada i mantenida per la \href{https://lora-alliance.org}{LoRa Alliance}. Defineix el protocol de comunicació i l'arquitectura de la xarxa, així com els mecanismes de seguretat i gestió de la xarxa. 
 
 Utilitzant l'estructura per capes vista a la \autoref{sec:protocols}, LoRaWAN opera principalment a nivell d'enllaç, malgrat que també implementa característiques d'altres capes (com ara el control de sessions). A nivell físic, utilitza la modulació LoRa.
@@ -287,7 +287,7 @@ Per respectar l'estructura per capes i el model de \est{callbacks} establert, s'
 
 Fent això s'obté una interfície senzilla i ben definida per a la capa superior. A més, ofereix la possibilitat de modificar el transductor utilitzat sense afectar la resta del protocol. 
 
-La part més complexa és l'abstracció de la recepció de missatges: una recepció es pot produir en qualsevol moment, i no es pot controlar quan es realitzarà. La llibreria RadioLib ofereix la possibilitat de configurar interrupcions, fent que quan es rep un missatge es generi una interrupció en el microcontrolador. L'inconvenient de les interrupcions és que han de realitzar tasques ràpides i senzilles, per tal de no bloquejar el fil d'execució principal (si no podrien, per exemple, interrompre una transmissió en curs). La solució emprada és que la interrupció únicament guarda en un \est{flag} que s'ha produït una recepció. El fil principal, que s'executa de forma periòdica, comprova aquest \est{flag} per saber si s'ha produït una recepció i, en cas afirmatiu, l'obté i la processa. Realment, aquesta comprovació la realitza una tasca del gestor de tasques, amb un interval configurable. Es pot llegir més sobre aquest a la \autoref{sec:altres_serveis}.
+La part més complexa és l'abstracció de la recepció de missatges: una recepció es pot produir en qualsevol moment, i no es pot controlar quan es realitzarà. La llibreria RadioLib ofereix la possibilitat de configurar interrupcions, fent que quan es rep un missatge es generi una interrupció en el microcontrolador. L'inconvenient de les interrupcions és que han de realitzar tasques ràpides i senzilles, per tal de no bloquejar el fil d'execució principal (si no podrien, per exemple, interrompre una transmissió en curs). La solució emprada és que la interrupció únicament guarda en un \est{flag} que s'ha produït una recepció. El fil principal, que s'executa de forma periòdica, comprova aquest \est{flag} per saber si s'ha produït una recepció i, en cas afirmatiu, l'obté i la processa. Realment, aquesta comprovació la realitza una tasca del gestor de tasques, amb una periodicitat configurable ja que, com s'ha comentat, la implementació s'ha basat en un model de tasques.
 
 Pel que fa a les transmissions a través de LoRa, aquestes s'han hagut de dissenyar de forma bloquejant. Això implica que, quan s'utilitza la interfície de transmissió, el fil d'execució queda bloquejat fins que la transmissió s'ha completat (ja sigui correcta o incorrectament). En un primer moment es va provar de fer-ho de forma no bloquejant, fent que el transductor notifiqués quan la transmissió havia finalitzat a través d'una interrupció. A causa del fet que el transductor escollit (\acro{sx1262}) únicament permet configurar una interrupció, es va decidir que la millor solució era fer-ho de forma bloquejant, i configurar la interrupció per a la recepció de missatges, la qual no es pot controlar.
 
@@ -307,7 +307,7 @@ Dos camps essencials són el \emph{receptor} i l'\emph{emissor}, que indiquen re
 Per tal de poder identificar cada trama, s'ha inclòs un camp d'\emph{identificador} (\emph{id}), que conté un número aleatori generat per l'emissor. Aquest camp permet que el receptor pugui identificar trames duplicades i no processar-les de nou. S'ha considerat utilitzar una longitud de \SI{2}{\byte}, permetent 65536 identificadors diferents. Tot i això, s'ha reservat l'identificador \fitx{0x0000}; la utilitat d'aquest s'exposarà al \autoref{subsubsec:mac_lorawan}. En el pitjor dels casos, si 252 dispositius transmetessin a un mateix receptor, la probabilitat d'una co\l.lisió és, aproximadament, d'un 38\%. Es tracta d'un problema similar al del «problema dels aniversaris» \cite{noauthor_birthday_2025}.
 
 Tot i semblar una probabilitat molt elevada, no es considera un fet greu: es tracta del pitjor dels casos, on 252 dispositius transmeten al mateix destí, i on el receptor recorda tots els identificadors rebuts. En aplicacions reals, la quantitat d'identificadors guardats és limitada (per exemple als últims 10), reduint la probabilitat de co\l.lisió. Si ho repetim en un cas més realista, on hi ha un receptor comú i 5 transmissors, obtenim una probabilitat de col\l.lisió del 0.015\%, i del 0.068\% si considerem 10 transmissors. Així, s'ha considerant escaient una longitud de \SI{2}{\byte}, buscant minimitzar el consum energètic i el temps de transmissió, sense afectar greument el funcionament.
-% TODO: LA FINESTRA DE RECEPCIÓ HAURIA DE GUARDAR ELS IDS JUSTOS ENTRE RETRANSMISSIONS (COSA RAPIDA A MAC)
+% // TODO: LA FINESTRA DE RECEPCIÓ HAURIA DE GUARDAR ELS IDS JUSTOS ENTRE RETRANSMISSIONS (COSA RAPIDA A MAC)
 
 Un altre camp important és el dels \est{flags}, que conté informació sobre el missatge. En concret, s'ha definit un camp de \SI{1}{\byte} amb els següents bits:
 \begin{itemize}
@@ -391,7 +391,7 @@ Pel que fa a la implementació de la cua, s'ha utilitzat una cua enllaçada (mit
 La implementació d'aquesta capa es pot trobar al fitxer \fitx{mac.cpp}, l'extensió de la capa amb funcionalitats de cua al \fitx{mac_buffer.cpp}, i la de cua enllaçada a \fitx{utils/LinkedFIFO.hpp}.
 \subsubsection{LoRaWAN}
 \label{subsubsec:mac_lorawan}
-LoRaWAN ja defineix els mecanismes d'accés al medi i, per tant, no aplica els detalls comentats anteriorment. Malgrat això, s'ha decidit implementar una capa d'abstracció per tal de poder-la utilitzar fàcilment, i integrar-la amb l'estructura de la resta del protocol.
+LoRaWAN ja defineix els mecanismes d'accés al medi i, per tant, no aplica els detalls comentats anteriorment. Malgrat això, s'ha decidit implementar una capa d'abstracció per tal de poder-la utilitzar fàcilment, i integrar-la amb l'estructura de la resta del protocol. S'ha optat per incloure-la en aquesta secció ja que implementa mecanismes d'accés al medi, i coexisteix amb la capa d'accés al medi.
 
 S'utilitzen dispositius LoRaWAN de classe A, i la definició 1.1 del protocol LoRaWAN, la qual afegeix millores de seguretat respecte les versions \acro{1.0.x} anteriors. Es pot consultar l'especificació completa a \cite{noauthor_lorawan_2023}.
 
@@ -574,6 +574,22 @@ Per acabar es mostra una situació més complexa i completa, representada a la \
     \caption{Transmissió considerada fallida, rebuda correctament per receptor.}
     \label{fig:mac_tx_complet}
 \end{figure}
+\subsubsection{Múltiples transductors}
+% « »
+Una situació que es podria donar és la de disposar de múltiples ràdios LoRa en un mateix dispositiu. Per exemple, podria ser útil utilitzar-ne una com a transmissora i una altra com a receptora, ambdues amb paràmetres de configuració LoRa diferents. Una altra situació d'utilitat es trobaria quan algunes transmissions s'han de realitzar amb un dispositiu més llunyà ---utilitzant un \acro{sf} més elevat---, i d'altres amb dispositius més propers, utilitzant \acro{sf} més baixos per reduir el temps de transmissió i el consum energètic.
+
+Malgrat no ser una funcionalitat implementada, gràcies al disseny modular, afegir aquesta funcionalitat és trivial: caldria modificar la capa d'accés al medi per tal de poder seleccionar quin transductor s'ha d'utilitzar en cada moment, on cada transductor formaria part de la capa física (o de la seva abstracció).
+
+Aquest mateix comportament es podria fins i tot obtenir amb una única ràdio, disposant de diferents perfils de configuració LoRa, i implementats com parts diferents de la capa física. A la \autoref{fig:mac_multiplesTrans} es pot observar l'estructura de capes que s'hauria d'implementar per obtenir aquesta funcionalitat.
+
+\begin{figure}
+    \centering
+        \includegraphics[width=0.4\linewidth]{imatges/multiplesTXLora.drawio.pdf}
+    \caption{Estructura de capes amb múltiples perfils de ràdio.}
+    \label{fig:mac_multiplesTrans}
+\end{figure}
+
+% // TODO: ESTEM AQUI, QUEDA FER AIXO
 
 \subsection{Encaminament estàtic}
 La funció d'aquesta capa és la de determinar quin és el següent dispositiu a qui s'ha d'enviar un missatge perquè arribi al destí final. Tal com s’ha comentat anteriorment, s’utilitza un encaminament estàtic, de manera que les taules que defineixen les rutes s’han de configurar prèviament. Aquesta capa també és responsable de gestionar i accedir a aquestes taules quan sigui necessari.
@@ -730,7 +746,7 @@ Les taules d'encaminament de cada dispositiu i exemple es representen a la \auto
             \textbf{0x04} & 0x01 & 0x01 & 0x01 & -
         \end{tabular}
     \end{tabular}
-    \caption{Matrius d'encaminament d'exemple. La cel·la $(x, y)$ indica el dispositiu que $y$ ha d'utilitzar per enviar un paquet a $x$.}
+    \caption{Matrius d'encaminament d'exemple. La ce\l.la $(x, y)$ indica el dispositiu que $y$ ha d'utilitzar per enviar un paquet a $x$.}
     \label{tab:routing_taula_enc_exemples}
 \end{table}
 
@@ -1048,9 +1064,9 @@ Les proves s'han realitzat de forma manual, observant l'estat del sistema a trav
 
 Una clara limitació ha estat la manca de dispositius. A causa de només disposar d'un \est{gateway} i de dos dispositius, no s'ha pogut verifica el funcionament del protocol en grans xarxes, o en topologies complexes. 
 
-TODO: Verificació de distància?
+% // TODO: Verificació de distància?
 
-TODO: Posar aquí un exemple de log de comunicació?
+% // TODO: Posar aquí un exemple de log de comunicació?
 
 En el procés de validació es van observar inconsistències en el funcionament del protocol. Les més rellevants, que impedien el funcionament total del protocol, són les següents:
 \begin{itemize}
@@ -1063,8 +1079,33 @@ Després de les verificacions, cada capa del protocol verifica els requisits pr�
 
 \chapter{Adaptació a entorns de baix consum}
 \label{chap:adaptacio_baix_consum}
+En el desenvolupament del protocol, s'ha posat èmfasi en la reducció del consum energètic. En xarxes de monitoratge, com ara les agrícoles o ferroviàries, el subministrament energètic dels dispositius pot no estar garantit, i una mala gestió del consum pot resultar en temps d'ús molt reduïts.
+
+Una característica de les comunicacions és que el receptor no coneix quan un transmissor enviarà un missatge. Això provoca que el receptor hagi d'estar, sempre que ell no vulgui transmetre, en estat de recepció, fent impossible aplicar modes de baix consum.
+
+En aquest capítol es presenta, primerament, les limitacions del protocol implementat sense optimitzacions energètiques addicionals. Seguidament, es presenten les estratègies considerades, basades en la sincronització entre nodes per permetre modes de baix consum, i implementades a la capa d'aplicació. Finalment, es presenten les proves realitzades per verificar el correcte funcionament de la solució, i els seus resultats i limitacions.
+
 \section{Descripció de l’escenari: xarxa lineal de sensors}
+L'adaptació s'ha realitzat en un entorn concret i conegut, aprofitant les característiques de la xarxa per implementar i optimitzar la solució. Aquest fet permet que la solució sigui eficient en aquest context, però no garanteix que pugui ser aplicable en altres topologies. 
+
+L'escenari considerat és una xarxa lineal de dispositius, amb connectivitat a un \est{gateway} LoRaWAN a través d'un dels seus extrems. Per simplicitat, es considera també que cada dispositiu es pot comunicar únicament amb els dos veïns immediats. Això es pot assegurar mitjançant les taules d'encaminament, definint les rutes per tal que cada dispositiu utilitzi únicament els seus veïns.
+
+% // TODO: Afegir figura de la topologia
+
+Aquesta topologia pot ser útil en entorns agrícoles, on els sensors es poden co\l.locar al llarg d'una línia de cultiu, o en entorns ferroviaris, on els sensors es poden co\l.locar al llarg de les vies. 
+
+També s'ha limitat el comportament i les funcionalitats del protocol:
+\begin{itemize}
+    \item La comunicació és, únicament, unidireccional. És a dir, els nodes únicament envien dades, i no esperen rebre'n. Aquesta consideració és deguda a que en aplicacions de monitoratge és poc freqüent voler enviar dades cap a un dispositiu de lectura.
+    \item Cada dispositiu vol enviar únicament un missatge, amb destí al \est{gateway}. En un cicle de funcionament del dispositiu, aquest envia la lectura de les seves dades al \est{gateway} el qual, si es vol, les farà arribar a un servidor d'aplicació d'internet per a processar-les.
+    \item Els dispositius coneixen l'interval de temps entre transmissions. Un cop transcorregut aquest temps, el dispositiu inicia una nova transmissió de la seva lectura cap al \est{gateway}.
+\end{itemize}
+
 \section{Limitacions del protocol sense optimitzacions energètiques}
+% Bàsicament és explicar el consum de bateria?
+
+% En el següent apartat parlar sobre sincronització
+
 % \section{Estratègies de sincronització i activació temporal}
 \section{Estratègies de sincronització}
 \subsection{Sincronització explícita}
@@ -1128,7 +1169,7 @@ Després de les verificacions, cada capa del protocol verifica els requisits pr�
 
 % ABANS D'ENTREGAR MIRAR QUE L·L ESTIGUIN BEN ESCRITES AMB \l.l
 
-% TODO:
+% // TODO:
 % FALTA EXPLICAR QUE POTÈNCIA D'ENVIAMENT ACK DEPEN DEL NOMBRE DE REINTENTS DEL FRAME REBUT A CAPA MAC
 
 \end{document}
