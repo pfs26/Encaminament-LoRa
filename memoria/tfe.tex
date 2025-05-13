@@ -1135,7 +1135,7 @@ En el període de funcionament, és important que els dispositius es trobin acti
     
     Tot i que l'error podria semblar insignificant, s'ha observat que el rellotge utilitzat en mode de baix consum pot tenir desviacions superiors a 5000 parts per millió (\emph{ppm}), equivalents de més de set minuts per dia de funcionament \cite{nikki_smith_esp32_2022}. A més, aquest error depèn també de la temperatura, fent-lo imprevisible. Malgrat existir mecanismes per reduir aquest error, com ara utilitzar osci\l.ladors externs, l'error no és mai nul, i s'acaba acumulant mb el temps, desincronitzant els dispositius.
     
-    \item \emph{Sincronització externa}. Es basa en un mecanisme de sincronització entre dispositius, on un dels dispositius actua com a referència, i la resta s'ajusten a aquest. Això es pot aconseguir mitjançant un missatge de sincronització generat per aquest dispositiu. Aquest missatge es trobaria a nivell d'aplicació. 
+    \item \emph{Sincronització externa}. Es basa en un mecanisme de sincronització entre dispositius, on un dels dispositius actua com a referència, i la resta s'ajusten a aquest. Això es pot aconseguir mitjançant un missatge de sincronització generat per aquest dispositiu, el qual, en rebre's, indica l'inici del cicle de funcionament durant una període conegut i igual per a cada dispositiu. Aquest missatge es trobaria a nivell d'aplicació. 
     
     Malgrat seguir utilitzant el rellotge intern per regular el temps de baix consum i funcionament, la sincronització amb el dispositiu de referència permet corregir l'error acumulat. 
     Continua sent important que els dispositius es trobin actius abans de rebre el missatge de sincronització; en cas contrari, no existeix sincronització i, per tant, no es corregeix l'error que ha introduït el rellotge intern.
@@ -1152,11 +1152,29 @@ Per aconseguir que tots els dispositius es puguin sincronitzar, és important qu
 \label{fig:app_opcionsIniciSync}
 \end{figure}
 
-En els següents apartats es presenten diferents mecanismes de sincronització externa considerats.
+En els següents apartats es presenten els diferents mecanismes de sincronització externa considerats, amb les seves diferències i limitacions.
 % PARLAR DE SINCRONITZACIÓ INICIAL
 
 \subsection{Sincronització explícita}
-Com a sincronització explícita es considera l'ús d'un missatge especial i diferent de la resta
+Com a sincronització explícita es considera l'ús d'un missatge especial i fàcilment identificable. Com s'ha comentat, el propòsit d'aquest missatge és el d'indicar l'instant d'inici de cicle de funcionament normal, i la d'eliminar l'error introduit pel rellotge intern.
+
+Quan un dispositiu inicia el mode de funcionament normal, espera rebre un missatge de sincronització. En el moment que el rep, inicia el seu cicle de funcionament, i propaga el missatge al següent dispositiu. Després d'això, pot realitzar la seva lectura, i generar el missatge de transmissió. Gràcies a que prèviament havia propagat el missatge de sincronització, qualsevol dels seus dos veïns immediats es troben sincronitzats ---o bé perquè és qui li ha enviat el missatge, o és a qui li ha propagat---, i per tant poden actuar com a encaminadors.
+El funcionament difereix quan el propi dispositiu és el de referència. En aquest cas, l'inici del cicle de funcionament es produeix instantàniament, enviant un missatge de sincronització que ell genera. Seguidament pot fer la seva lectura, i realitzar la transmissió.
+
+Així s'introdueix un fet important: el dispositiu de referència ha de despertar del mode de baix consum més tard que els dispositius a qui ha d'enviar el missatge de sincronització, ja que si no aquests no el rebrien. Aquest temps ha de ser, com a mínim, igual al temps de transmissió del missatge de sincronització. Una solució fàcil per aconseguir-ho és restant aquest temps del de baix consum, de manera que despertarà abans. 
+
+A la \autoref{fig:app_opcioSyncExp1} es pot veure representat el funcionament d'aquesta opció, on el dispositiu de referència és el \fitx{D1}. Es representen els missatges de sincronització com a \fitx{TX_S}, i els de dades com a \fitx{TX_D}. S'indica també quan cada dispositiu desperta i inicia el mode de baix consum (\fitx{W} i \fitx{S} respectivament).
+
+\begin{table}
+\centering
+\begin{tabular}{llllllllllllllllllll}
+\textbf{D1} &  & WAKE & TX\_S & TX\_D &  &  & SLEEP &  &  &  &  &  &  &  &  &  &  &  &  \\
+D2 & WAKE &  & RX\_S & TX\_S & TX\_D &  &  & SLEEP &  &  &  &  &  &  &  &  &  &  &  \\
+D3 &  & WAKE &  & RX\_S & TX\_S & TX\_D &  &  & SLEEP &  &  &  &  &  &  &  &  &  &  \\
+D4 &  &  & WAKE &  & RX\_S & TX\_S & TX\_D &  &  & SLEEP &  &  &  &  &  &  &  &  &  \\
+ &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & 
+\end{tabular}
+\end{table}
 
 \subsection{Sincronització implícita}
 % \subsection{Avantatges i inconvenients de cada enfocament}
