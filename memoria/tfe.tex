@@ -9,7 +9,7 @@
 \usepackage{hhline}
 \usepackage{caption}
 \usepackage{bytefield}
-
+\usepackage{tabularx}
 
 \usepackage{makecell}
 \usepackage{array}
@@ -209,7 +209,7 @@ Es tracta d'un projecte de codi obert que té com a objectiu crear una xarxa de 
 
 Utilitza comunicació LoRa per a transmetre missatges entre dispositius, evitant dependre d'altres infraestructures com internet. Per tal d'aconseguir-ho, tots els dispositius actuen com a encaminadors: quan reben un missatge que no està destinat a ells, el reenvien, permetent que altres dispositius puguin repetir l'encaminament fins arribar al destí final. Una característica molt interessant d'aquest projecte és que ofereix aplicacions mòbils i web per interactuar amb els dispositius de la xarxa, permetent enviar missatges de forma molt senzilla.
 
-L'estratègia d'encaminament que utilitza es basa en «inundació» (\est{flooding}), on cada dispositiu reenvia tots els missatges que rep, sempre que no sigui ell el destinetari, sense tenir en compte si ja els ha rebut o no. Aquest disseny tampoc considera la ubicació del destí final, fent que el missatge es transmeti per tota la xarxa. Aquests fets poden provocar un sobreús del canal, i un augment del consum energètic dels dispositius. 
+L'estratègia d'encaminament que utilitza es basa en «inundació» (\est{flooding}), on cada dispositiu reenvia tots els missatges que rep, sempre que no sigui ell el destinatari, sense tenir en compte si ja els ha rebut o no. Aquest disseny tampoc considera la ubicació del destí final, fent que el missatge es transmeti per tota la xarxa. Aquests fets poden provocar un sobreús del canal, i un augment del consum energètic dels dispositius. 
 
 Per intentar reduir aquest efecte, implementa un estil d'«inundació controlada». Quan un dispositiu rep un missatge, espera un temps proporcional a la relació senyal soroll (\acro{snr}) del missatge rebut abans de retransmetre, i cance\l.la l'enviament si un node realitza la transmissió abans. Així, un dispositiu més proper a l'origen (major \acro{snr}) esperarà més temps que un de llunyà i, per tant, el missatge el retransmetrà únicament el dispositiu llunyà. És cert que això redueix el nombre de transmissions que realitza cada dispositiu, però no evita que el missatge es retransmeti per tota la xarxa. 
 
@@ -367,7 +367,7 @@ Finalment, per evitar processar missatges duplicats, el receptor guarda en una c
 % « »
 La recepció de trames es realitza mitjançant el \est{callback} de la capa d'abstracció LoRa. En rebre una trama, es verifica el \acro{crc}; si no és correcte, s'ignora el missatge, ja que no podem assegurar que cap de les dades rebudes sigui correcta.
 
-Seguidament es verifica si el dispositiu és el destinetari de la trama. Si no ho és, no és necessari continuar; en cas afirmatiu, es determina si la trama és de reconeixement, comprovant el bit d'\acro{ack} dels \est{flags}, i comparant l'identificador de la trama rebuda amb el de l'enviada. Si no s'havia realitzat cap transmissió prèvia, el missatge es considera un error, i s'ignora. En cas contrari, es considera que la transmissió ha estat correcta, i es notifica a la capa superior a través d'un \est{callback}. Si el missatge rebut no és un missatge de reconeixement, es guarda l'identificador a la cua de trames rebudes, i es notifica a la capa superior a través d'un \est{callback}.
+Seguidament es verifica si el dispositiu és el destinatari de la trama. Si no ho és, no és necessari continuar; en cas afirmatiu, es determina si la trama és de reconeixement, comprovant el bit d'\acro{ack} dels \est{flags}, i comparant l'identificador de la trama rebuda amb el de l'enviada. Si no s'havia realitzat cap transmissió prèvia, el missatge es considera un error, i s'ignora. En cas contrari, es considera que la transmissió ha estat correcta, i es notifica a la capa superior a través d'un \est{callback}. Si el missatge rebut no és un missatge de reconeixement, es guarda l'identificador a la cua de trames rebudes, i es notifica a la capa superior a través d'un \est{callback}.
 
 S'exposa una interfície que permet a la capa superior obtenir les dades de la trama rebuda, la qual únicament s'hauria d'utilitzar després que s'hagi notificat a través de l'anterior \est{callback}. En cas contrari, les dades que s'obtinguin podrien ser incorrectes o duplicades.
 \subsubsection{Cues de transmissió i recepció}
@@ -1156,26 +1156,89 @@ En els següents apartats es presenten els diferents mecanismes de sincronitzaci
 % PARLAR DE SINCRONITZACIÓ INICIAL
 
 \subsection{Sincronització explícita}
-Com a sincronització explícita es considera l'ús d'un missatge especial i fàcilment identificable. Com s'ha comentat, el propòsit d'aquest missatge és el d'indicar l'instant d'inici de cicle de funcionament normal, i la d'eliminar l'error introduit pel rellotge intern.
+% 
+Com a sincronització explícita es considera l'ús d'un missatge especial i fàcilment identificable. Com s'ha comentat, el propòsit d'aquest missatge és indicar l'instant d'inici de cicle de funcionament normal, i eliminar l'error introduït pel rellotge intern.
 
-Quan un dispositiu inicia el mode de funcionament normal, espera rebre un missatge de sincronització. En el moment que el rep, inicia el seu cicle de funcionament, i propaga el missatge al següent dispositiu. Després d'això, pot realitzar la seva lectura, i generar el missatge de transmissió. Gràcies a que prèviament havia propagat el missatge de sincronització, qualsevol dels seus dos veïns immediats es troben sincronitzats ---o bé perquè és qui li ha enviat el missatge, o és a qui li ha propagat---, i per tant poden actuar com a encaminadors.
-El funcionament difereix quan el propi dispositiu és el de referència. En aquest cas, l'inici del cicle de funcionament es produeix instantàniament, enviant un missatge de sincronització que ell genera. Seguidament pot fer la seva lectura, i realitzar la transmissió.
+\subsubsection{Dades transmeses després de la sincronització}
+Quan un dispositiu inicia el mode de funcionament normal, espera rebre un missatge de sincronització. En el moment que el rep, inicia el seu cicle de funcionament, i propaga el missatge al següent dispositiu. Després d'això, pot realitzar la seva lectura, i generar la transmissió de les dades. Gràcies a que prèviament havia propagat el missatge de sincronització, qualsevol dels seus dos veïns immediats es troben sincronitzats ---bé perquè és qui li ha enviat el missatge, o és a qui li ha propagat---, i per tant poden actuar com a encaminadors.
 
-Així s'introdueix un fet important: el dispositiu de referència ha de despertar del mode de baix consum més tard que els dispositius a qui ha d'enviar el missatge de sincronització, ja que si no aquests no el rebrien. Aquest temps ha de ser, com a mínim, igual al temps de transmissió del missatge de sincronització. Una solució fàcil per aconseguir-ho és restant aquest temps del de baix consum, de manera que despertarà abans. 
+El funcionament canvia quan el dispositiu és el de referència. En aquest cas, l'inici del cicle de funcionament comença immediatament, generant i transmetent el missatge de sincronització. A continuació pot fer la seva lectura, i transmetre-la com qualsevol altre node.
 
-A la \autoref{fig:app_opcioSyncExp1} es pot veure representat el funcionament d'aquesta opció, on el dispositiu de referència és el \fitx{D1}. Es representen els missatges de sincronització com a \fitx{TX_S}, i els de dades com a \fitx{TX_D}. S'indica també quan cada dispositiu desperta i inicia el mode de baix consum (\fitx{W} i \fitx{S} respectivament).
+Aquest plantejamen introdueix un fet important: el dispositiu de referència ha de despertar del mode de baix consum més tard que els dispositius a qui ha d'enviar el missatge de sincronització, ja que si no aquests no el rebrien. Aquest temps ha de ser, com a mínim, igual al temps de transmissió del missatge de sincronització. Una solució fàcil per aconseguir-ho és restant aquest temps del de baix consum, de manera que despertarà abans. 
 
-\begin{table}
-\centering
-\begin{tabular}{llllllllllllllllllll}
-\textbf{D1} &  & WAKE & TX\_S & TX\_D &  &  & SLEEP &  &  &  &  &  &  &  &  &  &  &  &  \\
-D2 & WAKE &  & RX\_S & TX\_S & TX\_D &  &  & SLEEP &  &  &  &  &  &  &  &  &  &  &  \\
-D3 &  & WAKE &  & RX\_S & TX\_S & TX\_D &  &  & SLEEP &  &  &  &  &  &  &  &  &  &  \\
-D4 &  &  & WAKE &  & RX\_S & TX\_S & TX\_D &  &  & SLEEP &  &  &  &  &  &  &  &  &  \\
- &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & 
-\end{tabular}
-\end{table}
+A la \autoref{fig:app_opcioSyncExp1} es representa aquest comportament. El dispositiu de referència és \fitx{D1}, i el dispositiu amb capacitats LoRaWAN és el \fitx{D4}. Les dades es transmeten en direcció al \est{gateway}, creuant els dispositius intermedis fins a arribar a \fitx{D4}. Es representen els missatges de sincronització com a \fitx{TX_S}, i els de dades com a \fitx{TX_Dn}, on \fitx{n} indica l'origen de les dades. Les recepcions respectives d'aquests missatges s'identifiquen amb el prefix \fitx{RX}. S'indica també quan cada dispositiu desperta i inicia el mode de baix consum, amb línies verdes i vermelles respectivament, i amb el període de baix consum ressaltat en vermell clar. 
 
+Per simplicitat i per evitar sobrecarregar el diagrama, només s'han representat les recepcions dels missatges en el dispositiu destinatari; per exemple, per al missatge \fitx{TX_S} enviat per \fitx{D2}, només es mostra la recepció a \fitx{D3}, tot i que \fitx{D1} també el rebria. No obstant això, com que no és el destinatari final, l'ignoraria. A més, cal tenir en compte que cada transmissió representa una transmissió de la capa d'accés al medi, i per tant inclou també una part de recepció per rebre el reconeixement.
+
+% « »
+
+\begin{figure}
+    \centering
+    \setlength{\extrarowheight}{0pt}
+    \addtolength{\extrarowheight}{\aboverulesep}
+    \addtolength{\extrarowheight}{\belowrulesep}
+    \setlength{\aboverulesep}{0pt}
+    \setlength{\belowrulesep}{0pt}
+    \arrayrulecolor{black}
+    \resizebox{\linewidth}{!}{%
+        \begin{tabular}{!{\vrule width \heavyrulewidth}l!{\vrule width \heavyrulewidth}c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}c|c|c|c|cccc!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}c|c!{\vrule width \heavyrulewidth}} 
+        \toprule
+        \textbf{D1} & {\cellcolor[rgb]{1,0.847,0.808}} & TX\_S & TX\_D1 & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}} & {\cellcolor[rgb]{1,0.847,0.808}} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~ & TX\_S &  \\ 
+        \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}---~>{\arrayrulecolor[rgb]{1,0.847,0.808}}---->{\arrayrulecolor{black}}-~}
+        D2 & {\cellcolor[rgb]{1,0.847,0.808}} & RX\_S & TX\_S & TX\_D2 & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{} & {\cellcolor[rgb]{1,0.847,0.808}} & {\cellcolor[rgb]{1,0.847,0.808}} & {\cellcolor[rgb]{1,0.847,0.808}} & {\cellcolor[rgb]{1,0.847,0.808}} & RX\_S & … \\ 
+        \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}----~>{\arrayrulecolor[rgb]{1,0.847,0.808}}--->{\arrayrulecolor{black}}-~}
+        D3 & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}} & RX\_S & TX\_S & TX\_D3 & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{~~~~~~~~~~~ } & {\cellcolor[rgb]{1,0.847,0.808}} & {\cellcolor[rgb]{1,0.847,0.808}} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}} &  \\ 
+        \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}-->{\arrayrulecolor{black}}----~>{\arrayrulecolor{black}}->{\arrayrulecolor[rgb]{1,0.847,0.808}}---}
+        \textbf{\textcolor[rgb]{0,0.502,0}{D4}} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~} & RX\_S & TX\_S & \multicolumn{1}{c|}{TX\_D4} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{} & {\cellcolor[rgb]{1,0.847,0.808}} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~ \\
+        \arrayrulecolor{black}\toprule
+        \end{tabular}
+    }
+    \caption{Sincronització explícita. Transmissió de dades després de sincronització.}
+    \label{fig:app_opcioSyncExp1}
+\end{figure}
+
+Aquest mecanisme podria semblar correcte, però s'observen problemes quan es considera un fet mencionat anteriorment: el dispositiu veí que no és receptor també rep els missatges transmesos, provocant co\l.lisions. Per exemple, la transmissió de les dades de \fitx{D1} coincideix amb el missatge de sincronització enviar per \fitx{D2} a \fitx{D3}. En aquest moment \fitx{D2} es posa en recepció momentàniament per obtenir l'\acro{ack} de \fitx{D3}, però també rep la transmissió de \fitx{D1}. Això fa que cap de les dues transmissions sigui satisfactòria.
+
+Per tant, aquest mecanisme no és viable si dos nodes veïns transmeten alhora, fent que les  les co\l.lisions siguin inevitables.
+Es vol destacar que el diagrama no està complet ni representa totes les transmissions, sinó que únicament s'han mostrat les necessàries per trobar la primera co\l.lisió. 
+
+\subsubsection{Dades transmeses en blocs}
+Una segona opció consisteix en dividir les transmissions de dades en dos blocs: en el primer bloc transmeten els dispositius en posició imparell (\fitx{D1, D3}, etc.), i en el segon bloc els dispositius en posició parell (\fitx{D2, D4}, etc.). Per si sol això no és suficient, ja que dos veïns continuen transmetent simultàniament quan un envia el missatge de sincronització i l'altre les dades. Per evitar-ho, es pot aplicar un marge abans de transmetre les dades, de com a mínim el temps de transmissió del missatge de sincronització. 
+
+En aquesta situació és necessari també que el dispositiu de referència sigui el que té capacitats LoRaWAN: així, els nodes que transmetran primer les seves dades seran els més propers al \est{gateway}. En cas que la referència fos el dispositiu més allunyat (com en l'exemple anterior), els primers dispositius a enviar les dades serien els més allunyats, i haurien de transmetre les seves dades a través d'altres dispositius que no només han de transmetre les seves dades, sinó també propagar el missatge de sincronització. 
+
+Aquesta segona opció afegeix major complexitat, ja que ara el comportament dels nodes no és homogeni. A més, és necessari també determinar quan el segon bloc de dispositius poden iniciar les seves transmissions:
+\begin{itemize}
+    \item \emph{Temps aleatori}. Els dispositius del segon bloc esperen un temps aleatori després de propagar el missatge de sincronització. El més senzill d'implementar, però no garenteix que la transmissió no es realitzi en el bloc de temps imparell, i és totalment imprevisible.
+    \item \emph{Temps fix}. Esperen un temps preestablert després de propagar el missatge de sincronització. Aquest temps hauria de ser suficientment gran com per permetre que totes les transmissions dels nodes imparells anteriors a aquest s'hagin realitzat. En cas contrari, iniciaria la seva transmissió en el bloc de temps imparell, provocant co\l.lisions.
+\end{itemize}
+
+Així, en qualsevol dels casos, aquesta solució implica una complexitat molt major, ja que és necessari establir el temps d'inici de les transmissions de cada dispositiu, seguint una lògica semblant a \acro{tdma} (\emph{Time Division Multiple Access}), on l'accés al medi es divideix en ranures de temps. A la \autoref{fig:app_opcioSyncExp2} es representa aquest comportament, on cal recordar que \fitx{D1} ara és qui té capacitats LoRaWAN i també actua com a referència.
+
+\begin{figure}
+    \centering
+    \setlength{\extrarowheight}{0pt}
+    \addtolength{\extrarowheight}{\aboverulesep}
+    \addtolength{\extrarowheight}{\belowrulesep}
+    \setlength{\aboverulesep}{0pt}
+    \setlength{\belowrulesep}{0pt}
+    \arrayrulecolor{black}
+    \resizebox{\linewidth}{!}{%
+        \begin{tabular}{!{\vrule width \heavyrulewidth}c!{\vrule width \heavyrulewidth}c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}c|c|c|c|c|c|cc|c|c!{\vrule width \heavyrulewidth}} 
+    \toprule
+    \textbf{\textcolor[rgb]{0,0.502,0}{D1}} &  & TX\_S & \tiny marge & TX\_D1 & \multicolumn{1}{c}{} &  & RX\_D3 & \multicolumn{1}{c|}{TX\_D3} & ~~~~~~~~~~~ & RX\_D2 & TX\_D2 \\ 
+    \cline{3-5}\cline{7-9}\cline{11-12}
+    D2 &  & RX\_S & TX\_S & \multicolumn{1}{c}{} &  & RX\_D3 & TX\_D3 &  &  & TX\_D2 &  \\ 
+    \cline{3-8}\cline{11-12}
+    D3 & \multicolumn{1}{c}{} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{} & RX\_S & TX\_S & \tiny marge & TX\_D3 & \multicolumn{1}{c}{} &  & \multicolumn{1}{c}{} &  & RX\_D4 \\ 
+    \cline{4-7}\cline{12-12}
+    D4 & \multicolumn{1}{c}{~~~~~~~~~~} & \multicolumn{1}{c}{~~~~~~~~~~} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{~~~~~~~~~~} & RX\_S & TX\_S & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} &  & \multicolumn{1}{c}{} &  & TX\_D4 \\
+    \toprule
+    \end{tabular}
+    }
+    \caption{Sincronització explícita. Transmissió dades en blocs imparells/parells.}
+    \label{fig:app_opcioSyncExp2}
+\end{figure}
 \subsection{Sincronització implícita}
 % \subsection{Avantatges i inconvenients de cada enfocament}
 % \subsection{Compromisos entre consum i generalitat del protocol}
@@ -1200,27 +1263,29 @@ D4 &  &  & WAKE &  & RX\_S & TX\_S & TX\_D &  &  & SLEEP &  &  &  &  &  &  &  & 
 \begin{figure}
     \centering
     \resizebox{\linewidth}{!}{%
-        \begin{tabular}{l||cccccccccccccccccc} 
-            \hhline{~|t|~~~~~~~----~~~~~~~}
-            \textbf{N1} &                          &                            &                            &                            &                            &                            & \multicolumn{1}{c|}{}      & \multicolumn{1}{c|}{RX2:9} & \multicolumn{1}{c|}{TX1:9} & \multicolumn{1}{c|}{{\cellcolor[rgb]{0.753,0.749,0.737}}RXG} & \multicolumn{1}{c|}{{\cellcolor[rgb]{0.753,0.749,0.737}}TXG} &                                                              &                                                              &                          &                          &                          &                          &                           \\ 
-            \hhline{~||~~~~~~------~~~~~~}
-            \textbf{N2} &                          &                            &                            &                            &                            & \multicolumn{1}{c|}{}      & \multicolumn{1}{c|}{RX3:9} & \multicolumn{1}{c|}{TX2:9} &                            & \multicolumn{1}{c|}{}                                        & \multicolumn{1}{c|}{{\cellcolor[rgb]{0.753,0.749,0.737}}RXG} & \multicolumn{1}{c|}{{\cellcolor[rgb]{0.753,0.749,0.737}}TXG} &                                                              &                          &                          &                          &                          &                           \\ 
-            \hhline{~||~~~~~---~~---~~~~~}
-            \textbf{N3} &                          &                            &                            &                            & \multicolumn{1}{c|}{}      & \multicolumn{1}{c|}{RX4:9} & \multicolumn{1}{c|}{TX3:9} &                            &                            &                                                              & \multicolumn{1}{c|}{}                                        & \multicolumn{1}{c|}{{\cellcolor[rgb]{0.753,0.749,0.737}}RXG} & \multicolumn{1}{c|}{{\cellcolor[rgb]{0.753,0.749,0.737}}TXG} &                          &                          &                          &                          &                           \\ 
-            \hhline{~||~~~~---~~~~---~~~~}
-            \textbf{N4} &                          &                            &                            & \multicolumn{1}{c|}{}      & \multicolumn{1}{c|}{RX5:9} & \multicolumn{1}{c|}{TX4:9} &                            &                            &                            &                                                              &                                                              & \multicolumn{1}{c|}{}                                        & \multicolumn{1}{c|}{{\cellcolor[rgb]{0.753,0.749,0.737}}RXG} & \multicolumn{1}{c|}{TXG} &                          &                          &                          &                           \\ 
-            \cline{5-7}\cline{14-16}
-            \textbf{N5} &                          &                            & \multicolumn{1}{c|}{}      & \multicolumn{1}{c|}{RX6:9} & \multicolumn{1}{c|}{TX5:9} &                            &                            &                            &                            &                                                              &                                                              &                                                              & \multicolumn{1}{c|}{}                                        & \multicolumn{1}{c|}{RXG} & \multicolumn{1}{c|}{TXG} &                          &                          &                           \\ 
-            \cline{4-6}\cline{15-17}
-            \textbf{N6} &                          & \multicolumn{1}{c|}{}      & \multicolumn{1}{c|}{RX7:9} & \multicolumn{1}{c|}{TX6:9} &                            &                            &                            &                            &                            &                                                              &                                                              &                                                              &                                                              & \multicolumn{1}{c|}{}    & \multicolumn{1}{c|}{RXG} & \multicolumn{1}{c|}{TXG} &                          &                           \\ 
-            \cline{3-5}\cline{16-18}
-            \textbf{N7} & \multicolumn{1}{c|}{}    & \multicolumn{1}{c|}{RX8:9} & \multicolumn{1}{c|}{TX7:9} &                            &                            &                            &                            &                            &                            &                                                              &                                                              &                                                              &                                                              &                          & \multicolumn{1}{c|}{}    & \multicolumn{1}{c|}{RXG} & \multicolumn{1}{c|}{TXG} &                           \\ 
-            \cline{2-4}\cline{17-19}
-            \textbf{N8} & \multicolumn{1}{c|}{RX9} & \multicolumn{1}{c|}{TX8:9} &                            &                            &                            &                            &                            &                            &                            &                                                              &                                                              &                                                              &                                                              &                          &                          & \multicolumn{1}{c|}{}    & \multicolumn{1}{c|}{RXG} & \multicolumn{1}{c|}{TXG}  \\ 
-            \cline{2-3}\cline{18-19}
-            \textcolor[rgb]{0.1,1,0.2}{\textbf{N9}} & \multicolumn{1}{c|}{TX9} &                            &                            &                            &                            &                            &                            &                            &                            &                                                              &                                                              &                                                              &                                                              &                          &                          &                          & \multicolumn{1}{c|}{}    & \multicolumn{1}{c|}{RXG}  \\
-            \cline{2-2}\cline{19-19}
-        \end{tabular}
+        \begin{tabular}{|>{\centering\arraybackslash}p{1.5cm}
+                |>{\centering\arraybackslash}p{1.5cm}
+                >{\centering\arraybackslash}p{1.5cm}
+                >{\centering\arraybackslash}p{1.5cm}
+                |>{\centering\arraybackslash}p{1.5cm}
+                >{\centering\arraybackslash}p{1.5cm}
+                >{\centering\arraybackslash}p{1.5cm}
+                |>{\centering\arraybackslash}p{1.5cm}
+                >{\centering\arraybackslash}p{1.5cm}
+                |>{\centering\arraybackslash}p{1.5cm}
+                >{\centering\arraybackslash}p{1.5cm}
+                >{\centering\arraybackslash}p{1.5cm}
+                >{\centering\arraybackslash}p{1.5cm}|}
+\hline
+\textbf{D1} &  & & W & TX\_S & TX\_D1 & &  & \multicolumn{1}{!{\color[rgb]{0.875,0.322,0.325}\vrule}c!{\color[rgb]{0.875,0.322,0.325}\vrule}}{S} &  &  &  &  \\ 
+\cline{5-7}
+D2 & \multicolumn{1}{!{\color[rgb]{0.451,0.804,0.443}\vrule}p{1.5cm}}{} & W &  & RX\_S & TX\_S & TX\_D2 &  & \multicolumn{1}{!{\color[rgb]{0.875,0.322,0.325}\vrule}c!{\color[rgb]{0.875,0.322,0.325}\vrule}}{S} &  &  &  &  \\ 
+\cline{5-8}
+D3 &  & \multicolumn{1}{!{\color[rgb]{0.451,0.804,0.443}\vrule}p{1.5cm}}{} & W &  & RX\_S & TX\_S & TX\_D3 & \multicolumn{1}{!{\color[rgb]{0.875,0.322,0.325}\vrule}c!{\color[rgb]{0.875,0.322,0.325}\vrule}}{S} &  &  &  &  \\ 
+\cline{6-9}
+D4 &  &  & \multicolumn{1}{!{\color[rgb]{0.451,0.804,0.443}\vrule}p{1.5cm}}{W} &  & RX\_S & TX\_S & TX\_D4 & \multicolumn{1}{!{\color[rgb]{0.875,0.322,0.325}\vrule}c!{\color[rgb]{0.875,0.322,0.325}\vrule}}{S} &  &  &  &  \\ 
+\hline
+\end{tabular}
     }
     \caption{Model sense missatge de sincronització, amb dades acumulatives}
     \label{fig:noSyncAcumulatiu}
@@ -1240,7 +1305,17 @@ D4 &  &  & WAKE &  & RX\_S & TX\_S & TX\_D &  &  & SLEEP &  &  &  &  &  &  &  & 
 
 
 % ABANS D'ENTREGAR MIRAR QUE L·L ESTIGUIN BEN ESCRITES AMB \l.l
+% // TODO: Falta diagrama FSM de capa MAC
+% // TODO: Diagrama funcionament transport
 
+% « »
+% « »
+% « »
+% « »
+% « »
+% « »
+% « »
+% « »
 
 \end{document}
 
@@ -1249,3 +1324,5 @@ D4 &  &  & WAKE &  & RX\_S & TX\_S & TX\_D &  &  & SLEEP &  &  &  &  &  &  &  & 
 %%% TeX-master: t
 %%% LaTeX-biblatex-use-Biber: t
 %%% End:
+
+
