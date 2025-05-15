@@ -1126,7 +1126,7 @@ Per tal de reduir el consum, podem tenir en compte les consideracions 1 i 2, que
 Podem dividir el cicle de funcionament dels dispositius en dues parts:
 \begin{enumerate}
     \item \emph{Baix consum}. És el temps on els dispositius es troben en mode de baix consum, i no realitzen cap altra funció. En aquest estat la ràdio no funciona, i per tant no poden realitzar cap funció d'encaminament.
-    \item \emph{Funcionament}. És el temps on els dispositius es troben actius, realitzen la seva lectura, generen el missatge de transmissió, i actuen com a encaminadors d'altres dispositius ---en aquest cas, únicament del dispositiu anterior a aquest---. 
+    \item \emph{Funcionament normal}. És el temps on els dispositius es troben actius, realitzen la seva lectura, generen el missatge de transmissió, i actuen com a encaminadors d'altres dispositius ---en aquest cas, únicament del dispositiu anterior a aquest---. 
 \end{enumerate}
 
 En el període de funcionament, és important que els dispositius es trobin actius i en mode de recepció, per mantenir les funcionalitats d'encaminament. Per tal d'aconseguir-ho, els dispositius han de trobar-se sincronitzats, fent que es trobin en el mateix estat de funcionament al mateix temps. Això es pot aconseguir, principalment, mitjançant dues estratègies:
@@ -1170,6 +1170,8 @@ A la \autoref{fig:app_opcioSyncExp1} es representa aquest comportament. El dispo
 
 Per simplicitat i per evitar sobrecarregar el diagrama, només s'han representat les recepcions dels missatges en el dispositiu destinatari; per exemple, per al missatge \fitx{TX_S} enviat per \fitx{D2}, només es mostra la recepció a \fitx{D3}, tot i que \fitx{D1} també el rebria. No obstant això, com que no és el destinatari final, l'ignoraria. A més, cal tenir en compte que cada transmissió representa una transmissió de la capa d'accés al medi, i per tant inclou també una part de recepció per rebre el reconeixement.
 
+S'observa com el la durada del cicle és de vuit unitats de temps, sent dues d'aquestes destinades al funcionament normal (després de rebre i propagar la sincronització). Es mostra com els dispositiu que no són el de referència es troben fora del mode de baix consum durant una unitat de temps més: és així ja que en aquesta reben la sincronització.
+
 % « »
 
 \begin{figure}
@@ -1198,17 +1200,20 @@ Per tant, aquest mecanisme no és viable si dos nodes veïns transmeten alhora, 
 Es vol destacar que el diagrama no està complet ni representa totes les transmissions, sinó que únicament s'han mostrat les necessàries per trobar la primera co\l.lisió. 
 
 \subsubsection{Dades transmeses en blocs}
-Una segona opció consisteix en dividir les transmissions de dades en dos blocs: en el primer bloc transmeten els dispositius en posició imparell (\fitx{D1, D3}, etc.), i en el segon bloc els dispositius en posició parell (\fitx{D2, D4}, etc.). Per si sol això no és suficient, ja que dos veïns continuen transmetent simultàniament quan un envia el missatge de sincronització i l'altre les dades. Per evitar-ho, es pot aplicar un marge abans de transmetre les dades, de com a mínim el temps de transmissió del missatge de sincronització. 
+Una segona opció consisteix en dividir les transmissions de dades en dos blocs: en el primer bloc transmeten els dispositius en posició senar (\fitx{D1, D3}, etc.), i en el segon bloc els dispositius en posició parell (\fitx{D2, D4}, etc.). Per si sol això no és suficient, ja que dos veïns continuen transmetent simultàniament quan un envia el missatge de sincronització i l'altre les dades. Per evitar-ho, es pot aplicar un marge abans de transmetre les dades, de com a mínim el temps de transmissió del missatge de sincronització. 
 
-En aquesta situació és necessari també que el dispositiu de referència sigui el que té capacitats LoRaWAN: així, els nodes que transmetran primer les seves dades seran els més propers al \est{gateway}. En cas que la referència fos el dispositiu més allunyat (com en l'exemple anterior), els primers dispositius a enviar les dades serien els més allunyats, i haurien de transmetre les seves dades a través d'altres dispositius que no només han de transmetre les seves dades, sinó també propagar el missatge de sincronització. 
+En aquest escenari és necessari també que el dispositiu de referència sigui el que té capacitats LoRaWAN. Això permet que els nodes més propers al \est{gateway} siguin els primers a transmetre les seves dades. En cas que la referència fos el dispositiu més allunyat (com en l'exemple anterior), els primers a transmetre haurien d'enviar les dades al node que s'acaba de sincronitzar. Això pot generar problemes, ja que si el dispositiu es troba en el primer bloc de transmissió, també voldrà enviar les seves dades i, a més, haurà d'encaminar les dades anteriors. Aquest fet s'accentua com més proper es el dispositiu al \est{gateway}, ja que ha de realitzar molts més encaminaments.
 
-Aquesta segona opció afegeix major complexitat, ja que ara el comportament dels nodes no és homogeni. A més, és necessari també determinar quan el segon bloc de dispositius poden iniciar les seves transmissions:
+Aquesta segona opció, tot i reduir el risc de co\l.lisions, afegeix major complexitat, sent necessari determinar quan el segon bloc de dispositius poden iniciar les seves transmissions:
 \begin{itemize}
-    \item \emph{Temps aleatori}. Els dispositius del segon bloc esperen un temps aleatori després de propagar el missatge de sincronització. El més senzill d'implementar, però no garenteix que la transmissió no es realitzi en el bloc de temps imparell, i és totalment imprevisible.
-    \item \emph{Temps fix}. Esperen un temps preestablert després de propagar el missatge de sincronització. Aquest temps hauria de ser suficientment gran com per permetre que totes les transmissions dels nodes imparells anteriors a aquest s'hagin realitzat. En cas contrari, iniciaria la seva transmissió en el bloc de temps imparell, provocant co\l.lisions.
+    \item \emph{Temps aleatori}. Els dispositius del segon bloc esperen un temps aleatori després de propagar el missatge de sincronització. El més senzill d'implementar, però no garenteix que la transmissió no es realitzi en el bloc de transmissions senar, i és totalment imprevisible.
+    \item \emph{Temps fix}. Esperen un temps preestablert després de propagar el missatge de sincronització. Aquest temps hauria de ser suficientment gran com per permetre que totes les transmissions dels nodes senars anteriors a aquest s'hagin realitzat. En cas contrari, iniciaria la seva transmissió en el bloc de temps incorrecte, provocant co\l.lisions.
 \end{itemize}
 
-Així, en qualsevol dels casos, aquesta solució implica una complexitat molt major, ja que és necessari establir el temps d'inici de les transmissions de cada dispositiu. Segeuxi una lògica semblant a \acro{tdma} (\emph{Time Division Multiple Access}), on l'accés al medi es divideix en ranures de temps. A la \autoref{fig:app_opcioSyncExp2} es representa aquest comportament, on cal recordar que \fitx{D1} ara és qui té capacitats LoRaWAN i també actua com a referència.
+
+En qualsevol dels dos casos, aquesta solució implica una coordinació temporal molt més precisa, ja que cal definir per a cada node quan ha de transmetre i quan pot tornar al mode de baix consum. El funcionament resultant s’assembla molt a un esquema de \acro{tdma} (Time Division Multiple Access), on cada dispositiu disposa d’un interval de temps específic per accedir al canal.
+
+A la \autoref{fig:app_opcioSyncExp2} es representa aquest comportament, on cal recordar que \fitx{D1} ara és qui té capacitats LoRaWAN i també actua com a referència. El diagrama no representa totes les transmissions, ja que això el faria massa complex i complicat de llegir; per aquest motiu es representen únicament les del bloc senar, i les inicials del bloc parell.
 
 \begin{figure}
     \centering
@@ -1224,16 +1229,30 @@ Així, en qualsevol dels casos, aquesta solució implica una complexitat molt ma
 \textbf{\textcolor[rgb]{0,0.502,0}{D1}} & {\cellcolor[rgb]{1,0.847,0.808}} & TX\_S & \tiny marge & TX\_D1 & \multicolumn{1}{c}{} &  & RX\_D3 & \multicolumn{1}{c|}{TX\_D3} & ~~~~~~~~~~~ & RX\_D2 & TX\_D2 \\ 
 \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}---~---~--}
 D2 & {\cellcolor[rgb]{1,0.847,0.808}} & RX\_S & TX\_S & \multicolumn{1}{c}{} &  & RX\_D3 & TX\_D3 &  &  & TX\_D2 &  \\ 
-\hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}------~~--}
+\hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}---~--~~--}
 D3 & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}} & RX\_S & TX\_S & \tiny marge & TX\_D3 & \multicolumn{1}{c}{} &  & \multicolumn{1}{c}{} &  & RX\_D4 \\ 
 \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}-->{\arrayrulecolor{black}}----~~~~-}
-D4 & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~} & RX\_S & TX\_S & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} &  & \multicolumn{1}{c}{} &  & TX\_D4 \\
+D4 & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~} & RX\_S & TX\_S & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} &  & \multicolumn{1}{c}{} &  & TX\_D4 \\ 
 \toprule
+\multicolumn{1}{l}{} & \multicolumn{1}{l}{} & \multicolumn{1}{l}{} & \multicolumn{1}{c!{\color[rgb]{0.753,0.753,0.753}\vrule width \heavyrulewidth}}{} & \multicolumn{5}{c!{\color[rgb]{0.753,0.753,0.753}\vrule width \heavyrulewidth}}{\textcolor[rgb]{0.753,0.753,0.753}{Bloc senar}} & \multicolumn{1}{l!{\color[rgb]{0.753,0.753,0.753}\vrule width \heavyrulewidth}}{} & \multicolumn{2}{c}{\textcolor[rgb]{0.753,0.753,0.753}{Bloc parell...}}
 \end{tabular}
 }
-    \caption{Sincronització explícita. Transmissió dades en blocs imparells/parells.}
+    \caption{Sincronització explícita. Transmissió dades en blocs senars/parells.}
     \label{fig:app_opcioSyncExp2}
 \end{figure}
+
+S'observa com, gràcies a que cada dispositiu té «assignat» els seu instant de temps per fer la seva transmissió, i gràcies al marge de després de propagar la sincronització, s'eviten les co\l.lisions tant entre dades, com entre dades i sincronització. Tot i això, aquesta solució no és viable, pels motius següents:
+\begin{enumerate}
+    \item Cada dispositiu ha de seguir un comportament específic i diferent, amb instants de transmissió i d'inici de baix consum diferents. Això complica la implementació i el manteniment.
+    \item La durada del cicle de funcionament normal ---des que surt del mode de baix consum fins que torna a iniciar-lo--- és molt elevat. El node més proper al \est{gateway} ha d'esperar-se a que el node més allunyat realitzi la seva transmissió, i aquesta s'encamini a través de tota la xarxa.  
+    \item El nombre de transmissions que realitza cada dispositiu no és homogeni. Els nodes més propers al \est{gateway} en realitzaran més (tantes com nodes anteriors a ell hi hagi). Tenint en compte que les transmissions tenen un consum energètic elevat, fa que el consum tampoc sigui homogeni. Aquest fet comporta més complexitat de manteniment ja que, per exemple, comporta a no poder modificar totes les bateries dels dispositius a la mateixa vegada, ja que no han consumit el mateix. És cert que es pot intentar evitar utilitzant bateries de capacitats diferents, però llavors implicaria també un disseny previ més complex.
+    \item No considera la possibilitat que una transmissió pugui fallar, resultant en retransmissions. A causa de 
+\end{enumerate}
+
+
+\subsubsection{Altres opcions}
+Durant el disseny dels anteriors mecanismes de sincronització, s'han considerat altres opcions, com ara la de utilitzar el node central com a referència, i que aquest generi un missatge de sincronització per els seus dos veïns.
+
 \subsection{Sincronització implícita}
 % \subsection{Avantatges i inconvenients de cada enfocament}
 % \subsection{Compromisos entre consum i generalitat del protocol}
