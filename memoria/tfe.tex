@@ -1173,26 +1173,21 @@ Per simplicitat i per evitar sobrecarregar el diagrama, només s'han representat
 % « »
 
 \begin{figure}
-    \centering
-    \setlength{\extrarowheight}{0pt}
-    \addtolength{\extrarowheight}{\aboverulesep}
-    \addtolength{\extrarowheight}{\belowrulesep}
-    \setlength{\aboverulesep}{0pt}
-    \setlength{\belowrulesep}{0pt}
-    \arrayrulecolor{black}
-    \resizebox{\linewidth}{!}{%
-        \begin{tabular}{!{\vrule width \heavyrulewidth}l!{\vrule width \heavyrulewidth}c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}c|c|c|c|cccc!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}c|c!{\vrule width \heavyrulewidth}} 
-        \toprule
-        \textbf{D1} & {\cellcolor[rgb]{1,0.847,0.808}} & TX\_S & TX\_D1 & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}} & {\cellcolor[rgb]{1,0.847,0.808}} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~ & TX\_S &  \\ 
-        \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}---~>{\arrayrulecolor[rgb]{1,0.847,0.808}}---->{\arrayrulecolor{black}}-~}
-        D2 & {\cellcolor[rgb]{1,0.847,0.808}} & RX\_S & TX\_S & TX\_D2 & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{} & {\cellcolor[rgb]{1,0.847,0.808}} & {\cellcolor[rgb]{1,0.847,0.808}} & {\cellcolor[rgb]{1,0.847,0.808}} & {\cellcolor[rgb]{1,0.847,0.808}} & RX\_S & … \\ 
-        \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}----~>{\arrayrulecolor[rgb]{1,0.847,0.808}}--->{\arrayrulecolor{black}}-~}
-        D3 & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}} & RX\_S & TX\_S & TX\_D3 & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{~~~~~~~~~~~ } & {\cellcolor[rgb]{1,0.847,0.808}} & {\cellcolor[rgb]{1,0.847,0.808}} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}} &  \\ 
-        \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}-->{\arrayrulecolor{black}}----~>{\arrayrulecolor{black}}->{\arrayrulecolor[rgb]{1,0.847,0.808}}---}
-        \textbf{\textcolor[rgb]{0,0.502,0}{D4}} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~} & RX\_S & TX\_S & \multicolumn{1}{c|}{TX\_D4} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{} & {\cellcolor[rgb]{1,0.847,0.808}} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~ \\
-        \arrayrulecolor{black}\toprule
-        \end{tabular}
-    }
+\centering
+\setlength{\extrarowheight}{0pt}
+\addtolength{\extrarowheight}{\aboverulesep}
+\addtolength{\extrarowheight}{\belowrulesep}
+\setlength{\aboverulesep}{0pt}
+\setlength{\belowrulesep}{0pt}
+\arrayrulecolor{black}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{!{\vrule width \heavyrulewidth}l!{\vrule width \heavyrulewidth}c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}c|c|c|c|cccc!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}c|c!{\vrule width \heavyrulewidth}} \toprule
+\textbf{D1} & {\cellcolor[rgb]{1,0.847,0.808}} & TX\_S & TX\_D1 & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}} & {\cellcolor[rgb]{1,0.847,0.808}} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~ & TX\_S &  \\ \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}---~>{\arrayrulecolor[rgb]{1,0.847,0.808}}---->{\arrayrulecolor{black}}-~}
+D2 & {\cellcolor[rgb]{1,0.847,0.808}} & RX\_S & TX\_S & TX\_D2 & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{} & {\cellcolor[rgb]{1,0.847,0.808}} & {\cellcolor[rgb]{1,0.847,0.808}} & {\cellcolor[rgb]{1,0.847,0.808}} & {\cellcolor[rgb]{1,0.847,0.808}} & RX\_S & … \\ \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}----~>{\arrayrulecolor[rgb]{1,0.847,0.808}}--->{\arrayrulecolor{black}}-~}
+D3 & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}} & RX\_S & TX\_S & TX\_D3 & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{~~~~~~~~~~~ } & {\cellcolor[rgb]{1,0.847,0.808}} & {\cellcolor[rgb]{1,0.847,0.808}} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}} &  \\ \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}-->{\arrayrulecolor{black}}----~>{\arrayrulecolor[rgb]{1,0.847,0.808}}----}
+\textbf{\textcolor[rgb]{0,0.502,0}{D4}} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~} & RX\_S & TX\_S & \multicolumn{1}{c|}{TX\_D4} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{} & {\cellcolor[rgb]{1,0.847,0.808}} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~ \\ \arrayrulecolor{black}\toprule
+\end{tabular}
+}
     \caption{Sincronització explícita. Transmissió de dades després de sincronització.}
     \label{fig:app_opcioSyncExp1}
 \end{figure}
@@ -1213,29 +1208,29 @@ Aquesta segona opció afegeix major complexitat, ja que ara el comportament dels
     \item \emph{Temps fix}. Esperen un temps preestablert després de propagar el missatge de sincronització. Aquest temps hauria de ser suficientment gran com per permetre que totes les transmissions dels nodes imparells anteriors a aquest s'hagin realitzat. En cas contrari, iniciaria la seva transmissió en el bloc de temps imparell, provocant co\l.lisions.
 \end{itemize}
 
-Així, en qualsevol dels casos, aquesta solució implica una complexitat molt major, ja que és necessari establir el temps d'inici de les transmissions de cada dispositiu, seguint una lògica semblant a \acro{tdma} (\emph{Time Division Multiple Access}), on l'accés al medi es divideix en ranures de temps. A la \autoref{fig:app_opcioSyncExp2} es representa aquest comportament, on cal recordar que \fitx{D1} ara és qui té capacitats LoRaWAN i també actua com a referència.
+Així, en qualsevol dels casos, aquesta solució implica una complexitat molt major, ja que és necessari establir el temps d'inici de les transmissions de cada dispositiu. Segeuxi una lògica semblant a \acro{tdma} (\emph{Time Division Multiple Access}), on l'accés al medi es divideix en ranures de temps. A la \autoref{fig:app_opcioSyncExp2} es representa aquest comportament, on cal recordar que \fitx{D1} ara és qui té capacitats LoRaWAN i també actua com a referència.
 
 \begin{figure}
     \centering
-    \setlength{\extrarowheight}{0pt}
-    \addtolength{\extrarowheight}{\aboverulesep}
-    \addtolength{\extrarowheight}{\belowrulesep}
-    \setlength{\aboverulesep}{0pt}
-    \setlength{\belowrulesep}{0pt}
-    \arrayrulecolor{black}
-    \resizebox{\linewidth}{!}{%
-        \begin{tabular}{!{\vrule width \heavyrulewidth}c!{\vrule width \heavyrulewidth}c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}c|c|c|c|c|c|cc|c|c!{\vrule width \heavyrulewidth}} 
-    \toprule
-    \textbf{\textcolor[rgb]{0,0.502,0}{D1}} &  & TX\_S & \tiny marge & TX\_D1 & \multicolumn{1}{c}{} &  & RX\_D3 & \multicolumn{1}{c|}{TX\_D3} & ~~~~~~~~~~~ & RX\_D2 & TX\_D2 \\ 
-    \cline{3-5}\cline{7-9}\cline{11-12}
-    D2 &  & RX\_S & TX\_S & \multicolumn{1}{c}{} &  & RX\_D3 & TX\_D3 &  &  & TX\_D2 &  \\ 
-    \cline{3-8}\cline{11-12}
-    D3 & \multicolumn{1}{c}{} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{} & RX\_S & TX\_S & \tiny marge & TX\_D3 & \multicolumn{1}{c}{} &  & \multicolumn{1}{c}{} &  & RX\_D4 \\ 
-    \cline{4-7}\cline{12-12}
-    D4 & \multicolumn{1}{c}{~~~~~~~~~~} & \multicolumn{1}{c}{~~~~~~~~~~} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{~~~~~~~~~~} & RX\_S & TX\_S & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} &  & \multicolumn{1}{c}{} &  & TX\_D4 \\
-    \toprule
-    \end{tabular}
-    }
+\setlength{\extrarowheight}{0pt}
+\addtolength{\extrarowheight}{\aboverulesep}
+\addtolength{\extrarowheight}{\belowrulesep}
+\setlength{\aboverulesep}{0pt}
+\setlength{\belowrulesep}{0pt}
+\arrayrulecolor{black}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{!{\vrule width \heavyrulewidth}c!{\vrule width \heavyrulewidth}c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}c|c|c|c|c|c|cc|c|c!{\vrule width \heavyrulewidth}} 
+\toprule
+\textbf{\textcolor[rgb]{0,0.502,0}{D1}} & {\cellcolor[rgb]{1,0.847,0.808}} & TX\_S & \tiny marge & TX\_D1 & \multicolumn{1}{c}{} &  & RX\_D3 & \multicolumn{1}{c|}{TX\_D3} & ~~~~~~~~~~~ & RX\_D2 & TX\_D2 \\ 
+\hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}---~---~--}
+D2 & {\cellcolor[rgb]{1,0.847,0.808}} & RX\_S & TX\_S & \multicolumn{1}{c}{} &  & RX\_D3 & TX\_D3 &  &  & TX\_D2 &  \\ 
+\hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}------~~--}
+D3 & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}} & RX\_S & TX\_S & \tiny marge & TX\_D3 & \multicolumn{1}{c}{} &  & \multicolumn{1}{c}{} &  & RX\_D4 \\ 
+\hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}-->{\arrayrulecolor{black}}----~~~~-}
+D4 & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~} & RX\_S & TX\_S & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} &  & \multicolumn{1}{c}{} &  & TX\_D4 \\
+\toprule
+\end{tabular}
+}
     \caption{Sincronització explícita. Transmissió dades en blocs imparells/parells.}
     \label{fig:app_opcioSyncExp2}
 \end{figure}
