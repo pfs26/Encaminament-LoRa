@@ -121,7 +121,7 @@ Un dels models més coneguts és el model \acro{osi}, definit per set capes. Tot
 
 En sistemes reals, el model més utilitzat és el model \acro{tcp/ip}, que estableix les bases d'Internet. Està format per quatre capes:
 \begin{enumerate}
-    \item \emph{Enllaç}. És la capa de més baix nivell. S'encarrega de la comunicació entre dispositius d'una mateixa xarxa ---és a dir, es poden comunicar directament---, i de la detecció i correció d'errors produits en la comunicació. També gestiona l'accés al medi físic per on es transmeten les dades, que sovint és compartit amb altres dispositius.
+    \item \emph{Enllaç}. És la capa de més baix nivell. S'encarrega de la comunicació entre dispositius d'una mateixa xarxa ---és a dir, es poden comunicar directament---, i de la detecció i correcció d'errors produïts en la comunicació. També gestiona l'accés al medi físic per on es transmeten les dades, que sovint és compartit amb altres dispositius.
     \item \emph{Xarxa}. Gestiona la comunicació entre dispositius que es troben en xarxes diferents i, per tant, no es poden comunicar directament. Per fer-ho, s'utilitzen dispositius intermedis, coneguts com a encaminadors (\est{routers}), que determinen la ruta més eficient per fer arribar les dades al seu destí.
     \item \emph{Transport}. Defineix la connexió d'extrem a extrem entre els dispositius origen i destí i, si és necessari, que la transmissió sigui fiable. Els protocols d'aquesta capa poden oferir mecanismes com l'ordenació de missatges, l'eliminació de missatges duplicats i la gestió de congestió. Els dos protocols més coneguts d'aquesta capa són \acro{tcp}, que garanteix la transmissió fiable de dades mitjançant confirmacions i retransmissions, i \acro{udp}, que no garanteix fiabilitat, però és més eficient per aplicacions en temps real com el contingut en estríming o videjocs.
     \item \emph{Aplicació}. És la capa més alta i propera a l'usuari final. Defineix els protocols que utilitzen les aplicacions per comunicar-se a través de la xarxa, com ara \acro{http}, utilitzat per a la navegació web, o protocols de suport, com ara \acro{dns}, per a la resolució de noms de domini.
@@ -139,13 +139,13 @@ El nom de \emph{LoRa} prové de l'anglès \est{Long Range}. És una tecnologia d
 
 Utilitza freqüència sub-GHz en bandes \acro{ism} ---\emph{Industrial, Scientific and Medical}---, que són bandes de freqüència lliures de llicència. Això permet que qualsevol persona pugui utilitzar la tecnologia sense necessitat d'obtenir una llicència. Malgrat això, existeixen limitacions legals, com la potència màxima de transmissió o la quantitat de dades que es poden transmetre en un període de temps determinat. Per a més informació, es pot consultar \ref{subsec:limitacions_legals}.
 
-Per assolir una comunicació de llarg abast, LoRa utilitza modulació de \emph{chirp spread spectrum} (\acro{css}), que permet una comunicació robusta i fiable en entorns amb interferències. Aquesta modulació es basa en codificar cada símbol com un senyal que s'escampa per tot l'ample de banda disponible, augmentant (o disminuint) de forma lineal la freqüència al llarg del temps. Gràcies a que la freqüència varia de forma lineal, també és resistent a l'efecte \emph{Doppler}, com s'ha estudiat a \cite{doroshkin_experimental_2019}. Una representació visual del funcionament de la modulació \acro{css} es pot veure a \cite{richard_wenner_lora_2017}.
+Per assolir una comunicació de llarg abast, LoRa utilitza modulació de \emph{chirp spread spectrum} (\acro{css}), que permet una comunicació robusta i fiable en entorns amb interferències. Aquesta modulació es basa a codificar cada símbol com un senyal que s'escampa per tot l'ample de banda disponible, augmentant (o disminuint) de forma lineal la freqüència al llarg del temps. Gràcies al fet que la freqüència varia de forma lineal, també és resistent a l'efecte \emph{Doppler}, com s'ha estudiat a \cite{doroshkin_experimental_2019}. Una representació visual del funcionament de la modulació \acro{css} es pot veure a \cite{richard_wenner_lora_2017}.
 
 Consta de diversos paràmetres que es poden ajustar per adaptar la comunicació a diferents necessitats:
 \begin{itemize}
     \item \emph{Ample de banda}. És l'ample de banda (\acro{bw}) del canal de transmissió, sovint de \SI{125}{\kHz}, però també pot ser de \SI{250}{\kHz} o \SI{500}{\kHz}. Un ample de banda més gran permet una major velocitat de transmissió, però redueix la sensibilitat de recepció i, per tant, el rang de comunicació.
     \item \emph{Data rate}. És la velocitat de transmissió de dades (\acro{dr}), que depèn de l'ample de banda i del factor d'espargiment. Un data rate més alt permet una major velocitat de transmissió, però redueix la sensibilitat de recepció i, per tant, el rang de comunicació.
-    \item \emph{Spreading Factor}. El factor d'espargiment (\acro{sf}) defineix la durada dels símbols i, per tant, la velocitat de transmissió. Es correspon amb la quantitat de bits d'informació que codifica cada símbol. Un \acro{sf} més alt permet una major sensibilitat de recepció, ja que cada símbol ocupa més temps i, per tant, és més fàcil de detectar. Això permet una comunicació a llarg abast, però redueix la velocitat de transmissió. Els valors possibles de \acro{sf} són entre 7 i 12 i, per cada increment de 1 d'\acro{sf}, es redueix la velocitat de transmissió a la meitat. Una característica molt important és que els diferents \acro{sf} són ortogonals entre ells. Això implica que senyals modulats amb diferents \acro{sf} i en un mateix canal no interfereixin entre ells. 
+    \item \emph{Spreading Factor}. El factor d'espargiment (\acro{sf}) defineix la durada dels símbols i, per tant, la velocitat de transmissió. Es correspon amb la quantitat de bits d'informació que codifica cada símbol. Un \acro{sf} més alt permet una major sensibilitat de recepció, ja que cada símbol ocupa més temps i, per tant, és més fàcil de detectar. Això permet una comunicació a llarg abast, però redueix la velocitat de transmissió. Els valors possibles de \acro{sf} són entre 7 i 12 i, per cada increment d'1 de \acro{sf}, es redueix la velocitat de transmissió a la meitat. Una característica molt important és que els diferents \acro{sf} són ortogonals entre ells. Això implica que senyals modulats amb diferents \acro{sf} i en un mateix canal no interfereixin entre ells. 
     \item \emph{Coding Rate}. La taxa de codificació (\acro{cr}) defineix la proporció d'informació útil que es transmet en comparació amb la quantitat total de dades enviades. Els possibles valors són $\frac{4}{5}$, $\frac{4}{6}$, $\frac{4}{7}$ i $\frac{4}{8}$. Així, per un \acro{cr} de $\frac{4}{5}$, per cada quatre bits d'informació útil, se n'afegeix un de redundància.
 \end{itemize}
 
@@ -153,7 +153,7 @@ Tots aquests paràmetres estan relacionats entre ells, i és important trobar un
 
 Amb una configuració adequada, es poden aconseguir comunicacions de fins a quinze quilòmetres en entorns rurals, i amb una vida útil de les bateries de diversos mesos i anys, com especifica Semtech a \cite{noauthor_lora_2024}.
 
-Per tal que el transmissor i el receptor es puguin sincronitzar, LoRa utilitza un preàmbul de sincronització. Aquest preàmbul és un senyal de referència que permet al receptor detectar l'inici d'una transmissió i sincronitzar-se amb el transmissor. La durada del preàmbul és configurable, però sovint s'estableix de vuit símbols. Una durada major ofereix més garenties que el receptor pugui detectar la transmissió, però augmenta el temps total de transmissió i, per tant, el consum energètic.
+Per tal que el transmissor i el receptor es puguin sincronitzar, LoRa utilitza un preàmbul de sincronització. Aquest preàmbul és un senyal de referència que permet al receptor detectar l'inici d'una transmissió i sincronitzar-se amb el transmissor. La durada del preàmbul és configurable, però sovint s'estableix de vuit símbols. Una durada major ofereix més garanties que el receptor pugui detectar la transmissió, però augmenta el temps total de transmissió i, per tant, el consum energètic.
 
 Després de transmetre el preàmbul, es transmeten les dades del missatge. Un fet a tenir en compte és que, ja que està pensat per a ser utilitzat en dispositius de baix consum, i a la baixa velocitat de transmissió, la quantitat màxima de dades que molts transductors permeten enviar és de \SI{255}{\byte}.
 
@@ -162,7 +162,7 @@ Per assegurar la integritat de les dades rebudes, LoRa ofereix la possibilitat d
 
 \subsection{LoRaWAN}
 % // TODO: QUEDA EXPLICAR JOIN (OTAA I ABP)
-Pel que fa a LoRaWAN, es tracta d'una definició de l'arquitectura d'un sistema \acro{LPWAN} (\est{Low Power Wide Area Network}), desenvolupada i mantenida per la \href{https://lora-alliance.org}{LoRa Alliance}. Defineix el protocol de comunicació i l'arquitectura de la xarxa, així com els mecanismes de seguretat i gestió de la xarxa. 
+Pel que fa a LoRaWAN, es tracta d'una definició de l'arquitectura d'un sistema \acro{LPWAN} (\est{Low Power Wide Area Network}), desenvolupada i mantinguda per la \href{https://lora-alliance.org}{LoRa Alliance}. Defineix el protocol de comunicació i l'arquitectura de la xarxa, així com els mecanismes de seguretat i gestió de la xarxa. 
 
 Utilitzant l'estructura per capes vista a la \autoref{sec:protocols}, LoRaWAN opera principalment a nivell d'enllaç, malgrat que també implementa característiques d'altres capes (com ara el control de sessions). A nivell físic, utilitza la modulació LoRa.
 
@@ -174,7 +174,7 @@ Pel que fa a l'estructura de la xarxa, consta de 4 components principals:
     \item \emph{Servidor d'aplicació}. Processa les dades d'aplicació enviades pels dispositius finals.
 \end{itemize}
 Aquests dispositius es troben organitzats en una estructura d'«estrella d'estrelles», on a la part central hi trobem el servidor de la xarxa. Aquest es comunica amb múltiples \est{gateways}, i cada \est{gateway} es comunica a la vegada amb múltiples dispositius finals. 
-Un fet important és que un dispositiu final no escull el \est{gateway} amb qui comunicar-se: en transmetre, tots els \est{gateways} que reben les dades ho reenvien al servidor de la xarxa. El servidor de xarxa és qui s'encarrega de detecar missatges duplicats i escollir quin és el millor \est{gateway} per transmetre un \est{downlink}. Aquesta estructura simplifica el disseny dels dispositius finals, amb el cost d'una major complexitat en el servidor de xarxa, tenint en compte que hi ha un únic servidor de xarxa per una quantitat N de dispositius finals.
+Un fet important és que un dispositiu final no escull el \est{gateway} amb qui comunicar-se: en transmetre, tots els \est{gateways} que reben les dades ho reenvien al servidor de la xarxa. El servidor de xarxa és qui s'encarrega de detectar missatges duplicats i escollir quin és el millor \est{gateway} per transmetre un \est{downlink}. Aquesta estructura simplifica el disseny dels dispositius finals, amb el cost d'una major complexitat en el servidor de xarxa, tenint en compte que hi ha un únic servidor de xarxa per una quantitat N de dispositius finals.
 
 Els dispositius finals poden operar en tres modes diferents, coneguts com a \emph{classes}:
 \begin{itemize}
@@ -1156,8 +1156,7 @@ En els següents apartats es presenten els diferents mecanismes de sincronitzaci
 % PARLAR DE SINCRONITZACIÓ INICIAL
 
 \subsection{Sincronització explícita}
-% 
-Com a sincronització explícita es considera l'ús d'un missatge especial i fàcilment identificable. Com s'ha comentat, el propòsit d'aquest missatge és indicar l'instant d'inici de cicle de funcionament normal, i eliminar l'error introduït pel rellotge intern.
+Com a sincronització explícita es considera l'ús d'un missatge especial i fàcilment identificable. Com s'ha comentat, el propòsit d'aquest missatge és indicar l'instant d'inici de cicle de funcionament normal, i eliminar l'error introduït pel rellotge intern. En aquest subapartat es mostren dues estratègies considerades, on la diferència principal entre aquestes és el moment de transmissió de les dades.
 
 \subsubsection{Dades transmeses després de la sincronització}
 Quan un dispositiu inicia el mode de funcionament normal, espera rebre un missatge de sincronització. En el moment que el rep, inicia el seu cicle de funcionament, i propaga el missatge al següent dispositiu. Després d'això, pot realitzar la seva lectura, i generar la transmissió de les dades. Gràcies a que prèviament havia propagat el missatge de sincronització, qualsevol dels seus dos veïns immediats es troben sincronitzats ---bé perquè és qui li ha enviat el missatge, o és a qui li ha propagat---, i per tant poden actuar com a encaminadors.
@@ -1249,9 +1248,58 @@ S'observa com, gràcies a que cada dispositiu té «assignat» els seu instant d
     \item No considera la possibilitat que una transmissió pugui fallar, resultant en retransmissions. Una retransmissió es podria superposar a la transmissió de dades d'un altre dispositiu, generant co\l.lisions. A més, si el següent node també podria haver de realitzar una retransmissió per encaminar les dades, agreujant més la situació 
 \end{enumerate}
 
-Es va considerar la possibiltiat d'utilitzar més de dos blocs, per exemple en múltiples de tres, fet que faria que les transmissions es trobessin més separades i, per tant, permetria més retransmissions sense que es superposessin amb altres enviaments. Es va descartar la opció, ja que augmentaria encara més la durada del cicle de funcionament normal, i tampoc evitaria les co\l.lisions si es produeixen més retransmissions que l'espai obtingut en afegir aquest nou bloc.
+Es va considerar la possibilitat d'utilitzar més de dos blocs, per exemple en múltiples de tres, fet que faria que les transmissions es trobessin més espaïades, reduint la probabilitat de solapaments entre transmissions. Es va descartar la opció, ja que augmentaria encara més la durada del cicle de funcionament normal, i tampoc evitaria les co\l.lisions si es produïssin més retransmissions que l'espai obtingut en afegir aquest nou bloc.
 
-Finalment, es va descartar la implementació de qualsevol de les opcions anteriors, ja que requereixen una quantitat molt elevada de transmissions. Amb \fitx{N} dispositius, el nombre total de transmissions (incloent-hi les dades i missatges de sincronització) és aproximadament $\sum{N} + N$, fet que incrementa el consum energètic i la saturació del canal. A més, la lògica de funcionament és excessivament complexa, dificultant la implementació d'aquesta solució.
+Finalment, es va descartar la implementació de qualsevol de les opcions anteriors, ja que requereixen una quantitat molt elevada de transmissions. Amb \fitx{N} dispositius, el nombre total de transmissions (incloent-hi les dades i missatges de sincronització) és aproximadament $\sum{N} + N$, fet que incrementa el consum energètic i la saturació del canal. A més, la lògica de funcionament és excessivament complexa, dificultant la implementació d'aquesta solució. 
+
+\subsubsection{Dades acumulades}
+Com s’ha comentat, un dels principals inconvenients de les solucions anteriors és l’elevat nombre de transmissions que es realitzen en cada cicle. Això es deu al fet que cada dispositiu genera el seu propi segment de dades amb destí final al gateway. Ja que la topologia és lineal, aquest segment ha de ser encaminat a través dels dispositius intermedis, els quals han de retransmetre’l fins al seu destí, fent que el nombre de transmissions i l'ús del canal creixi de forma exponencial amb el nombre de dispositius. 
+
+Per tal de reduir aquest nombre de transmissions, s'ha optat per acumular les dades de tots els dispositius en un únic missatge. És important recordar que s'havia limitat el comportament dels dispositius a un únic missatge, i amb el mateix destí final, el \est{gateway}. Si no s'haguessin près aquestes limitacions, aquesta estratègia no seria possible.
+
+El funcionament d'aquest mecanisme és el següent:
+\begin{enumerate}
+    \item \emph{Sincronització}. El dispositiu de referència continua enviant el missatge de sincronització en sortir del mode de baix consum. El següent dispositiu rep la sincronització, i el propaga al següent. Es continua aplicant el marge d'inici de funcionament normal pels dispositius que no són el de referència, per tal de garantir que reben el missatge de sincronització i que no estan en mode de baix consum quan s'envia.
+    \item \emph{Dades}. El dispositiu de l'extrem més llunyà al \est{gateway} envia les seves dades després de rebre el missatge de sincronització. La resta de dispositius, després de propagar la sincronització, queden a l'espera de rebre el missatge de dades. Quan el reben, hi afegeixen les seves dades, i el transmeten al següent dispositiu. S'observa com la propagació del missatge de sincronització i del de dades es realitza en sentits contraris.
+    
+    Establir un altre dispositiu per enviar primer les dades és incoherent, ja que implicaria que hauria de transmetre les seves dades en sentit contrari al \est{gateway}, les quals després haurien de ser encaminades en sentit contrari.
+
+    \item \emph{Timeout}. Si després d'un temps determinat un dispositiu no ha rebut el missatge de dades, considera que hi ha hagut un error, i inicia ell l'enviament de dades. És important que aquest temps sigui superior en els dispositius més propers al de referència, ja que són els que reben abans el missatge de sincronització i, a més, són qui més tard reben el missatge de dades. En cas contrari, un dispositiu podria generar aquest \est{timeout} quan encara s'estan transmetent les dades, sense que hi hagi hagut cap error. 
+
+    Aquest mecanisme és important, ja que evita perdre les dades de tots els dispositius si un falla. A més, afegeix un mecanisme de detecció d'errors: si existeixen 10 dispositius però només rebem 5 valors de dades, podem assegurar que, com a mínim, hi ha hagut un error en la transmissió entre els dispositius 6 i 5. Si no hi hagués hagut aquest error, el dispositiu 5 hauria rebut les dades del dispositiu 6, hi hauria afegit les seves i, per tant, hauríem rebut com a mínim 6 valors de dades.
+\end{enumerate}
+
+% Explicar qui és referència i qui dades
+Una qüestió important és determinar quin dispositiu és el de referència (i, en conseqüència, es determina també qui inicia l'enviament de dades). Tractant-se d'una xarxa lineal, existeixen tres opcions
+
+\begin{figure}
+    \centering
+\setlength{\extrarowheight}{0pt}
+\addtolength{\extrarowheight}{\aboverulesep}
+\addtolength{\extrarowheight}{\belowrulesep}
+\setlength{\aboverulesep}{0pt}
+\setlength{\belowrulesep}{0pt}
+\arrayrulecolor{black}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{!{\vrule width \heavyrulewidth}c!{\vrule width \heavyrulewidth}c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}c|c|c|c|c|c|cc!{\vrule width \heavyrulewidth}} 
+\toprule
+\textbf{\textcolor[rgb]{0,0.392,0}{D1}} & {\cellcolor[rgb]{1,0.847,0.808}} & TX\_S & \multicolumn{1}{c}{~~~~~~~~~~~~~~ } & \multicolumn{1}{c}{~~~~~~~~~~~~~~ } & \multicolumn{1}{c}{} &  & RX\_D4:2 & \multicolumn{1}{c|}{TX\_D4:1} &  \\ 
+\hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}--~~---~}
+\textbf{D2} & {\cellcolor[rgb]{1,0.847,0.808}} & RX\_S & TX\_S & \multicolumn{1}{c}{} &  & RX\_D4:3 & TX\_D4:2 &  &  \\ 
+\hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}------~~}
+\textbf{D3} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}} & RX\_S & TX\_S & RX\_D4 & TX\_D4:3 & \multicolumn{1}{c}{} &  &  \\ 
+\hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}-->{\arrayrulecolor{black}}----~~~}
+\textbf{D4} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ } & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ } & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}} & RX\_S & TX\_D4 & \multicolumn{1}{c}{~~~~~~~~~~~~~~ } & \multicolumn{1}{c}{} &  & ~~~~~~~~~~~~~~  \\
+\toprule
+\end{tabular}
+}
+\end{figure}
+
+
+% EXPLICAR LIMITACIONS MIDA DADES I SOLUCIO DE FRAGMENTACIÓ
+% sino potser explicar-ho a la secció de solució final???
+
+% En solució final, fer un petit resum de totes les funcionalitats (timeout, que permet saber on hi pot haver un error, etc.)
 
 \subsection{Sincronització implícita}
 % \subsection{Avantatges i inconvenients de cada enfocament}
