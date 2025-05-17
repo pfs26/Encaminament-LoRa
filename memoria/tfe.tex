@@ -1189,7 +1189,7 @@ S'observa com el la durada del cicle és de vuit unitats de temps, sent dues d'a
         \textbf{\textcolor[rgb]{0,0.502,0}{D4}} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~} & RX\_S & TX\_S & \multicolumn{1}{c|}{TX\_D4} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{} & {\cellcolor[rgb]{1,0.847,0.808}} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~ \\ \arrayrulecolor{black}\toprule
         \end{tabular}
     }
-    \caption{Sincronització explícita. Transmissió de dades després de sincronització.}
+    \caption{Transmissió de dades després de sincronització.}
     \label{fig:app_opcioSyncExp1}
 \end{figure}
 
@@ -1236,7 +1236,7 @@ D4 & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~} & \multicolu
 \multicolumn{1}{l}{} & \multicolumn{1}{l}{} & \multicolumn{1}{l}{} & \multicolumn{1}{c!{\color[rgb]{0.753,0.753,0.753}\vrule width \heavyrulewidth}}{} & \multicolumn{5}{c!{\color[rgb]{0.753,0.753,0.753}\vrule width \heavyrulewidth}}{\textcolor[rgb]{0.753,0.753,0.753}{Bloc senar}} & \multicolumn{1}{l!{\color[rgb]{0.753,0.753,0.753}\vrule width \heavyrulewidth}}{} & \multicolumn{2}{c}{\textcolor[rgb]{0.753,0.753,0.753}{Bloc parell...}}
 \end{tabular}
 }
-    \caption{Sincronització explícita. Transmissió dades en blocs senars/parells.}
+    \caption{Transmissió de dades en blocs senars/parells.}
     \label{fig:app_opcioSyncExp2}
 \end{figure}
 
@@ -1267,13 +1267,16 @@ El funcionament d'aquest mecanisme és el següent:
     \item \emph{Timeout}. Si després d'un temps determinat un dispositiu no ha rebut el missatge de dades, considera que hi ha hagut un error, i inicia ell l'enviament de dades. És important que aquest temps sigui superior en els dispositius més propers al de referència, ja que són els que reben abans el missatge de sincronització i, a més, són qui més tard reben el missatge de dades. En cas contrari, un dispositiu podria generar aquest \est{timeout} quan encara s'estan transmetent les dades, sense que hi hagi hagut cap error. 
 
     Aquest mecanisme és important, ja que evita perdre les dades de tots els dispositius si un falla. A més, afegeix un mecanisme de detecció d'errors: si existeixen 10 dispositius però només rebem 5 valors de dades, podem assegurar que, com a mínim, hi ha hagut un error en la transmissió entre els dispositius 6 i 5. Si no hi hagués hagut aquest error, el dispositiu 5 hauria rebut les dades del dispositiu 6, hi hauria afegit les seves i, per tant, hauríem rebut com a mínim 6 valors de dades.
+    \item \emph{Baix consum}. Després de realitzar la transmissió de les dades, el dispositiu pot tornar al mode de baix consum automàticament. Això és possible gràcies a la consideració que únicament realitzen una transmissió per cicle.
 \end{enumerate}
 
+% // TODO: A PARTIR D'AQUI QUEDA PENDENT REVISAR 
+
 % Explicar qui és referència i qui dades
-Una qüestió important és determinar quin dispositiu és el de referència (i, en conseqüència, es determina també qui inicia l'enviament de dades). Tractant-se d'una xarxa lineal, existeixen tres opcions
+Una qüestió important és determinar quin dispositiu és el de referència. En un primer moment es va pensar utilitzar el dispositiu més proper al \est{gateway}, permetent així que la sincronització viatgés en un sentit (del \est{gateway} cap a l'extrem contrari), i les dades en sentit invers. Aquesta situació es representa a la \autoref{fig:app_opcioSyncAcum1}, on el dispositiu \fitx{D1} és el més proper al \est{gateway} i és qui inicia la sincronització. El dispositiu \fitx{D4} és el més llunyà, i és qui inicia la transmissió de les dades. Es representen les transmissions de les dades amb \fitx{TX_Dm:n} , amb \fitx{m} i \fitx{n} sent el dispositiu que ha afegit les primeres i últimes dades respectivament.  
 
 \begin{figure}
-    \centering
+\centering
 \setlength{\extrarowheight}{0pt}
 \addtolength{\extrarowheight}{\aboverulesep}
 \addtolength{\extrarowheight}{\belowrulesep}
@@ -1281,20 +1284,25 @@ Una qüestió important és determinar quin dispositiu és el de referència (i,
 \setlength{\belowrulesep}{0pt}
 \arrayrulecolor{black}
 \resizebox{\linewidth}{!}{%
-\begin{tabular}{!{\vrule width \heavyrulewidth}c!{\vrule width \heavyrulewidth}c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}c|c|c|c|c|c|cc!{\vrule width \heavyrulewidth}} 
+\begin{tabular}{!{\vrule width \heavyrulewidth}c!{\vrule width \heavyrulewidth}c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}c|c|c|c|c|ccc!{\vrule width \heavyrulewidth}} 
 \toprule
-\textbf{\textcolor[rgb]{0,0.392,0}{D1}} & {\cellcolor[rgb]{1,0.847,0.808}} & TX\_S & \multicolumn{1}{c}{~~~~~~~~~~~~~~ } & \multicolumn{1}{c}{~~~~~~~~~~~~~~ } & \multicolumn{1}{c}{} &  & RX\_D4:2 & \multicolumn{1}{c|}{TX\_D4:1} &  \\ 
-\hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}--~~---~}
-\textbf{D2} & {\cellcolor[rgb]{1,0.847,0.808}} & RX\_S & TX\_S & \multicolumn{1}{c}{} &  & RX\_D4:3 & TX\_D4:2 &  &  \\ 
-\hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}------~~}
-\textbf{D3} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}} & RX\_S & TX\_S & RX\_D4 & TX\_D4:3 & \multicolumn{1}{c}{} &  &  \\ 
-\hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}-->{\arrayrulecolor{black}}----~~~}
-\textbf{D4} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ } & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ } & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}} & RX\_S & TX\_D4 & \multicolumn{1}{c}{~~~~~~~~~~~~~~ } & \multicolumn{1}{c}{} &  & ~~~~~~~~~~~~~~  \\
-\toprule
+\textbf{\textcolor[rgb]{0,0.392,0}{D1}} & {\cellcolor[rgb]{1,0.847,0.808}} & TX\_S & \multicolumn{1}{c}{~~~~~~~~~~~~~~ } & \multicolumn{1}{c}{~~~~~~~~~~~~~~ } & \multicolumn{1}{c}{} &  & \multicolumn{1}{c|}{RX\_D4:2} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D4:1} & {\cellcolor[rgb]{1,0.847,0.808}} \\ 
+\hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}--~~--->{\arrayrulecolor[rgb]{1,0.847,0.808}}-}
+\textbf{D2} & {\cellcolor[rgb]{1,0.847,0.808}} & RX\_S & TX\_S & \multicolumn{1}{c}{} &  & RX\_D4:3 & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D4:2} & {\cellcolor[rgb]{1,0.847,0.808}} & {\cellcolor[rgb]{1,0.847,0.808}} \\ 
+\hhline{~->{\arrayrulecolor{black}}------>{\arrayrulecolor[rgb]{1,0.847,0.808}}--}
+\textbf{D3} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}} & RX\_S & TX\_S & RX\_D4 & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D4:3} & {\cellcolor[rgb]{1,0.847,0.808}} & {\cellcolor[rgb]{1,0.847,0.808}} & {\cellcolor[rgb]{1,0.847,0.808}} \\ 
+\hhline{~-->{\arrayrulecolor{black}}---->{\arrayrulecolor[rgb]{1,0.847,0.808}}---}
+\textbf{D4} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ } & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ } & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}} & RX\_S & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D4} & \multicolumn{1}{c}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ } & {\cellcolor[rgb]{1,0.847,0.808}} & {\cellcolor[rgb]{1,0.847,0.808}} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~  \\
+\arrayrulecolor{black}\toprule
 \end{tabular}
 }
+\caption{Transmissió de dades acumulades. Dispositiu de referència a l'extrem més proper al \est{gateway}.}
+\label{fig:app_opcioSyncAcum1}
 \end{figure}
 
+En observar el diagrama, s'observa com els dispositius més propers al \est{gateway}, que són dels primers en sincronitzar-se i dels últims en rebre les dades, tenen un espai de temps entre la sincronització i la recepció de les dades elevat. Aquest fet fa que, a causa que han d'estar durant més temps en mode de funcionament, el consum energètic sigui també major. A més, aquest inconvenient s'accentua amb el nombre de dispositius. Es va intentar minimitzar aquest efecte modificant el dispositiu de referència, fent que fos un de més pròxim a l'extrem oposat, que és qui inicia l'enviament de dades. En utilitzar un dispositiu intermig com a referència, és necessàri que aquest enviï el missatge de sincronització als seus dos veïns. Aquest comportament es representa a la \autoref{fig:app_opcioSyncAcum2}, on el dispositiu \fitx{D3} és el de referència i el dispositiu \fitx{D3} és qui inicia l'enviament de dades. 
+
+% explicar com poden determinar el temps de sleep cada tipus de dispositiu
 
 % EXPLICAR LIMITACIONS MIDA DADES I SOLUCIO DE FRAGMENTACIÓ
 % sino potser explicar-ho a la secció de solució final???
