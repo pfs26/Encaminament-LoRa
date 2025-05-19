@@ -1275,16 +1275,15 @@ El funcionament d'aquest mecanisme és el següent:
     \item \emph{Baix consum}. Després de realitzar la transmissió de les dades, el dispositiu pot tornar al mode de baix consum automàticament. Això és possible gràcies a la consideració que únicament realitzen una transmissió per cicle.
 \end{enumerate}
 
-% // TODO: A PARTIR D'AQUI QUEDA PENDENT REVISAR 
 
 % Explicar qui és referència i qui dades
-Una qüestió important és determinar quin dispositiu és el de referència. En un primer moment es va pensar utilitzar el dispositiu més proper al \est{gateway}, permetent així que la sincronització viatgés en un sentit (del \est{gateway} cap a l'extrem contrari), i les dades en sentit invers. Aquesta situació es representa a la \autoref{fig:app_opcioSyncAcum1}, on el dispositiu \fitx{D1} és el més proper al \est{gateway} i és qui inicia la sincronització. El dispositiu \fitx{D4} és el més llunyà, i és qui inicia la transmissió de les dades. Es representen les transmissions de les dades amb \fitx{TX_Dm:n} , amb \fitx{m} i \fitx{n} sent el dispositiu que ha afegit les primeres i últimes dades respectivament.  
+Una qüestió important és determinar quin dispositiu és el de referència. Inicialment es va considerar utilitzar el dispositiu més proper al \est{gateway}, de manera que la sincronització es propagaria en un únic sentit (des del \est{gateway} cap a l’extrem de la xarxa), mentre que les dades circularien en sentit contrari. Aquesta situació es mostra a la \autoref{fig:app_opcioSyncAcum1}, on el dispositiu \fitx{D1}, el més proper al \est{gateway}, inicia el missatge de sincronització. Per altra banda, el dispositiu \fitx{D4}, situat a l’extrem oposat, és l’encarregat d’iniciar la transmissió de dades després de sincronitzar-se. Les transmissions de dades s’identifiquen com \fitx{TX_Dm:n}, on \fitx{m} representa el dispositiu que ha afegit les primeres dades, i \fitx{n} el dispositiu que ha afegit les últimes.
 
 \begin{figure}[ht]
-\centering
-\setlength{\extrarowheight}{0pt}
-\addtolength{\extrarowheight}{\aboverulesep}
-\addtolength{\extrarowheight}{\belowrulesep}
+    \centering
+    \setlength{\extrarowheight}{0pt}
+    \addtolength{\extrarowheight}{\aboverulesep}
+    \addtolength{\extrarowheight}{\belowrulesep}
 \setlength{\aboverulesep}{0pt}
 \setlength{\belowrulesep}{0pt}
 \arrayrulecolor{black}
@@ -1310,11 +1309,10 @@ Una qüestió important és determinar quin dispositiu és el de referència. En
 \label{fig:app_opcioSyncAcum1}
 \end{figure}
 
+En analitzar el diagrama, es pot observar com els dispositius més propers al \est{gateway} ---que són els primers en sincronitzar-se i els últims en rebre les dades---  tenen un temps d'espera entre la sincronització i la recepció de les dades elevat. Aquest fet fa que, a causa que han d'estar durant més temps en mode de funcionament, el consum energètic sigui també major. També provoca que els consums entre dispositiu no siguin homogenis, dificultant com s'ha dit el manteniment. Aquest inconvenient, a més, s'accentua amb el nombre de dispositius, ja que tant el temps de propagació de la sincronització com el de les dades seria major. 
 
 
-En observar el diagrama, s'observa com els dispositius més propers al \est{gateway}, que són els primers en sincronitzar-se i els últims en rebre les dades, tenen un espai de temps entre la sincronització i la recepció de les dades elevat. Aquest fet fa que, a causa que han d'estar durant més temps en mode de funcionament, el consum energètic sigui també major. També provoca que els consums entre dispositiu no siguin homogenis, dificultant com s'ha dit el manteniment. Aquest inconvenient, a més, s'accentua amb el nombre de dispositius, ja que el temps de propagació del missatge de sincronització i de les dades seria major. 
-
-Una segona opció que intenta minimitzar aquest efecte es pot veure representat a la \autoref{fig:app_opcioSyncAcum1}, on s'utilitza un dispositiu més pròxim a l'extrem oposat, que és qui inicia l'enviament de dades, com a dispositiu de referència. En aquest cas, el dispositiu de referència (\fitx{D3}) és necessari que enviï el missatge de sincronització als seus dos veïns i, seguidament, el missatge de sincronització es propaga en els dos sentits de froma simultània. El dispositiu que inicia l'enviament de dades continua sent el de l'extrem oposat al que té capacitats LoRaWAN, el més llunyà al \est{gateway}.
+Una segona opció que intenta minimitzar aquest efecte es pot veure representat a la \autoref{fig:app_opcioSyncAcum1}. En aquest cas s'utilitza com a referència un dispositiu més pròxim a l'extrem oposat, que és qui inicia l'enviament de dades. A causa de trobar-se entre dos dispositius, és necessari que enviï el missatge de sincronització als seus dos veïns, fent que aquest es propagi simultàniament en ambdós sentits. Per evitar una co\l.lisió és necessari que entre els dos missatges de sincronització que transmet deixi un marge de temps, equivalent al temps de transmissió del missatge de sincronització. Això permet que el dispositiu que rep el missatge de sincronització pugui propagar-lo sense que es superposi amb el segon missatge de sincronització. El dispositiu que inicia l'enviament de dades continua sent el de l'extrem oposat al que té capacitats LoRaWAN, el més llunyà al \est{gateway}.
 
 \begin{figure}[ht]
     \centering
@@ -1353,7 +1351,8 @@ Una segona opció que intenta minimitzar aquest efecte es pot veure representat 
     \label{fig:app_opcioSyncAcum2}
 \end{figure}
 
-En aquesta segona situació s'observa com el temps d'espera entre la recepció de la sincronització i de les dades és menor, fent també que el temps total del cicle sigui menor. Malgrat aquesta millora, es continua observant que el temps de cicle no és constant entre dispositius, sent aquest molt major pel dispositiu de referència (7 unitats de temps, en aquest cas) en vers al dispositiu que inicia la transmissió de dades (2 unitats de temps). Portant aquesta situació a l'extrem, es podria pensar en utilitzar com a dispositiu de referència el que inicia la transmissió de dades. En aquest cas, el dispositiu de referència enviaria la sincronització i, seguidament, les dades. Això faria que el temps d'espera entre ambdós missatges fos el mínim possible, i igual per a tots els dispositius. Aquesta situació es representa a la \autoref{fig:app_opcioSyncAcum3}.
+
+En aquesta segona situació s'observa com el temps d'espera entre la recepció de la sincronització i de les dades és menor, fent també que el temps total del cicle sigui menor. Malgrat aquesta millora, es continua observant que el temps de cicle no és constant entre dispositius, sent aquest molt major pel dispositiu de referència (7 unitats de temps, en aquest cas) en comparació amb el dispositiu que inicia la transmissió de dades (2 unitats de temps). S'ha observat, però, que desplaçant el dispositiu de referència cap al que inicia la transmissió de dades s'aconsegueix reduir el temps d'espera. Portant aquesta situació a l'extrem, es podria pensar en utilitzar com a dispositiu de referència el que inicia la transmissió de dades. En aquest cas, el dispositiu de referència enviaria la sincronització i, seguidament, les dades. Això faria que el temps d'espera entre ambdós missatges fos el mínim possible, i constant per a tots els dispositius. De nou, és important afegir un temps d'espera mínim entre els dos missatges; en cas contràri, es produirien co\l.lisions, ja que un dispositiu estaria transmetent les dades, mentre que el següent, que les ha de rebre, està propagant la sincronització. Aquesta situació es representa a la \autoref{fig:app_opcioSyncAcum3}.
 
 \begin{figure}[ht]
     \centering
@@ -1368,7 +1367,7 @@ En aquesta segona situació s'observa com el temps d'espera entre la recepció d
     \multicolumn{1}{c}{\est{gateway}} & \multicolumn{10}{c}{} \\
 \toprule
 
-{D1} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_S} & \multicolumn{1}{c|}{~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_D6:2} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D6:1}  & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+\textbf{\textcolor[rgb]{0,0.502,0}{D1}} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_S} & \multicolumn{1}{c|}{~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_D6:2} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D6:1}  & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
 
 \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}---->{\arrayrulecolor{black}}----->{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}}
 {D2} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_S} & \multicolumn{1}{c|}{TX\_S} & \multicolumn{1}{c|}{RX\_D6:3} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D6:2}  & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
@@ -1388,9 +1387,11 @@ En aquesta segona situació s'observa com el temps d'espera entre la recepció d
 \toprule
 \end{tabular}
 }
-    \caption{Transmissió de dades acumulades. Dispositiu de referència intermig.}
+    \caption{Transmissió de dades acumulades. Mateix dispositiu de referència i inici de dades.}
     \label{fig:app_opcioSyncAcum3}
 \end{figure}
+
+% // TODO: A PARTIR D'AQUI QUEDA PENDENT REVISAR 
 
 % explicar com poden determinar el temps de sleep cada tipus de dispositiu
 
