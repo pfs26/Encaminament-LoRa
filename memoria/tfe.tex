@@ -1165,7 +1165,7 @@ El funcionament canvia quan el dispositiu és el de referència. En aquest cas, 
 
 Aquest plantejamen introdueix un fet important: el dispositiu de referència ha de despertar del mode de baix consum més tard que els dispositius a qui ha d'enviar el missatge de sincronització, ja que si no aquests no el rebrien. Aquest temps ha de ser, com a mínim, igual al temps de transmissió del missatge de sincronització. Una solució fàcil per aconseguir-ho és restant aquest temps del de baix consum, de manera que despertarà abans. 
 
-A la \autoref{fig:app_opcioSyncExp1} es representa aquest comportament. El dispositiu de referència és \fitx{D1}, i el dispositiu amb capacitats LoRaWAN és el \fitx{D4}. Les dades es transmeten en direcció al \est{gateway}, creuant els dispositius intermedis fins a arribar a \fitx{D4}. Es representen els missatges de sincronització com a \fitx{TX_S}, i els de dades com a \fitx{TX_Dn}, on \fitx{n} indica l'origen de les dades. Les recepcions respectives d'aquests missatges s'identifiquen amb el prefix \fitx{RX}. S'indica també quan cada dispositiu desperta i inicia el mode de baix consum, amb línies verdes i vermelles respectivament, i amb el període de baix consum ressaltat en vermell clar. 
+A la \autoref{fig:app_opcioSyncExp1} es representa aquest comportament. El dispositiu de referència és \fitx{D1} (ressaltat en negreta), i el dispositiu amb capacitats LoRaWAN és el \fitx{D4} (ressaltat en verd). Les dades es transmeten en direcció al \est{gateway}, creuant els dispositius intermedis fins a arribar a \fitx{D4}. Es representen els missatges de sincronització com a \fitx{TX_S}, i els de dades com a \fitx{TX_Dn}, on \fitx{n} indica l'origen de les dades. Les recepcions respectives d'aquests missatges s'identifiquen amb el prefix \fitx{RX}. S'indica també quan cada dispositiu desperta i inicia el mode de baix consum, amb línies verdes i vermelles respectivament, i amb el període de baix consum ressaltat en vermell clar. L'eix horitzontal es correspon al temps, i el vertical als dispositius, que es podria entendre com una distància.
 
 Per simplicitat i per evitar sobrecarregar el diagrama, només s'han representat les recepcions dels missatges en el dispositiu destinatari; per exemple, per al missatge \fitx{TX_S} enviat per \fitx{D2}, només es mostra la recepció a \fitx{D3}, tot i que \fitx{D1} també el rebria. No obstant això, com que no és el destinatari final, l'ignoraria. A més, cal tenir en compte que cada transmissió representa una transmissió de la capa d'accés al medi, i per tant inclou també una part de recepció per rebre el reconeixement.
 
@@ -1280,7 +1280,7 @@ El funcionament d'aquest mecanisme és el següent:
 % Explicar qui és referència i qui dades
 Una qüestió important és determinar quin dispositiu és el de referència. En un primer moment es va pensar utilitzar el dispositiu més proper al \est{gateway}, permetent així que la sincronització viatgés en un sentit (del \est{gateway} cap a l'extrem contrari), i les dades en sentit invers. Aquesta situació es representa a la \autoref{fig:app_opcioSyncAcum1}, on el dispositiu \fitx{D1} és el més proper al \est{gateway} i és qui inicia la sincronització. El dispositiu \fitx{D4} és el més llunyà, i és qui inicia la transmissió de les dades. Es representen les transmissions de les dades amb \fitx{TX_Dm:n} , amb \fitx{m} i \fitx{n} sent el dispositiu que ha afegit les primeres i últimes dades respectivament.  
 
-\begin{figure}
+\begin{figure}[ht]
 \centering
 \setlength{\extrarowheight}{0pt}
 \addtolength{\extrarowheight}{\aboverulesep}
@@ -1312,11 +1312,11 @@ Una qüestió important és determinar quin dispositiu és el de referència. En
 
 
 
-En observar el diagrama, s'observa com els dispositius més propers al \est{gateway}, que són els primers en sincronitzar-se i els últims en rebre les dades, tenen un espai de temps entre la sincronització i la recepció de les dades elevat. Aquest fet fa que, a causa que han d'estar durant més temps en mode de funcionament, el consum energètic sigui també major. A més, aquest inconvenient s'accentua amb el nombre de dispositius. 
+En observar el diagrama, s'observa com els dispositius més propers al \est{gateway}, que són els primers en sincronitzar-se i els últims en rebre les dades, tenen un espai de temps entre la sincronització i la recepció de les dades elevat. Aquest fet fa que, a causa que han d'estar durant més temps en mode de funcionament, el consum energètic sigui també major. També provoca que els consums entre dispositiu no siguin homogenis, dificultant com s'ha dit el manteniment. Aquest inconvenient, a més, s'accentua amb el nombre de dispositius, ja que el temps de propagació del missatge de sincronització i de les dades seria major. 
 
 Una segona opció que intenta minimitzar aquest efecte es pot veure representat a la \autoref{fig:app_opcioSyncAcum1}, on s'utilitza un dispositiu més pròxim a l'extrem oposat, que és qui inicia l'enviament de dades, com a dispositiu de referència. En aquest cas, el dispositiu de referència (\fitx{D3}) és necessari que enviï el missatge de sincronització als seus dos veïns i, seguidament, el missatge de sincronització es propaga en els dos sentits de froma simultània. El dispositiu que inicia l'enviament de dades continua sent el de l'extrem oposat al que té capacitats LoRaWAN, el més llunyà al \est{gateway}.
 
-\begin{figure}
+\begin{figure}[ht]
     \centering
 \setlength{\extrarowheight}{0pt}
 \addtolength{\extrarowheight}{\aboverulesep}
@@ -1352,9 +1352,45 @@ Una segona opció que intenta minimitzar aquest efecte es pot veure representat 
     \caption{Transmissió de dades acumulades. Dispositiu de referència intermig.}
     \label{fig:app_opcioSyncAcum2}
 \end{figure}
-% \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}} & \multicolumn{1}{c|}{RX\_S} & \multicolumn{1}{c|}{TX\_S}
 
-En aquesta segona situació s'observa
+En aquesta segona situació s'observa com el temps d'espera entre la recepció de la sincronització i de les dades és menor, fent també que el temps total del cicle sigui menor. Malgrat aquesta millora, es continua observant que el temps de cicle no és constant entre dispositius, sent aquest molt major pel dispositiu de referència (7 unitats de temps, en aquest cas) en vers al dispositiu que inicia la transmissió de dades (2 unitats de temps). Portant aquesta situació a l'extrem, es podria pensar en utilitzar com a dispositiu de referència el que inicia la transmissió de dades. En aquest cas, el dispositiu de referència enviaria la sincronització i, seguidament, les dades. Això faria que el temps d'espera entre ambdós missatges fos el mínim possible, i igual per a tots els dispositius. Aquesta situació es representa a la \autoref{fig:app_opcioSyncAcum3}.
+
+\begin{figure}[ht]
+    \centering
+\setlength{\extrarowheight}{0pt}
+\addtolength{\extrarowheight}{\aboverulesep}
+\addtolength{\extrarowheight}{\belowrulesep}
+\setlength{\aboverulesep}{0pt}
+\setlength{\belowrulesep}{0pt}
+\arrayrulecolor{black}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{!{\vrule width \heavyrulewidth}c!{\vrule width \heavyrulewidth}cccccccccc!{\vrule width \heavyrulewidth}} 
+    \multicolumn{1}{c}{\est{gateway}} & \multicolumn{10}{c}{} \\
+\toprule
+
+{D1} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_S} & \multicolumn{1}{c|}{~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_D6:2} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D6:1}  & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+
+\hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}---->{\arrayrulecolor{black}}----->{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}}
+{D2} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_S} & \multicolumn{1}{c|}{TX\_S} & \multicolumn{1}{c|}{RX\_D6:3} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D6:2}  & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+
+\hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}--->{\arrayrulecolor{black}}----->{\arrayrulecolor[rgb]{1,0.847,0.808}}-->{\arrayrulecolor{black}}}
+{D3} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_S} & \multicolumn{1}{c|}{TX\_S} & \multicolumn{1}{c|}{RX\_D6:4} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D6:3} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+
+\hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}-->{\arrayrulecolor{black}}----->{\arrayrulecolor[rgb]{1,0.847,0.808}}--->{\arrayrulecolor{black}}}
+{D4} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_S} & \multicolumn{1}{c|}{TX\_S} & \multicolumn{1}{c|}{RX\_D6:5} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D6:4}  & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+
+\hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}----->{\arrayrulecolor[rgb]{1,0.847,0.808}}---->{\arrayrulecolor{black}}}
+{D5} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_S} & \multicolumn{1}{c|}{TX\_S} & \multicolumn{1}{c|}{RX\_D6:6} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D6:5} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+
+\hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}---->{\arrayrulecolor[rgb]{1,0.847,0.808}}----->{\arrayrulecolor{black}}}
+\textbf{D6} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{TX\_S} & \multicolumn{1}{c|}{~~~~~~~~~~~~~~} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D6:6} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+
+\toprule
+\end{tabular}
+}
+    \caption{Transmissió de dades acumulades. Dispositiu de referència intermig.}
+    \label{fig:app_opcioSyncAcum3}
+\end{figure}
 
 % explicar com poden determinar el temps de sleep cada tipus de dispositiu
 
