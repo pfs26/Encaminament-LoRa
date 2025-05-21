@@ -1121,6 +1121,7 @@ Podríem obtenir valors més optimistes si considerem únicament el consum del m
 S'observa com ni en el cas més optimista s'aconsegueix una temps de funcionament prolongat, fent que l'ús d'aquest protocol impliqués substitucions de bateries de forma regular, o bé l'ús de dispositius externs (com ara panells solars) per augmentar el temps de funcionament. 
 
 \section{Estratègies de sincronització}
+\label{section:estrategiesSync}
 Per tal de reduir el consum, podem tenir en compte les consideracions 1 i 2, que limiten el comportament dels dispositius a una única transmissió per cicle, i que no esperen ser receptors de cap missatge. 
 
 Podem dividir el cicle de funcionament dels dispositius en dues parts:
@@ -1155,10 +1156,10 @@ Per aconseguir que tots els dispositius es puguin sincronitzar, és important qu
 En els següents apartats es presenten els diferents mecanismes de sincronització externa considerats, amb les seves diferències i limitacions.
 % PARLAR DE SINCRONITZACIÓ INICIAL
 
-\subsection{Sincronització explícita}
-Com a sincronització explícita es considera l'ús d'un missatge especial i fàcilment identificable. Com s'ha comentat, el propòsit d'aquest missatge és indicar l'instant d'inici de cicle de funcionament normal, i eliminar l'error introduït pel rellotge intern. En aquest subapartat es mostren dues estratègies considerades, on la diferència principal entre aquestes és el moment de transmissió de les dades.
+\section{Sincronització explícita}
+Com a sincronització explícita es considera l'ús d'un missatge especial i fàcilment identificable. Com s'ha comentat, el propòsit d'aquest missatge és indicar l'instant d'inici de cicle de funcionament normal, i eliminar l'error introduït pel rellotge intern. En aquest apartat es mostren dues estratègies considerades, on la diferència principal entre aquestes és el moment de transmissió de les dades.
 
-\subsubsection{Dades transmeses després de la sincronització}
+\subsection{Dades transmeses després de la sincronització}
 Quan un dispositiu inicia el mode de funcionament normal, espera rebre un missatge de sincronització. En el moment que el rep, inicia el seu cicle de funcionament, i propaga el missatge al següent dispositiu. Després d'això, pot realitzar la seva lectura, i generar la transmissió de les dades. Gràcies a que prèviament havia propagat el missatge de sincronització, qualsevol dels seus dos veïns immediats es troben sincronitzats ---bé perquè és qui li ha enviat el missatge, o és a qui li ha propagat---, i per tant poden actuar com a encaminadors.
 
 El funcionament canvia quan el dispositiu és el de referència. En aquest cas, l'inici del cicle de funcionament comença immediatament, generant i transmetent el missatge de sincronització. A continuació pot fer la seva lectura, i transmetre-la com qualsevol altre node.
@@ -1202,7 +1203,7 @@ Aquest mecanisme podria semblar correcte, però s'observen problemes quan es con
 Per tant, aquest mecanisme no és viable si dos nodes veïns transmeten alhora, fent que les  les co\l.lisions siguin inevitables.
 Es vol destacar que el diagrama no està complet ni representa totes les transmissions, sinó que únicament s'han mostrat les necessàries per trobar la primera co\l.lisió. 
 
-\subsubsection{Dades transmeses en blocs}
+\subsection{Dades transmeses en blocs}
 Una segona opció consisteix en dividir les transmissions de dades en dos blocs: en el primer bloc transmeten els dispositius en posició senar (\fitx{D1, D3}, etc.), i en el segon bloc els dispositius en posició parell (\fitx{D2, D4}, etc.). Per si sol això no és suficient, ja que dos veïns continuen transmetent simultàniament quan un envia el missatge de sincronització i l'altre les dades. Per evitar-ho, es pot aplicar un marge abans de transmetre les dades, de com a mínim el temps de transmissió del missatge de sincronització. 
 
 En aquest escenari és necessari també que el dispositiu de referència sigui el que té capacitats LoRaWAN. Això permet que els nodes més propers al \est{gateway} siguin els primers a transmetre les seves dades. En cas que la referència fos el dispositiu més allunyat (com en l'exemple anterior), els primers a transmetre haurien d'enviar les dades al node que s'acaba de sincronitzar. Això pot generar problemes, ja que si el dispositiu es troba en el primer bloc de transmissió, també voldrà enviar les seves dades i, a més, haurà d'encaminar les dades anteriors. Aquest fet s'accentua com més proper es el dispositiu al \est{gateway}, ja que ha de realitzar molts més encaminaments.
@@ -1257,7 +1258,7 @@ Es va considerar la possibilitat d'utilitzar més de dos blocs, per exemple en m
 
 Finalment, es va descartar la implementació de qualsevol de les opcions anteriors, ja que requereixen una quantitat molt elevada de transmissions. Amb \fitx{N} dispositius, el nombre total de transmissions (incloent-hi les dades i missatges de sincronització) és aproximadament $\sum{N} + N$, fet que incrementa el consum energètic i la saturació del canal. A més, la lògica de funcionament és excessivament complexa, dificultant la implementació d'aquesta solució. 
 
-\subsubsection{Dades acumulades}
+\subsection{Dades acumulades}
 Com s’ha comentat, un dels principals inconvenients de les solucions anteriors és l’elevat nombre de transmissions que es realitzen en cada cicle. Això es deu al fet que cada dispositiu genera el seu propi segment de dades amb destí final al gateway. Ja que la topologia és lineal, aquest segment ha de ser encaminat a través dels dispositius intermedis, els quals han de retransmetre’l fins al seu destí, fent que el nombre de transmissions i l'ús del canal creixi de forma exponencial amb el nombre de dispositius. 
 
 Per tal de reduir aquest nombre de transmissions, s'ha optat per acumular les dades de tots els dispositius en un únic missatge. És important recordar que s'havia limitat el comportament dels dispositius a un únic missatge, i amb el mateix destí final, el \est{gateway}. Si no s'haguessin près aquestes limitacions, aquesta estratègia no seria possible.
@@ -1430,14 +1431,25 @@ No obstant això, encara hi ha un fet crític: què passa si la capa d'accés al
 Es pot veure com una única retransmissió del missatge de sincronització, causada per no haver rebut el missatge de reconeixement de la capa d'accés al medi, ha causat una co\l.lisió pel dispositiu \fitx{D3}: en el moment que aquest estava rebent les dades s'ha retransmès la sincronització des de \fitx{D2} cap a \fitx{D1}, fent que ambdues transmissions es superposessin.
 L'única possible solució per reduir aquest problema és deixar més marge entre l'enviament de la sincronització i el de les dades, que és just el contrari del que buscava aquesta estratègia. 
 
-\subsection{Disseny final}
+% // TODO: Potser fer que sigui section i no subsection?
+
+\section{Disseny final}
+Després de les iteracions anteriors s'ha arribat a un disseny final que soluciona els problemes observats. En aquest apartat es presenta el funcionament general d'aquesta estratègia. Seguidament es consideren situacions no ideals que poden produir-se i que cal considerar per garantir el correcte funcionament, i les solucions proposades. A continuació es presenta la implementació realitzada a nivell d'aplicació, amb el format i estructura dels missatges. Finalment, es presenta la correcta utilització del sistema, com per exemple com afegir nous dispositius a la xarxa, i les proves i resultats obtinguts.
+
+\subsection{Funcionament general}
 En l'últim disseny, l'estratègia que se seguia era la següent:
-\begin{enumerate}
+\begin{itemize}
     \item Pel dispositiu de referència, generar i transmetre el missatge de sincronització, deixar un temps d'espera equivalent al de la transmissió del missatge de sincronització i, seguidament, transmetre les dades i iniciar el mode de baix consum.
     \item Pels altres dispositius, esperar a rebre el missatge de sincronització, propagar-lo, i esperar a rebre les dades. En rebre les dades, afegir-hi les seves, transmetre-les i iniciar el mode de baix consum.
-\end{enumerate}
+\end{itemize}
 
 Deixant de banda el problema de les co\l.lisions si hi ha retransmissions, aquesta estratègia és poc òptima: es realitza una transmissió completa per enviar únicament el missatge de sincronització, que no aporta informació «útil» i, poc després, es realitza una nova transmissió al mateix dispositiu amb les dades (informació «útil»). Combinant ambdós missatges en un d'únic s'aconsegueix reduir el nombre de transmissions a la meitat i, per tant, també el temps de cicle. Així, podríem considerar que el missatge de sincronització és implícit en el de dades.
+
+Llavors, el funcionament seria el següent:
+\begin{itemize}
+    \item Pel dispositiu de referència, en despertar de mode de baix consum, generar missatge amb les dades, transmetre'l, i iniciar mode de baix consum.
+    \item Pels altres dispositius, esperar a rebre el missatge de dades, que indica també l'instant de sincronització, afegir-hi les seves dades, transmetre-les i iniciar mode de baix consum.
+\end{itemize}
 
 \begin{figure}[ht]
     \centering
@@ -1471,12 +1483,9 @@ Deixant de banda el problema de les co\l.lisions si hi ha retransmissions, aques
 \end{figure}
 
 
+No només s'aconsegueixen reduir les transmissions, sinó que també s'elimina l'inconvenient de les co\l.lisions causades per les retransmissions. Com que en qualsevol moment únicament un dispositiu de la xarxa estarà transmetent (ja que la resta o bé ja han transmès i, per tant, estan en baix consum, o bé estan esperant rebre les dades), la capa d'accés al medi d'aquest pot realitzar transmissions sense causar co\l.lisions als dispositius veïns.
 
-
-A més, així també s'elimina l'inconvenient de les co\l.lisions. En cada moment únicament un dispositiu de la xarxa estarà transmetent, fent que pugui fer totes les retransmissions establertes sense que generi col.lisions.
-
-
-s'ha observat com el principal inconvenient són les co\l.lisions causades per les retransmissions
+A més, s'observa també com el temps de funcionament normal de cada dispositiu, en condicions ideals ---sense que existeixin retransmissions---, és el mateix per a tots, i és constant. Tampoc existeix un temps d'espera entre la recepció del missatge de sincronització i del de dades, ja que el missatge de sincronització és implícit, fent que a més sigui el mínim possible, reduint el consum energètic.
 
 % explicar com poden determinar el temps de sleep cada tipus de dispositiu
 
@@ -1485,13 +1494,43 @@ s'ha observat com el principal inconvenient són les co\l.lisions causades per l
 
 % En solució final, fer un petit resum de totes les funcionalitats (timeout, que permet saber on hi pot haver un error, etc.)
 
-% \subsection{Avantatges i inconvenients de cada enfocament}
-% \subsection{Compromisos entre consum i generalitat del protocol}
 
 % RECORDAR PARLAR DE COM S'AFEGEIX UN NOU DISPOSITIU, I DE LA SINCRONITZACIÓ INICIAL
 % PARLAR SOBRE COM AFEGIR NOUS DISPOSITIUS: 
 %   - Si només volem UPLINK implica modifica únicament el dispositiu anterior (o si volem canviar referència, modificar també el de referència). No és necessari modificar taula encaminament, ja que ni s'utilitza. En aquest cas la capa d'aplicació podria utilitzar-se a capa d'encaminament, per sobre de MAC directament.
 %   - Si volem DOWNLINK és necessari modificar-los tots, ja que cal canviar la taula d'encaminament dels dispositius. 
+% Si veiem que tot falla, resincronitzar tot des de 0: reiniciar dispositius començant pel de referència, la resta quedaran actius fins que referència enviï.
+
+\subsection{Situacions no ideals}
+En l'anterior subapartat s'ha presentat el funcionament del sistema en condicions ideals. Tot i això, hi ha certes situacions que cal tenir en compte:
+\begin{itemize}
+    \item \emph{Errors del rellotge}. Com s'ha vist a la \autoref{section:estrategiesSync}, els rellotges dels dispositius no són totalment precisos. Això provoca que, tot i indicar-li que estigui en mode de baix consum durant un temps determinat, el temps real en què hi està sigui diferent. Per un dispositiu que espera rebre les dades, si el seu rellotge és més lent de l'esperat, es trobarà en mode de baix consum durant més estona del que li correspondria. Això provocaria que, en despertar-se i esperar rebre les dades, aquestes ja s'haguessin transmès, fent que no les rebés.
+    
+    Una solució a aquest problema és afegir un temps de marge entre l'inici de funcionament normal i l'instant en què espera rebre les dades. Aquest temps de marge ha de ser superior al màxim error que es pot produir en els rellotges dels dispositius, i és fàcilment calculable a partir del temps de cicle total i l'error, normalment expresat en parts per millió (\acro{ppm}):
+    $$t_{\text{marge}} \geq t_{\text{cicle}} \cdot \epsilon_{\text{\acro{ppm}}} \cdot 10^{-6}$$
+    
+    \item \emph{Retransmissions}. La capa d'accés al medi d'un dispositiu pot necessitar realitzar retransmissions si no rep el missatge de reconeixement, o aplicar \acro{beb} si el canal està ocupat per un altre dispositiu ---aliè a la xarxa---. Això provoca que el següent dispositiu rebi la sincronització més tard de l'esperat i, per tant, com que també el propagarà més tard, passarà el mateix per la resta de dispositius. Aquest fet provoca que els dispositius prenguin com a referència un instant invàlid, fent que en el següent cicle es despertin més tard i, si ara no és necessari realitzar retransmissions, no rebin les dades (o rebin una retransmissió que l'anterior dispositiu ha hagut de fer ja que no han enviat reconeixement perquè encara estaven en baix consum).
+    
+    A la \autoref{fig:syncDeltaTimeErr} es mostra un exemple d'aquesta situació. S'han representat els instants de temps d'inici de funcionament normal i de baix consum, \fitx{w} i \fitx{s} respectivament, així com l'instant que es pren com a referència en la sincronització, \fitx{sync}. En aquest exemple la durada de cicle ($t_c$) és de 7 unitats de temps, i els dispositius que no són de referència apliquen un marge ($t_m$) d'1 unitat de temps. S'observa com en el segon cicle \fitx{D2} ha hagut de fer una retransmissió; llavors \fitx{D1} pren l'instant de recepció de la retransmissió com el temps de sincronització. En el següent cicle, com que desperta més tard, no rep la transmissió del primer intent i, per tant, les torna a rebre en el segon intent. Tot i que les retransmissions no provoquen co\l.lisions, és important reduir-les al mínim ja que incrementen el consum. A més, el simple fet de perdre la primera transmissió provoca que hi hagi menys probabilitats que rebi les dades, perquè hi ha menys intents «reals», en els quals \fitx{D1} està actiu. És a dir, si el límit d'intents fos 2 i el primer el perdés sempre perquè està en baix consum, només disposaria d'1 intent per rebre les dades i, si aquest fallés, el dispositiu no es sincronitzaria.
+    
+    La solució que s'ha implementat és sortir del mode de baix consum un temps «delta», el qual es correspon a la diferència entre els instants de temps en què pot rebre l'últim i el primer missatge de sincronització possible:
+    \begin{itemize}
+        \item \emph{Primer possible}. Tots els dispositius anteriors a ell han enviat les dades en el primer intent, i sense necessitat d'aplicar \acro{beb} per accedir al canal. 
+        \item \emph{Últim possible}. Tots els dispositius anteriors a ell han enviat les dades en l'últim intent possible. Per considerar els retard d'accés al medi a causa del \acro{beb}, s'aplica un factor incrementatiu al resultat anterior, per exemple del 25\%. 
+    \end{itemize} 
+
+    \item \emph{Sense recepció de dades.}
+
+\end{itemize}
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\linewidth]{imatges/errorDeltaInconvenients.drawio.pdf}
+    \caption{Representació mala sincronització a causa de retransmissions.}
+    \label{fig:syncDeltaTimeErr}
+\end{figure}
+
 
 \chapter{Conclusions}
 % \section{Resultats assolits}
