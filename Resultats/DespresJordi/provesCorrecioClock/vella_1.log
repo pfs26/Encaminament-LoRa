@@ -1,0 +1,29 @@
+[2025-05-20 13:22:34.160301] [W]       99 routing_table.cpp   :  84 | [RTABLE] Route for 0x09 already exists
+[2025-05-20 13:22:34.926417] [W]      867 mac.cpp             : 418 | [MAC] Max retries (3) reached, transmission failed
+[2025-05-20 13:22:34.926557] [W]      867 mac.cpp             : 555 | [MAC] TX error (1)
+[2025-05-20 13:22:34.932882] [W]      875 transport.cpp       : 274 | [TRANSPORT] TX Error for UDP segment 47133 (frame 19750)
+[2025-05-20 13:22:34.947852] Sleeping for 299109 ms
+[2025-05-20 13:27:31.108468] [W]       99 routing_table.cpp   :  84 | [RTABLE] Route for 0x09 already exists
+[2025-05-20 13:27:31.875881] [W]      868 mac.cpp             : 418 | [MAC] Max retries (3) reached, transmission failed
+[2025-05-20 13:27:31.876427] [W]      868 mac.cpp             : 555 | [MAC] TX error (1)
+[2025-05-20 13:27:31.883527] [W]      876 transport.cpp       : 274 | [TRANSPORT] TX Error for UDP segment 63316 (frame 40616)
+[2025-05-20 13:27:31.898417] Sleeping for 299108 ms
+[2025-05-20 13:32:28.083186] [W]       99 routing_table.cpp   :  84 | [RTABLE] Route for 0x09 already exists
+[2025-05-20 13:32:28.956209] [W]      975 mac.cpp             : 418 | [MAC] Max retries (3) reached, transmission failed
+[2025-05-20 13:32:28.957255] [W]      975 mac.cpp             : 555 | [MAC] TX error (1)
+[2025-05-20 13:32:28.964068] [W]      983 transport.cpp       : 274 | [TRANSPORT] TX Error for UDP segment 33780 (frame 58937)
+[2025-05-20 13:32:28.978105] Sleeping for 299002 ms
+[2025-05-20 13:37:24.887089] [W]       99 routing_table.cpp   :  84 | [RTABLE] Route for 0x09 already exists
+[2025-05-20 13:37:25.651439] [W]      866 mac.cpp             : 418 | [MAC] Max retries (3) reached, transmission failed
+[2025-05-20 13:37:25.651892] [W]      866 mac.cpp             : 555 | [MAC] TX error (1)
+[2025-05-20 13:37:25.658636] [W]      874 transport.cpp       : 274 | [TRANSPORT] TX Error for UDP segment 28176 (frame 35422)
+[2025-05-20 13:37:25.673532] Sleeping for 299110 ms
+[2025-05-20 13:42:22.021028] [W]       99 routing_table.cpp   :  84 | [RTABLE] Route for 0x09 already exists
+[2025-05-20 13:42:22.788475] [W]      868 mac.cpp             : 418 | [MAC] Max retries (3) reached, transmission failed
+[2025-05-20 13:42:22.788620] [W]      868 mac.cpp             : 555 | [MAC] TX error (1)
+[2025-05-20 13:42:22.794946] [W]      876 transport.cpp       : 274 | [TRANSPORT] TX Error for UDP segment 6604 (frame 29553)
+[2025-05-20 13:42:22.809844] Sleeping for 299108 ms
+
+
+
+

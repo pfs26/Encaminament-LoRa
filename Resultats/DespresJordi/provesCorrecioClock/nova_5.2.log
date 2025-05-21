@@ -1,0 +1,28 @@
+[200~[2025-05-20 18:09:25.512275] [W]       79 routing_table.cpp   :  84 | [RTABLE] Route for 0x09 already exists
+[2025-05-20 18:09:26.277403] [W]      847 mac.cpp             : 418 | [MAC] Max retries (3) reached, transmission failed
+[2025-05-20 18:09:26.279811] [W]      847 mac.cpp             : 555 | [MAC] TX error (1)
+[2025-05-20 18:09:26.286805] [W]      855 transport.cpp       : 274 | [TRANSPORT] TX Error for UDP segment 58064 (frame 64404)
+[2025-05-20 18:09:26.301837] Sleeping for 599129 ms
+[2025-05-20 18:19:17.980640] [W]       79 routing_table.cpp   :  84 | [RTABLE] Route for 0x09 already exists
+[2025-05-20 18:19:18.746948] [W]      848 mac.cpp             : 418 | [MAC] Max retries (3) reached, transmission failed
+[2025-05-20 18:19:18.749425] [W]      848 mac.cpp             : 555 | [MAC] TX error (1)
+[2025-05-20 18:19:18.756416] [W]      856 transport.cpp       : 274 | [TRANSPORT] TX Error for UDP segment 57368 (frame 42963)
+[2025-05-20 18:19:18.771149] Sleeping for 599128 ms
+[2025-05-20 18:29:11.879264] [W]       79 routing_table.cpp   :  84 | [RTABLE] Route for 0x09 already exists
+[2025-05-20 18:29:12.645654] [W]      848 mac.cpp             : 418 | [MAC] Max retries (3) reached, transmission failed
+[2025-05-20 18:29:12.648126] [W]      848 mac.cpp             : 555 | [MAC] TX error (1)
+[2025-05-20 18:29:12.655264] [W]      856 transport.cpp       : 274 | [TRANSPORT] TX Error for UDP segment 42434 (frame 20150)
+[2025-05-20 18:29:12.669963] Sleeping for 599128 ms
+[2025-05-20 18:39:05.664488] [W]       79 routing_table.cpp   :  84 | [RTABLE] Route for 0x09 already exists
+[2025-05-20 18:39:06.431979] [W]      849 mac.cpp             : 418 | [MAC] Max retries (3) reached, transmission failed
+[2025-05-20 18:39:06.434313] [W]      849 mac.cpp             : 555 | [MAC] TX error (1)
+[2025-05-20 18:39:06.441363] [W]      857 transport.cpp       : 274 | [TRANSPORT] TX Error for UDP segment 29252 (frame 20643)
+[2025-05-20 18:39:06.455885] Sleeping for 599127 ms
+
+
+
+
+
+
+
+

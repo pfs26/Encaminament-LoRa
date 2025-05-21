@@ -1,0 +1,495 @@
+[200~[2025-05-20 19:03:03.392632] Boot: 0	Sync: 0
+[2025-05-20 19:03:03.392758] [I]       38 transport.cpp       :  54 | [TRANSPORT] Initializing...
+[2025-05-20 19:03:03.445593] [I]       91 lora.cpp            :  32 | [LORA] Init
+[2025-05-20 19:03:03.446487] [I]       91 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-20 19:03:03.452509] [I]       98 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:03:03.453441] [I]       98 loraraw.cpp         :  46 | [LR] Init
+[2025-05-20 19:03:03.453597] [I]       98 mac.cpp             : 103 | [MAC] Init
+[2025-05-20 19:03:03.456304] [I]      101 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (4 B, 2 routes) Heap: 328372
+[2025-05-20 19:03:03.457414] [I]      102 routing.cpp         :  64 | [ROUTING] Initialized
+[2025-05-20 19:03:03.458379] [I]      103 transport.cpp       :  74 | [TRANSPORT] Initialized
+[2025-05-20 19:03:03.459476] [W]      103 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-20 19:03:03.460460] [I]      105 sleep.cpp           : 104 | [SLEEP] Set forward node to 2
+[2025-05-20 19:03:03.461453] [I]      105 sleep.cpp           :  52 | [SLEEP] Initiator. Making PDU and sending.
+[2025-05-20 19:03:03.462504] [I]      107 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1
+[2025-05-20 19:03:03.462804] [I]      108 sleep.cpp           : 150 | [SLEEP] Sync received
+[2025-05-20 19:03:03.463566] [I]      108 sleep.cpp           : 165 | [SLEEP] Nodes before self: 0
+[2025-05-20 19:03:03.467084] [W]      110 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 0 nodes up to (3+1) txs, with 0.25 extra
+[2025-05-20 19:03:03.467242] [112] Ready to send data: 9B 
+[2025-05-20 19:03:03.467720] [I]      112 transport.cpp       :  93 | [TRANSPORT] Preparing to send
+[2025-05-20 19:03:03.468865] [I]      114 transport.cpp       : 361 | [TRANSPORT] SEGMENT: ID=4796 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=
+[2025-05-20 19:03:03.469743] [I]      114 routing.cpp         :  90 | [ROUTING] Sending packet:
+[2025-05-20 19:03:03.470708] [I]      115 routing.cpp         : 292 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=
+[2025-05-20 19:03:03.472002] [I]      117 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x02, through 0x02
+[2025-05-20 19:03:03.472548] [I]      117 mac.cpp             : 115 | [MAC] Preparing to send
+[2025-05-20 19:03:03.473512] [I]      119 mac.cpp             : 128 | [MAC] PDU ready
+[2025-05-20 19:03:03.474650] [I]      119 mac.cpp             : 566 | [MAC] FRAME: TX=03 RX=02 ID=40578 D-LEN=11 DATA= CRC=56 ACK=0 RETRY=0
+[2025-05-20 19:03:03.475645] [I]      120 mac.cpp             : 141 | [MAC] FSM transmission scheduled
+[2025-05-20 19:03:03.476646] [I]      122 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 40578)
+[2025-05-20 19:03:03.478518] [I]      122 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 4796, Frame ID: 40578)
+[2025-05-20 19:03:03.479475] [I]      123 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 2
+[2025-05-20 19:03:03.488381] [I]      133 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-20 19:03:03.489479] [I]      134 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-20 19:03:03.498532] [I]      144 loraraw.cpp         : 235 | [LR] Packet: 0302829EF80B03020507BC12040301019B38
+[2025-05-20 19:03:03.563401] [I]      208 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:03:03.564549] [I]      209 mac.cpp             : 485 | [MAC] Frame sent successfully, waiting for ACK
+[2025-05-20 19:03:03.570552] [I]      216 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:03:03.571547] [I]      216 mac.cpp             : 511 | [MAC] Timeout d'ACK: 108ms (36096us airtime)
+[2025-05-20 19:03:03.625437] [I]      271 loraraw.cpp         : 219 | [LR] Data received. SNR: 12, RSSI: -71
+[2025-05-20 19:03:03.626707] [I]      271 mac.cpp             : 308 | [MAC] Frame rcv
+[2025-05-20 19:03:03.633549] [I]      279 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:03:03.634386] [I]      279 mac.cpp             : 328 | Received valid PDU from LORA
+[2025-05-20 19:03:03.635608] [I]      281 mac.cpp             : 566 | [MAC] FRAME: TX=02 RX=03 ID=40578 D-LEN=0 DATA= CRC=197 ACK=1 RETRY=0
+[2025-05-20 19:03:03.636511] [I]      281 mac.cpp             : 340 | [MAC] ACK Received from 0x02
+[2025-05-20 19:03:03.645386] [I]      291 mac.cpp             : 409 | [MAC] ACK received
+[2025-05-20 19:03:03.646637] [I]      291 mac.cpp             : 540 | [MAC] Sent. Notify higher layer?
+[2025-05-20 19:03:03.653403] [I]      299 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:03:03.654547] [I]      299 transport.cpp       : 241 | [TRANSPORT] TX done for UDP segment 4796 (frame 40578)
+[2025-05-20 19:03:03.654612] [I]      300 sleep.cpp           : 311 | [SLEEP] Forwarded data
+[2025-05-20 19:03:03.656296] [I]      302 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327652
+[2025-05-20 19:03:03.657391] [I]      302 mac.cpp             : 108 | [MAC] Deinit
+[2025-05-20 19:03:03.657560] [I]      303 lora.cpp            :  37 | [LORA] Deinit
+[2025-05-20 19:03:03.671121] [I]      317 routing.cpp         :  75 | [ROUTING] Deinitialized
+[2025-05-20 19:03:03.671552] [I]      317 transport.cpp       :  88 | [TRANSPORT] De-initialized
+[2025-05-20 19:03:03.672674] [W]      318 sleep.cpp           : 269 | [SLEEP] Sleep breakdown: 299682 ms = 300000 ms - 318 ms + 0 ms
+[2025-05-20 19:03:03.675535] [E]      318 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	 Sleep time: 299682 ms	 Sync time: 0 ms	me: 318 ms	  Delta Time: 0 ms	  Clk correction: 0 ms	  Sync AVG: nan msDone AVG: nan ms	   Sync count: 0	count: 0	t:  0 ms
+[2025-05-20 19:03:03.676560] [E]      321 sleep.cpp           : 280 | [SLEEP] Extra 3 ms (299679)
+[2025-05-20 19:08:00.928460] Boot: 0	Sync: 1
+[2025-05-20 19:08:00.929365] [I]       38 transport.cpp       :  54 | [TRANSPORT] Initializing...
+[2025-05-20 19:08:00.982283] [I]       91 lora.cpp            :  32 | [LORA] Init
+[2025-05-20 19:08:00.983302] [I]       91 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-20 19:08:00.989052] [I]       98 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:08:00.990108] [I]       98 loraraw.cpp         :  46 | [LR] Init
+[2025-05-20 19:08:00.990248] [I]       98 mac.cpp             : 103 | [MAC] Init
+[2025-05-20 19:08:00.993045] [I]      101 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (4 B, 2 routes) Heap: 328372
+[2025-05-20 19:08:00.994162] [I]      102 routing.cpp         :  64 | [ROUTING] Initialized
+[2025-05-20 19:08:00.995111] [I]      103 transport.cpp       :  74 | [TRANSPORT] Initialized
+[2025-05-20 19:08:00.996162] [W]      103 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-20 19:08:00.996276] [I]      105 sleep.cpp           : 104 | [SLEEP] Set forward node to 2
+[2025-05-20 19:08:00.997290] [I]      105 sleep.cpp           :  52 | [SLEEP] Initiator. Making PDU and sending.
+[2025-05-20 19:08:00.998282] [I]      107 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1
+[2025-05-20 19:08:00.999134] [I]      108 sleep.cpp           : 150 | [SLEEP] Sync received
+[2025-05-20 19:08:01.000302] [I]      108 sleep.cpp           : 165 | [SLEEP] Nodes before self: 0
+[2025-05-20 19:08:01.003413] [W]      110 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 0 nodes up to (3+1) txs, with 0.25 extra
+[2025-05-20 19:08:01.003701] [112] Ready to send data: F4 
+[2025-05-20 19:08:01.004313] [I]      112 transport.cpp       :  93 | [TRANSPORT] Preparing to send
+[2025-05-20 19:08:01.005327] [I]      114 transport.cpp       : 361 | [TRANSPORT] SEGMENT: ID=15942 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=ÔøΩ[0m
+[2025-05-20 19:08:01.006326] [I]      114 routing.cpp         :  90 | [ROUTING] Sending packet:
+[2025-05-20 19:08:01.007330] [I]      115 routing.cpp         : 292 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=F>ÔøΩ[0m
+[2025-05-20 19:08:01.008417] [I]      117 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x02, through 0x02
+[2025-05-20 19:08:01.009349] [I]      117 mac.cpp             : 115 | [MAC] Preparing to send
+[2025-05-20 19:08:01.010330] [I]      119 mac.cpp             : 128 | [MAC] PDU ready
+[2025-05-20 19:08:01.011318] [I]      119 mac.cpp             : 566 | [MAC] FRAME: TX=03 RX=02 ID=24015 D-LEN=11 DATA=F>ÔøΩCRC=77 ACK=0 RETRY=0
+[2025-05-20 19:08:01.012353] [I]      120 mac.cpp             : 141 | [MAC] FSM transmission scheduled
+[2025-05-20 19:08:01.013266] [I]      122 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 24015)
+[2025-05-20 19:08:01.015334] [I]      122 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 15942, Frame ID: 24015)
+[2025-05-20 19:08:01.015391] [I]      123 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 2
+[2025-05-20 19:08:01.025208] [I]      133 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-20 19:08:01.025342] [I]      134 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-20 19:08:01.035265] [I]      144 loraraw.cpp         : 235 | [LR] Packet: 0302CF5DF80B03020507463E04030101F44D
+[2025-05-20 19:08:01.100125] [I]      208 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:08:01.101309] [I]      209 mac.cpp             : 485 | [MAC] Frame sent successfully, waiting for ACK
+[2025-05-20 19:08:01.107272] [I]      216 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:08:01.108261] [I]      216 mac.cpp             : 511 | [MAC] Timeout d'ACK: 108ms (36096us airtime)
+[2025-05-20 19:08:01.222854] [I]      332 mac.cpp             : 415 | [MAC] ACK timeout
+[2025-05-20 19:08:01.223404] [I]      332 mac.cpp             : 423 | [MAC] Retry 1/3
+[2025-05-20 19:08:01.224404] [I]      333 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-20 19:08:01.225287] [I]      334 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-20 19:08:01.234197] [I]      343 loraraw.cpp         : 235 | [LR] Packet: 0302CF5DFA0B03020507463E04030101F462
+[2025-05-20 19:08:01.298413] [I]      408 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:08:01.299305] [I]      408 mac.cpp             : 485 | [MAC] Frame sent successfully after retry, waiting for ACK
+[2025-05-20 19:08:01.305447] [I]      415 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:08:01.306397] [I]      416 mac.cpp             : 511 | [MAC] Timeout d'ACK: 108ms (36096us airtime)
+[2025-05-20 19:08:01.422297] [I]      532 mac.cpp             : 415 | [MAC] ACK timeout
+[2025-05-20 19:08:01.423127] [I]      532 mac.cpp             : 423 | [MAC] Retry 2/3
+[2025-05-20 19:08:01.424127] [I]      533 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-20 19:08:01.424299] [I]      534 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-20 19:08:01.433306] [I]      543 loraraw.cpp         : 235 | [LR] Packet: 0302CF5DFC0B03020507463E04030101F413
+[2025-05-20 19:08:01.498367] [I]      608 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:08:01.499368] [I]      608 mac.cpp             : 485 | [MAC] Frame sent successfully after retry, waiting for ACK
+[2025-05-20 19:08:01.505355] [I]      615 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:08:01.506351] [I]      615 mac.cpp             : 511 | [MAC] Timeout d'ACK: 108ms (36096us airtime)
+[2025-05-20 19:08:01.621214] [I]      731 mac.cpp             : 415 | [MAC] ACK timeout
+[2025-05-20 19:08:01.621367] [I]      731 mac.cpp             : 423 | [MAC] Retry 3/3
+[2025-05-20 19:08:01.622144] [I]      732 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-20 19:08:01.623251] [I]      733 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-20 19:08:01.632378] [I]      742 loraraw.cpp         : 235 | [LR] Packet: 0302CF5DFE0B03020507463E04030101F43C
+[2025-05-20 19:08:01.696210] [I]      806 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:08:01.697284] [I]      807 mac.cpp             : 485 | [MAC] Frame sent successfully after retry, waiting for ACK
+[2025-05-20 19:08:01.703491] [I]      814 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:08:01.704401] [I]      814 mac.cpp             : 511 | [MAC] Timeout d'ACK: 108ms (36096us airtime)
+[2025-05-20 19:08:01.818500] [I]      929 mac.cpp             : 415 | [MAC] ACK timeout
+[2025-05-20 19:08:01.819454] [W]      929 mac.cpp             : 418 | [MAC] Max retries (3) reached, transmission failed
+[2025-05-20 19:08:01.820315] [W]      931 mac.cpp             : 555 | [MAC] TX error (1)
+[2025-05-20 19:08:01.826306] [I]      937 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:08:01.827393] [W]      937 transport.cpp       : 274 | [TRANSPORT] TX Error for UDP segment 15942 (frame 24015)
+[2025-05-20 19:08:01.828377] [I]      939 sleep.cpp           : 316 | [SLEEP] Error forwarding data. Going to sleep.
+[2025-05-20 19:08:01.830238] [I]      940 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327400
+[2025-05-20 19:08:01.830349] [I]      940 mac.cpp             : 108 | [MAC] Deinit
+[2025-05-20 19:08:01.831223] [I]      942 lora.cpp            :  37 | [LORA] Deinit
+[2025-05-20 19:08:01.844330] [I]      955 routing.cpp         :  75 | [ROUTING] Deinitialized
+[2025-05-20 19:08:01.845171] [I]      955 transport.cpp       :  88 | [TRANSPORT] De-initialized
+[2025-05-20 19:08:01.846366] [W]      957 sleep.cpp           : 269 | [SLEEP] Sleep breakdown: 299043 ms = 300000 ms - 957 ms + 0 ms
+[2025-05-20 19:08:01.849188] [E]      957 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	 Sleep time: 299043 ms	 Sync time: 0 ms	me: 957 ms	  Delta Time: 0 ms	  Clk correction: 0 ms	  Sync AVG: 0.00 ms	  Done AVG: nan ms	   Sync count: 1	count: 0	ut:  0 ms
+[2025-05-20 19:08:01.850312] [E]      960 sleep.cpp           : 280 | [SLEEP] Extra 3 ms (299040)
+[2025-05-20 19:12:58.049049] Boot: 0	Sync: 2
+[2025-05-20 19:12:58.049193] [I]       38 transport.cpp       :  54 | [TRANSPORT] Initializing...
+[2025-05-20 19:12:58.101765] [I]       91 lora.cpp            :  32 | [LORA] Init
+[2025-05-20 19:12:58.103037] [I]       91 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-20 19:12:58.109138] [I]       98 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:12:58.109912] [I]       98 loraraw.cpp         :  46 | [LR] Init
+[2025-05-20 19:12:58.111054] [I]       98 mac.cpp             : 103 | [MAC] Init
+[2025-05-20 19:12:58.113888] [I]      101 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (4 B, 2 routes) Heap: 328372
+[2025-05-20 19:12:58.114336] [I]      102 routing.cpp         :  64 | [ROUTING] Initialized
+[2025-05-20 19:12:58.114931] [I]      103 transport.cpp       :  74 | [TRANSPORT] Initialized
+[2025-05-20 19:12:58.115891] [W]      103 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-20 19:12:58.116924] [I]      105 sleep.cpp           : 104 | [SLEEP] Set forward node to 2
+[2025-05-20 19:12:58.117945] [I]      105 sleep.cpp           :  52 | [SLEEP] Initiator. Making PDU and sending.
+[2025-05-20 19:12:58.119033] [I]      107 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1
+[2025-05-20 19:12:58.120005] [I]      108 sleep.cpp           : 150 | [SLEEP] Sync received
+[2025-05-20 19:12:58.120108] [I]      108 sleep.cpp           : 165 | [SLEEP] Nodes before self: 0
+[2025-05-20 19:12:58.123095] [W]      110 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 0 nodes up to (3+1) txs, with 0.25 extra
+[2025-05-20 19:12:58.123396] [112] Ready to send data: 6F 
+[2025-05-20 19:12:58.124341] [I]      112 transport.cpp       :  93 | [TRANSPORT] Preparing to send
+[2025-05-20 19:12:58.126163] [I]      114 transport.cpp       : 361 | [TRANSPORT] SEGMENT: ID=43115 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=o
+[2025-05-20 19:12:58.126295] [I]      114 routing.cpp         :  90 | [ROUTING] Sending packet:
+[2025-05-20 19:12:58.127928] [I]      115 routing.cpp         : 292 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=ko
+[2025-05-20 19:12:58.129136] [I]      117 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x02, through 0x02
+[2025-05-20 19:12:58.129241] [I]      117 mac.cpp             : 115 | [MAC] Preparing to send
+[2025-05-20 19:12:58.130103] [I]      119 mac.cpp             : 128 | [MAC] PDU ready
+[2025-05-20 19:12:58.131225] [I]      119 mac.cpp             : 566 | [MAC] FRAME: TX=03 RX=02 ID=51177 D-LEN=11 DATA=ko CRC=198 ACK=0 RETRY=0
+[2025-05-20 19:12:58.132291] [I]      120 mac.cpp             : 141 | [MAC] FSM transmission scheduled
+[2025-05-20 19:12:58.133164] [I]      122 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 51177)
+[2025-05-20 19:12:58.135042] [I]      122 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 43115, Frame ID: 51177)
+[2025-05-20 19:12:58.137254] [I]      123 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 2
+[2025-05-20 19:12:58.149010] [I]      133 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-20 19:12:58.149214] [I]      134 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-20 19:12:58.155055] [I]      144 loraraw.cpp         : 235 | [LR] Packet: 0302E9C7F80B030205076BA8040301016FC6
+[2025-05-20 19:12:58.219789] [I]      208 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:12:58.221042] [I]      209 mac.cpp             : 485 | [MAC] Frame sent successfully, waiting for ACK
+[2025-05-20 19:12:58.227185] [I]      216 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:12:58.228273] [I]      216 mac.cpp             : 511 | [MAC] Timeout d'ACK: 108ms (36096us airtime)
+[2025-05-20 19:12:58.342790] [I]      332 mac.cpp             : 415 | [MAC] ACK timeout
+[2025-05-20 19:12:58.343862] [I]      333 mac.cpp             : 423 | [MAC] Retry 1/3
+[2025-05-20 19:12:58.344006] [I]      333 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-20 19:12:58.344998] [I]      335 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-20 19:12:58.353883] [I]      343 loraraw.cpp         : 235 | [LR] Packet: 0302E9C7FA0B030205076BA8040301016FE9
+[2025-05-20 19:12:58.418223] [I]      408 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:12:58.419166] [I]      408 mac.cpp             : 485 | [MAC] Frame sent successfully after retry, waiting for ACK
+[2025-05-20 19:12:58.427004] [I]      415 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:12:58.427444] [I]      416 mac.cpp             : 511 | [MAC] Timeout d'ACK: 108ms (36096us airtime)
+[2025-05-20 19:12:58.543024] [I]      532 mac.cpp             : 415 | [MAC] ACK timeout
+[2025-05-20 19:12:58.543141] [I]      532 mac.cpp             : 423 | [MAC] Retry 2/3
+[2025-05-20 19:12:58.543899] [I]      533 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-20 19:12:58.545105] [I]      534 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-20 19:12:58.553960] [I]      543 loraraw.cpp         : 235 | [LR] Packet: 0302E9C7FC0B030205076BA8040301016F98
+[2025-05-20 19:12:58.617915] [I]      608 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:12:58.619049] [I]      608 mac.cpp             : 485 | [MAC] Frame sent successfully after retry, waiting for ACK
+[2025-05-20 19:12:58.625232] [I]      615 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:12:58.626202] [I]      616 mac.cpp             : 511 | [MAC] Timeout d'ACK: 108ms (36096us airtime)
+[2025-05-20 19:12:58.743741] [I]      732 mac.cpp             : 415 | [MAC] ACK timeout
+[2025-05-20 19:12:58.743946] [I]      732 mac.cpp             : 423 | [MAC] Retry 3/3
+[2025-05-20 19:12:58.744015] [I]      733 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-20 19:12:58.744117] [I]      734 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-20 19:12:58.753019] [I]      743 loraraw.cpp         : 235 | [LR] Packet: 0302E9C7FE0B030205076BA8040301016FB7
+[2025-05-20 19:12:58.817112] [I]      808 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:12:58.818123] [I]      808 mac.cpp             : 485 | [MAC] Frame sent successfully after retry, waiting for ACK
+[2025-05-20 19:12:58.825007] [I]      815 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:12:58.826193] [I]      815 mac.cpp             : 511 | [MAC] Timeout d'ACK: 108ms (36096us airtime)
+[2025-05-20 19:12:58.939914] [I]      930 mac.cpp             : 415 | [MAC] ACK timeout
+[2025-05-20 19:12:58.940927] [W]      930 mac.cpp             : 418 | [MAC] Max retries (3) reached, transmission failed
+[2025-05-20 19:12:58.941092] [W]      932 mac.cpp             : 555 | [MAC] TX error (1)
+[2025-05-20 19:12:58.947053] [I]      938 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:12:58.948053] [W]      938 transport.cpp       : 274 | [TRANSPORT] TX Error for UDP segment 43115 (frame 51177)
+[2025-05-20 19:12:58.949115] [I]      940 sleep.cpp           : 316 | [SLEEP] Error forwarding data. Going to sleep.
+[2025-05-20 19:12:58.950931] [I]      941 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327400
+[2025-05-20 19:12:58.951816] [I]      941 mac.cpp             : 108 | [MAC] Deinit
+[2025-05-20 19:12:58.952121] [I]      943 lora.cpp            :  37 | [LORA] Deinit
+[2025-05-20 19:12:58.965888] [I]      956 routing.cpp         :  75 | [ROUTING] Deinitialized
+[2025-05-20 19:12:58.966108] [I]      956 transport.cpp       :  88 | [TRANSPORT] De-initialized
+[2025-05-20 19:12:58.967901] [W]      958 sleep.cpp           : 269 | [SLEEP] Sleep breakdown: 299042 ms = 300000 ms - 958 ms + 0 ms
+[2025-05-20 19:12:58.970788] [E]      958 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	   Sleep time: 299042 ms	time: 0 ms	Done time: 958 ms	 Delta Time: 0 ms	k correction: 0 ms	nc AVG: 0.00 ms	   Done AVG: nan ms	    Sync count: 2Boot count: 0	 Timeout:  0 ms
+[2025-05-20 19:12:58.971117] [E]      961 sleep.cpp           : 280 | [SLEEP] Extra 3 ms (299039)
+[2025-05-20 19:17:54.842814] Boot: 0	Sync: 3
+[2025-05-20 19:17:54.843827] [I]       38 transport.cpp       :  54 | [TRANSPORT] Initializing...
+[2025-05-20 19:17:54.896641] [I]       91 lora.cpp            :  32 | [LORA] Init
+[2025-05-20 19:17:54.896832] [I]       91 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-20 19:17:54.903820] [I]       98 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:17:54.903948] [I]       98 loraraw.cpp         :  46 | [LR] Init
+[2025-05-20 19:17:54.904888] [I]       98 mac.cpp             : 103 | [MAC] Init
+[2025-05-20 19:17:54.908022] [I]      101 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (4 B, 2 routes) Heap: 328372
+[2025-05-20 19:17:54.908137] [I]      102 routing.cpp         :  64 | [ROUTING] Initialized
+[2025-05-20 19:17:54.909034] [I]      103 transport.cpp       :  74 | [TRANSPORT] Initialized
+[2025-05-20 19:17:54.910008] [W]      103 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-20 19:17:54.910850] [I]      105 sleep.cpp           : 104 | [SLEEP] Set forward node to 2
+[2025-05-20 19:17:54.911975] [I]      105 sleep.cpp           :  52 | [SLEEP] Initiator. Making PDU and sending.
+[2025-05-20 19:17:54.912957] [I]      107 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1
+[2025-05-20 19:17:54.913843] [I]      108 sleep.cpp           : 150 | [SLEEP] Sync received
+[2025-05-20 19:17:54.914795] [I]      108 sleep.cpp           : 165 | [SLEEP] Nodes before self: 0
+[2025-05-20 19:17:54.917605] [W]      110 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 0 nodes up to (3+1) txs, with 0.25 extra
+[2025-05-20 19:17:54.917661] [112] Ready to send data: B1 
+[2025-05-20 19:17:54.919313] [I]      112 transport.cpp       :  93 | [TRANSPORT] Preparing to send
+[2025-05-20 19:17:54.919937] [I]      114 transport.cpp       : 361 | [TRANSPORT] SEGMENT: ID=33504 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=
+[2025-05-20 19:17:54.920758] [I]      114 routing.cpp         :  90 | [ROUTING] Sending packet:
+[2025-05-20 19:17:54.921861] [I]      115 routing.cpp         : 292 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=ÔøΩ
+[2025-05-20 19:17:54.922858] [I]      117 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x02, through 0x02
+[2025-05-20 19:17:54.923698] [I]      117 mac.cpp             : 115 | [MAC] Preparing to send
+[2025-05-20 19:17:54.924747] [I]      119 mac.cpp             : 128 | [MAC] PDU ready
+[2025-05-20 19:17:54.925861] [I]      119 mac.cpp             : 566 | [MAC] FRAME: TX=03 RX=02 ID=35830 D-LEN=11 DATA=ÔøΩ CRC=109 ACK=0 RETRY=0
+[2025-05-20 19:17:54.926743] [I]      120 mac.cpp             : 141 | [MAC] FSM transmission scheduled
+[2025-05-20 19:17:54.927854] [I]      122 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 35830)
+[2025-05-20 19:17:54.929718] [I]      122 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 33504, Frame ID: 35830)
+[2025-05-20 19:17:54.929875] [I]      123 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 2
+[2025-05-20 19:17:54.939002] [I]      133 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-20 19:17:54.939823] [I]      134 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-20 19:17:54.949949] [I]      144 loraraw.cpp         : 235 | [LR] Packet: 0302F68BF80B03020507E08204030101B16D
+[2025-05-20 19:17:55.014159] [I]      208 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:17:55.014999] [I]      209 mac.cpp             : 485 | [MAC] Frame sent successfully, waiting for ACK
+[2025-05-20 19:17:55.021686] [I]      216 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:17:55.022835] [I]      216 mac.cpp             : 511 | [MAC] Timeout d'ACK: 108ms (36096us airtime)
+[2025-05-20 19:17:55.077735] [I]      272 loraraw.cpp         : 219 | [LR] Data received. SNR: 12, RSSI: -81
+[2025-05-20 19:17:55.077913] [I]      272 mac.cpp             : 308 | [MAC] Frame rcv
+[2025-05-20 19:17:55.085683] [I]      280 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:17:55.086728] [I]      280 mac.cpp             : 328 | Received valid PDU from LORA
+[2025-05-20 19:17:55.087682] [I]      282 mac.cpp             : 566 | [MAC] FRAME: TX=02 RX=03 ID=35830 D-LEN=0 DATA= CRC=205 ACK=1 RETRY=0
+[2025-05-20 19:17:55.088836] [I]      282 mac.cpp             : 340 | [MAC] ACK Received from 0x02
+[2025-05-20 19:17:55.097746] [I]      292 mac.cpp             : 409 | [MAC] ACK received
+[2025-05-20 19:17:55.098840] [I]      292 mac.cpp             : 540 | [MAC] Sent. Notify higher layer?
+[2025-05-20 19:17:55.104846] [I]      300 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:17:55.105864] [I]      300 transport.cpp       : 241 | [TRANSPORT] TX done for UDP segment 33504 (frame 35830)
+[2025-05-20 19:17:55.106861] [I]      301 sleep.cpp           : 311 | [SLEEP] Forwarded data
+[2025-05-20 19:17:55.108708] [I]      303 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327652
+[2025-05-20 19:17:55.108857] [I]      303 mac.cpp             : 108 | [MAC] Deinit
+[2025-05-20 19:17:55.109879] [I]      304 lora.cpp            :  37 | [LORA] Deinit
+[2025-05-20 19:17:55.122860] [I]      318 routing.cpp         :  75 | [ROUTING] Deinitialized
+[2025-05-20 19:17:55.123738] [I]      318 transport.cpp       :  88 | [TRANSPORT] De-initialized
+[2025-05-20 19:17:55.124855] [W]      319 sleep.cpp           : 269 | [SLEEP] Sleep breakdown: 299681 ms = 300000 ms - 319 ms + 0 ms
+[2025-05-20 19:17:55.127796] [E]      319 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	  Sleep time: 299681 ms	  Sync time: 0 ms	ime: 319 ms	    Delta Time: 0 ms	    Clk correction: 0 ms	 AVG: 0.00 ms	     Done AVG: nan ms	      Sync count: 3	ot count: 0	meout:  0 ms
+[2025-05-20 19:17:55.128841] [E]      323 sleep.cpp           : 280 | [SLEEP] Extra 4 ms (299677)
+[2025-05-20 19:22:52.528915] Boot: 0	Sync: 4
+[2025-05-20 19:22:52.530004] [I]       38 transport.cpp       :  54 | [TRANSPORT] Initializing...
+[2025-05-20 19:22:52.582985] [I]       91 lora.cpp            :  32 | [LORA] Init
+[2025-05-20 19:22:52.583175] [I]       91 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-20 19:22:52.589959] [I]       98 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:22:52.590109] [I]       98 loraraw.cpp         :  46 | [LR] Init
+[2025-05-20 19:22:52.591077] [I]       98 mac.cpp             : 103 | [MAC] Init
+[2025-05-20 19:22:52.594114] [I]      101 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (4 B, 2 routes) Heap: 328372
+[2025-05-20 19:22:52.594213] [I]      102 routing.cpp         :  64 | [ROUTING] Initialized
+[2025-05-20 19:22:52.595319] [I]      103 transport.cpp       :  74 | [TRANSPORT] Initialized
+[2025-05-20 19:22:52.596004] [W]      103 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-20 19:22:52.597007] [I]      105 sleep.cpp           : 104 | [SLEEP] Set forward node to 2
+[2025-05-20 19:22:52.598054] [I]      105 sleep.cpp           :  52 | [SLEEP] Initiator. Making PDU and sending.
+[2025-05-20 19:22:52.599000] [I]      107 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1
+[2025-05-20 19:22:52.599995] [I]      108 sleep.cpp           : 150 | [SLEEP] Sync received
+[2025-05-20 19:22:52.601099] [I]      108 sleep.cpp           : 165 | [SLEEP] Nodes before self: 0
+[2025-05-20 19:22:52.603870] [W]      110 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 0 nodes up to (3+1) txs, with 0.25 extra
+[2025-05-20 19:22:52.603977] [112] Ready to send data: 80 
+[2025-05-20 19:22:52.605001] [I]      112 transport.cpp       :  93 | [TRANSPORT] Preparing to send
+[2025-05-20 19:22:52.605986] [I]      114 transport.cpp       : 361 | [TRANSPORT] SEGMENT: ID=61038 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=
+[2025-05-20 19:22:52.607029] [I]      114 routing.cpp         :  90 | [ROUTING] Sending packet:
+[2025-05-20 19:22:52.607991] [I]      115 routing.cpp         : 292 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=nÔøΩ
+[2025-05-20 19:22:52.608979] [I]      117 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x02, through 0x02
+[2025-05-20 19:22:52.609990] [I]      117 mac.cpp             : 115 | [MAC] Preparing to send
+[2025-05-20 19:22:52.611050] [I]      119 mac.cpp             : 128 | [MAC] PDU ready
+[2025-05-20 19:22:52.612014] [I]      119 mac.cpp             : 566 | [MAC] FRAME: TX=03 RX=02 ID=60162 D-LEN=11 DATA=nÔøΩ CRC=16 ACK=0 RETRY=0
+[2025-05-20 19:22:52.613040] [I]      120 mac.cpp             : 141 | [MAC] FSM transmission scheduled
+[2025-05-20 19:22:52.614069] [I]      122 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 60162)
+[2025-05-20 19:22:52.615171] [I]      122 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 61038, Frame ID: 60162)
+[2025-05-20 19:22:52.616252] [I]      123 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 2
+[2025-05-20 19:22:52.625211] [I]      133 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-20 19:22:52.625957] [I]      134 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-20 19:22:52.635979] [I]      144 loraraw.cpp         : 235 | [LR] Packet: 030202EBF80B030205076EEE040301018010
+[2025-05-20 19:22:52.700177] [I]      208 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:22:52.701450] [I]      209 mac.cpp             : 485 | [MAC] Frame sent successfully, waiting for ACK
+[2025-05-20 19:22:52.707737] [I]      216 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:22:52.708958] [I]      216 mac.cpp             : 511 | [MAC] Timeout d'ACK: 108ms (36096us airtime)
+[2025-05-20 19:22:52.762786] [I]      271 loraraw.cpp         : 219 | [LR] Data received. SNR: 12, RSSI: -78
+[2025-05-20 19:22:52.763136] [I]      271 mac.cpp             : 308 | [MAC] Frame rcv
+[2025-05-20 19:22:52.770836] [I]      279 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:22:52.771912] [I]      279 mac.cpp             : 328 | Received valid PDU from LORA
+[2025-05-20 19:22:52.772822] [I]      281 mac.cpp             : 566 | [MAC] FRAME: TX=02 RX=03 ID=60162 D-LEN=0 DATA= CRC=83 ACK=1 RETRY=0
+[2025-05-20 19:22:52.773945] [I]      281 mac.cpp             : 340 | [MAC] ACK Received from 0x02
+[2025-05-20 19:22:52.782855] [I]      291 mac.cpp             : 409 | [MAC] ACK received
+[2025-05-20 19:22:52.783921] [I]      291 mac.cpp             : 540 | [MAC] Sent. Notify higher layer?
+[2025-05-20 19:22:52.790042] [I]      299 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:22:52.791045] [I]      299 transport.cpp       : 241 | [TRANSPORT] TX done for UDP segment 61038 (frame 60162)
+[2025-05-20 19:22:52.792013] [I]      300 sleep.cpp           : 311 | [SLEEP] Forwarded data
+[2025-05-20 19:22:52.793850] [I]      302 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327652
+[2025-05-20 19:22:52.793993] [I]      302 mac.cpp             : 108 | [MAC] Deinit
+[2025-05-20 19:22:52.794934] [I]      303 lora.cpp            :  37 | [LORA] Deinit
+[2025-05-20 19:22:52.808039] [I]      317 routing.cpp         :  75 | [ROUTING] Deinitialized
+[2025-05-20 19:22:52.808922] [I]      317 transport.cpp       :  88 | [TRANSPORT] De-initialized
+[2025-05-20 19:22:52.810043] [W]      318 sleep.cpp           : 269 | [SLEEP] Sleep breakdown: 299682 ms = 300000 ms - 318 ms + 0 ms
+[2025-05-20 19:22:52.812818] [E]      318 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	  Sleep time: 299682 ms	  Sync time: 0 ms	ime: 318 ms	    Delta Time: 0 ms	    Clk correction: 0 ms	 AVG: 0.00 ms	     Done AVG: nan ms	      Sync count: 4	ot count: 0	meout:  0 ms
+[2025-05-20 19:22:52.813950] [E]      322 sleep.cpp           : 280 | [SLEEP] Extra 4 ms (299678)
+[2025-05-20 19:27:50.347702] Boot: 0	Sync: 5
+[2025-05-20 19:27:50.348746] [I]       38 transport.cpp       :  54 | [TRANSPORT] Initializing...
+[2025-05-20 19:27:50.400941] [I]       91 lora.cpp            :  32 | [LORA] Init
+[2025-05-20 19:27:50.401740] [I]       91 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-20 19:27:50.408588] [I]       98 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:27:50.408706] [I]       98 loraraw.cpp         :  46 | [LR] Init
+[2025-05-20 19:27:50.409806] [I]       98 mac.cpp             : 103 | [MAC] Init
+[2025-05-20 19:27:50.412613] [I]      101 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (4 B, 2 routes) Heap: 328372
+[2025-05-20 19:27:50.412736] [I]      102 routing.cpp         :  64 | [ROUTING] Initialized
+[2025-05-20 19:27:50.413749] [I]      103 transport.cpp       :  74 | [TRANSPORT] Initialized
+[2025-05-20 19:27:50.414686] [W]      103 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists
+[2025-05-20 19:27:50.415653] [I]      105 sleep.cpp           : 104 | [SLEEP] Set forward node to 2
+[2025-05-20 19:27:50.416581] [I]      105 sleep.cpp           :  52 | [SLEEP] Initiator. Making PDU and sending.
+[2025-05-20 19:27:50.417617] [I]      107 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1
+[2025-05-20 19:27:50.418566] [I]      108 sleep.cpp           : 150 | [SLEEP] Sync received
+[2025-05-20 19:27:50.419664] [I]      108 sleep.cpp           : 165 | [SLEEP] Nodes before self: 0
+[2025-05-20 19:27:50.421759] [W]      110 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 0 nodes up to (3+1) txs, with 0.25 extra
+[2025-05-20 19:27:50.422712] [112] Ready to send data: FB 
+[2025-05-20 19:27:50.423753] [I]      112 transport.cpp       :  93 | [TRANSPORT] Preparing to send
+[2025-05-20 19:27:50.424753] [I]      114 transport.cpp       : 361 | [TRANSPORT] SEGMENT: ID=51182 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=
+[2025-05-20 19:27:50.425794] [I]      114 routing.cpp         :  90 | [ROUTING] Sending packet:
+[2025-05-20 19:27:50.426806] [I]      115 routing.cpp         : 292 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=ÔøΩ
+[2025-05-20 19:27:50.427787] [I]      117 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x02, through 0x02
+[2025-05-20 19:27:50.428808] [I]      117 mac.cpp             : 115 | [MAC] Preparing to send
+[2025-05-20 19:27:50.428895] [I]      119 mac.cpp             : 128 | [MAC] PDU ready
+[2025-05-20 19:27:50.430681] [I]      119 mac.cpp             : 566 | [MAC] FRAME: TX=03 RX=02 ID=43151 D-LEN=11 DATA=ÔøΩ CRC=187 ACK=0 RETRY=0
+[2025-05-20 19:27:50.431741] [I]      120 mac.cpp             : 141 | [MAC] FSM transmission scheduled
+[2025-05-20 19:27:50.432714] [I]      122 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 43151)
+[2025-05-20 19:27:50.433872] [I]      122 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 51182, Frame ID: 43151)
+[2025-05-20 19:27:50.434688] [I]      123 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 2
+[2025-05-20 19:27:50.443710] [I]      133 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-20 19:27:50.444724] [I]      134 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-20 19:27:50.454664] [I]      144 loraraw.cpp         : 235 | [LR] Packet: 03028FA8F80B03020507EEC704030101FBBB
+[2025-05-20 19:27:50.518696] [I]      208 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:27:50.519721] [I]      209 mac.cpp             : 485 | [MAC] Frame sent successfully, waiting for ACK
+[2025-05-20 19:27:50.526568] [I]      216 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:27:50.527701] [I]      216 mac.cpp             : 511 | [MAC] Timeout d'ACK: 108ms (36096us airtime)
+[2025-05-20 19:27:50.581768] [I]      272 loraraw.cpp         : 219 | [LR] Data received. SNR: 12, RSSI: -81
+[2025-05-20 19:27:50.582611] [I]      272 mac.cpp             : 308 | [MAC] Frame rcv
+[2025-05-20 19:27:50.590544] [I]      280 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:27:50.590702] [I]      280 mac.cpp             : 328 | Received valid PDU from LORA
+[2025-05-20 19:27:50.592719] [I]      282 mac.cpp             : 566 | [MAC] FRAME: TX=02 RX=03 ID=43151 D-LEN=0 DATA= CRC=167 ACK=1 RETRY=0
+[2025-05-20 19:27:50.593694] [I]      282 mac.cpp             : 340 | [MAC] ACK Received from 0x02
+[2025-05-20 19:27:50.601907] [I]      292 mac.cpp             : 409 | [MAC] ACK received
+[2025-05-20 19:27:50.602702] [I]      292 mac.cpp             : 540 | [MAC] Sent. Notify higher layer?
+[2025-05-20 19:27:50.609591] [I]      300 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-20 19:27:50.610723] [I]      300 transport.cpp       : 241 | [TRANSPORT] TX done for UDP segment 51182 (frame 43151)
+[2025-05-20 19:27:50.611783] [I]      301 sleep.cpp           : 311 | [SLEEP] Forwarded data
+[2025-05-20 19:27:50.612754] [I]      303 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327652
+[2025-05-20 19:27:50.613753] [I]      303 mac.cpp             : 108 | [MAC] Deinit
+[2025-05-20 19:27:50.613893] [I]      304 lora.cpp            :  37 | [LORA] Deinit
+[2025-05-20 19:27:50.627580] [I]      318 routing.cpp         :  75 | [ROUTING] Deinitialized
+[2025-05-20 19:27:50.628576] [I]      318 transport.cpp       :  88 | [TRANSPORT] De-initialized
+[2025-05-20 19:27:50.629589] [W]      319 sleep.cpp           : 269 | [SLEEP] Sleep breakdown: 299681 ms = 300000 ms - 319 ms + 0 ms
+[2025-05-20 19:27:50.632645] [E]      319 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	  Sleep time: 299681 ms	  Sync time: 0 ms	ime: 319 ms	    Delta Time: 0 ms	    Clk correction: 0 ms	 AVG: 0.00 ms	     Done AVG: nan ms	      Sync count: 5	ot count: 0	meout:  0 ms
+[2025-05-20 19:27:50.633698] [E]      323 sleep.cpp           : 280 | [SLEEP] Extra 4 ms (299677)
+[2025-05-20 19:32:47.694902] ÄÄ Ä ÄÄÄ Ä   Ä ÄÄÄÄÄ ÄÄ     Ä         Ä  Ä    Ä      Ä    Ä   Ä  Ä  Ä ÄÄ  Ä ÄÄ  Ä   ÄÄ Ä ÄÄ Ä    ÄÄÄÄ    Ä   ÄÄÄ ÄÄÄ Ä ÄÄÄ ÄÄ  ÄÄÄ ÄÄÄ Ä ÄÄÄÄÄ  ÄÄÄÄ ÄÄ ÄÄÄÄ Ä ÄÄÄÄ Ä  Ä   ÄÄÄÄÄÄÄ ÄÄ Ä    ÄÄ  Ä     Ä Ä ÄÄ ÄÄÄ  ÄÄÄÄ  ÄÄ ÄÄ ÄÄ ÄÄÄÄÄÄ  Ä  ÄÄ ÄÄ ÄÄ  ÄÄÄÄ  ÄÄ ÄÄ Ä ÄÄÄÄ Ä ÄÄ  Ä Ä ÄÄÄÄ ÄÄ  ÄÄ ÄÄÄ ÄÄ ÄÄ ÄÄ Ä Ä      Ä   Ä ÄÄ ÄÄÄ  ÄÄÄÄÄ ÄÄ Ä    ÄÄÄ ÄÄÄ ÄÄÄ  Ä Ä Ä ÄÄÄÄÄÄÄÄÄ  Ä  Ä ÄÄ Ä    Ä     Ä Ä ÄÄÄÄ  Ä  Ä ÄÄ Ä    Ä     Ä   ÄÄÄÄ  Ä  Ä ÄÄ Ä    Ä     Ä Ä ÄÄ Ä  ÄÄÄ  Ä  Ä ÄÄ Ä    Ä     Ä  ÄÄ  ÄÄÄÄ  Ä  Ä ÄÄ Ä    Ä     Ä ÄÄÄ ÄÄÄÄ  Ä  Ä ÄÄ Ä    Ä    ÄÄ  Ä ÄÄÄÄÄÄÄ  ÄÄÄ Ä Ä   ÄÄ  ÄÄ Ä Ä   Ä Ä ÄÄÄÄÄÄ ÄÄÄÄÄ    ÄÄ ÄÄ ÄÄ Ä    ÄÄ  Ä  ÄÄÄÄÄÄ Ä  Ä Ä    ÄÄ    Ä  Ä  Ä    Ä     Ä  ÄÄÄÄ Ä ÄÄ Ä Ä  Ä     Ä ÄÄ  Ä  ÄÄÄÄÄÄ Ä  Ä Ä    Ä Ä     ÄÄ          Ä  ÄÄÄÄ Ä ÄÄ Ä Ä  Ä     Ä     ÄÄ  Ä  ÄÄÄÄÄÄ Ä  Ä Ä    Ä Ä          Ä      Ä  ÄÄÄÄ Ä ÄÄ Ä Ä         ÄÄ  Ä ÄÄ Ä ÄÄ ÄÄ  ÄÄ Ä     Ä Ä         ÄÄÄ ÄÄ Ä Ä ÄÄ  Ä ÄÄÄÄ           ÄÄ ÄÄÄÄÄÄÄÄ  ÄÄÄÄÄÄÄÄÄÄÄ ÄÄ Ä ÄÄ     ÄÄÄ  ÄÄÄ Ä ÄÄÄÄÄ Ä Ä ÄÄÄÄÄ Ä Ä Ä Ä     Ä  Ä ÄÄÄÄ  Ä ÄÄÄ Ä ÄÄÄ Ä ÄÄÄÄÄ  Ä  ÄÄÄ ÄÄ ÄÄÄÄÄÄÄ Ä ÄÄÄ ÄÄ ÄÄÄ Ä ÄÄ ÄÄ Ä Ä Ä  Ä    ÄÄ  Ä  Ä Ä    Ä       ÄÄ        ÄÄ       Ä     ÄÄ Ä ÄÄ ÄÄ Ä   Ä Ä ÄÄ  Ä Ä                       Ä ÄÄÄÄ  Ä Boot: 0	Sync: 6
+[2025-05-20 19:32:47.695761] [32m[I]       38 transport.cpp       :  54 | [TRANSPORT] Initializing...[0m
+[2025-05-20 19:32:47.747694] [32m[I]       91 lora.cpp            :  32 | [LORA] Init[0m
+[2025-05-20 19:32:47.748819] [32m[I]       91 scheduler.cpp       :  77 | [SCHED] Cleanup started[0m
+[2025-05-20 19:32:47.754840] [32m[I]       98 loraraw.cpp         : 185 | [LR] Started Receiving[0m
+[2025-05-20 19:32:47.755767] [32m[I]       98 loraraw.cpp         :  46 | [LR] Init[0m
+[2025-05-20 19:32:47.755929] [32m[I]       98 mac.cpp             : 103 | [MAC] Init[0m
+[2025-05-20 19:32:47.758684] [32m[I]      101 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (4 B, 2 routes) Heap: 328372[0m
+[2025-05-20 19:32:47.759781] [32m[I]      102 routing.cpp         :  64 | [ROUTING] Initialized[0m
+[2025-05-20 19:32:47.760613] [32m[I]      103 transport.cpp       :  74 | [TRANSPORT] Initialized[0m
+[2025-05-20 19:32:47.761678] [33m[W]      103 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists[0m
+[2025-05-20 19:32:47.762655] [32m[I]      105 sleep.cpp           : 104 | [SLEEP] Set forward node to 2[0m
+[2025-05-20 19:32:47.763616] [32m[I]      105 sleep.cpp           :  52 | [SLEEP] Initiator. Making PDU and sending.[0m
+[2025-05-20 19:32:47.764613] [32m[I]      106 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1[0m
+[2025-05-20 19:32:47.765614] [32m[I]      108 sleep.cpp           : 150 | [SLEEP] Sync received[0m
+[2025-05-20 19:32:47.765741] [32m[I]      108 sleep.cpp           : 165 | [SLEEP] Nodes before self: 0[0m
+[2025-05-20 19:32:47.768614] [33m[W]      110 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 0 nodes up to (3+1) txs, with 0.25 extra[0m
+[2025-05-20 19:32:47.768742] [112] Ready to send data: 9D 
+[2025-05-20 19:32:47.769788] [32m[I]      112 transport.cpp       :  93 | [TRANSPORT] Preparing to send[0m
+[2025-05-20 19:32:47.771602] [32m[I]      114 transport.cpp       : 361 | [TRANSPORT] SEGMENT: ID=2138 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=ù[0m
+[2025-05-20 19:32:47.772634] [32m[I]      114 routing.cpp         :  90 | [ROUTING] Sending packet:[0m
+[2025-05-20 19:32:47.773624] [32m[I]      115 routing.cpp         : 292 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=Zù[0m
+[2025-05-20 19:32:47.774663] [32m[I]      117 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x02, through 0x02[0m
+[2025-05-20 19:32:47.775025] [32m[I]      117 mac.cpp             : 115 | [MAC] Preparing to send[0m
+[2025-05-20 19:32:47.775824] [32m[I]      119 mac.cpp             : 128 | [MAC] PDU ready[0m
+[2025-05-20 19:32:47.777620] [32m[I]      119 mac.cpp             : 566 | [MAC] FRAME: TX=03 RX=02 ID=39566 D-LEN=11 DATA=Zù CRC=255 ACK=0 RETRY=0[0m
+[2025-05-20 19:32:47.778697] [32m[I]      120 mac.cpp             : 141 | [MAC] FSM transmission scheduled[0m
+[2025-05-20 19:32:47.779732] [32m[I]      122 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 39566)[0m
+[2025-05-20 19:32:47.780697] [32m[I]      122 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 2138, Frame ID: 39566)[0m
+[2025-05-20 19:32:47.781733] [32m[I]      123 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 2[0m
+[2025-05-20 19:32:47.790570] [32m[I]      133 loraraw.cpp         : 155 | [LR] Set power to -9 dBm[0m
+[2025-05-20 19:32:47.791737] [32m[I]      134 loraraw.cpp         :  57 | [LR] Preparing to send[0m
+[2025-05-20 19:32:47.801795] [32m[I]      144 loraraw.cpp         : 235 | [LR] Packet: 03028E9AF80B030205075A08040301019DFF[0m
+[2025-05-20 19:32:47.866090] [32m[I]      208 loraraw.cpp         : 185 | [LR] Started Receiving[0m
+[2025-05-20 19:32:47.866748] [32m[I]      209 mac.cpp             : 485 | [MAC] Frame sent successfully, waiting for ACK[0m
+[2025-05-20 19:32:47.872957] [32m[I]      216 loraraw.cpp         : 185 | [LR] Started Receiving[0m
+[2025-05-20 19:32:47.876410] [32m[I]      216 mac.cpp             : 511 | [MAC] Timeout d'ACK: 108ms (36096us airtime)[0m
+[2025-05-20 19:32:47.928821] [32m[I]      271 loraraw.cpp         : 219 | [LR] Data received. SNR: 12, RSSI: -85[0m
+[2025-05-20 19:32:47.929104] [32m[I]      271 mac.cpp             : 308 | [MAC] Frame rcv[0m
+[2025-05-20 19:32:47.935816] [32m[I]      279 loraraw.cpp         : 185 | [LR] Started Receiving[0m
+[2025-05-20 19:32:47.936872] [32m[I]      279 mac.cpp             : 328 | Received valid PDU from LORA[0m
+[2025-05-20 19:32:47.938116] [32m[I]      281 mac.cpp             : 566 | [MAC] FRAME: TX=02 RX=03 ID=39566 D-LEN=0 DATA= CRC=134 ACK=1 RETRY=0[0m
+[2025-05-20 19:32:47.940224] [32m[I]      281 mac.cpp             : 340 | [MAC] ACK Received from 0x02[0m
+[2025-05-20 19:32:47.948184] [32m[I]      291 mac.cpp             : 409 | [MAC] ACK received[0m
+[2025-05-20 19:32:47.949631] [32m[I]      291 mac.cpp             : 540 | [MAC] Sent. Notify higher layer?[0m
+[2025-05-20 19:32:47.955538] [32m[I]      299 loraraw.cpp         : 185 | [LR] Started Receiving[0m
+[2025-05-20 19:32:47.957840] [32m[I]      299 transport.cpp       : 241 | [TRANSPORT] TX done for UDP segment 2138 (frame 39566)[0m
+[2025-05-20 19:32:47.957963] [32m[I]      300 sleep.cpp           : 311 | [SLEEP] Forwarded data[0m
+[2025-05-20 19:32:47.959318] [32m[I]      302 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327652[0m
+[2025-05-20 19:32:47.960717] [32m[I]      302 mac.cpp             : 108 | [MAC] Deinit[0m
+[2025-05-20 19:32:47.960793] [32m[I]      303 lora.cpp            :  37 | [LORA] Deinit[0m
+[2025-05-20 19:32:47.973854] [32m[I]      317 routing.cpp         :  75 | [ROUTING] Deinitialized[0m
+[2025-05-20 19:32:47.976053] [32m[I]      317 transport.cpp       :  88 | [TRANSPORT] De-initialized[0m
+[2025-05-20 19:32:47.976173] [33m[W]      318 sleep.cpp           : 269 | [SLEEP] Sleep breakdown: 299682 ms = 300000 ms - 318 ms + 0 ms[0m
+[2025-05-20 19:32:47.977997] [31m[E]      318 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	Sleep time: 299682 ms	Sync time: 0 ms	Done time: 318 ms	Delta Time: 0 ms	Clk correction: 0 ms	Sync AVG: 0.00 ms	Done AVG: nan ms	Sync count: 6	Boot count: 0	Timeout:  0 ms[0m
+[2025-05-20 19:32:47.978847] [31m[E]      322 sleep.cpp           : 280 | [SLEEP] Extra 4 ms (299678)[0m
+[2025-05-20 19:37:45.244008] ÄÄ Ä ÄÄÄ Ä   Ä ÄÄÄÄÄ ÄÄ     Ä         Ä  Ä    Ä      Ä    Ä   Ä  Ä  Ä ÄÄ  Ä ÄÄ  Ä   ÄÄ Ä ÄÄ Ä    ÄÄÄÄ    Ä   ÄÄÄ ÄÄÄ Ä ÄÄÄ ÄÄ  ÄÄÄ ÄÄÄ Ä ÄÄÄÄÄ  ÄÄÄÄ ÄÄ ÄÄÄÄ Ä ÄÄÄÄ Ä  Ä   ÄÄÄÄÄÄÄ ÄÄ Ä    ÄÄ  Ä     Ä Ä ÄÄ ÄÄÄ  ÄÄÄÄ  ÄÄ ÄÄ ÄÄ ÄÄÄÄÄÄ  Ä  ÄÄ ÄÄ ÄÄ  ÄÄÄÄ  ÄÄ ÄÄ Ä ÄÄÄÄ Ä ÄÄ  Ä Ä ÄÄÄÄ ÄÄ  ÄÄ ÄÄÄ ÄÄ ÄÄ ÄÄ Ä Ä      Ä   Ä ÄÄ ÄÄÄ  ÄÄÄÄÄ ÄÄ Ä    ÄÄÄ ÄÄÄ ÄÄÄ  Ä Ä Ä ÄÄÄÄÄÄÄÄÄ  Ä  Ä ÄÄ Ä    Ä     Ä Ä ÄÄÄÄ  Ä  Ä ÄÄ Ä    Ä     Ä   ÄÄÄÄ  Ä  Ä ÄÄ Ä    Ä     Ä Ä ÄÄ Ä  ÄÄÄ  Ä  Ä ÄÄ Ä    Ä     Ä  ÄÄ  ÄÄÄÄ  Ä  Ä ÄÄ Ä    Ä     Ä ÄÄÄ ÄÄÄÄ  Ä  Ä ÄÄ Ä    Ä    ÄÄ  Ä ÄÄÄÄÄÄÄ  ÄÄÄ Ä Ä   ÄÄ  ÄÄ Ä Ä   Ä Ä ÄÄÄÄÄÄ ÄÄÄÄÄ    ÄÄ ÄÄ ÄÄ Ä    ÄÄ  Ä  ÄÄÄÄÄÄ Ä  Ä Ä    ÄÄ    Ä  Ä  Ä    Ä     Ä  ÄÄÄÄ Ä ÄÄ Ä Ä  Ä     Ä ÄÄ  Ä  ÄÄÄÄÄÄ Ä  Ä Ä    Ä Ä     ÄÄ          Ä  ÄÄÄÄ Ä ÄÄ Ä Ä  Ä     Ä     ÄÄ  Ä  ÄÄÄÄÄÄ Ä  Ä Ä    Ä Ä          Ä      Ä  ÄÄÄÄ Ä ÄÄ Ä Ä         ÄÄ  Ä ÄÄ Ä ÄÄ ÄÄ  ÄÄ Ä     Ä Ä         ÄÄÄ ÄÄ Ä Ä ÄÄ  Ä ÄÄÄÄ           ÄÄ ÄÄÄÄÄÄÄÄ  ÄÄÄÄÄÄÄÄÄÄÄ ÄÄ Ä ÄÄ     ÄÄÄ  ÄÄÄ Ä ÄÄÄÄÄ Ä Ä ÄÄÄÄÄ Ä Ä Ä Ä     Ä  Ä ÄÄÄÄ  Ä ÄÄÄ Ä ÄÄÄ Ä ÄÄÄÄÄ  Ä  ÄÄÄ ÄÄ ÄÄÄÄÄÄÄ Ä ÄÄÄ ÄÄ ÄÄÄ Ä ÄÄ ÄÄ Ä Ä Ä  Ä    ÄÄ  Ä  Ä Ä    Ä       ÄÄ        ÄÄ       Ä     ÄÄ Ä ÄÄ ÄÄ Ä   Ä Ä ÄÄ  Ä Ä                       Ä ÄÄÄÄ  Ä Boot: 0	Sync: 7
+[2025-05-20 19:37:45.245007] [32m[I]       38 transport.cpp       :  54 | [TRANSPORT] Initializing...[0m
+[2025-05-20 19:37:45.297097] [32m[I]       91 lora.cpp            :  32 | [LORA] Init[0m
+[2025-05-20 19:37:45.297945] [32m[I]       91 scheduler.cpp       :  77 | [SCHED] Cleanup started[0m
+[2025-05-20 19:37:45.304840] [32m[I]       98 loraraw.cpp         : 185 | [LR] Started Receiving[0m
+[2025-05-20 19:37:45.304997] [32m[I]       98 loraraw.cpp         :  46 | [LR] Init[0m
+[2025-05-20 19:37:45.306087] [32m[I]       98 mac.cpp             : 103 | [MAC] Init[0m
+[2025-05-20 19:37:45.308926] [32m[I]      101 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (4 B, 2 routes) Heap: 328372[0m
+[2025-05-20 19:37:45.309041] [32m[I]      102 routing.cpp         :  64 | [ROUTING] Initialized[0m
+[2025-05-20 19:37:45.310079] [32m[I]      103 transport.cpp       :  74 | [TRANSPORT] Initialized[0m
+[2025-05-20 19:37:45.311075] [33m[W]      103 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists[0m
+[2025-05-20 19:37:45.311852] [32m[I]      105 sleep.cpp           : 104 | [SLEEP] Set forward node to 2[0m
+[2025-05-20 19:37:45.312852] [32m[I]      105 sleep.cpp           :  52 | [SLEEP] Initiator. Making PDU and sending.[0m
+[2025-05-20 19:37:45.313831] [32m[I]      107 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1[0m
+[2025-05-20 19:37:45.314838] [32m[I]      108 sleep.cpp           : 150 | [SLEEP] Sync received[0m
+[2025-05-20 19:37:45.315967] [32m[I]      108 sleep.cpp           : 165 | [SLEEP] Nodes before self: 0[0m
+[2025-05-20 19:37:45.318158] [33m[W]      110 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 0 nodes up to (3+1) txs, with 0.25 extra[0m
+[2025-05-20 19:37:45.318996] [112] Ready to send data: F7 
+[2025-05-20 19:37:45.320029] [32m[I]      112 transport.cpp       :  93 | [TRANSPORT] Preparing to send[0m
+[2025-05-20 19:37:45.321052] [32m[I]      114 transport.cpp       : 361 | [TRANSPORT] SEGMENT: ID=611 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=˜[0m
+[2025-05-20 19:37:45.322042] [32m[I]      114 routing.cpp         :  90 | [ROUTING] Sending packet:[0m
+[2025-05-20 19:37:45.323026] [32m[I]      115 routing.cpp         : 292 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=c˜[0m
+[2025-05-20 19:37:45.324014] [32m[I]      117 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x02, through 0x02[0m
+[2025-05-20 19:37:45.325021] [32m[I]      117 mac.cpp             : 115 | [MAC] Preparing to send[0m
+[2025-05-20 19:37:45.325184] [32m[I]      119 mac.cpp             : 128 | [MAC] PDU ready[0m
+[2025-05-20 19:37:45.327096] [32m[I]      119 mac.cpp             : 566 | [MAC] FRAME: TX=03 RX=02 ID=4501 D-LEN=11 DATA=c˜ CRC=114 ACK=0 RETRY=0[0m
+[2025-05-20 19:37:45.328018] [32m[I]      120 mac.cpp             : 141 | [MAC] FSM transmission scheduled[0m
+[2025-05-20 19:37:45.329021] [32m[I]      122 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 4501)[0m
+[2025-05-20 19:37:45.330074] [32m[I]      122 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 611, Frame ID: 4501)[0m
+[2025-05-20 19:37:45.333093] [32m[I]      123 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 2[0m
+[2025-05-20 19:37:45.339973] [32m[I]      133 loraraw.cpp         : 155 | [LR] Set power to -9 dBm[0m
+[2025-05-20 19:37:45.341031] [32m[I]      134 loraraw.cpp         :  57 | [LR] Preparing to send[0m
+[2025-05-20 19:37:45.351172] [32m[I]      144 loraraw.cpp         : 235 | [LR] Packet: 03029511F80B03020507630204030101F772[0m
+[2025-05-20 19:37:45.415285] [32m[I]      208 loraraw.cpp         : 185 | [LR] Started Receiving[0m
+[2025-05-20 19:37:45.416060] [32m[I]      209 mac.cpp             : 485 | [MAC] Frame sent successfully, waiting for ACK[0m
+[2025-05-20 19:37:45.422782] [32m[I]      216 loraraw.cpp         : 185 | [LR] Started Receiving[0m
+[2025-05-20 19:37:45.424004] [32m[I]      216 mac.cpp             : 511 | [MAC] Timeout d'ACK: 108ms (36096us airtime)[0m
+[2025-05-20 19:37:45.477084] [32m[I]      271 loraraw.cpp         : 219 | [LR] Data received. SNR: 12, RSSI: -79[0m
+[2025-05-20 19:37:45.477982] [32m[I]      271 mac.cpp             : 308 | [MAC] Frame rcv[0m
+[2025-05-20 19:37:45.485856] [32m[I]      279 loraraw.cpp         : 185 | [LR] Started Receiving[0m
+[2025-05-20 19:37:45.486083] [32m[I]      279 mac.cpp             : 328 | Received valid PDU from LORA[0m
+[2025-05-20 19:37:45.487864] [32m[I]      281 mac.cpp             : 566 | [MAC] FRAME: TX=02 RX=03 ID=4501 D-LEN=0 DATA= CRC=140 ACK=1 RETRY=0[0m
+[2025-05-20 19:37:45.488949] [32m[I]      281 mac.cpp             : 340 | [MAC] ACK Received from 0x02[0m
+[2025-05-20 19:37:45.497212] [32m[I]      291 mac.cpp             : 409 | [MAC] ACK received[0m
+[2025-05-20 19:37:45.498055] [32m[I]      291 mac.cpp             : 540 | [MAC] Sent. Notify higher layer?[0m
+[2025-05-20 19:37:45.504805] [32m[I]      299 loraraw.cpp         : 185 | [LR] Started Receiving[0m
+[2025-05-20 19:37:45.505783] [32m[I]      299 transport.cpp       : 241 | [TRANSPORT] TX done for UDP segment 611 (frame 4501)[0m
+[2025-05-20 19:37:45.507023] [32m[I]      300 sleep.cpp           : 311 | [SLEEP] Forwarded data[0m
+[2025-05-20 19:37:45.508070] [32m[I]      302 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327652[0m
+[2025-05-20 19:37:45.508897] [32m[I]      302 mac.cpp             : 108 | [MAC] Deinit[0m
+[2025-05-20 19:37:45.510060] [32m[I]      303 lora.cpp            :  37 | [LORA] Deinit[0m
+[2025-05-20 19:37:45.523091] [32m[I]      317 routing.cpp         :  75 | [ROUTING] Deinitialized[0m
+[2025-05-20 19:37:45.525737] [32m[I]      317 transport.cpp       :  88 | [TRANSPORT] De-initialized[0m
+[2025-05-20 19:37:45.525909] [33m[W]      318 sleep.cpp           : 269 | [SLEEP] Sleep breakdown: 299682 ms = 300000 ms - 318 ms + 0 ms[0m
+[2025-05-20 19:37:45.527916] [31m[E]      318 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	Sleep time: 299682 ms	Sync time: 0 ms	Done time: 318 ms	Delta Time: 0 ms	Clk correction: 0 ms	Sync AVG: 0.00 ms	Done AVG: nan ms	Sync count: 7	Boot count: 0	Timeout:  0 ms[0m
+[2025-05-20 19:37:45.528995] [31m[E]      322 sleep.cpp           : 280 | [SLEEP] Extra 4 ms (299678)[0m
+[2025-05-20 19:38:42.251737] 
+[2025-05-20 19:38:42.251869] Terminating...
+[2025-05-20 19:38:42.251905] Thanks for using picocom

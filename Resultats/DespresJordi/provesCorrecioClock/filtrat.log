@@ -1,0 +1,32 @@
+[2025-05-21 12:09:51.237959] Boot: 0	Sync: 0
+[2025-05-21 12:10:09.271890] [E]    18034 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 111738 ms	Sync time: 12286 ms	Done time: 18013 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: nan ms	Done AVG: nan ms	Sync count: 0	Boot count: 0	Timeout:  0 ms
+[2025-05-21 12:11:59.456930] Boot: 0	Sync: 1
+[2025-05-21 12:12:38.968776] [E]    39544 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110749 ms	Sync time: 32807 ms	Done time: 39523 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 32807.00 ms	Done AVG: nan ms	Sync count: 1	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:14:27.989385] Boot: 0	Sync: 2
+[2025-05-21 12:15:07.780353] [E]    39824 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110749 ms	Sync time: 33087 ms	Done time: 39803 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 32947.00 ms	Done AVG: nan ms	Sync count: 2	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:16:56.749475] Boot: 0	Sync: 3
+[2025-05-21 12:17:36.555602] [E]    39838 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110749 ms	Sync time: 33101 ms	Done time: 39817 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 32998.33 ms	Done AVG: nan ms	Sync count: 3	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:19:25.494561] Boot: 0	Sync: 4
+[2025-05-21 12:20:05.385627] [E]    39923 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110749 ms	Sync time: 33186 ms	Done time: 39902 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33045.25 ms	Done AVG: nan ms	Sync count: 4	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:21:54.342159] Boot: 0	Sync: 5
+[2025-05-21 12:22:34.090211] [E]    39780 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110749 ms	Sync time: 33043 ms	Done time: 39759 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33044.80 ms	Done AVG: nan ms	Sync count: 5	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:24:23.046147] Boot: 0	Sync: 6
+[2025-05-21 12:25:02.835100] [E]    39821 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110749 ms	Sync time: 33084 ms	Done time: 39800 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33051.33 ms	Done AVG: nan ms	Sync count: 6	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:26:51.837115] Boot: 0	Sync: 7
+[2025-05-21 12:27:31.640142] [E]    39835 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110749 ms	Sync time: 33098 ms	Done time: 39814 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33058.00 ms	Done AVG: nan ms	Sync count: 7	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:29:20.505369] Boot: 0	Sync: 8
+[2025-05-21 12:30:00.391443] [E]    39917 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110749 ms	Sync time: 33180 ms	Done time: 39896 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33073.25 ms	Done AVG: nan ms	Sync count: 8	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:31:49.316919] Boot: 0	Sync: 9
+[2025-05-21 12:32:29.316894] [E]    40032 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110749 ms	Sync time: 33295 ms	Done time: 40011 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33097.89 ms	Done AVG: nan ms	Sync count: 9	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:34:18.261628] Boot: 0	Sync: 10
+[2025-05-21 12:34:57.884490] [E]    39655 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110747 ms	Sync time: 32916 ms	Done time: 39634 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33079.70 ms	Done AVG: nan ms	Sync count: 10	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:36:46.818514] Boot: 0	Sync: 11
+[2025-05-21 12:37:26.800345] [E]    40014 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110749 ms	Sync time: 33277 ms	Done time: 39993 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33097.64 ms	Done AVG: nan ms	Sync count: 11	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:39:15.776494] Boot: 0	Sync: 12
+[2025-05-21 12:39:55.648488] [E]    39904 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110747 ms	Sync time: 33165 ms	Done time: 39883 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33103.25 ms	Done AVG: nan ms	Sync count: 12	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:41:44.537066] Boot: 0	Sync: 13
+[2025-05-21 12:42:24.554913] [E]    40050 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110748 ms	Sync time: 33312 ms	Done time: 40029 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33119.31 ms	Done AVG: nan ms	Sync count: 13	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:44:13.449816] Boot: 0	Sync: 14
+[2025-05-21 12:44:53.436986] [E]    40018 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110749 ms	Sync time: 33281 ms	Done time: 39997 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33130.86 ms	Done AVG: nan ms	Sync count: 14	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:46:42.334476] Boot: 0	Sync: 15
+[2025-05-21 12:47:22.249407] [E]    39946 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110747 ms	Sync time: 33207 ms	Done time: 39925 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33135.93 ms	Done AVG: nan ms	Sync count: 15	Boot count: 0	Timeout:  65070 ms

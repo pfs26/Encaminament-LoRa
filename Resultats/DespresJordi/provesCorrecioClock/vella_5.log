@@ -1,0 +1,11 @@
+[2025-05-20 17:48:06.059019] [W]      100 routing_table.cpp   :  84 | [RTABLE] Route for 0x09 already exists
+[2025-05-20 17:48:06.783144] [W]      826 mac.cpp             : 418 | [MAC] Max retries (3) reached, transmission failed
+[2025-05-20 17:48:06.783952] [W]      826 mac.cpp             : 555 | [MAC] TX error (1)
+[2025-05-20 17:48:06.803961] Sleeping for 599152 ms
+[2025-05-20 17:57:58.163912] [W]      100 routing_table.cpp   :  84 | [RTABLE] Route for 0x09 already exists
+[2025-05-20 17:57:58.888145] [W]      826 mac.cpp             : 418 | [MAC] Max retries (3) reached, transmission failed
+[2025-05-20 17:57:58.888604] [W]      826 mac.cpp             : 555 | [MAC] TX error (1)
+[2025-05-20 17:57:58.908634] Sleeping for 599152 ms
+
+FATAL: read zero bytes from port
+term_exitfunc: reset failed for dev UNKNOWN: Input/output error

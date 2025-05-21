@@ -1,0 +1,11 @@
+[200~[2025-05-20 17:48:08.199181] [W]       80 routing_table.cpp   :  84 | [RTABLE] Route for 0x09 already exists
+[2025-05-20 17:48:08.923980] [W]      808 mac.cpp             : 418 | [MAC] Max retries (3) reached, transmission failed
+[2025-05-20 17:48:08.926511] [W]      808 mac.cpp             : 555 | [MAC] TX error (1)
+[2025-05-20 17:48:08.947463] Sleeping for 599169 ms
+[2025-05-20 17:57:59.508761] [W]       80 routing_table.cpp   :  84 | [RTABLE] Route for 0x09 already exists
+[2025-05-20 17:58:00.233689] [W]      808 mac.cpp             : 418 | [MAC] Max retries (3) reached, transmission failed
+[2025-05-20 17:58:00.236059] [W]      808 mac.cpp             : 555 | [MAC] TX error (1)
+[2025-05-20 17:58:00.256340] Sleeping for 599170 ms
+[2025-05-20 18:07:22.201557] 
+[2025-05-20 18:07:22.201661] Terminating...
+[2025-05-20 18:07:22.201688] Thanks for using picocom

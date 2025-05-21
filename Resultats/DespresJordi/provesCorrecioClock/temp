@@ -1,0 +1,1343 @@
+[2025-05-21 12:09:51.015709] ets Jul 29 2019 12:21:46
+[2025-05-21 12:09:51.015829] 
+[2025-05-21 12:09:51.021153] rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-21 12:09:51.024041] configsip: 0, SPIWP:0xee
+[2025-05-21 12:09:51.029657] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-21 12:09:51.032221] mode:DIO, clock div:2
+[2025-05-21 12:09:51.035007] load:0x3fff0030,len:1184
+[2025-05-21 12:09:51.037798] load:0x40078000,len:13232
+[2025-05-21 12:09:51.037878] load:0x40080400,len:3028
+[2025-05-21 12:09:51.041195] entry 0x400805e4
+[2025-05-21 12:09:51.233438] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-21 12:09:51.237959] Boot: 0	Sync: 0
+[2025-05-21 12:09:51.245313] [I]       20 transport.cpp       :  54 | [TRANSPORT] Initializing...
+[2025-05-21 12:09:51.294026] [I]       73 lora.cpp            :  32 | [LORA] Init
+[2025-05-21 12:09:51.302201] [I]       73 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-21 12:09:51.314226] [I]       90 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:09:51.319865] [I]       91 loraraw.cpp         :  46 | [LR] Init
+[2025-05-21 12:09:51.325279] [I]      101 mac.cpp             : 103 | [MAC] Init
+[2025-05-21 12:09:51.332277] [I]      101 lorawan.cpp         :  48 | [LW] Initializing...
+[2025-05-21 12:09:51.344347] [W]      115 lorawan.cpp         : 250 | [LW] Could not restore saved LoRaWAN session. Should connect to LW again (code = -1101)
+[2025-05-21 12:09:56.897383] [I]     5672 lorawan.cpp         :  77 | [LW] Activated OTAA. Saving nonces
+[2025-05-21 12:09:56.905730] [I]     5681 lorawan.cpp         :  91 | [LW] Max LoRaWAN payload size: 113
+[2025-05-21 12:09:56.911343] [I]     5681 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:09:56.919680] [I]     5692 lorawan.cpp         :  96 | [LW] Joined the network successfully
+[2025-05-21 12:09:57.968068] [I]     6744 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:09:57.976126] [I]     6746 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (6 B, 3 routes) Heap: 328324
+[2025-05-21 12:09:57.984447] [I]     6756 routing.cpp         :  64 | [ROUTING] Initialized
+[2025-05-21 12:09:57.990083] [I]     6757 transport.cpp       :  74 | [TRANSPORT] Initialized
+[2025-05-21 12:09:57.998465] [W]     6767 routing_table.cpp   :  84 | [RTABLE] Route for 0x01 already exists
+[2025-05-21 12:09:58.003889] [I]     6778 sleep.cpp           : 104 | [SLEEP] Set forward node to 1
+[2025-05-21 12:09:58.015107] [I]     6778 sleep.cpp           :  80 | [SLEEP] Init. Not synchronized. Waiting for first sync.
+[2025-05-21 12:09:58.024563] [I]     6788 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1
+[2025-05-21 12:10:01.295163] [I]    10073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 2, Heap: 328324
+[2025-05-21 12:10:03.312160] [I]    12095 loraraw.cpp         : 219 | [LR] Data received. SNR: 12, RSSI: -70
+[2025-05-21 12:10:03.319428] [I]    12095 mac.cpp             : 308 | [MAC] Frame rcv
+[2025-05-21 12:10:03.329644] [I]    12112 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:10:03.335102] [I]    12113 mac.cpp             : 334 | Received valid PDU from LORA
+[2025-05-21 12:10:03.346289] [I]    12123 mac.cpp             : 565 | [MAC] FRAME: TX=03 RX=02 ID=51087 D-LEN=11 DATA=>�CRC=234 ACK=0 RETRY=0
+[2025-05-21 12:10:03.354713] [I]    12134 mac.cpp             : 352 | [MAC] Frame for higher layer
+[2025-05-21 12:10:03.360272] [I]    12134 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:10:03.367818] [I]    12145 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-21 12:10:03.380312] [I]    12163 loraraw.cpp         : 235 | [LR] Packet: 02038FC7F90025
+[2025-05-21 12:10:03.429214] [I]    12212 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:10:03.434764] [I]    12212 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:10:03.443017] [I]    12223 routing.cpp         : 169 | [ROUTING] Received packet from 0x03
+[2025-05-21 12:10:03.451309] [I]    12223 routing.cpp         : 299 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=>�[0m
+[2025-05-21 12:10:03.459706] [I]    12234 transport.cpp       : 181 | [TRANSPORT] Received segment
+[2025-05-21 12:10:03.470747] [I]    12244 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=16003 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=�[0m
+[2025-05-21 12:10:03.479082] [I]    12255 transport.cpp       : 203 | [TRANSPORT] ACK not requested for segment 16003
+[2025-05-21 12:10:03.487494] [I]    12265 transport.cpp       : 215 | [TRANSPORT] New segment received (ID: 16003)
+[2025-05-21 12:10:03.492945] [I]    12265 sleep.cpp           : 131 | [SLEEP] Decoding PDU. Command: 1, data: �[0m
+[2025-05-21 12:10:03.501286] [I]    12276 sleep.cpp           : 150 | [SLEEP] Sync received
+[2025-05-21 12:10:03.506829] [I]    12286 sleep.cpp           : 165 | [SLEEP] Nodes before self: 1
+[2025-05-21 12:10:03.523689] [W]    12286 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 1 nodes up to (3+1) txs, with 0.25 extra
+[2025-05-21 12:10:03.526316] [12308] Ready to send data: 84 
+[2025-05-21 12:10:03.531832] [I]    12308 transport.cpp       :  93 | [TRANSPORT] Preparing to send
+[2025-05-21 12:10:03.542979] [I]    12318 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=22200 PORT=1 ACKreq=0 ACKResp=0 D-LEN=4 DATA=�[0m
+[2025-05-21 12:10:03.548618] [I]    12329 routing.cpp         :  90 | [ROUTING] Sending packet:
+[2025-05-21 12:10:03.559728] [I]    12329 routing.cpp         : 299 | [ROUTING] PACKET: SRC=02 DST=01 TTL=5 D-LEN=8 DATA=V�[0m
+[2025-05-21 12:10:03.568032] [I]    12339 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x01, through 0x01
+[2025-05-21 12:10:03.577588] [I]    12350 routing.cpp         : 150 | [ROUTING] Sending packet to gateway. Forwarding to LoRaWAN
+[2025-05-21 12:10:09.056534] [I]    17839 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:10:09.062100] [I]    17840 lorawan.cpp         : 142 | [LW] Data sent; downlink received
+[2025-05-21 12:10:09.073269] [I]    17850 lorawan.cpp         : 144 | [LW] 	Window: 1, Power: 16, fPort: 0, Confirmed: 0, Confirming: 0, Size: 0, Data: 
+[2025-05-21 12:10:09.083513] [W]    17860 lorawan.cpp         : 147 | [LW] Received downlink with port 0; ignoring
+[2025-05-21 12:10:09.139907] [I]    17922 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:10:09.148196] [I]    17923 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 0)
+[2025-05-21 12:10:09.159365] [I]    17934 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 22200, Frame ID: 0)
+[2025-05-21 12:10:09.164954] [I]    17944 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 1
+[2025-05-21 12:10:09.173138] [I]    17944 transport.cpp       : 248 | [TRANSPORT] TX done for UDP segment 22200 (frame 0)
+[2025-05-21 12:10:09.181578] [I]    17955 sleep.cpp           : 311 | [SLEEP] Forwarded data
+[2025-05-21 12:10:09.189870] [I]    17967 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327796
+[2025-05-21 12:10:09.195392] [I]    17978 mac.cpp             : 108 | [MAC] Deinit
+[2025-05-21 12:10:09.200981] [I]    17978 lora.cpp            :  37 | [LORA] Deinit
+[2025-05-21 12:10:09.219105] [I]    18002 routing.cpp         :  75 | [ROUTING] Deinitialized
+[2025-05-21 12:10:09.224646] [I]    18002 transport.cpp       :  88 | [TRANSPORT] De-initialized
+[2025-05-21 12:10:09.235787] [W]    18013 sleep.cpp           : 250 | [SLEEP] Expected reception: 18 B, Transmission time: 0 ms
+[2025-05-21 12:10:09.249630] [W]    18023 sleep.cpp           : 252 | [SLEEP] Sleep breakdown: 111738 ms = 4684393973593145344 ms - (18013 ms - 12286 ms) - 0 ms - 2535 ms - 30000 ms + 0 ms
+[2025-05-21 12:10:09.271890] [E]    18034 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 111738 ms	Sync time: 12286 ms	Done time: 18013 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: nan ms	Done AVG: nan ms	Sync count: 0	Boot count: 0	Timeout:  0 ms
+[2025-05-21 12:10:09.278733] [E]    18055 sleep.cpp           : 280 | [SLEEP] Extra 42 ms (111696)
+[2025-05-21 12:11:59.384571] ets Jul 29 2019 12:21:46
+[2025-05-21 12:11:59.384678] 
+[2025-05-21 12:11:59.390072] rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-21 12:11:59.392893] configsip: 0, SPIWP:0xee
+[2025-05-21 12:11:59.398405] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-21 12:11:59.401131] mode:DIO, clock div:2
+[2025-05-21 12:11:59.403932] load:0x3fff0030,len:1184
+[2025-05-21 12:11:59.406744] load:0x40078000,len:13232
+[2025-05-21 12:11:59.406815] load:0x40080400,len:3028
+[2025-05-21 12:11:59.410256] entry 0x400805e4
+[2025-05-21 12:11:59.451145] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-21 12:11:59.456930] Boot: 0	Sync: 1
+[2025-05-21 12:11:59.463124] [I]       20 transport.cpp       :  54 | [TRANSPORT] Initializing...
+[2025-05-21 12:11:59.511846] [I]       73 lora.cpp            :  32 | [LORA] Init
+[2025-05-21 12:11:59.520040] [I]       73 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-21 12:11:59.532110] [I]       90 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:11:59.537670] [I]       91 loraraw.cpp         :  46 | [LR] Init
+[2025-05-21 12:11:59.543329] [I]      101 mac.cpp             : 103 | [MAC] Init
+[2025-05-21 12:11:59.549378] [I]      101 lorawan.cpp         :  48 | [LW] Initializing...
+[2025-05-21 12:11:59.561276] [I]      119 lorawan.cpp         :  62 | [LW] Reused session
+[2025-05-21 12:11:59.566834] [I]      121 lorawan.cpp         :  91 | [LW] Max LoRaWAN payload size: 115
+[2025-05-21 12:11:59.575190] [I]      131 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:11:59.582157] [I]      131 lorawan.cpp         :  96 | [LW] Joined the network successfully
+[2025-05-21 12:12:00.635959] [I]     1194 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:12:00.644242] [I]     1196 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (6 B, 3 routes) Heap: 328324
+[2025-05-21 12:12:00.652485] [I]     1206 routing.cpp         :  64 | [ROUTING] Initialized
+[2025-05-21 12:12:00.658029] [I]     1207 transport.cpp       :  74 | [TRANSPORT] Initialized
+[2025-05-21 12:12:00.666346] [W]     1217 routing_table.cpp   :  84 | [RTABLE] Route for 0x01 already exists
+[2025-05-21 12:12:00.671922] [I]     1228 sleep.cpp           : 104 | [SLEEP] Set forward node to 1
+[2025-05-21 12:12:00.680328] [W]     1228 sleep.cpp           :  61 | [SLEEP] Wakeup reason: Timer
+[2025-05-21 12:12:00.685816] [W]     1238 sleep.cpp           :  74 | [SLEEP] Init. Already synchronized.
+[2025-05-21 12:12:00.694125] [W]     1249 sleep.cpp           :  75 |         Clock correction: 0 ms
+[2025-05-21 12:12:00.702616] [W]     1249 sleep.cpp           :  76 |         Delta time: 2535 ms. Nodes before: 1
+[2025-05-21 12:12:00.708154] [W]     1259 sleep.cpp           :  77 |         Timeout in 65070 ms
+[2025-05-21 12:12:00.717583] [I]     1270 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1
+[2025-05-21 12:12:09.509535] [I]    10073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:12:19.494812] [I]    20073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:12:29.482364] [I]    30073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:12:32.020308] [I]    32616 loraraw.cpp         : 219 | [LR] Data received. SNR: 12, RSSI: -69
+[2025-05-21 12:12:32.026991] [I]    32616 mac.cpp             : 308 | [MAC] Frame rcv
+[2025-05-21 12:12:32.037299] [I]    32633 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:12:32.042930] [I]    32634 mac.cpp             : 334 | Received valid PDU from LORA
+[2025-05-21 12:12:32.054091] [I]    32644 mac.cpp             : 565 | [MAC] FRAME: TX=03 RX=02 ID=34071 D-LEN=11 DATA=� CRC=35 ACK=0 RETRY=0
+[2025-05-21 12:12:32.062421] [I]    32655 mac.cpp             : 352 | [MAC] Frame for higher layer
+[2025-05-21 12:12:32.067978] [I]    32655 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:12:32.075327] [I]    32666 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-21 12:12:32.088219] [I]    32684 loraraw.cpp         : 235 | [LR] Packet: 02031785F90093
+[2025-05-21 12:12:32.136895] [I]    32733 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:12:32.142489] [I]    32734 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:12:32.150774] [I]    32744 routing.cpp         : 169 | [ROUTING] Received packet from 0x03
+[2025-05-21 12:12:32.159120] [I]    32744 routing.cpp         : 299 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=�
+[2025-05-21 12:12:32.167431] [I]    32755 transport.cpp       : 181 | [TRANSPORT] Received segment
+[2025-05-21 12:12:32.178513] [I]    32765 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=58097 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=
+[2025-05-21 12:12:32.186914] [I]    32776 transport.cpp       : 203 | [TRANSPORT] ACK not requested for segment 58097
+[2025-05-21 12:12:32.195219] [I]    32786 transport.cpp       : 215 | [TRANSPORT] New segment received (ID: 58097)
+[2025-05-21 12:12:32.200772] [I]    32786 sleep.cpp           : 131 | [SLEEP] Decoding PDU. Command: 1, data: 
+[2025-05-21 12:12:32.209159] [I]    32797 sleep.cpp           : 150 | [SLEEP] Sync received
+[2025-05-21 12:12:32.214637] [I]    32807 sleep.cpp           : 160 | [SLEEP] Cancelled sleep timeout
+[2025-05-21 12:12:32.223081] [I]    32817 sleep.cpp           : 165 | [SLEEP] Nodes before self: 1
+[2025-05-21 12:12:32.236886] [W]    32818 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 1 nodes up to (3+1) txs, with 0.25 extra
+[2025-05-21 12:12:32.239635] [32839] Ready to send data: 2F 
+[2025-05-21 12:12:32.247989] [I]    32839 transport.cpp       :  93 | [TRANSPORT] Preparing to send
+[2025-05-21 12:12:32.259064] [I]    32840 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=40462 PORT=1 ACKreq=0 ACKResp=0 D-LEN=4 DATA=/
+[2025-05-21 12:12:32.264726] [I]    32850 routing.cpp         :  90 | [ROUTING] Sending packet:
+[2025-05-21 12:12:32.273027] [I]    32860 routing.cpp         : 299 | [ROUTING] PACKET: SRC=02 DST=01 TTL=5 D-LEN=8 DATA=/
+[2025-05-21 12:12:32.281344] [I]    32871 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x01, through 0x01
+[2025-05-21 12:12:32.292321] [I]    32881 routing.cpp         : 150 | [ROUTING] Sending packet to gateway. Forwarding to LoRaWAN
+[2025-05-21 12:12:38.774824] [I]    39370 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:12:38.781535] [I]    39371 lorawan.cpp         : 139 | [LW] Data sent; none received
+[2025-05-21 12:12:38.836747] [I]    39433 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:12:38.845081] [I]    39433 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 0)
+[2025-05-21 12:12:38.856176] [I]    39444 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 40462, Frame ID: 0)
+[2025-05-21 12:12:38.861827] [I]    39454 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 1
+[2025-05-21 12:12:38.870144] [I]    39455 transport.cpp       : 248 | [TRANSPORT] TX done for UDP segment 40462 (frame 0)
+[2025-05-21 12:12:38.878339] [I]    39465 sleep.cpp           : 311 | [SLEEP] Forwarded data
+[2025-05-21 12:12:38.886759] [I]    39477 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327712
+[2025-05-21 12:12:38.892221] [I]    39488 mac.cpp             : 108 | [MAC] Deinit
+[2025-05-21 12:12:38.897627] [I]    39488 lora.cpp            :  37 | [LORA] Deinit
+[2025-05-21 12:12:38.916039] [I]    39512 routing.cpp         :  75 | [ROUTING] Deinitialized
+[2025-05-21 12:12:38.921563] [I]    39512 transport.cpp       :  88 | [TRANSPORT] De-initialized
+[2025-05-21 12:12:38.932676] [W]    39523 sleep.cpp           : 250 | [SLEEP] Expected reception: 18 B, Transmission time: 0 ms
+[2025-05-21 12:12:38.946885] [W]    39533 sleep.cpp           : 252 | [SLEEP] Sleep breakdown: 110749 ms = 4684393973593145344 ms - (39523 ms - 32807 ms) - 0 ms - 2535 ms - 30000 ms + 0 ms
+[2025-05-21 12:12:38.968776] [E]    39544 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110749 ms	Sync time: 32807 ms	Done time: 39523 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 32807.00 ms	Done AVG: nan ms	Sync count: 1	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:12:38.974401] [E]    39565 sleep.cpp           : 280 | [SLEEP] Extra 42 ms (110707)
+[2025-05-21 12:14:27.918180] ets Jul 29 2019 12:21:46
+[2025-05-21 12:14:27.918316] 
+[2025-05-21 12:14:27.923718] rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-21 12:14:27.926579] configsip: 0, SPIWP:0xee
+[2025-05-21 12:14:27.931963] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-21 12:14:27.934749] mode:DIO, clock div:2
+[2025-05-21 12:14:27.937506] load:0x3fff0030,len:1184
+[2025-05-21 12:14:27.940330] load:0x40078000,len:13232
+[2025-05-21 12:14:27.940419] load:0x40080400,len:3028
+[2025-05-21 12:14:27.943941] entry 0x400805e4
+[2025-05-21 12:14:27.984694] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-21 12:14:27.989385] Boot: 0	Sync: 2
+[2025-05-21 12:14:27.996765] [I]       20 transport.cpp       :  54 | [TRANSPORT] Initializing...
+[2025-05-21 12:14:28.045558] [I]       73 lora.cpp            :  32 | [LORA] Init
+[2025-05-21 12:14:28.053678] [I]       73 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-21 12:14:28.065711] [I]       90 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:14:28.071387] [I]       91 loraraw.cpp         :  46 | [LR] Init
+[2025-05-21 12:14:28.076926] [I]      101 mac.cpp             : 103 | [MAC] Init
+[2025-05-21 12:14:28.082401] [I]      101 lorawan.cpp         :  48 | [LW] Initializing...
+[2025-05-21 12:14:28.094953] [I]      119 lorawan.cpp         :  62 | [LW] Reused session
+[2025-05-21 12:14:28.100472] [I]      121 lorawan.cpp         :  91 | [LW] Max LoRaWAN payload size: 115
+[2025-05-21 12:14:28.108840] [I]      131 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:14:28.115674] [I]      131 lorawan.cpp         :  96 | [LW] Joined the network successfully
+[2025-05-21 12:14:29.169328] [I]     1194 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:14:29.177736] [I]     1196 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (6 B, 3 routes) Heap: 328324
+[2025-05-21 12:14:29.186087] [I]     1206 routing.cpp         :  64 | [ROUTING] Initialized
+[2025-05-21 12:14:29.191688] [I]     1207 transport.cpp       :  74 | [TRANSPORT] Initialized
+[2025-05-21 12:14:29.199878] [W]     1217 routing_table.cpp   :  84 | [RTABLE] Route for 0x01 already exists
+[2025-05-21 12:14:29.205438] [I]     1228 sleep.cpp           : 104 | [SLEEP] Set forward node to 1
+[2025-05-21 12:14:29.213882] [W]     1228 sleep.cpp           :  61 | [SLEEP] Wakeup reason: Timer
+[2025-05-21 12:14:29.219318] [W]     1238 sleep.cpp           :  74 | [SLEEP] Init. Already synchronized.
+[2025-05-21 12:14:29.227653] [W]     1249 sleep.cpp           :  75 |         Clock correction: 0 ms
+[2025-05-21 12:14:29.236018] [W]     1249 sleep.cpp           :  76 |         Delta time: 2535 ms. Nodes before: 1
+[2025-05-21 12:14:29.241581] [W]     1259 sleep.cpp           :  77 |         Timeout in 65070 ms
+[2025-05-21 12:14:29.251373] [I]     1270 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1
+[2025-05-21 12:14:38.040890] [I]    10073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:14:48.026233] [I]    20073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:14:58.013723] [I]    30073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:15:00.832044] [I]    32896 loraraw.cpp         : 219 | [LR] Data received. SNR: 11, RSSI: -69
+[2025-05-21 12:15:00.838499] [I]    32896 mac.cpp             : 308 | [MAC] Frame rcv
+[2025-05-21 12:15:00.848850] [I]    32913 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:15:00.854488] [I]    32914 mac.cpp             : 334 | Received valid PDU from LORA
+[2025-05-21 12:15:00.865514] [I]    32924 mac.cpp             : 565 | [MAC] FRAME: TX=03 RX=02 ID=138 D-LEN=11 DATA= CRC=184 ACK=0 RETRY=0
+[2025-05-21 12:15:00.873910] [I]    32935 mac.cpp             : 352 | [MAC] Frame for higher layer
+[2025-05-21 12:15:00.879538] [I]    32935 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:15:00.886628] [I]    32946 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-21 12:15:00.899694] [I]    32964 loraraw.cpp         : 235 | [LR] Packet: 02038A00F900F0
+[2025-05-21 12:15:00.948487] [I]    33013 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:15:00.953958] [I]    33014 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:15:00.962408] [I]    33024 routing.cpp         : 169 | [ROUTING] Received packet from 0x03
+[2025-05-21 12:15:00.970592] [I]    33024 routing.cpp         : 299 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=
+[2025-05-21 12:15:00.978943] [I]    33035 transport.cpp       : 181 | [TRANSPORT] Received segment
+[2025-05-21 12:15:00.990032] [I]    33045 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=45847 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=
+[2025-05-21 12:15:00.998371] [I]    33056 transport.cpp       : 203 | [TRANSPORT] ACK not requested for segment 45847
+[2025-05-21 12:15:01.006678] [I]    33066 transport.cpp       : 215 | [TRANSPORT] New segment received (ID: 45847)
+[2025-05-21 12:15:01.012346] [I]    33066 sleep.cpp           : 131 | [SLEEP] Decoding PDU. Command: 1, data: 
+[2025-05-21 12:15:01.020563] [I]    33077 sleep.cpp           : 150 | [SLEEP] Sync received
+[2025-05-21 12:15:01.026244] [I]    33087 sleep.cpp           : 160 | [SLEEP] Cancelled sleep timeout
+[2025-05-21 12:15:01.034509] [I]    33097 sleep.cpp           : 165 | [SLEEP] Nodes before self: 1
+[2025-05-21 12:15:01.048418] [W]    33098 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 1 nodes up to (3+1) txs, with 0.25 extra
+[2025-05-21 12:15:01.051145] [33119] Ready to send data: 8A 
+[2025-05-21 12:15:01.059474] [I]    33119 transport.cpp       :  93 | [TRANSPORT] Preparing to send
+[2025-05-21 12:15:01.070585] [I]    33120 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=24175 PORT=1 ACKreq=0 ACKResp=0 D-LEN=4 DATA=
+[2025-05-21 12:15:01.076182] [I]    33130 routing.cpp         :  90 | [ROUTING] Sending packet:
+[2025-05-21 12:15:01.084458] [I]    33140 routing.cpp         : 299 | [ROUTING] PACKET: SRC=02 DST=01 TTL=5 D-LEN=8 DATA=o^
+[2025-05-21 12:15:01.092937] [I]    33151 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x01, through 0x01
+[2025-05-21 12:15:01.103946] [I]    33161 routing.cpp         : 150 | [ROUTING] Sending packet to gateway. Forwarding to LoRaWAN
+[2025-05-21 12:15:07.586814] [I]    39650 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:15:07.593127] [I]    39651 lorawan.cpp         : 139 | [LW] Data sent; none received
+[2025-05-21 12:15:07.648366] [I]    39713 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:15:07.656599] [I]    39713 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 0)
+[2025-05-21 12:15:07.667632] [I]    39724 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 24175, Frame ID: 0)
+[2025-05-21 12:15:07.673264] [I]    39734 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 1
+[2025-05-21 12:15:07.681564] [I]    39735 transport.cpp       : 248 | [TRANSPORT] TX done for UDP segment 24175 (frame 0)
+[2025-05-21 12:15:07.689939] [I]    39745 sleep.cpp           : 311 | [SLEEP] Forwarded data
+[2025-05-21 12:15:07.698282] [I]    39757 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327712
+[2025-05-21 12:15:07.703745] [I]    39768 mac.cpp             : 108 | [MAC] Deinit
+[2025-05-21 12:15:07.709227] [I]    39768 lora.cpp            :  37 | [LORA] Deinit
+[2025-05-21 12:15:07.727606] [I]    39792 routing.cpp         :  75 | [ROUTING] Deinitialized
+[2025-05-21 12:15:07.733125] [I]    39792 transport.cpp       :  88 | [TRANSPORT] De-initialized
+[2025-05-21 12:15:07.744340] [W]    39803 sleep.cpp           : 250 | [SLEEP] Expected reception: 18 B, Transmission time: 0 ms
+[2025-05-21 12:15:07.758274] [W]    39813 sleep.cpp           : 252 | [SLEEP] Sleep breakdown: 110749 ms = 4684393973593145344 ms - (39803 ms - 33087 ms) - 0 ms - 2535 ms - 30000 ms + 0 ms
+[2025-05-21 12:15:07.780353] [E]    39824 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110749 ms	Sync time: 33087 ms	Done time: 39803 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 32947.00 ms	Done AVG: nan ms	Sync count: 2	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:15:07.785933] [E]    39845 sleep.cpp           : 280 | [SLEEP] Extra 42 ms (110707)
+[2025-05-21 12:16:56.678852] ets Jul 29 2019 12:21:46
+[2025-05-21 12:16:56.679024] 
+[2025-05-21 12:16:56.683609] rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-21 12:16:56.686600] configsip: 0, SPIWP:0xee
+[2025-05-21 12:16:56.692164] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-21 12:16:56.694818] mode:DIO, clock div:2
+[2025-05-21 12:16:56.697589] load:0x3fff0030,len:1184
+[2025-05-21 12:16:56.700307] load:0x40078000,len:13232
+[2025-05-21 12:16:56.700358] load:0x40080400,len:3028
+[2025-05-21 12:16:56.703995] entry 0x400805e4
+[2025-05-21 12:16:56.745365] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-21 12:16:56.749475] Boot: 0	Sync: 3
+[2025-05-21 12:16:56.757004] [I]       20 transport.cpp       :  54 | [TRANSPORT] Initializing...
+[2025-05-21 12:16:56.805637] [I]       73 lora.cpp            :  32 | [LORA] Init
+[2025-05-21 12:16:56.813885] [I]       73 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-21 12:16:56.825780] [I]       90 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:16:56.831504] [I]       91 loraraw.cpp         :  46 | [LR] Init
+[2025-05-21 12:16:56.836839] [I]      101 mac.cpp             : 103 | [MAC] Init
+[2025-05-21 12:16:56.842428] [I]      101 lorawan.cpp         :  48 | [LW] Initializing...
+[2025-05-21 12:16:56.854904] [I]      119 lorawan.cpp         :  62 | [LW] Reused session
+[2025-05-21 12:16:56.860513] [I]      121 lorawan.cpp         :  91 | [LW] Max LoRaWAN payload size: 115
+[2025-05-21 12:16:56.868814] [I]      131 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:16:56.875694] [I]      131 lorawan.cpp         :  96 | [LW] Joined the network successfully
+[2025-05-21 12:16:57.929753] [I]     1194 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:16:57.937959] [I]     1196 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (6 B, 3 routes) Heap: 328324
+[2025-05-21 12:16:57.946254] [I]     1207 routing.cpp         :  64 | [ROUTING] Initialized
+[2025-05-21 12:16:57.951619] [I]     1207 transport.cpp       :  74 | [TRANSPORT] Initialized
+[2025-05-21 12:16:57.960225] [W]     1217 routing_table.cpp   :  84 | [RTABLE] Route for 0x01 already exists
+[2025-05-21 12:16:57.965607] [I]     1228 sleep.cpp           : 104 | [SLEEP] Set forward node to 1
+[2025-05-21 12:16:57.974179] [W]     1228 sleep.cpp           :  61 | [SLEEP] Wakeup reason: Timer
+[2025-05-21 12:16:57.979428] [W]     1239 sleep.cpp           :  74 | [SLEEP] Init. Already synchronized.
+[2025-05-21 12:16:57.987782] [W]     1249 sleep.cpp           :  75 |         Clock correction: 0 ms
+[2025-05-21 12:16:57.996286] [W]     1249 sleep.cpp           :  76 |         Delta time: 2535 ms. Nodes before: 1
+[2025-05-21 12:16:58.001581] [W]     1259 sleep.cpp           :  77 |         Timeout in 65070 ms
+[2025-05-21 12:16:58.011332] [I]     1270 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1
+[2025-05-21 12:17:06.800209] [I]    10073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:17:16.785997] [I]    20073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:17:26.774258] [I]    30073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:17:29.606497] [I]    32910 loraraw.cpp         : 219 | [LR] Data received. SNR: 12, RSSI: -69
+[2025-05-21 12:17:29.613548] [I]    32910 mac.cpp             : 308 | [MAC] Frame rcv
+[2025-05-21 12:17:29.623856] [I]    32927 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:17:29.629453] [I]    32928 mac.cpp             : 334 | Received valid PDU from LORA
+[2025-05-21 12:17:29.640489] [I]    32938 mac.cpp             : 565 | [MAC] FRAME: TX=03 RX=02 ID=3991 D-LEN=11 DATA=
+                     E CRC=225 ACK=0 RETRY=0
+[2025-05-21 12:17:29.648741] [I]    32949 mac.cpp             : 352 | [MAC] Frame for higher layer
+[2025-05-21 12:17:29.654337] [I]    32949 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:17:29.661704] [I]    32960 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-21 12:17:29.674521] [I]    32978 loraraw.cpp         : 235 | [LR] Packet: 0203970FF9002E
+[2025-05-21 12:17:29.723276] [I]    33027 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:17:29.728835] [I]    33028 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:17:29.737152] [I]    33038 routing.cpp         : 169 | [ROUTING] Received packet from 0x03
+[2025-05-21 12:17:29.745495] [I]    33038 routing.cpp         : 299 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=
+                         E
+[2025-05-21 12:17:29.753830] [I]    33049 transport.cpp       : 181 | [TRANSPORT] Received segment
+[2025-05-21 12:17:29.764922] [I]    33059 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=43276 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=E
+[2025-05-21 12:17:29.773368] [I]    33070 transport.cpp       : 203 | [TRANSPORT] ACK not requested for segment 43276
+[2025-05-21 12:17:29.781721] [I]    33080 transport.cpp       : 215 | [TRANSPORT] New segment received (ID: 43276)
+[2025-05-21 12:17:29.787156] [I]    33080 sleep.cpp           : 131 | [SLEEP] Decoding PDU. Command: 1, data: E
+[2025-05-21 12:17:29.795596] [I]    33091 sleep.cpp           : 150 | [SLEEP] Sync received
+[2025-05-21 12:17:29.801116] [I]    33101 sleep.cpp           : 160 | [SLEEP] Cancelled sleep timeout
+[2025-05-21 12:17:29.809465] [I]    33112 sleep.cpp           : 165 | [SLEEP] Nodes before self: 1
+[2025-05-21 12:17:29.823365] [W]    33112 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 1 nodes up to (3+1) txs, with 0.25 extra
+[2025-05-21 12:17:29.826123] [33133] Ready to send data: 53 
+[2025-05-21 12:17:29.834472] [I]    33134 transport.cpp       :  93 | [TRANSPORT] Preparing to send
+[2025-05-21 12:17:29.845516] [I]    33134 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=23894 PORT=1 ACKreq=0 ACKResp=0 D-LEN=4 DATA=ES
+[2025-05-21 12:17:29.851035] [I]    33144 routing.cpp         :  90 | [ROUTING] Sending packet:
+[2025-05-21 12:17:29.859422] [I]    33155 routing.cpp         : 299 | [ROUTING] PACKET: SRC=02 DST=01 TTL=5 D-LEN=8 DATA=V]ES
+[2025-05-21 12:17:29.867796] [I]    33165 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x01, through 0x01
+[2025-05-21 12:17:29.878808] [I]    33176 routing.cpp         : 150 | [ROUTING] Sending packet to gateway. Forwarding to LoRaWAN
+[2025-05-21 12:17:36.361889] [I]    39665 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:17:36.367843] [I]    39665 lorawan.cpp         : 139 | [LW] Data sent; none received
+[2025-05-21 12:17:36.423444] [I]    39727 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:17:36.431690] [I]    39727 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 0)
+[2025-05-21 12:17:36.442787] [I]    39738 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 23894, Frame ID: 0)
+[2025-05-21 12:17:36.448368] [I]    39749 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 1
+[2025-05-21 12:17:36.456686] [I]    39749 transport.cpp       : 248 | [TRANSPORT] TX done for UDP segment 23894 (frame 0)
+[2025-05-21 12:17:36.465020] [I]    39759 sleep.cpp           : 311 | [SLEEP] Forwarded data
+[2025-05-21 12:17:36.473308] [I]    39771 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327712
+[2025-05-21 12:17:36.478791] [I]    39782 mac.cpp             : 108 | [MAC] Deinit
+[2025-05-21 12:17:36.484236] [I]    39782 lora.cpp            :  37 | [LORA] Deinit
+[2025-05-21 12:17:36.502716] [I]    39806 routing.cpp         :  75 | [ROUTING] Deinitialized
+[2025-05-21 12:17:36.508133] [I]    39807 transport.cpp       :  88 | [TRANSPORT] De-initialized
+[2025-05-21 12:17:36.519369] [W]    39817 sleep.cpp           : 250 | [SLEEP] Expected reception: 18 B, Transmission time: 0 ms
+[2025-05-21 12:17:36.533216] [W]    39828 sleep.cpp           : 252 | [SLEEP] Sleep breakdown: 110749 ms = 4684393973593145344 ms - (39817 ms - 33101 ms) - 0 ms - 2535 ms - 30000 ms + 0 ms
+[2025-05-21 12:17:36.555602] [E]    39838 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110749 ms	Sync time: 33101 ms	Done time: 39817 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 32998.33 ms	Done AVG: nan ms	Sync count: 3	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:17:36.561050] [E]    39859 sleep.cpp           : 280 | [SLEEP] Extra 42 ms (110707)
+[2025-05-21 12:19:25.423887] ets Jul 29 2019 12:21:46
+[2025-05-21 12:19:25.424051] 
+[2025-05-21 12:19:25.428826] rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-21 12:19:25.431570] configsip: 0, SPIWP:0xee
+[2025-05-21 12:19:25.437213] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-21 12:19:25.439898] mode:DIO, clock div:2
+[2025-05-21 12:19:25.442647] load:0x3fff0030,len:1184
+[2025-05-21 12:19:25.445360] load:0x40078000,len:13232
+[2025-05-21 12:19:25.445479] load:0x40080400,len:3028
+[2025-05-21 12:19:25.448919] entry 0x400805e4
+[2025-05-21 12:19:25.490365] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-21 12:19:25.494561] Boot: 0	Sync: 4
+[2025-05-21 12:19:25.501801] [I]       20 transport.cpp       :  54 | [TRANSPORT] Initializing...
+[2025-05-21 12:19:25.550661] [I]       73 lora.cpp            :  32 | [LORA] Init
+[2025-05-21 12:19:25.558701] [I]       73 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-21 12:19:25.570723] [I]       90 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:19:25.576471] [I]       91 loraraw.cpp         :  46 | [LR] Init
+[2025-05-21 12:19:25.581858] [I]      101 mac.cpp             : 103 | [MAC] Init
+[2025-05-21 12:19:25.587380] [I]      101 lorawan.cpp         :  48 | [LW] Initializing...
+[2025-05-21 12:19:25.600176] [I]      119 lorawan.cpp         :  62 | [LW] Reused session
+[2025-05-21 12:19:25.605607] [I]      121 lorawan.cpp         :  91 | [LW] Max LoRaWAN payload size: 115
+[2025-05-21 12:19:25.614060] [I]      131 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:19:25.620647] [I]      131 lorawan.cpp         :  96 | [LW] Joined the network successfully
+[2025-05-21 12:19:26.674524] [I]     1194 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:19:26.682741] [I]     1196 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (6 B, 3 routes) Heap: 328324
+[2025-05-21 12:19:26.691115] [I]     1206 routing.cpp         :  64 | [ROUTING] Initialized
+[2025-05-21 12:19:26.696596] [I]     1207 transport.cpp       :  74 | [TRANSPORT] Initialized
+[2025-05-21 12:19:26.704998] [W]     1217 routing_table.cpp   :  84 | [RTABLE] Route for 0x01 already exists
+[2025-05-21 12:19:26.710551] [I]     1228 sleep.cpp           : 104 | [SLEEP] Set forward node to 1
+[2025-05-21 12:19:26.718874] [W]     1228 sleep.cpp           :  61 | [SLEEP] Wakeup reason: Timer
+[2025-05-21 12:19:26.724476] [W]     1238 sleep.cpp           :  74 | [SLEEP] Init. Already synchronized.
+[2025-05-21 12:19:26.732718] [W]     1249 sleep.cpp           :  75 |         Clock correction: 0 ms
+[2025-05-21 12:19:26.741160] [W]     1249 sleep.cpp           :  76 |         Delta time: 2535 ms. Nodes before: 1
+[2025-05-21 12:19:26.746651] [W]     1259 sleep.cpp           :  77 |         Timeout in 65070 ms
+[2025-05-21 12:19:26.756224] [I]     1270 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1
+[2025-05-21 12:19:35.544849] [I]    10073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:19:45.531305] [I]    20073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:19:55.519416] [I]    30073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:19:58.436501] [I]    32995 loraraw.cpp         : 219 | [LR] Data received. SNR: 12, RSSI: -69
+[2025-05-21 12:19:58.443583] [I]    32995 mac.cpp             : 308 | [MAC] Frame rcv
+[2025-05-21 12:19:58.453907] [I]    33012 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:19:58.459461] [I]    33013 mac.cpp             : 334 | Received valid PDU from LORA
+[2025-05-21 12:19:58.470583] [I]    33023 mac.cpp             : 565 | [MAC] FRAME: TX=03 RX=02 ID=13977 D-LEN=11 DATA=Yh CRC=112 ACK=0 RETRY=0
+[2025-05-21 12:19:58.478906] [I]    33034 mac.cpp             : 352 | [MAC] Frame for higher layer
+[2025-05-21 12:19:58.484504] [I]    33034 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:19:58.491902] [I]    33045 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-21 12:19:58.504758] [I]    33063 loraraw.cpp         : 235 | [LR] Packet: 02039936F90031
+[2025-05-21 12:19:58.553509] [I]    33112 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:19:58.559064] [I]    33113 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:19:58.567293] [I]    33123 routing.cpp         : 169 | [ROUTING] Received packet from 0x03
+[2025-05-21 12:19:58.575635] [I]    33123 routing.cpp         : 299 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=Yh
+[2025-05-21 12:19:58.584001] [I]    33134 transport.cpp       : 181 | [TRANSPORT] Received segment
+[2025-05-21 12:19:58.595074] [I]    33144 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=22943 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=h
+[2025-05-21 12:19:58.603497] [I]    33155 transport.cpp       : 203 | [TRANSPORT] ACK not requested for segment 22943
+[2025-05-21 12:19:58.611766] [I]    33165 transport.cpp       : 215 | [TRANSPORT] New segment received (ID: 22943)
+[2025-05-21 12:19:58.617311] [I]    33165 sleep.cpp           : 131 | [SLEEP] Decoding PDU. Command: 1, data: h
+[2025-05-21 12:19:58.625618] [I]    33176 sleep.cpp           : 150 | [SLEEP] Sync received
+[2025-05-21 12:19:58.631181] [I]    33186 sleep.cpp           : 160 | [SLEEP] Cancelled sleep timeout
+[2025-05-21 12:19:58.639532] [I]    33197 sleep.cpp           : 165 | [SLEEP] Nodes before self: 1
+[2025-05-21 12:19:58.653471] [W]    33197 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 1 nodes up to (3+1) txs, with 0.25 extra
+[2025-05-21 12:19:58.656189] [33218] Ready to send data: 3E 
+[2025-05-21 12:19:58.664488] [I]    33219 transport.cpp       :  93 | [TRANSPORT] Preparing to send
+[2025-05-21 12:19:58.675604] [I]    33219 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=10329 PORT=1 ACKreq=0 ACKResp=0 D-LEN=4 DATA=h>
+[2025-05-21 12:19:58.681158] [I]    33229 routing.cpp         :  90 | [ROUTING] Sending packet:
+[2025-05-21 12:19:58.689545] [I]    33239 routing.cpp         : 299 | [ROUTING] PACKET: SRC=02 DST=01 TTL=5 D-LEN=8 DATA=Y(h>
+[2025-05-21 12:19:58.697842] [I]    33250 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x01, through 0x01
+[2025-05-21 12:19:58.708881] [I]    33260 routing.cpp         : 150 | [ROUTING] Sending packet to gateway. Forwarding to LoRaWAN
+[2025-05-21 12:20:05.191906] [I]    39750 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:20:05.198104] [I]    39750 lorawan.cpp         : 139 | [LW] Data sent; none received
+[2025-05-21 12:20:05.253439] [I]    39812 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:20:05.261715] [I]    39812 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 0)
+[2025-05-21 12:20:05.272815] [I]    39823 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 10329, Frame ID: 0)
+[2025-05-21 12:20:05.278411] [I]    39833 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 1
+[2025-05-21 12:20:05.286764] [I]    39834 transport.cpp       : 248 | [TRANSPORT] TX done for UDP segment 10329 (frame 0)
+[2025-05-21 12:20:05.295027] [I]    39844 sleep.cpp           : 311 | [SLEEP] Forwarded data
+[2025-05-21 12:20:05.303436] [I]    39856 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327712
+[2025-05-21 12:20:05.308855] [I]    39867 mac.cpp             : 108 | [MAC] Deinit
+[2025-05-21 12:20:05.314274] [I]    39867 lora.cpp            :  37 | [LORA] Deinit
+[2025-05-21 12:20:05.332653] [I]    39891 routing.cpp         :  75 | [ROUTING] Deinitialized
+[2025-05-21 12:20:05.338298] [I]    39892 transport.cpp       :  88 | [TRANSPORT] De-initialized
+[2025-05-21 12:20:05.349346] [W]    39902 sleep.cpp           : 250 | [SLEEP] Expected reception: 18 B, Transmission time: 0 ms
+[2025-05-21 12:20:05.363300] [W]    39912 sleep.cpp           : 252 | [SLEEP] Sleep breakdown: 110749 ms = 4684393973593145344 ms - (39902 ms - 33186 ms) - 0 ms - 2535 ms - 30000 ms + 0 ms
+[2025-05-21 12:20:05.385627] [E]    39923 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110749 ms	Sync time: 33186 ms	Done time: 39902 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33045.25 ms	Done AVG: nan ms	Sync count: 4	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:20:05.391110] [E]    39944 sleep.cpp           : 280 | [SLEEP] Extra 42 ms (110707)
+[2025-05-21 12:21:54.270990] ets Jul 29 2019 12:21:46
+[2025-05-21 12:21:54.271128] 
+[2025-05-21 12:21:54.276419] rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-21 12:21:54.279168] configsip: 0, SPIWP:0xee
+[2025-05-21 12:21:54.284866] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-21 12:21:54.287477] mode:DIO, clock div:2
+[2025-05-21 12:21:54.290246] load:0x3fff0030,len:1184
+[2025-05-21 12:21:54.293047] load:0x40078000,len:13232
+[2025-05-21 12:21:54.293099] load:0x40080400,len:3028
+[2025-05-21 12:21:54.296664] entry 0x400805e4
+[2025-05-21 12:21:54.337918] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-21 12:21:54.342159] Boot: 0	Sync: 5
+[2025-05-21 12:21:54.349702] [I]       20 transport.cpp       :  54 | [TRANSPORT] Initializing...
+[2025-05-21 12:21:54.398287] [I]       73 lora.cpp            :  32 | [LORA] Init
+[2025-05-21 12:21:54.406381] [I]       73 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-21 12:21:54.418395] [I]       90 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:21:54.424066] [I]       91 loraraw.cpp         :  46 | [LR] Init
+[2025-05-21 12:21:54.429582] [I]      101 mac.cpp             : 103 | [MAC] Init
+[2025-05-21 12:21:54.435080] [I]      101 lorawan.cpp         :  48 | [LW] Initializing...
+[2025-05-21 12:21:54.447628] [I]      119 lorawan.cpp         :  62 | [LW] Reused session
+[2025-05-21 12:21:54.453155] [I]      121 lorawan.cpp         :  91 | [LW] Max LoRaWAN payload size: 115
+[2025-05-21 12:21:54.461518] [I]      131 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:21:54.468528] [I]      131 lorawan.cpp         :  96 | [LW] Joined the network successfully
+[2025-05-21 12:21:55.522304] [I]     1194 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:21:55.530553] [I]     1196 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (6 B, 3 routes) Heap: 328324
+[2025-05-21 12:21:55.538926] [I]     1206 routing.cpp         :  64 | [ROUTING] Initialized
+[2025-05-21 12:21:55.544322] [I]     1207 transport.cpp       :  74 | [TRANSPORT] Initialized
+[2025-05-21 12:21:55.552738] [W]     1217 routing_table.cpp   :  84 | [RTABLE] Route for 0x01 already exists
+[2025-05-21 12:21:55.558233] [I]     1228 sleep.cpp           : 104 | [SLEEP] Set forward node to 1
+[2025-05-21 12:21:55.566719] [W]     1228 sleep.cpp           :  61 | [SLEEP] Wakeup reason: Timer
+[2025-05-21 12:21:55.572076] [W]     1239 sleep.cpp           :  74 | [SLEEP] Init. Already synchronized.
+[2025-05-21 12:21:55.580409] [W]     1249 sleep.cpp           :  75 |         Clock correction: 0 ms
+[2025-05-21 12:21:55.588939] [W]     1249 sleep.cpp           :  76 |         Delta time: 2535 ms. Nodes before: 1
+[2025-05-21 12:21:55.594326] [W]     1259 sleep.cpp           :  77 |         Timeout in 65070 ms
+[2025-05-21 12:21:55.604055] [I]     1270 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1
+[2025-05-21 12:22:04.392130] [I]    10073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:22:14.378658] [I]    20073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:22:24.367227] [I]    30073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:22:27.141695] [I]    32852 loraraw.cpp         : 219 | [LR] Data received. SNR: 12, RSSI: -69
+[2025-05-21 12:22:27.148124] [I]    32852 mac.cpp             : 308 | [MAC] Frame rcv
+[2025-05-21 12:22:27.158552] [I]    32869 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:22:27.164009] [I]    32870 mac.cpp             : 334 | Received valid PDU from LORA
+[2025-05-21 12:22:27.175111] [I]    32880 mac.cpp             : 565 | [MAC] FRAME: TX=03 RX=02 ID=22165 D-LEN=11 DATA=� CRC=249 ACK=0 RETRY=0
+[2025-05-21 12:22:27.183630] [I]    32891 mac.cpp             : 352 | [MAC] Frame for higher layer
+[2025-05-21 12:22:27.189018] [I]    32891 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:22:27.196504] [I]    32902 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-21 12:22:27.209326] [I]    32920 loraraw.cpp         : 235 | [LR] Packet: 02039556F9001C
+[2025-05-21 12:22:27.258058] [I]    32969 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:22:27.263583] [I]    32970 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:22:27.271945] [I]    32980 routing.cpp         : 169 | [ROUTING] Received packet from 0x03
+[2025-05-21 12:22:27.280192] [I]    32980 routing.cpp         : 299 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=�
+[2025-05-21 12:22:27.288582] [I]    32991 transport.cpp       : 181 | [TRANSPORT] Received segment
+[2025-05-21 12:22:27.299632] [I]    33001 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=28108 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=
+[2025-05-21 12:22:27.308047] [I]    33012 transport.cpp       : 203 | [TRANSPORT] ACK not requested for segment 28108
+[2025-05-21 12:22:27.316372] [I]    33022 transport.cpp       : 215 | [TRANSPORT] New segment received (ID: 28108)
+[2025-05-21 12:22:27.322011] [I]    33022 sleep.cpp           : 131 | [SLEEP] Decoding PDU. Command: 1, data: 
+[2025-05-21 12:22:27.330204] [I]    33033 sleep.cpp           : 150 | [SLEEP] Sync received
+[2025-05-21 12:22:27.335822] [I]    33043 sleep.cpp           : 160 | [SLEEP] Cancelled sleep timeout
+[2025-05-21 12:22:27.344176] [I]    33054 sleep.cpp           : 165 | [SLEEP] Nodes before self: 1
+[2025-05-21 12:22:27.358017] [W]    33054 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 1 nodes up to (3+1) txs, with 0.25 extra
+[2025-05-21 12:22:27.360857] [33075] Ready to send data: 16 
+[2025-05-21 12:22:27.369153] [I]    33075 transport.cpp       :  93 | [TRANSPORT] Preparing to send
+[2025-05-21 12:22:27.380236] [I]    33076 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=17062 PORT=1 ACKreq=0 ACKResp=0 D-LEN=4 DATA=
+[2025-05-21 12:22:27.385809] [I]    33086 routing.cpp         :  90 | [ROUTING] Sending packet:
+[2025-05-21 12:22:27.394117] [I]    33096 routing.cpp         : 299 | [ROUTING] PACKET: SRC=02 DST=01 TTL=5 D-LEN=8 DATA=B
+[2025-05-21 12:22:27.402529] [I]    33107 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x01, through 0x01
+[2025-05-21 12:22:27.413526] [I]    33117 routing.cpp         : 150 | [ROUTING] Sending packet to gateway. Forwarding to LoRaWAN
+[2025-05-21 12:22:33.895708] [I]    39607 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:22:33.902511] [I]    39607 lorawan.cpp         : 139 | [LW] Data sent; none received
+[2025-05-21 12:22:33.957923] [I]    39669 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:22:33.966223] [I]    39669 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 0)
+[2025-05-21 12:22:33.977370] [I]    39680 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 17062, Frame ID: 0)
+[2025-05-21 12:22:33.983054] [I]    39690 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 1
+[2025-05-21 12:22:33.991317] [I]    39691 transport.cpp       : 248 | [TRANSPORT] TX done for UDP segment 17062 (frame 0)
+[2025-05-21 12:22:33.999618] [I]    39701 sleep.cpp           : 311 | [SLEEP] Forwarded data
+[2025-05-21 12:22:34.008002] [I]    39713 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327712
+[2025-05-21 12:22:34.013527] [I]    39724 mac.cpp             : 108 | [MAC] Deinit
+[2025-05-21 12:22:34.018999] [I]    39724 lora.cpp            :  37 | [LORA] Deinit
+[2025-05-21 12:22:34.037219] [I]    39748 routing.cpp         :  75 | [ROUTING] Deinitialized
+[2025-05-21 12:22:34.042817] [I]    39749 transport.cpp       :  88 | [TRANSPORT] De-initialized
+[2025-05-21 12:22:34.053952] [W]    39759 sleep.cpp           : 250 | [SLEEP] Expected reception: 18 B, Transmission time: 0 ms
+[2025-05-21 12:22:34.067810] [W]    39769 sleep.cpp           : 252 | [SLEEP] Sleep breakdown: 110749 ms = 4684393973593145344 ms - (39759 ms - 33043 ms) - 0 ms - 2535 ms - 30000 ms + 0 ms
+[2025-05-21 12:22:34.090211] [E]    39780 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110749 ms	Sync time: 33043 ms	Done time: 39759 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33044.80 ms	Done AVG: nan ms	Sync count: 5	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:22:34.095687] [E]    39801 sleep.cpp           : 280 | [SLEEP] Extra 42 ms (110707)
+[2025-05-21 12:24:22.975556] ets Jul 29 2019 12:21:46
+[2025-05-21 12:24:22.975697] 
+[2025-05-21 12:24:22.980370] rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-21 12:24:22.983205] configsip: 0, SPIWP:0xee
+[2025-05-21 12:24:22.988851] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-21 12:24:22.991609] mode:DIO, clock div:2
+[2025-05-21 12:24:22.994253] load:0x3fff0030,len:1184
+[2025-05-21 12:24:22.997004] load:0x40078000,len:13232
+[2025-05-21 12:24:22.997070] load:0x40080400,len:3028
+[2025-05-21 12:24:23.000703] entry 0x400805e4
+[2025-05-21 12:24:23.041662] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-21 12:24:23.046147] Boot: 0	Sync: 6
+[2025-05-21 12:24:23.053385] [I]       20 transport.cpp       :  54 | [TRANSPORT] Initializing...
+[2025-05-21 12:24:23.102339] [I]       73 lora.cpp            :  32 | [LORA] Init
+[2025-05-21 12:24:23.110265] [I]       73 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-21 12:24:23.122462] [I]       90 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:24:23.128080] [I]       91 loraraw.cpp         :  46 | [LR] Init
+[2025-05-21 12:24:23.133597] [I]      101 mac.cpp             : 103 | [MAC] Init
+[2025-05-21 12:24:23.138946] [I]      101 lorawan.cpp         :  48 | [LW] Initializing...
+[2025-05-21 12:24:23.151643] [I]      119 lorawan.cpp         :  62 | [LW] Reused session
+[2025-05-21 12:24:23.157245] [I]      121 lorawan.cpp         :  91 | [LW] Max LoRaWAN payload size: 115
+[2025-05-21 12:24:23.165600] [I]      131 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:24:23.172466] [I]      131 lorawan.cpp         :  96 | [LW] Joined the network successfully
+[2025-05-21 12:24:24.226783] [I]     1194 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:24:24.234533] [I]     1196 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (6 B, 3 routes) Heap: 328324
+[2025-05-21 12:24:24.242756] [I]     1206 routing.cpp         :  64 | [ROUTING] Initialized
+[2025-05-21 12:24:24.248225] [I]     1207 transport.cpp       :  74 | [TRANSPORT] Initialized
+[2025-05-21 12:24:24.256596] [W]     1217 routing_table.cpp   :  84 | [RTABLE] Route for 0x01 already exists
+[2025-05-21 12:24:24.262200] [I]     1228 sleep.cpp           : 104 | [SLEEP] Set forward node to 1
+[2025-05-21 12:24:24.270646] [W]     1228 sleep.cpp           :  61 | [SLEEP] Wakeup reason: Timer
+[2025-05-21 12:24:24.276122] [W]     1238 sleep.cpp           :  74 | [SLEEP] Init. Already synchronized.
+[2025-05-21 12:24:24.284384] [W]     1249 sleep.cpp           :  75 |         Clock correction: 0 ms
+[2025-05-21 12:24:24.292843] [W]     1249 sleep.cpp           :  76 |         Delta time: 2535 ms. Nodes before: 1
+[2025-05-21 12:24:24.298846] [W]     1259 sleep.cpp           :  77 |         Timeout in 65070 ms
+[2025-05-21 12:24:24.307904] [I]     1270 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1
+[2025-05-21 12:24:33.096286] [I]    10073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:24:43.082944] [I]    20073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:24:53.071077] [I]    30073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:24:55.885992] [I]    32893 loraraw.cpp         : 219 | [LR] Data received. SNR: 12, RSSI: -69
+[2025-05-21 12:24:55.893181] [I]    32893 mac.cpp             : 308 | [MAC] Frame rcv
+[2025-05-21 12:24:55.903412] [I]    32910 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:24:55.908963] [I]    32911 mac.cpp             : 334 | Received valid PDU from LORA
+[2025-05-21 12:24:55.920093] [I]    32921 mac.cpp             : 565 | [MAC] FRAME: TX=03 RX=02 ID=43985 D-LEN=11 DATA= CRC=6 ACK=0 RETRY=0
+[2025-05-21 12:24:55.928458] [I]    32932 mac.cpp             : 352 | [MAC] Frame for higher layer
+[2025-05-21 12:24:55.934010] [I]    32932 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:24:55.941316] [I]    32943 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-21 12:24:55.954185] [I]    32961 loraraw.cpp         : 235 | [LR] Packet: 0203D1ABF90022
+[2025-05-21 12:24:56.002963] [I]    33010 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:24:56.008469] [I]    33011 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:24:56.016859] [I]    33021 routing.cpp         : 169 | [ROUTING] Received packet from 0x03
+[2025-05-21 12:24:56.025205] [I]    33021 routing.cpp         : 299 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=
+[2025-05-21 12:24:56.033491] [I]    33032 transport.cpp       : 181 | [TRANSPORT] Received segment
+[2025-05-21 12:24:56.041848] [I]    33042 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=938 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=
+[2025-05-21 12:24:56.050308] [I]    33053 transport.cpp       : 203 | [TRANSPORT] ACK not requested for segment 938
+[2025-05-21 12:24:56.058548] [I]    33063 transport.cpp       : 215 | [TRANSPORT] New segment received (ID: 938)
+[2025-05-21 12:24:56.066837] [I]    33063 sleep.cpp           : 131 | [SLEEP] Decoding PDU. Command: 1, data: 
+[2025-05-21 12:24:56.072375] [I]    33074 sleep.cpp           : 150 | [SLEEP] Sync received
+[2025-05-21 12:24:56.080730] [I]    33084 sleep.cpp           : 160 | [SLEEP] Cancelled sleep timeout
+[2025-05-21 12:24:56.089051] [I]    33084 sleep.cpp           : 165 | [SLEEP] Nodes before self: 1
+[2025-05-21 12:24:56.102942] [W]    33095 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 1 nodes up to (3+1) txs, with 0.25 extra
+[2025-05-21 12:24:56.105739] [33106] Ready to send data: DA 
+[2025-05-21 12:24:56.111251] [I]    33116 transport.cpp       :  93 | [TRANSPORT] Preparing to send
+[2025-05-21 12:24:56.122413] [I]    33117 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=7858 PORT=1 ACKreq=0 ACKResp=0 D-LEN=4 DATA=�[0m
+[2025-05-21 12:24:56.130747] [I]    33127 routing.cpp         :  90 | [ROUTING] Sending packet:
+[2025-05-21 12:24:56.139053] [I]    33137 routing.cpp         : 299 | [ROUTING] PACKET: SRC=02 DST=01 TTL=5 D-LEN=8 DATA=�[0m
+[2025-05-21 12:24:56.147377] [I]    33148 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x01, through 0x01
+[2025-05-21 12:24:56.157810] [I]    33158 routing.cpp         : 150 | [ROUTING] Sending packet to gateway. Forwarding to LoRaWAN
+[2025-05-21 12:25:02.641588] [I]    39648 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:25:02.647650] [I]    39648 lorawan.cpp         : 139 | [LW] Data sent; none received
+[2025-05-21 12:25:02.703234] [I]    39710 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:25:02.711176] [I]    39710 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 0)
+[2025-05-21 12:25:02.719688] [I]    39721 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 7858, Frame ID: 0)
+[2025-05-21 12:25:02.727877] [I]    39731 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 1
+[2025-05-21 12:25:02.736368] [I]    39732 transport.cpp       : 248 | [TRANSPORT] TX done for UDP segment 7858 (frame 0)
+[2025-05-21 12:25:02.744747] [I]    39742 sleep.cpp           : 311 | [SLEEP] Forwarded data
+[2025-05-21 12:25:02.752933] [I]    39754 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327712
+[2025-05-21 12:25:02.758517] [I]    39765 mac.cpp             : 108 | [MAC] Deinit
+[2025-05-21 12:25:02.763630] [I]    39765 lora.cpp            :  37 | [LORA] Deinit
+[2025-05-21 12:25:02.782281] [I]    39789 routing.cpp         :  75 | [ROUTING] Deinitialized
+[2025-05-21 12:25:02.787790] [I]    39789 transport.cpp       :  88 | [TRANSPORT] De-initialized
+[2025-05-21 12:25:02.798925] [W]    39800 sleep.cpp           : 250 | [SLEEP] Expected reception: 18 B, Transmission time: 0 ms
+[2025-05-21 12:25:02.812851] [W]    39810 sleep.cpp           : 252 | [SLEEP] Sleep breakdown: 110749 ms = 4684393973593145344 ms - (39800 ms - 33084 ms) - 0 ms - 2535 ms - 30000 ms + 0 ms
+[2025-05-21 12:25:02.835100] [E]    39821 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110749 ms	Sync time: 33084 ms	Done time: 39800 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33051.33 ms	Done AVG: nan ms	Sync count: 6	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:25:02.840654] [E]    39842 sleep.cpp           : 280 | [SLEEP] Extra 42 ms (110707)
+[2025-05-21 12:26:51.765950] ets Jul 29 2019 12:21:46
+[2025-05-21 12:26:51.766138] 
+[2025-05-21 12:26:51.771315] rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-21 12:26:51.774262] configsip: 0, SPIWP:0xee
+[2025-05-21 12:26:51.779715] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-21 12:26:51.782404] mode:DIO, clock div:2
+[2025-05-21 12:26:51.785186] load:0x3fff0030,len:1184
+[2025-05-21 12:26:51.787954] load:0x40078000,len:13232
+[2025-05-21 12:26:51.788034] load:0x40080400,len:3028
+[2025-05-21 12:26:51.791621] entry 0x400805e4
+[2025-05-21 12:26:51.832390] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-21 12:26:51.837115] Boot: 0	Sync: 7
+[2025-05-21 12:26:51.844482] [I]       20 transport.cpp       :  54 | [TRANSPORT] Initializing...
+[2025-05-21 12:26:51.893308] [I]       73 lora.cpp            :  32 | [LORA] Init
+[2025-05-21 12:26:51.901183] [I]       73 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-21 12:26:51.913317] [I]       90 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:26:51.918994] [I]       91 loraraw.cpp         :  46 | [LR] Init
+[2025-05-21 12:26:51.924520] [I]      101 mac.cpp             : 103 | [MAC] Init
+[2025-05-21 12:26:51.929892] [I]      101 lorawan.cpp         :  48 | [LW] Initializing...
+[2025-05-21 12:26:51.942548] [I]      119 lorawan.cpp         :  62 | [LW] Reused session
+[2025-05-21 12:26:51.948180] [I]      121 lorawan.cpp         :  91 | [LW] Max LoRaWAN payload size: 115
+[2025-05-21 12:26:51.956381] [I]      131 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:26:51.963229] [I]      131 lorawan.cpp         :  96 | [LW] Joined the network successfully
+[2025-05-21 12:26:53.017716] [I]     1194 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:26:53.025541] [I]     1196 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (6 B, 3 routes) Heap: 328324
+[2025-05-21 12:26:53.033846] [I]     1207 routing.cpp         :  64 | [ROUTING] Initialized
+[2025-05-21 12:26:53.039371] [I]     1207 transport.cpp       :  74 | [TRANSPORT] Initialized
+[2025-05-21 12:26:53.047636] [W]     1217 routing_table.cpp   :  84 | [RTABLE] Route for 0x01 already exists
+[2025-05-21 12:26:53.053121] [I]     1228 sleep.cpp           : 104 | [SLEEP] Set forward node to 1
+[2025-05-21 12:26:53.061463] [W]     1228 sleep.cpp           :  61 | [SLEEP] Wakeup reason: Timer
+[2025-05-21 12:26:53.067121] [W]     1239 sleep.cpp           :  74 | [SLEEP] Init. Already synchronized.
+[2025-05-21 12:26:53.075364] [W]     1249 sleep.cpp           :  75 |         Clock correction: 0 ms
+[2025-05-21 12:26:53.083914] [W]     1249 sleep.cpp           :  76 |         Delta time: 2535 ms. Nodes before: 1
+[2025-05-21 12:26:53.089259] [W]     1259 sleep.cpp           :  77 |         Timeout in 65070 ms
+[2025-05-21 12:26:53.098796] [I]     1270 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1
+[2025-05-21 12:27:01.887278] [I]    10073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:27:11.873552] [I]    20073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:27:21.862219] [I]    30073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:27:24.691071] [I]    32907 loraraw.cpp         : 219 | [LR] Data received. SNR: 13, RSSI: -69
+[2025-05-21 12:27:24.697997] [I]    32907 mac.cpp             : 308 | [MAC] Frame rcv
+[2025-05-21 12:27:24.708514] [I]    32924 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:27:24.713912] [I]    32925 mac.cpp             : 334 | Received valid PDU from LORA
+[2025-05-21 12:27:24.725085] [I]    32935 mac.cpp             : 565 | [MAC] FRAME: TX=03 RX=02 ID=11133 D-LEN=11 DATA=� CRC=202 ACK=0 RETRY=0
+[2025-05-21 12:27:24.733508] [I]    32946 mac.cpp             : 352 | [MAC] Frame for higher layer
+[2025-05-21 12:27:24.739050] [I]    32946 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:27:24.746356] [I]    32957 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-21 12:27:24.759265] [I]    32975 loraraw.cpp         : 235 | [LR] Packet: 02037D2BF9003E
+[2025-05-21 12:27:24.807915] [I]    33024 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:27:24.813579] [I]    33025 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:27:24.821813] [I]    33035 routing.cpp         : 169 | [ROUTING] Received packet from 0x03
+[2025-05-21 12:27:24.830163] [I]    33035 routing.cpp         : 299 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=�
+[2025-05-21 12:27:24.838497] [I]    33046 transport.cpp       : 181 | [TRANSPORT] Received segment
+[2025-05-21 12:27:24.849543] [I]    33056 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=61663 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=
+[2025-05-21 12:27:24.857940] [I]    33067 transport.cpp       : 203 | [TRANSPORT] ACK not requested for segment 61663
+[2025-05-21 12:27:24.866236] [I]    33077 transport.cpp       : 215 | [TRANSPORT] New segment received (ID: 61663)
+[2025-05-21 12:27:24.871807] [I]    33077 sleep.cpp           : 131 | [SLEEP] Decoding PDU. Command: 1, data: 
+[2025-05-21 12:27:24.880175] [I]    33088 sleep.cpp           : 150 | [SLEEP] Sync received
+[2025-05-21 12:27:24.885678] [I]    33098 sleep.cpp           : 160 | [SLEEP] Cancelled sleep timeout
+[2025-05-21 12:27:24.894031] [I]    33108 sleep.cpp           : 165 | [SLEEP] Nodes before self: 1
+[2025-05-21 12:27:24.908016] [W]    33109 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 1 nodes up to (3+1) txs, with 0.25 extra
+[2025-05-21 12:27:24.910672] [33130] Ready to send data: 17 
+[2025-05-21 12:27:24.919025] [I]    33130 transport.cpp       :  93 | [TRANSPORT] Preparing to send
+[2025-05-21 12:27:24.930210] [I]    33131 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=23781 PORT=1 ACKreq=0 ACKResp=0 D-LEN=4 DATA=
+[2025-05-21 12:27:24.935757] [I]    33141 routing.cpp         :  90 | [ROUTING] Sending packet:
+[2025-05-21 12:27:24.944115] [I]    33151 routing.cpp         : 299 | [ROUTING] PACKET: SRC=02 DST=01 TTL=5 D-LEN=8 DATA=�
+[2025-05-21 12:27:24.952400] [I]    33162 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x01, through 0x01
+[2025-05-21 12:27:24.963367] [I]    33172 routing.cpp         : 150 | [ROUTING] Sending packet to gateway. Forwarding to LoRaWAN
+[2025-05-21 12:27:31.446359] [I]    39662 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:27:31.452459] [I]    39662 lorawan.cpp         : 139 | [LW] Data sent; none received
+[2025-05-21 12:27:31.508071] [I]    39724 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:27:31.516232] [I]    39724 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 0)
+[2025-05-21 12:27:31.527369] [I]    39735 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 23781, Frame ID: 0)
+[2025-05-21 12:27:31.532888] [I]    39745 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 1
+[2025-05-21 12:27:31.541252] [I]    39746 transport.cpp       : 248 | [TRANSPORT] TX done for UDP segment 23781 (frame 0)
+[2025-05-21 12:27:31.549475] [I]    39756 sleep.cpp           : 311 | [SLEEP] Forwarded data
+[2025-05-21 12:27:31.557807] [I]    39768 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327712
+[2025-05-21 12:27:31.563436] [I]    39779 mac.cpp             : 108 | [MAC] Deinit
+[2025-05-21 12:27:31.568838] [I]    39779 lora.cpp            :  37 | [LORA] Deinit
+[2025-05-21 12:27:31.587279] [I]    39803 routing.cpp         :  75 | [ROUTING] Deinitialized
+[2025-05-21 12:27:31.592775] [I]    39803 transport.cpp       :  88 | [TRANSPORT] De-initialized
+[2025-05-21 12:27:31.604033] [W]    39814 sleep.cpp           : 250 | [SLEEP] Expected reception: 18 B, Transmission time: 0 ms
+[2025-05-21 12:27:31.617923] [W]    39824 sleep.cpp           : 252 | [SLEEP] Sleep breakdown: 110749 ms = 4684393973593145344 ms - (39814 ms - 33098 ms) - 0 ms - 2535 ms - 30000 ms + 0 ms
+[2025-05-21 12:27:31.640142] [E]    39835 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110749 ms	Sync time: 33098 ms	Done time: 39814 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33058.00 ms	Done AVG: nan ms	Sync count: 7	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:27:31.645505] [E]    39856 sleep.cpp           : 280 | [SLEEP] Extra 42 ms (110707)
+[2025-05-21 12:29:20.434580] ets Jul 29 2019 12:21:46
+[2025-05-21 12:29:20.434718] 
+[2025-05-21 12:29:20.439617] rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-21 12:29:20.442537] configsip: 0, SPIWP:0xee
+[2025-05-21 12:29:20.448125] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-21 12:29:20.450817] mode:DIO, clock div:2
+[2025-05-21 12:29:20.453495] load:0x3fff0030,len:1184
+[2025-05-21 12:29:20.456266] load:0x40078000,len:13232
+[2025-05-21 12:29:20.456366] load:0x40080400,len:3028
+[2025-05-21 12:29:20.459839] entry 0x400805e4
+[2025-05-21 12:29:20.501220] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-21 12:29:20.505369] Boot: 0	Sync: 8
+[2025-05-21 12:29:20.512730] [I]       20 transport.cpp       :  54 | [TRANSPORT] Initializing...
+[2025-05-21 12:29:20.561367] [I]       73 lora.cpp            :  32 | [LORA] Init
+[2025-05-21 12:29:20.569627] [I]       73 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-21 12:29:20.581713] [I]       90 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:29:20.587283] [I]       91 loraraw.cpp         :  46 | [LR] Init
+[2025-05-21 12:29:20.592834] [I]      101 mac.cpp             : 103 | [MAC] Init
+[2025-05-21 12:29:20.598289] [I]      101 lorawan.cpp         :  48 | [LW] Initializing...
+[2025-05-21 12:29:20.611200] [I]      119 lorawan.cpp         :  62 | [LW] Reused session
+[2025-05-21 12:29:20.616416] [I]      121 lorawan.cpp         :  91 | [LW] Max LoRaWAN payload size: 115
+[2025-05-21 12:29:20.624818] [I]      131 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:29:20.631603] [I]      131 lorawan.cpp         :  96 | [LW] Joined the network successfully
+[2025-05-21 12:29:21.685470] [I]     1194 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:29:21.693635] [I]     1196 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (6 B, 3 routes) Heap: 328324
+[2025-05-21 12:29:21.701906] [I]     1206 routing.cpp         :  64 | [ROUTING] Initialized
+[2025-05-21 12:29:21.707495] [I]     1207 transport.cpp       :  74 | [TRANSPORT] Initialized
+[2025-05-21 12:29:21.715752] [W]     1217 routing_table.cpp   :  84 | [RTABLE] Route for 0x01 already exists
+[2025-05-21 12:29:21.721326] [I]     1228 sleep.cpp           : 104 | [SLEEP] Set forward node to 1
+[2025-05-21 12:29:21.729679] [W]     1228 sleep.cpp           :  61 | [SLEEP] Wakeup reason: Timer
+[2025-05-21 12:29:21.735212] [W]     1238 sleep.cpp           :  74 | [SLEEP] Init. Already synchronized.
+[2025-05-21 12:29:21.743817] [W]     1249 sleep.cpp           :  75 |         Clock correction: 0 ms
+[2025-05-21 12:29:21.751960] [W]     1249 sleep.cpp           :  76 |         Delta time: 2535 ms. Nodes before: 1
+[2025-05-21 12:29:21.757459] [W]     1259 sleep.cpp           :  77 |         Timeout in 65070 ms
+[2025-05-21 12:29:21.767109] [I]     1270 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1
+[2025-05-21 12:29:30.555956] [I]    10073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:29:40.543246] [I]    20073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:29:50.531247] [I]    30073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:29:53.443215] [I]    32989 loraraw.cpp         : 219 | [LR] Data received. SNR: 12, RSSI: -69
+[2025-05-21 12:29:53.449515] [I]    32989 mac.cpp             : 308 | [MAC] Frame rcv
+[2025-05-21 12:29:53.459838] [I]    33006 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:29:53.465423] [I]    33007 mac.cpp             : 334 | Received valid PDU from LORA
+[2025-05-21 12:29:53.476658] [I]    33017 mac.cpp             : 565 | [MAC] FRAME: TX=03 RX=02 ID=49236 D-LEN=11 DATA=��CRC=132 ACK=0 RETRY=0
+[2025-05-21 12:29:53.484925] [I]    33028 mac.cpp             : 352 | [MAC] Frame for higher layer
+[2025-05-21 12:29:53.490353] [I]    33028 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:29:53.497905] [I]    33039 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-21 12:29:53.510842] [I]    33057 loraraw.cpp         : 235 | [LR] Packet: 020354C0F90074
+[2025-05-21 12:29:53.559132] [I]    33106 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:29:53.564687] [I]    33106 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:29:53.573114] [I]    33117 routing.cpp         : 169 | [ROUTING] Received packet from 0x03
+[2025-05-21 12:29:53.581339] [I]    33117 routing.cpp         : 299 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=��[0m
+[2025-05-21 12:29:53.589686] [I]    33127 transport.cpp       : 181 | [TRANSPORT] Received segment
+[2025-05-21 12:29:53.600808] [I]    33138 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=21227 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=�[0m
+[2025-05-21 12:29:53.609092] [I]    33148 transport.cpp       : 203 | [TRANSPORT] ACK not requested for segment 21227
+[2025-05-21 12:29:53.617528] [I]    33159 transport.cpp       : 215 | [TRANSPORT] New segment received (ID: 21227)
+[2025-05-21 12:29:53.622996] [I]    33159 sleep.cpp           : 131 | [SLEEP] Decoding PDU. Command: 1, data: �[0m
+[2025-05-21 12:29:53.631349] [I]    33169 sleep.cpp           : 150 | [SLEEP] Sync received
+[2025-05-21 12:29:53.636866] [I]    33180 sleep.cpp           : 160 | [SLEEP] Cancelled sleep timeout
+[2025-05-21 12:29:53.645250] [I]    33190 sleep.cpp           : 165 | [SLEEP] Nodes before self: 1
+[2025-05-21 12:29:53.659103] [W]    33191 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 1 nodes up to (3+1) txs, with 0.25 extra
+[2025-05-21 12:29:53.661868] [33212] Ready to send data: C1 
+[2025-05-21 12:29:53.670280] [I]    33212 transport.cpp       :  93 | [TRANSPORT] Preparing to send
+[2025-05-21 12:29:53.681336] [I]    33212 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=26522 PORT=1 ACKreq=0 ACKResp=0 D-LEN=4 DATA=�
+[2025-05-21 12:29:53.686851] [I]    33223 routing.cpp         :  90 | [ROUTING] Sending packet:
+[2025-05-21 12:29:53.695210] [I]    33233 routing.cpp         : 299 | [ROUTING] PACKET: SRC=02 DST=01 TTL=5 D-LEN=8 DATA=g�
+[2025-05-21 12:29:53.703616] [I]    33244 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x01, through 0x01
+[2025-05-21 12:29:53.714584] [I]    33254 routing.cpp         : 150 | [ROUTING] Sending packet to gateway. Forwarding to LoRaWAN
+[2025-05-21 12:30:00.197428] [I]    39743 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:30:00.203948] [I]    39744 lorawan.cpp         : 139 | [LW] Data sent; none received
+[2025-05-21 12:30:00.259365] [I]    39806 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:30:00.267608] [I]    39806 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 0)
+[2025-05-21 12:30:00.278783] [I]    39817 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 26522, Frame ID: 0)
+[2025-05-21 12:30:00.284322] [I]    39827 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 1
+[2025-05-21 12:30:00.293113] [I]    39828 transport.cpp       : 248 | [TRANSPORT] TX done for UDP segment 26522 (frame 0)
+[2025-05-21 12:30:00.301046] [I]    39838 sleep.cpp           : 311 | [SLEEP] Forwarded data
+[2025-05-21 12:30:00.309296] [I]    39850 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327712
+[2025-05-21 12:30:00.314751] [I]    39861 mac.cpp             : 108 | [MAC] Deinit
+[2025-05-21 12:30:00.320339] [I]    39861 lora.cpp            :  37 | [LORA] Deinit
+[2025-05-21 12:30:00.338600] [I]    39885 routing.cpp         :  75 | [ROUTING] Deinitialized
+[2025-05-21 12:30:00.344271] [I]    39885 transport.cpp       :  88 | [TRANSPORT] De-initialized
+[2025-05-21 12:30:00.355297] [W]    39896 sleep.cpp           : 250 | [SLEEP] Expected reception: 18 B, Transmission time: 0 ms
+[2025-05-21 12:30:00.369234] [W]    39906 sleep.cpp           : 252 | [SLEEP] Sleep breakdown: 110749 ms = 4684393973593145344 ms - (39896 ms - 33180 ms) - 0 ms - 2535 ms - 30000 ms + 0 ms
+[2025-05-21 12:30:00.391443] [E]    39917 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110749 ms	Sync time: 33180 ms	Done time: 39896 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33073.25 ms	Done AVG: nan ms	Sync count: 8	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:30:00.396943] [E]    39938 sleep.cpp           : 280 | [SLEEP] Extra 42 ms (110707)
+[2025-05-21 12:31:49.245902] ets Jul 29 2019 12:21:46
+[2025-05-21 12:31:49.246073] 
+[2025-05-21 12:31:49.251129] rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-21 12:31:49.253984] configsip: 0, SPIWP:0xee
+[2025-05-21 12:31:49.259504] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-21 12:31:49.262114] mode:DIO, clock div:2
+[2025-05-21 12:31:49.264921] load:0x3fff0030,len:1184
+[2025-05-21 12:31:49.267698] load:0x40078000,len:13232
+[2025-05-21 12:31:49.267783] load:0x40080400,len:3028
+[2025-05-21 12:31:49.271166] entry 0x400805e4
+[2025-05-21 12:31:49.312354] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-21 12:31:49.316919] Boot: 0	Sync: 9
+[2025-05-21 12:31:49.324330] [I]       20 transport.cpp       :  54 | [TRANSPORT] Initializing...
+[2025-05-21 12:31:49.373064] [I]       73 lora.cpp            :  32 | [LORA] Init
+[2025-05-21 12:31:49.381046] [I]       73 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-21 12:31:49.393073] [I]       90 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:31:49.398820] [I]       91 loraraw.cpp         :  46 | [LR] Init
+[2025-05-21 12:31:49.404277] [I]      101 mac.cpp             : 103 | [MAC] Init
+[2025-05-21 12:31:49.409713] [I]      101 lorawan.cpp         :  48 | [LW] Initializing...
+[2025-05-21 12:31:49.422411] [I]      119 lorawan.cpp         :  62 | [LW] Reused session
+[2025-05-21 12:31:49.427913] [I]      121 lorawan.cpp         :  91 | [LW] Max LoRaWAN payload size: 115
+[2025-05-21 12:31:49.436244] [I]      131 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:31:49.443738] [I]      131 lorawan.cpp         :  96 | [LW] Joined the network successfully
+[2025-05-21 12:31:50.497091] [I]     1194 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:31:50.505243] [I]     1196 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (6 B, 3 routes) Heap: 328324
+[2025-05-21 12:31:50.513570] [I]     1206 routing.cpp         :  64 | [ROUTING] Initialized
+[2025-05-21 12:31:50.519036] [I]     1207 transport.cpp       :  74 | [TRANSPORT] Initialized
+[2025-05-21 12:31:50.527445] [W]     1217 routing_table.cpp   :  84 | [RTABLE] Route for 0x01 already exists
+[2025-05-21 12:31:50.532918] [I]     1228 sleep.cpp           : 104 | [SLEEP] Set forward node to 1
+[2025-05-21 12:31:50.541214] [W]     1228 sleep.cpp           :  61 | [SLEEP] Wakeup reason: Timer
+[2025-05-21 12:31:50.546700] [W]     1239 sleep.cpp           :  74 | [SLEEP] Init. Already synchronized.
+[2025-05-21 12:31:50.555089] [W]     1249 sleep.cpp           :  75 |         Clock correction: 0 ms
+[2025-05-21 12:31:50.563384] [W]     1249 sleep.cpp           :  76 |         Delta time: 2535 ms. Nodes before: 1
+[2025-05-21 12:31:50.568930] [W]     1259 sleep.cpp           :  77 |         Timeout in 65070 ms
+[2025-05-21 12:31:50.578670] [I]     1270 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1
+[2025-05-21 12:31:59.367219] [I]    10073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:32:09.353251] [I]    20073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:32:19.341579] [I]    30073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:32:22.367790] [I]    33104 loraraw.cpp         : 219 | [LR] Data received. SNR: 12, RSSI: -69
+[2025-05-21 12:32:22.374673] [I]    33104 mac.cpp             : 308 | [MAC] Frame rcv
+[2025-05-21 12:32:22.385180] [I]    33121 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:32:22.390639] [I]    33122 mac.cpp             : 334 | Received valid PDU from LORA
+[2025-05-21 12:32:22.401807] [I]    33132 mac.cpp             : 565 | [MAC] FRAME: TX=03 RX=02 ID=33267 D-LEN=11 DATA=]z CRC=91 ACK=0 RETRY=0
+[2025-05-21 12:32:22.410094] [I]    33143 mac.cpp             : 352 | [MAC] Frame for higher layer
+[2025-05-21 12:32:22.415690] [I]    33143 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:32:22.423055] [I]    33154 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-21 12:32:22.435948] [I]    33172 loraraw.cpp         : 235 | [LR] Packet: 0203F381F90004
+[2025-05-21 12:32:22.484688] [I]    33221 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:32:22.490203] [I]    33222 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:32:22.498611] [I]    33232 routing.cpp         : 169 | [ROUTING] Received packet from 0x03
+[2025-05-21 12:32:22.506929] [I]    33232 routing.cpp         : 299 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=]z
+[2025-05-21 12:32:22.515225] [I]    33243 transport.cpp       : 181 | [TRANSPORT] Received segment
+[2025-05-21 12:32:22.526330] [I]    33253 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=23956 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=z
+[2025-05-21 12:32:22.534638] [I]    33264 transport.cpp       : 203 | [TRANSPORT] ACK not requested for segment 23956
+[2025-05-21 12:32:22.542986] [I]    33274 transport.cpp       : 215 | [TRANSPORT] New segment received (ID: 23956)
+[2025-05-21 12:32:22.548645] [I]    33274 sleep.cpp           : 131 | [SLEEP] Decoding PDU. Command: 1, data: z
+[2025-05-21 12:32:22.556905] [I]    33285 sleep.cpp           : 150 | [SLEEP] Sync received
+[2025-05-21 12:32:22.562456] [I]    33295 sleep.cpp           : 160 | [SLEEP] Cancelled sleep timeout
+[2025-05-21 12:32:22.570893] [I]    33306 sleep.cpp           : 165 | [SLEEP] Nodes before self: 1
+[2025-05-21 12:32:22.584669] [W]    33306 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 1 nodes up to (3+1) txs, with 0.25 extra
+[2025-05-21 12:32:22.587559] [33327] Ready to send data: 21 
+[2025-05-21 12:32:22.596008] [I]    33327 transport.cpp       :  93 | [TRANSPORT] Preparing to send
+[2025-05-21 12:32:22.606981] [I]    33328 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=25100 PORT=1 ACKreq=0 ACKResp=0 D-LEN=4 DATA=z!
+[2025-05-21 12:32:22.612579] [I]    33338 routing.cpp         :  90 | [ROUTING] Sending packet:
+[2025-05-21 12:32:22.620842] [I]    33348 routing.cpp         : 299 | [ROUTING] PACKET: SRC=02 DST=01 TTL=5 D-LEN=8 DATA=
+                         bz!
+[2025-05-21 12:32:22.629151] [I]    33359 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x01, through 0x01
+[2025-05-21 12:32:22.640269] [I]    33369 routing.cpp         : 150 | [ROUTING] Sending packet to gateway. Forwarding to LoRaWAN
+[2025-05-21 12:32:29.122770] [I]    39859 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:32:29.129352] [I]    39859 lorawan.cpp         : 139 | [LW] Data sent; none received
+[2025-05-21 12:32:29.185240] [I]    39921 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:32:29.192943] [I]    39921 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 0)
+[2025-05-21 12:32:29.204050] [I]    39932 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 25100, Frame ID: 0)
+[2025-05-21 12:32:29.209829] [I]    39942 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 1
+[2025-05-21 12:32:29.217942] [I]    39943 transport.cpp       : 248 | [TRANSPORT] TX done for UDP segment 25100 (frame 0)
+[2025-05-21 12:32:29.226336] [I]    39953 sleep.cpp           : 311 | [SLEEP] Forwarded data
+[2025-05-21 12:32:29.234672] [I]    39965 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327712
+[2025-05-21 12:32:29.240175] [I]    39976 mac.cpp             : 108 | [MAC] Deinit
+[2025-05-21 12:32:29.245681] [I]    39976 lora.cpp            :  37 | [LORA] Deinit
+[2025-05-21 12:32:29.263934] [I]    40000 routing.cpp         :  75 | [ROUTING] Deinitialized
+[2025-05-21 12:32:29.269655] [I]    40000 transport.cpp       :  88 | [TRANSPORT] De-initialized
+[2025-05-21 12:32:29.280688] [W]    40011 sleep.cpp           : 250 | [SLEEP] Expected reception: 18 B, Transmission time: 0 ms
+[2025-05-21 12:32:29.294628] [W]    40021 sleep.cpp           : 252 | [SLEEP] Sleep breakdown: 110749 ms = 4684393973593145344 ms - (40011 ms - 33295 ms) - 0 ms - 2535 ms - 30000 ms + 0 ms
+[2025-05-21 12:32:29.316894] [E]    40032 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110749 ms	Sync time: 33295 ms	Done time: 40011 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33097.89 ms	Done AVG: nan ms	Sync count: 9	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:32:29.322335] [E]    40053 sleep.cpp           : 280 | [SLEEP] Extra 42 ms (110707)
+[2025-05-21 12:34:18.190572] ets Jul 29 2019 12:21:46
+[2025-05-21 12:34:18.190708] 
+[2025-05-21 12:34:18.195848] rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-21 12:34:18.198652] configsip: 0, SPIWP:0xee
+[2025-05-21 12:34:18.204261] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-21 12:34:18.206883] mode:DIO, clock div:2
+[2025-05-21 12:34:18.209656] load:0x3fff0030,len:1184
+[2025-05-21 12:34:18.212444] load:0x40078000,len:13232
+[2025-05-21 12:34:18.212555] load:0x40080400,len:3028
+[2025-05-21 12:34:18.215964] entry 0x400805e4
+[2025-05-21 12:34:18.256889] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-21 12:34:18.261628] Boot: 0	Sync: 10
+[2025-05-21 12:34:18.269180] [I]       20 transport.cpp       :  54 | [TRANSPORT] Initializing...
+[2025-05-21 12:34:18.318205] [I]       73 lora.cpp            :  32 | [LORA] Init
+[2025-05-21 12:34:18.325685] [I]       73 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-21 12:34:18.337866] [I]       90 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:34:18.343504] [I]       91 loraraw.cpp         :  46 | [LR] Init
+[2025-05-21 12:34:18.349016] [I]      101 mac.cpp             : 103 | [MAC] Init
+[2025-05-21 12:34:18.354475] [I]      101 lorawan.cpp         :  48 | [LW] Initializing...
+[2025-05-21 12:34:18.367216] [I]      119 lorawan.cpp         :  62 | [LW] Reused session
+[2025-05-21 12:34:18.372538] [I]      121 lorawan.cpp         :  91 | [LW] Max LoRaWAN payload size: 115
+[2025-05-21 12:34:18.380952] [I]      131 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:34:18.387781] [I]      131 lorawan.cpp         :  96 | [LW] Joined the network successfully
+[2025-05-21 12:34:19.441816] [I]     1194 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:34:19.449972] [I]     1196 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (6 B, 3 routes) Heap: 328324
+[2025-05-21 12:34:19.458182] [I]     1206 routing.cpp         :  64 | [ROUTING] Initialized
+[2025-05-21 12:34:19.463771] [I]     1207 transport.cpp       :  74 | [TRANSPORT] Initialized
+[2025-05-21 12:34:19.472281] [W]     1217 routing_table.cpp   :  84 | [RTABLE] Route for 0x01 already exists
+[2025-05-21 12:34:19.477620] [I]     1228 sleep.cpp           : 104 | [SLEEP] Set forward node to 1
+[2025-05-21 12:34:19.485941] [W]     1228 sleep.cpp           :  61 | [SLEEP] Wakeup reason: Timer
+[2025-05-21 12:34:19.491708] [W]     1238 sleep.cpp           :  74 | [SLEEP] Init. Already synchronized.
+[2025-05-21 12:34:19.499891] [W]     1249 sleep.cpp           :  75 |         Clock correction: 0 ms
+[2025-05-21 12:34:19.508132] [W]     1249 sleep.cpp           :  76 |         Delta time: 2535 ms. Nodes before: 1
+[2025-05-21 12:34:19.513759] [W]     1259 sleep.cpp           :  77 |         Timeout in 65070 ms
+[2025-05-21 12:34:19.523229] [I]     1270 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1
+[2025-05-21 12:34:28.311444] [I]    10073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:34:38.297584] [I]    20073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:34:48.286705] [I]    30073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:34:50.933705] [I]    32725 loraraw.cpp         : 219 | [LR] Data received. SNR: 12, RSSI: -69
+[2025-05-21 12:34:50.940803] [I]    32725 mac.cpp             : 308 | [MAC] Frame rcv
+[2025-05-21 12:34:50.951194] [I]    32742 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:34:50.956692] [I]    32743 mac.cpp             : 334 | Received valid PDU from LORA
+[2025-05-21 12:34:50.967813] [I]    32753 mac.cpp             : 565 | [MAC] FRAME: TX=03 RX=02 ID=43634 D-LEN=11 DATA=��CRC=245 ACK=0 RETRY=0
+[2025-05-21 12:34:50.976153] [I]    32764 mac.cpp             : 352 | [MAC] Frame for higher layer
+[2025-05-21 12:34:50.981873] [I]    32764 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:34:50.989367] [I]    32775 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-21 12:34:51.001830] [I]    32793 loraraw.cpp         : 235 | [LR] Packet: 020372AAF9008C
+[2025-05-21 12:34:51.050664] [I]    32842 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:34:51.056210] [I]    32843 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:34:51.064566] [I]    32853 routing.cpp         : 169 | [ROUTING] Received packet from 0x03
+[2025-05-21 12:34:51.072852] [I]    32853 routing.cpp         : 299 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=��[0m
+[2025-05-21 12:34:51.081237] [I]    32864 transport.cpp       : 181 | [TRANSPORT] Received segment
+[2025-05-21 12:34:51.092273] [I]    32874 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=54454 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=�[0m
+[2025-05-21 12:34:51.100632] [I]    32885 transport.cpp       : 203 | [TRANSPORT] ACK not requested for segment 54454
+[2025-05-21 12:34:51.108940] [I]    32895 transport.cpp       : 215 | [TRANSPORT] New segment received (ID: 54454)
+[2025-05-21 12:34:51.114510] [I]    32895 sleep.cpp           : 131 | [SLEEP] Decoding PDU. Command: 1, data: �[0m
+[2025-05-21 12:34:51.122872] [I]    32906 sleep.cpp           : 150 | [SLEEP] Sync received
+[2025-05-21 12:34:51.128387] [I]    32916 sleep.cpp           : 160 | [SLEEP] Cancelled sleep timeout
+[2025-05-21 12:34:51.136771] [I]    32926 sleep.cpp           : 165 | [SLEEP] Nodes before self: 1
+[2025-05-21 12:34:51.150617] [W]    32927 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 1 nodes up to (3+1) txs, with 0.25 extra
+[2025-05-21 12:34:51.153372] [32948] Ready to send data: 62 
+[2025-05-21 12:34:51.161756] [I]    32948 transport.cpp       :  93 | [TRANSPORT] Preparing to send
+[2025-05-21 12:34:51.172862] [I]    32949 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=31189 PORT=1 ACKreq=0 ACKResp=0 D-LEN=4 DATA=�
+[2025-05-21 12:34:51.178383] [I]    32959 routing.cpp         :  90 | [ROUTING] Sending packet:
+[2025-05-21 12:34:51.186771] [I]    32969 routing.cpp         : 299 | [ROUTING] PACKET: SRC=02 DST=01 TTL=5 D-LEN=8 DATA=��
+[2025-05-21 12:34:51.195167] [I]    32980 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x01, through 0x01
+[2025-05-21 12:34:51.206102] [I]    32990 routing.cpp         : 150 | [ROUTING] Sending packet to gateway. Forwarding to LoRaWAN
+[2025-05-21 12:34:57.690612] [I]    39481 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:34:57.697114] [I]    39482 lorawan.cpp         : 139 | [LW] Data sent; none received
+[2025-05-21 12:34:57.752532] [I]    39544 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:34:57.760781] [I]    39544 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 0)
+[2025-05-21 12:34:57.771804] [I]    39555 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 31189, Frame ID: 0)
+[2025-05-21 12:34:57.777482] [I]    39565 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 1
+[2025-05-21 12:34:57.785717] [I]    39565 transport.cpp       : 248 | [TRANSPORT] TX done for UDP segment 31189 (frame 0)
+[2025-05-21 12:34:57.794044] [I]    39576 sleep.cpp           : 311 | [SLEEP] Forwarded data
+[2025-05-21 12:34:57.802647] [I]    39588 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327712
+[2025-05-21 12:34:57.807940] [I]    39599 mac.cpp             : 108 | [MAC] Deinit
+[2025-05-21 12:34:57.813338] [I]    39599 lora.cpp            :  37 | [LORA] Deinit
+[2025-05-21 12:34:57.831731] [I]    39623 routing.cpp         :  75 | [ROUTING] Deinitialized
+[2025-05-21 12:34:57.837195] [I]    39623 transport.cpp       :  88 | [TRANSPORT] De-initialized
+[2025-05-21 12:34:57.848363] [W]    39634 sleep.cpp           : 250 | [SLEEP] Expected reception: 18 B, Transmission time: 0 ms
+[2025-05-21 12:34:57.862412] [W]    39644 sleep.cpp           : 252 | [SLEEP] Sleep breakdown: 110747 ms = 4684393973593145344 ms - (39634 ms - 32916 ms) - 0 ms - 2535 ms - 30000 ms + 0 ms
+[2025-05-21 12:34:57.884490] [E]    39655 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110747 ms	Sync time: 32916 ms	Done time: 39634 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33079.70 ms	Done AVG: nan ms	Sync count: 10	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:34:57.891934] [E]    39676 sleep.cpp           : 280 | [SLEEP] Extra 42 ms (110705)
+[2025-05-21 12:36:46.747708] ets Jul 29 2019 12:21:46
+[2025-05-21 12:36:46.747846] 
+[2025-05-21 12:36:46.752764] rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-21 12:36:46.755495] configsip: 0, SPIWP:0xee
+[2025-05-21 12:36:46.761096] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-21 12:36:46.763839] mode:DIO, clock div:2
+[2025-05-21 12:36:46.766502] load:0x3fff0030,len:1184
+[2025-05-21 12:36:46.769322] load:0x40078000,len:13232
+[2025-05-21 12:36:46.769426] load:0x40080400,len:3028
+[2025-05-21 12:36:46.772798] entry 0x400805e4
+[2025-05-21 12:36:46.813792] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-21 12:36:46.818514] Boot: 0	Sync: 11
+[2025-05-21 12:36:46.825861] [I]       20 transport.cpp       :  54 | [TRANSPORT] Initializing...
+[2025-05-21 12:36:46.874637] [I]       73 lora.cpp            :  32 | [LORA] Init
+[2025-05-21 12:36:46.882751] [I]       73 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-21 12:36:46.894692] [I]       90 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:36:46.900218] [I]       91 loraraw.cpp         :  46 | [LR] Init
+[2025-05-21 12:36:46.905961] [I]      101 mac.cpp             : 103 | [MAC] Init
+[2025-05-21 12:36:46.911384] [I]      101 lorawan.cpp         :  48 | [LW] Initializing...
+[2025-05-21 12:36:46.924205] [I]      119 lorawan.cpp         :  62 | [LW] Reused session
+[2025-05-21 12:36:46.929408] [I]      121 lorawan.cpp         :  91 | [LW] Max LoRaWAN payload size: 115
+[2025-05-21 12:36:46.937797] [I]      131 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:36:46.944705] [I]      131 lorawan.cpp         :  96 | [LW] Joined the network successfully
+[2025-05-21 12:36:47.998675] [I]     1194 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:36:48.006857] [I]     1196 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (6 B, 3 routes) Heap: 328324
+[2025-05-21 12:36:48.015183] [I]     1206 routing.cpp         :  64 | [ROUTING] Initialized
+[2025-05-21 12:36:48.020604] [I]     1207 transport.cpp       :  74 | [TRANSPORT] Initialized
+[2025-05-21 12:36:48.029022] [W]     1217 routing_table.cpp   :  84 | [RTABLE] Route for 0x01 already exists
+[2025-05-21 12:36:48.034451] [I]     1228 sleep.cpp           : 104 | [SLEEP] Set forward node to 1
+[2025-05-21 12:36:48.042933] [W]     1228 sleep.cpp           :  61 | [SLEEP] Wakeup reason: Timer
+[2025-05-21 12:36:48.048377] [W]     1239 sleep.cpp           :  74 | [SLEEP] Init. Already synchronized.
+[2025-05-21 12:36:48.056803] [W]     1249 sleep.cpp           :  75 |         Clock correction: 0 ms
+[2025-05-21 12:36:48.064957] [W]     1249 sleep.cpp           :  76 |         Delta time: 2535 ms. Nodes before: 1
+[2025-05-21 12:36:48.070521] [W]     1259 sleep.cpp           :  77 |         Timeout in 65070 ms
+[2025-05-21 12:36:48.080130] [I]     1270 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1
+[2025-05-21 12:36:56.867908] [I]    10073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:37:06.855357] [I]    20073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:37:16.843646] [I]    30073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:37:19.852031] [I]    33086 loraraw.cpp         : 219 | [LR] Data received. SNR: 12, RSSI: -69
+[2025-05-21 12:37:19.858391] [I]    33086 mac.cpp             : 308 | [MAC] Frame rcv
+[2025-05-21 12:37:19.868817] [I]    33103 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:37:19.874443] [I]    33104 mac.cpp             : 334 | Received valid PDU from LORA
+[2025-05-21 12:37:19.885497] [I]    33114 mac.cpp             : 565 | [MAC] FRAME: TX=03 RX=02 ID=22756 D-LEN=11 DATA=�CRC=91 ACK=0 RETRY=0
+[2025-05-21 12:37:19.893824] [I]    33125 mac.cpp             : 352 | [MAC] Frame for higher layer
+[2025-05-21 12:37:19.899409] [I]    33125 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:37:19.906768] [I]    33136 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-21 12:37:19.919700] [I]    33154 loraraw.cpp         : 235 | [LR] Packet: 0203E458F90014
+[2025-05-21 12:37:19.968535] [I]    33203 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:37:19.973920] [I]    33204 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:37:19.982231] [I]    33214 routing.cpp         : 169 | [ROUTING] Received packet from 0x03
+[2025-05-21 12:37:19.990520] [I]    33214 routing.cpp         : 299 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=�[0m
+[2025-05-21 12:37:19.998860] [I]    33225 transport.cpp       : 181 | [TRANSPORT] Received segment
+[2025-05-21 12:37:20.009995] [I]    33235 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=32901 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=�[0m
+[2025-05-21 12:37:20.018367] [I]    33246 transport.cpp       : 203 | [TRANSPORT] ACK not requested for segment 32901
+[2025-05-21 12:37:20.026631] [I]    33256 transport.cpp       : 215 | [TRANSPORT] New segment received (ID: 32901)
+[2025-05-21 12:37:20.032213] [I]    33256 sleep.cpp           : 131 | [SLEEP] Decoding PDU. Command: 1, data: �[0m
+[2025-05-21 12:37:20.040554] [I]    33267 sleep.cpp           : 150 | [SLEEP] Sync received
+[2025-05-21 12:37:20.046106] [I]    33277 sleep.cpp           : 160 | [SLEEP] Cancelled sleep timeout
+[2025-05-21 12:37:20.054551] [I]    33287 sleep.cpp           : 165 | [SLEEP] Nodes before self: 1
+[2025-05-21 12:37:20.068437] [W]    33288 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 1 nodes up to (3+1) txs, with 0.25 extra
+[2025-05-21 12:37:20.071086] [33309] Ready to send data: 00 
+[2025-05-21 12:37:20.079439] [I]    33309 transport.cpp       :  93 | [TRANSPORT] Preparing to send
+[2025-05-21 12:37:20.090521] [I]    33310 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=34929 PORT=1 ACKreq=0 ACKResp=0 D-LEN=4 DATA=�[0m
+[2025-05-21 12:37:20.096106] [I]    33320 routing.cpp         :  90 | [ROUTING] Sending packet:
+[2025-05-21 12:37:20.104413] [I]    33330 routing.cpp         : 299 | [ROUTING] PACKET: SRC=02 DST=01 TTL=5 D-LEN=8 DATA=q�[0m
+[2025-05-21 12:37:20.112742] [I]    33341 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x01, through 0x01
+[2025-05-21 12:37:20.123614] [I]    33351 routing.cpp         : 150 | [ROUTING] Sending packet to gateway. Forwarding to LoRaWAN
+[2025-05-21 12:37:26.606610] [I]    39840 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:37:26.612827] [I]    39841 lorawan.cpp         : 139 | [LW] Data sent; none received
+[2025-05-21 12:37:26.668249] [I]    39903 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:37:26.676599] [I]    39903 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 0)
+[2025-05-21 12:37:26.687664] [I]    39914 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 34929, Frame ID: 0)
+[2025-05-21 12:37:26.693317] [I]    39924 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 1
+[2025-05-21 12:37:26.701553] [I]    39925 transport.cpp       : 248 | [TRANSPORT] TX done for UDP segment 34929 (frame 0)
+[2025-05-21 12:37:26.709877] [I]    39935 sleep.cpp           : 311 | [SLEEP] Forwarded data
+[2025-05-21 12:37:26.718292] [I]    39947 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327712
+[2025-05-21 12:37:26.723762] [I]    39958 mac.cpp             : 108 | [MAC] Deinit
+[2025-05-21 12:37:26.729105] [I]    39958 lora.cpp            :  37 | [LORA] Deinit
+[2025-05-21 12:37:26.747794] [I]    39982 routing.cpp         :  75 | [ROUTING] Deinitialized
+[2025-05-21 12:37:26.753196] [I]    39982 transport.cpp       :  88 | [TRANSPORT] De-initialized
+[2025-05-21 12:37:26.764187] [W]    39993 sleep.cpp           : 250 | [SLEEP] Expected reception: 18 B, Transmission time: 0 ms
+[2025-05-21 12:37:26.778091] [W]    40003 sleep.cpp           : 252 | [SLEEP] Sleep breakdown: 110749 ms = 4684393973593145344 ms - (39993 ms - 33277 ms) - 0 ms - 2535 ms - 30000 ms + 0 ms
+[2025-05-21 12:37:26.800345] [E]    40014 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110749 ms	Sync time: 33277 ms	Done time: 39993 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33097.64 ms	Done AVG: nan ms	Sync count: 11	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:37:26.807958] [E]    40035 sleep.cpp           : 280 | [SLEEP] Extra 42 ms (110707)
+[2025-05-21 12:39:15.705140] ets Jul 29 2019 12:21:46
+[2025-05-21 12:39:15.705277] 
+[2025-05-21 12:39:15.710647] rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-21 12:39:15.713562] configsip: 0, SPIWP:0xee
+[2025-05-21 12:39:15.719064] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-21 12:39:15.721889] mode:DIO, clock div:2
+[2025-05-21 12:39:15.724529] load:0x3fff0030,len:1184
+[2025-05-21 12:39:15.727277] load:0x40078000,len:13232
+[2025-05-21 12:39:15.727382] load:0x40080400,len:3028
+[2025-05-21 12:39:15.730868] entry 0x400805e4
+[2025-05-21 12:39:15.771832] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-21 12:39:15.776494] Boot: 0	Sync: 12
+[2025-05-21 12:39:15.783884] [I]       20 transport.cpp       :  54 | [TRANSPORT] Initializing...
+[2025-05-21 12:39:15.832904] [I]       73 lora.cpp            :  32 | [LORA] Init
+[2025-05-21 12:39:15.840721] [I]       73 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-21 12:39:15.852750] [I]       90 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:39:15.858367] [I]       91 loraraw.cpp         :  46 | [LR] Init
+[2025-05-21 12:39:15.863870] [I]      101 mac.cpp             : 103 | [MAC] Init
+[2025-05-21 12:39:15.869439] [I]      101 lorawan.cpp         :  48 | [LW] Initializing...
+[2025-05-21 12:39:15.882005] [I]      119 lorawan.cpp         :  62 | [LW] Reused session
+[2025-05-21 12:39:15.887482] [I]      121 lorawan.cpp         :  91 | [LW] Max LoRaWAN payload size: 115
+[2025-05-21 12:39:15.895801] [I]      131 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:39:15.902720] [I]      131 lorawan.cpp         :  96 | [LW] Joined the network successfully
+[2025-05-21 12:39:16.956495] [I]     1194 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:39:16.964813] [I]     1196 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (6 B, 3 routes) Heap: 328324
+[2025-05-21 12:39:16.973041] [I]     1206 routing.cpp         :  64 | [ROUTING] Initialized
+[2025-05-21 12:39:16.978490] [I]     1207 transport.cpp       :  74 | [TRANSPORT] Initialized
+[2025-05-21 12:39:16.986895] [W]     1217 routing_table.cpp   :  84 | [RTABLE] Route for 0x01 already exists
+[2025-05-21 12:39:16.992487] [I]     1228 sleep.cpp           : 104 | [SLEEP] Set forward node to 1
+[2025-05-21 12:39:17.000764] [W]     1228 sleep.cpp           :  61 | [SLEEP] Wakeup reason: Timer
+[2025-05-21 12:39:17.006360] [W]     1239 sleep.cpp           :  74 | [SLEEP] Init. Already synchronized.
+[2025-05-21 12:39:17.014748] [W]     1249 sleep.cpp           :  75 |         Clock correction: 0 ms
+[2025-05-21 12:39:17.023177] [W]     1249 sleep.cpp           :  76 |         Delta time: 2535 ms. Nodes before: 1
+[2025-05-21 12:39:17.028528] [W]     1259 sleep.cpp           :  77 |         Timeout in 65070 ms
+[2025-05-21 12:39:17.038120] [I]     1270 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1
+[2025-05-21 12:39:25.826390] [I]    10073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:39:35.813033] [I]    20073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:39:45.801097] [I]    30073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:39:48.698206] [I]    32974 loraraw.cpp         : 219 | [LR] Data received. SNR: 12, RSSI: -69
+[2025-05-21 12:39:48.704813] [I]    32974 mac.cpp             : 308 | [MAC] Frame rcv
+[2025-05-21 12:39:48.715090] [I]    32991 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:39:48.720638] [I]    32992 mac.cpp             : 334 | Received valid PDU from LORA
+[2025-05-21 12:39:48.731787] [I]    33002 mac.cpp             : 565 | [MAC] FRAME: TX=03 RX=02 ID=23896 D-LEN=11 DATA=^' CRC=15 ACK=0 RETRY=0
+[2025-05-21 12:39:48.740102] [I]    33013 mac.cpp             : 352 | [MAC] Frame for higher layer
+[2025-05-21 12:39:48.745742] [I]    33013 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:39:48.753045] [I]    33024 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-21 12:39:48.765924] [I]    33042 loraraw.cpp         : 235 | [LR] Packet: 0203585DF900A4
+[2025-05-21 12:39:48.814740] [I]    33091 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:39:48.820168] [I]    33091 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:39:48.828546] [I]    33102 routing.cpp         : 169 | [ROUTING] Received packet from 0x03
+[2025-05-21 12:39:48.836804] [I]    33102 routing.cpp         : 299 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=^'
+[2025-05-21 12:39:48.845242] [I]    33113 transport.cpp       : 181 | [TRANSPORT] Received segment
+[2025-05-21 12:39:48.856397] [I]    33123 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=45918 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA='
+[2025-05-21 12:39:48.864640] [I]    33134 transport.cpp       : 203 | [TRANSPORT] ACK not requested for segment 45918
+[2025-05-21 12:39:48.872948] [I]    33144 transport.cpp       : 215 | [TRANSPORT] New segment received (ID: 45918)
+[2025-05-21 12:39:48.878555] [I]    33144 sleep.cpp           : 131 | [SLEEP] Decoding PDU. Command: 1, data: '
+[2025-05-21 12:39:48.886813] [I]    33155 sleep.cpp           : 150 | [SLEEP] Sync received
+[2025-05-21 12:39:48.892390] [I]    33165 sleep.cpp           : 160 | [SLEEP] Cancelled sleep timeout
+[2025-05-21 12:39:48.900738] [I]    33175 sleep.cpp           : 165 | [SLEEP] Nodes before self: 1
+[2025-05-21 12:39:48.914721] [W]    33176 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 1 nodes up to (3+1) txs, with 0.25 extra
+[2025-05-21 12:39:48.917363] [33197] Ready to send data: AC 
+[2025-05-21 12:39:48.925827] [I]    33197 transport.cpp       :  93 | [TRANSPORT] Preparing to send
+[2025-05-21 12:39:48.936790] [I]    33198 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=19095 PORT=1 ACKreq=0 ACKResp=0 D-LEN=4 DATA='
+[2025-05-21 12:39:48.942383] [I]    33208 routing.cpp         :  90 | [ROUTING] Sending packet:
+[2025-05-21 12:39:48.950714] [I]    33218 routing.cpp         : 299 | [ROUTING] PACKET: SRC=02 DST=01 TTL=5 D-LEN=8 DATA=J'
+[2025-05-21 12:39:48.959066] [I]    33229 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x01, through 0x01
+[2025-05-21 12:39:48.970236] [I]    33239 routing.cpp         : 150 | [ROUTING] Sending packet to gateway. Forwarding to LoRaWAN
+[2025-05-21 12:39:55.454389] [I]    39730 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:39:55.460886] [I]    39731 lorawan.cpp         : 139 | [LW] Data sent; none received
+[2025-05-21 12:39:55.516418] [I]    39792 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:39:55.524643] [I]    39793 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 0)
+[2025-05-21 12:39:55.535677] [I]    39803 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 19095, Frame ID: 0)
+[2025-05-21 12:39:55.541300] [I]    39814 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 1
+[2025-05-21 12:39:55.549517] [I]    39814 transport.cpp       : 248 | [TRANSPORT] TX done for UDP segment 19095 (frame 0)
+[2025-05-21 12:39:55.557957] [I]    39825 sleep.cpp           : 311 | [SLEEP] Forwarded data
+[2025-05-21 12:39:55.566238] [I]    39837 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327712
+[2025-05-21 12:39:55.571744] [I]    39847 mac.cpp             : 108 | [MAC] Deinit
+[2025-05-21 12:39:55.577143] [I]    39848 lora.cpp            :  37 | [LORA] Deinit
+[2025-05-21 12:39:55.595699] [I]    39872 routing.cpp         :  75 | [ROUTING] Deinitialized
+[2025-05-21 12:39:55.601161] [I]    39872 transport.cpp       :  88 | [TRANSPORT] De-initialized
+[2025-05-21 12:39:55.612341] [W]    39883 sleep.cpp           : 250 | [SLEEP] Expected reception: 18 B, Transmission time: 0 ms
+[2025-05-21 12:39:55.626173] [W]    39893 sleep.cpp           : 252 | [SLEEP] Sleep breakdown: 110747 ms = 4684393973593145344 ms - (39883 ms - 33165 ms) - 0 ms - 2535 ms - 30000 ms + 0 ms
+[2025-05-21 12:39:55.648488] [E]    39904 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110747 ms	Sync time: 33165 ms	Done time: 39883 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33103.25 ms	Done AVG: nan ms	Sync count: 12	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:39:55.656122] [E]    39925 sleep.cpp           : 280 | [SLEEP] Extra 42 ms (110705)
+[2025-05-21 12:41:44.466177] ets Jul 29 2019 12:21:46
+[2025-05-21 12:41:44.466316] 
+[2025-05-21 12:41:44.471144] rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-21 12:41:44.473979] configsip: 0, SPIWP:0xee
+[2025-05-21 12:41:44.479500] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-21 12:41:44.482268] mode:DIO, clock div:2
+[2025-05-21 12:41:44.485129] load:0x3fff0030,len:1184
+[2025-05-21 12:41:44.487859] load:0x40078000,len:13232
+[2025-05-21 12:41:44.487955] load:0x40080400,len:3028
+[2025-05-21 12:41:44.491499] entry 0x400805e4
+[2025-05-21 12:41:44.532340] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-21 12:41:44.537066] Boot: 0	Sync: 13
+[2025-05-21 12:41:44.544472] [I]       20 transport.cpp       :  54 | [TRANSPORT] Initializing...
+[2025-05-21 12:41:44.593488] [I]       73 lora.cpp            :  32 | [LORA] Init
+[2025-05-21 12:41:44.601291] [I]       73 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-21 12:41:44.613221] [I]       90 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:41:44.618830] [I]       91 loraraw.cpp         :  46 | [LR] Init
+[2025-05-21 12:41:44.624479] [I]      101 mac.cpp             : 103 | [MAC] Init
+[2025-05-21 12:41:44.629787] [I]      101 lorawan.cpp         :  48 | [LW] Initializing...
+[2025-05-21 12:41:44.642395] [I]      119 lorawan.cpp         :  62 | [LW] Reused session
+[2025-05-21 12:41:44.648005] [I]      121 lorawan.cpp         :  91 | [LW] Max LoRaWAN payload size: 115
+[2025-05-21 12:41:44.656314] [I]      131 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:41:44.663184] [I]      131 lorawan.cpp         :  96 | [LW] Joined the network successfully
+[2025-05-21 12:41:45.717157] [I]     1194 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:41:45.725201] [I]     1196 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (6 B, 3 routes) Heap: 328324
+[2025-05-21 12:41:45.733546] [I]     1206 routing.cpp         :  64 | [ROUTING] Initialized
+[2025-05-21 12:41:45.739221] [I]     1207 transport.cpp       :  74 | [TRANSPORT] Initialized
+[2025-05-21 12:41:45.747567] [W]     1217 routing_table.cpp   :  84 | [RTABLE] Route for 0x01 already exists
+[2025-05-21 12:41:45.752988] [I]     1228 sleep.cpp           : 104 | [SLEEP] Set forward node to 1
+[2025-05-21 12:41:45.761432] [W]     1228 sleep.cpp           :  61 | [SLEEP] Wakeup reason: Timer
+[2025-05-21 12:41:45.766871] [W]     1239 sleep.cpp           :  74 | [SLEEP] Init. Already synchronized.
+[2025-05-21 12:41:45.775260] [W]     1249 sleep.cpp           :  75 |         Clock correction: 0 ms
+[2025-05-21 12:41:45.783634] [W]     1249 sleep.cpp           :  76 |         Delta time: 2535 ms. Nodes before: 1
+[2025-05-21 12:41:45.789138] [W]     1259 sleep.cpp           :  77 |         Timeout in 65070 ms
+[2025-05-21 12:41:45.799246] [I]     1270 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1
+[2025-05-21 12:41:54.587257] [I]    10073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:42:04.574179] [I]    20073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:42:14.562339] [I]    30073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:42:17.605245] [I]    33121 loraraw.cpp         : 219 | [LR] Data received. SNR: 12, RSSI: -69
+[2025-05-21 12:42:17.612498] [I]    33121 mac.cpp             : 308 | [MAC] Frame rcv
+[2025-05-21 12:42:17.622682] [I]    33138 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:42:17.628273] [I]    33139 mac.cpp             : 334 | Received valid PDU from LORA
+[2025-05-21 12:42:17.639356] [I]    33149 mac.cpp             : 565 | [MAC] FRAME: TX=03 RX=02 ID=40717 D-LEN=11 DATA=4 CRC=122 ACK=0 RETRY=0
+[2025-05-21 12:42:17.647765] [I]    33160 mac.cpp             : 352 | [MAC] Frame for higher layer
+[2025-05-21 12:42:17.653287] [I]    33160 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:42:17.660753] [I]    33171 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-21 12:42:17.673485] [I]    33189 loraraw.cpp         : 235 | [LR] Packet: 02030D9FF9004D
+[2025-05-21 12:42:17.722180] [I]    33238 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:42:17.727846] [I]    33238 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:42:17.736082] [I]    33249 routing.cpp         : 169 | [ROUTING] Received packet from 0x03
+[2025-05-21 12:42:17.744510] [I]    33249 routing.cpp         : 299 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=4
+[2025-05-21 12:42:17.752852] [I]    33260 transport.cpp       : 181 | [TRANSPORT] Received segment
+[2025-05-21 12:42:17.761072] [I]    33270 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=4790 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=4
+[2025-05-21 12:42:17.772192] [I]    33281 transport.cpp       : 203 | [TRANSPORT] ACK not requested for segment 4790
+[2025-05-21 12:42:17.777896] [I]    33291 transport.cpp       : 215 | [TRANSPORT] New segment received (ID: 4790)
+[2025-05-21 12:42:17.786070] [I]    33291 sleep.cpp           : 131 | [SLEEP] Decoding PDU. Command: 1, data: 4
+[2025-05-21 12:42:17.794444] [I]    33302 sleep.cpp           : 150 | [SLEEP] Sync received
+[2025-05-21 12:42:17.800097] [I]    33312 sleep.cpp           : 160 | [SLEEP] Cancelled sleep timeout
+[2025-05-21 12:42:17.808298] [I]    33312 sleep.cpp           : 165 | [SLEEP] Nodes before self: 1
+[2025-05-21 12:42:17.822178] [W]    33323 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 1 nodes up to (3+1) txs, with 0.25 extra
+[2025-05-21 12:42:17.825070] [33344] Ready to send data: E6 
+[2025-05-21 12:42:17.833282] [I]    33344 transport.cpp       :  93 | [TRANSPORT] Preparing to send
+[2025-05-21 12:42:17.841622] [I]    33344 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=20564 PORT=1 ACKreq=0 ACKResp=0 D-LEN=4 DATA=4�[0m
+[2025-05-21 12:42:17.850034] [I]    33355 routing.cpp         :  90 | [ROUTING] Sending packet:
+[2025-05-21 12:42:17.858355] [I]    33365 routing.cpp         : 299 | [ROUTING] PACKET: SRC=02 DST=01 TTL=5 D-LEN=8 DATA=TP4�[0m
+[2025-05-21 12:42:17.866657] [I]    33376 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x01, through 0x01
+[2025-05-21 12:42:17.877421] [I]    33386 routing.cpp         : 150 | [ROUTING] Sending packet to gateway. Forwarding to LoRaWAN
+[2025-05-21 12:42:24.361014] [I]    39876 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:42:24.367549] [I]    39877 lorawan.cpp         : 139 | [LW] Data sent; none received
+[2025-05-21 12:42:24.422953] [I]    39938 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:42:24.431128] [I]    39939 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 0)
+[2025-05-21 12:42:24.442311] [I]    39949 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 20564, Frame ID: 0)
+[2025-05-21 12:42:24.447892] [I]    39960 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 1
+[2025-05-21 12:42:24.456090] [I]    39960 transport.cpp       : 248 | [TRANSPORT] TX done for UDP segment 20564 (frame 0)
+[2025-05-21 12:42:24.464503] [I]    39971 sleep.cpp           : 311 | [SLEEP] Forwarded data
+[2025-05-21 12:42:24.472837] [I]    39983 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327712
+[2025-05-21 12:42:24.478314] [I]    39993 mac.cpp             : 108 | [MAC] Deinit
+[2025-05-21 12:42:24.483843] [I]    39994 lora.cpp            :  37 | [LORA] Deinit
+[2025-05-21 12:42:24.502104] [I]    40018 routing.cpp         :  75 | [ROUTING] Deinitialized
+[2025-05-21 12:42:24.507821] [I]    40018 transport.cpp       :  88 | [TRANSPORT] De-initialized
+[2025-05-21 12:42:24.518767] [W]    40029 sleep.cpp           : 250 | [SLEEP] Expected reception: 18 B, Transmission time: 0 ms
+[2025-05-21 12:42:24.532669] [W]    40039 sleep.cpp           : 252 | [SLEEP] Sleep breakdown: 110748 ms = 4684393973593145344 ms - (40029 ms - 33312 ms) - 0 ms - 2535 ms - 30000 ms + 0 ms
+[2025-05-21 12:42:24.554913] [E]    40050 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110748 ms	Sync time: 33312 ms	Done time: 40029 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33119.31 ms	Done AVG: nan ms	Sync count: 13	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:42:24.562458] [E]    40071 sleep.cpp           : 280 | [SLEEP] Extra 42 ms (110706)
+[2025-05-21 12:44:13.378924] ets Jul 29 2019 12:21:46
+[2025-05-21 12:44:13.379148] 
+[2025-05-21 12:44:13.384022] rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-21 12:44:13.386864] configsip: 0, SPIWP:0xee
+[2025-05-21 12:44:13.392480] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-21 12:44:13.395139] mode:DIO, clock div:2
+[2025-05-21 12:44:13.397996] load:0x3fff0030,len:1184
+[2025-05-21 12:44:13.400674] load:0x40078000,len:13232
+[2025-05-21 12:44:13.400747] load:0x40080400,len:3028
+[2025-05-21 12:44:13.404278] entry 0x400805e4
+[2025-05-21 12:44:13.445375] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-21 12:44:13.449816] Boot: 0	Sync: 14
+[2025-05-21 12:44:13.457161] [I]       20 transport.cpp       :  54 | [TRANSPORT] Initializing...
+[2025-05-21 12:44:13.506124] [I]       73 lora.cpp            :  32 | [LORA] Init
+[2025-05-21 12:44:13.514174] [I]       73 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-21 12:44:13.526142] [I]       90 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:44:13.531667] [I]       91 loraraw.cpp         :  46 | [LR] Init
+[2025-05-21 12:44:13.537236] [I]      101 mac.cpp             : 103 | [MAC] Init
+[2025-05-21 12:44:13.542651] [I]      101 lorawan.cpp         :  48 | [LW] Initializing...
+[2025-05-21 12:44:13.555488] [I]      119 lorawan.cpp         :  62 | [LW] Reused session
+[2025-05-21 12:44:13.560857] [I]      121 lorawan.cpp         :  91 | [LW] Max LoRaWAN payload size: 115
+[2025-05-21 12:44:13.569322] [I]      131 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:44:13.576213] [I]      131 lorawan.cpp         :  96 | [LW] Joined the network successfully
+[2025-05-21 12:44:14.630102] [I]     1194 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:44:14.638286] [I]     1196 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (6 B, 3 routes) Heap: 328324
+[2025-05-21 12:44:14.646444] [I]     1206 routing.cpp         :  64 | [ROUTING] Initialized
+[2025-05-21 12:44:14.652057] [I]     1207 transport.cpp       :  74 | [TRANSPORT] Initialized
+[2025-05-21 12:44:14.660202] [W]     1217 routing_table.cpp   :  84 | [RTABLE] Route for 0x01 already exists
+[2025-05-21 12:44:14.665760] [I]     1228 sleep.cpp           : 104 | [SLEEP] Set forward node to 1
+[2025-05-21 12:44:14.674130] [W]     1228 sleep.cpp           :  61 | [SLEEP] Wakeup reason: Timer
+[2025-05-21 12:44:14.679905] [W]     1239 sleep.cpp           :  74 | [SLEEP] Init. Already synchronized.
+[2025-05-21 12:44:14.688110] [W]     1249 sleep.cpp           :  75 |         Clock correction: 0 ms
+[2025-05-21 12:44:14.696471] [W]     1249 sleep.cpp           :  76 |         Delta time: 2535 ms. Nodes before: 1
+[2025-05-21 12:44:14.702063] [W]     1259 sleep.cpp           :  77 |         Timeout in 65070 ms
+[2025-05-21 12:44:14.711630] [I]     1270 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1
+[2025-05-21 12:44:23.499690] [I]    10073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:44:33.487147] [I]    20073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:44:43.475372] [I]    30073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:44:46.487477] [I]    33090 loraraw.cpp         : 219 | [LR] Data received. SNR: 12, RSSI: -69
+[2025-05-21 12:44:46.494598] [I]    33090 mac.cpp             : 308 | [MAC] Frame rcv
+[2025-05-21 12:44:46.504911] [I]    33107 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:44:46.510441] [I]    33108 mac.cpp             : 334 | Received valid PDU from LORA
+[2025-05-21 12:44:46.521594] [I]    33118 mac.cpp             : 565 | [MAC] FRAME: TX=03 RX=02 ID=45098 D-LEN=11 DATA=Brt CRC=132 ACK=0 RETRY=0
+[2025-05-21 12:44:46.529942] [I]    33129 mac.cpp             : 352 | [MAC] Frame for higher layer
+[2025-05-21 12:44:46.535491] [I]    33129 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:44:46.543040] [I]    33140 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-21 12:44:46.555661] [I]    33158 loraraw.cpp         : 235 | [LR] Packet: 02032AB0F900E5
+[2025-05-21 12:44:46.604439] [I]    33207 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:44:46.610035] [I]    33208 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:44:46.618325] [I]    33218 routing.cpp         : 169 | [ROUTING] Received packet from 0x03
+[2025-05-21 12:44:46.626735] [I]    33218 routing.cpp         : 299 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=Brt
+[2025-05-21 12:44:46.634995] [I]    33229 transport.cpp       : 181 | [TRANSPORT] Received segment
+[2025-05-21 12:44:46.646111] [I]    33239 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=29250 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=t
+[2025-05-21 12:44:46.654429] [I]    33250 transport.cpp       : 203 | [TRANSPORT] ACK not requested for segment 29250
+[2025-05-21 12:44:46.662760] [I]    33260 transport.cpp       : 215 | [TRANSPORT] New segment received (ID: 29250)
+[2025-05-21 12:44:46.668353] [I]    33260 sleep.cpp           : 131 | [SLEEP] Decoding PDU. Command: 1, data: t
+[2025-05-21 12:44:46.676741] [I]    33271 sleep.cpp           : 150 | [SLEEP] Sync received
+[2025-05-21 12:44:46.682186] [I]    33281 sleep.cpp           : 160 | [SLEEP] Cancelled sleep timeout
+[2025-05-21 12:44:46.690534] [I]    33291 sleep.cpp           : 165 | [SLEEP] Nodes before self: 1
+[2025-05-21 12:44:46.704438] [W]    33292 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 1 nodes up to (3+1) txs, with 0.25 extra
+[2025-05-21 12:44:46.707313] [33313] Ready to send data: 5F 
+[2025-05-21 12:44:46.715521] [I]    33313 transport.cpp       :  93 | [TRANSPORT] Preparing to send
+[2025-05-21 12:44:46.726740] [I]    33314 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=18343 PORT=1 ACKreq=0 ACKResp=0 D-LEN=4 DATA=t_
+[2025-05-21 12:44:46.732272] [I]    33324 routing.cpp         :  90 | [ROUTING] Sending packet:
+[2025-05-21 12:44:46.740863] [I]    33334 routing.cpp         : 299 | [ROUTING] PACKET: SRC=02 DST=01 TTL=5 D-LEN=8 DATA=Gt_
+[2025-05-21 12:44:46.748905] [I]    33345 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x01, through 0x01
+[2025-05-21 12:44:46.760058] [I]    33355 routing.cpp         : 150 | [ROUTING] Sending packet to gateway. Forwarding to LoRaWAN
+[2025-05-21 12:44:53.243206] [I]    39845 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:44:53.249307] [I]    39845 lorawan.cpp         : 139 | [LW] Data sent; none received
+[2025-05-21 12:44:53.305173] [I]    39907 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:44:53.313024] [I]    39907 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 0)
+[2025-05-21 12:44:53.324114] [I]    39918 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 18343, Frame ID: 0)
+[2025-05-21 12:44:53.329754] [I]    39929 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 1
+[2025-05-21 12:44:53.337955] [I]    39929 transport.cpp       : 248 | [TRANSPORT] TX done for UDP segment 18343 (frame 0)
+[2025-05-21 12:44:53.346287] [I]    39939 sleep.cpp           : 311 | [SLEEP] Forwarded data
+[2025-05-21 12:44:53.354610] [I]    39951 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327712
+[2025-05-21 12:44:53.360155] [I]    39962 mac.cpp             : 108 | [MAC] Deinit
+[2025-05-21 12:44:53.365727] [I]    39962 lora.cpp            :  37 | [LORA] Deinit
+[2025-05-21 12:44:53.384099] [I]    39986 routing.cpp         :  75 | [ROUTING] Deinitialized
+[2025-05-21 12:44:53.389576] [I]    39987 transport.cpp       :  88 | [TRANSPORT] De-initialized
+[2025-05-21 12:44:53.400602] [W]    39997 sleep.cpp           : 250 | [SLEEP] Expected reception: 18 B, Transmission time: 0 ms
+[2025-05-21 12:44:53.414588] [W]    40008 sleep.cpp           : 252 | [SLEEP] Sleep breakdown: 110749 ms = 4684393973593145344 ms - (39997 ms - 33281 ms) - 0 ms - 2535 ms - 30000 ms + 0 ms
+[2025-05-21 12:44:53.436986] [E]    40018 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110749 ms	Sync time: 33281 ms	Done time: 39997 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33130.86 ms	Done AVG: nan ms	Sync count: 14	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:44:53.444454] [E]    40039 sleep.cpp           : 280 | [SLEEP] Extra 42 ms (110707)
+[2025-05-21 12:46:42.263778] ets Jul 29 2019 12:21:46
+[2025-05-21 12:46:42.263920] 
+[2025-05-21 12:46:42.268679] rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-21 12:46:42.271459] configsip: 0, SPIWP:0xee
+[2025-05-21 12:46:42.277196] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-21 12:46:42.279792] mode:DIO, clock div:2
+[2025-05-21 12:46:42.282473] load:0x3fff0030,len:1184
+[2025-05-21 12:46:42.285231] load:0x40078000,len:13232
+[2025-05-21 12:46:42.285283] load:0x40080400,len:3028
+[2025-05-21 12:46:42.288812] entry 0x400805e4
+[2025-05-21 12:46:42.329984] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-21 12:46:42.334476] Boot: 0	Sync: 15
+[2025-05-21 12:46:42.341816] [I]       20 transport.cpp       :  54 | [TRANSPORT] Initializing...
+[2025-05-21 12:46:42.390706] [I]       73 lora.cpp            :  32 | [LORA] Init
+[2025-05-21 12:46:42.398727] [I]       73 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-21 12:46:42.410660] [I]       90 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:46:42.416330] [I]       91 loraraw.cpp         :  46 | [LR] Init
+[2025-05-21 12:46:42.421793] [I]      101 mac.cpp             : 103 | [MAC] Init
+[2025-05-21 12:46:42.427473] [I]      101 lorawan.cpp         :  48 | [LW] Initializing...
+[2025-05-21 12:46:42.439928] [I]      119 lorawan.cpp         :  62 | [LW] Reused session
+[2025-05-21 12:46:42.445417] [I]      121 lorawan.cpp         :  91 | [LW] Max LoRaWAN payload size: 115
+[2025-05-21 12:46:42.453757] [I]      131 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:46:42.460614] [I]      131 lorawan.cpp         :  96 | [LW] Joined the network successfully
+[2025-05-21 12:46:43.515066] [I]     1194 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:46:43.522843] [I]     1196 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (6 B, 3 routes) Heap: 328324
+[2025-05-21 12:46:43.531053] [I]     1206 routing.cpp         :  64 | [ROUTING] Initialized
+[2025-05-21 12:46:43.536548] [I]     1207 transport.cpp       :  74 | [TRANSPORT] Initialized
+[2025-05-21 12:46:43.545047] [W]     1217 routing_table.cpp   :  84 | [RTABLE] Route for 0x01 already exists
+[2025-05-21 12:46:43.550434] [I]     1228 sleep.cpp           : 104 | [SLEEP] Set forward node to 1
+[2025-05-21 12:46:43.558856] [W]     1228 sleep.cpp           :  61 | [SLEEP] Wakeup reason: Timer
+[2025-05-21 12:46:43.564471] [W]     1238 sleep.cpp           :  74 | [SLEEP] Init. Already synchronized.
+[2025-05-21 12:46:43.572716] [W]     1249 sleep.cpp           :  75 |         Clock correction: 0 ms
+[2025-05-21 12:46:43.581089] [W]     1249 sleep.cpp           :  76 |         Delta time: 2535 ms. Nodes before: 1
+[2025-05-21 12:46:43.586615] [W]     1259 sleep.cpp           :  77 |         Timeout in 65070 ms
+[2025-05-21 12:46:43.596226] [I]     1270 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1
+[2025-05-21 12:46:52.385005] [I]    10073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:47:02.371206] [I]    20073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:47:12.360629] [I]    30073 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 3, Heap: 328240
+[2025-05-21 12:47:15.298807] [I]    33016 loraraw.cpp         : 219 | [LR] Data received. SNR: 12, RSSI: -69
+[2025-05-21 12:47:15.305954] [I]    33016 mac.cpp             : 308 | [MAC] Frame rcv
+[2025-05-21 12:47:15.316375] [I]    33033 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:47:15.321823] [I]    33034 mac.cpp             : 334 | Received valid PDU from LORA
+[2025-05-21 12:47:15.332950] [I]    33044 mac.cpp             : 565 | [MAC] FRAME: TX=03 RX=02 ID=43766 D-LEN=11 DATA=< CRC=197 ACK=0 RETRY=0
+[2025-05-21 12:47:15.341270] [I]    33055 mac.cpp             : 352 | [MAC] Frame for higher layer
+[2025-05-21 12:47:15.346886] [I]    33055 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:47:15.354542] [I]    33066 loraraw.cpp         :  57 | [LR] Preparing to send
+[2025-05-21 12:47:15.367118] [I]    33084 loraraw.cpp         : 235 | [LR] Packet: 0203F6AAF900E5
+[2025-05-21 12:47:15.415790] [I]    33133 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:47:15.421362] [I]    33134 loraraw.cpp         : 155 | [LR] Set power to -9 dBm
+[2025-05-21 12:47:15.429689] [I]    33144 routing.cpp         : 169 | [ROUTING] Received packet from 0x03
+[2025-05-21 12:47:15.438037] [I]    33144 routing.cpp         : 299 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=<
+[2025-05-21 12:47:15.446354] [I]    33155 transport.cpp       : 181 | [TRANSPORT] Received segment
+[2025-05-21 12:47:15.457546] [I]    33165 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=46140 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=
+[2025-05-21 12:47:15.465799] [I]    33176 transport.cpp       : 203 | [TRANSPORT] ACK not requested for segment 46140
+[2025-05-21 12:47:15.474217] [I]    33186 transport.cpp       : 215 | [TRANSPORT] New segment received (ID: 46140)
+[2025-05-21 12:47:15.479692] [I]    33186 sleep.cpp           : 131 | [SLEEP] Decoding PDU. Command: 1, data: 
+[2025-05-21 12:47:15.488093] [I]    33197 sleep.cpp           : 150 | [SLEEP] Sync received
+[2025-05-21 12:47:15.494085] [I]    33207 sleep.cpp           : 160 | [SLEEP] Cancelled sleep timeout
+[2025-05-21 12:47:15.501884] [I]    33218 sleep.cpp           : 165 | [SLEEP] Nodes before self: 1
+[2025-05-21 12:47:15.515786] [W]    33218 sleep.cpp           : 123 | [SLEEP] Delta time compute: TX time = 399 ms + ACK time = 36 ms (3 ACK factor) for 1 nodes up to (3+1) txs, with 0.25 extra
+[2025-05-21 12:47:15.518591] [33239] Ready to send data: A5 
+[2025-05-21 12:47:15.526877] [I]    33240 transport.cpp       :  93 | [TRANSPORT] Preparing to send
+[2025-05-21 12:47:15.538076] [I]    33240 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=60008 PORT=1 ACKreq=0 ACKResp=0 D-LEN=4 DATA=
+[2025-05-21 12:47:15.543706] [I]    33250 routing.cpp         :  90 | [ROUTING] Sending packet:
+[2025-05-21 12:47:15.551910] [I]    33261 routing.cpp         : 299 | [ROUTING] PACKET: SRC=02 DST=01 TTL=5 D-LEN=8 DATA=h�
+[2025-05-21 12:47:15.560237] [I]    33271 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x01, through 0x01
+[2025-05-21 12:47:15.571323] [I]    33282 routing.cpp         : 150 | [ROUTING] Sending packet to gateway. Forwarding to LoRaWAN
+[2025-05-21 12:47:22.055355] [I]    39772 lorawan.cpp         : 193 | [LW] Saving session:
+[2025-05-21 12:47:22.061892] [I]    39773 lorawan.cpp         : 139 | [LW] Data sent; none received
+[2025-05-21 12:47:22.117305] [I]    39834 loraraw.cpp         : 185 | [LR] Started Receiving
+[2025-05-21 12:47:22.125536] [I]    39835 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 0)
+[2025-05-21 12:47:22.136723] [I]    39845 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 60008, Frame ID: 0)
+[2025-05-21 12:47:22.142324] [I]    39856 sleep.cpp           : 213 | [SLEEP] Sync forwarded to node 1
+[2025-05-21 12:47:22.150507] [I]    39856 transport.cpp       : 248 | [TRANSPORT] TX done for UDP segment 60008 (frame 0)
+[2025-05-21 12:47:22.158934] [I]    39867 sleep.cpp           : 311 | [SLEEP] Forwarded data
+[2025-05-21 12:47:22.167183] [I]    39879 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327712
+[2025-05-21 12:47:22.172871] [I]    39889 mac.cpp             : 108 | [MAC] Deinit
+[2025-05-21 12:47:22.178291] [I]    39890 lora.cpp            :  37 | [LORA] Deinit
+[2025-05-21 12:47:22.196718] [I]    39914 routing.cpp         :  75 | [ROUTING] Deinitialized
+[2025-05-21 12:47:22.202053] [I]    39914 transport.cpp       :  88 | [TRANSPORT] De-initialized
+[2025-05-21 12:47:22.213275] [W]    39925 sleep.cpp           : 250 | [SLEEP] Expected reception: 18 B, Transmission time: 0 ms
+[2025-05-21 12:47:22.227236] [W]    39935 sleep.cpp           : 252 | [SLEEP] Sleep breakdown: 110747 ms = 4684393973593145344 ms - (39925 ms - 33207 ms) - 0 ms - 2535 ms - 30000 ms + 0 ms
+[2025-05-21 12:47:22.249407] [E]    39946 sleep.cpp           : 277 | [SLEEP-STATS] Sync: 1	leep time: 110747 ms	Sync time: 33207 ms	Done time: 39925 ms	Delta Time: 2535 ms	lk correction: 0 ms	Sync AVG: 33135.93 ms	Done AVG: nan ms	Sync count: 15	Boot count: 0	Timeout:  65070 ms
+[2025-05-21 12:47:22.256856] [E]    39967 sleep.cpp           : 280 | [SLEEP] Extra 42 ms (110705)
