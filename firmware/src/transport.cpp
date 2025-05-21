@@ -183,6 +183,13 @@ void _onRoutingReceived() {
     transport_pdu_t pdu;
     size_t RoutingLength;
     node_address_t rx = Routing_receive((routing_data_t*)&pdu, &RoutingLength);
+
+    // La mida ha de ser com a mínim la del header, si no no és vàlid
+    if (RoutingLength < TRANSPORT_HEADER_SIZE) {
+        _PW("[TRANSPORT] Segment too short (%d)", RoutingLength);
+        return;
+    }
+
     _printSegment(&pdu);
 
     // Si sol·licita ACK, enviem

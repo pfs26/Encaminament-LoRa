@@ -4,10 +4,9 @@
 #include "scheduler.h"
 #include "utils.h"
 #include "sleep.h"
-#include <stdlib.h> // For rand()
 
-#if true
-// #if IS_GATEWAY
+// #if true
+#if IS_GATEWAY
     #define NODE_ADDRESS 0x02
 #else
     #define NODE_ADDRESS 0x03
@@ -25,27 +24,16 @@ void getData(uint8_t* data) {
         Serial.printf("%02X ", data[i]);
     }
     Serial.println();
+    
+    // uint32_t txTime = US_TO_MS(LoRaRAW_getTimeOnAir(25));
+    // Temps entre [TX, TX*r*k], on r són nombre intents màxim (no reintents)
+    // uint32_t delayRandom = (esp_random() % (MAC_ACK_TIMEOUT_FACTOR * MAC_MAX_RETRIES * txTime)) + txTime;
+    // Serial.printf("Delay random: %dms\n", delayRandom);
+    // delay(delayRandom);
 }
 
 void setup() {
-    Serial.begin(921600);
-    
-    if(bootCount++ == 0) {
-        Serial.println("===========================");
-        Serial.print("Model: "); Serial.println(ESP.getChipModel());
-        Serial.print("CPU: "); Serial.println(ESP.getCpuFreqMHz());
-        Serial.print("Heap: "); Serial.println(ESP.getFreeHeap());
-        Serial.print("Flash: "); Serial.println(ESP.getFlashChipSize());
-        Serial.print("Flash speed: "); Serial.println(ESP.getFlashChipSpeed());
-        Serial.print("Flash mode: "); Serial.println(ESP.getFlashChipMode());
-        Serial.print("Reset reason: "); Serial.println(esp_reset_reason());
-        Serial.println("===========================");
-        Serial.println("RANDOM OPERATION SLEEP TEST");
-        Serial.println("===========================");
-        Serial.printf("Node address: 0x%02X\tGateway: %d\n", NODE_ADDRESS, IS_GATEWAY);
-    }
-    
-    Serial.println("===========================");
+    Serial.begin(115200);
     Serial.printf("Boot: %d\tSync: %d\n", bootCount, syncCount);
     
     if(!Transport_init(NODE_ADDRESS, IS_GATEWAY)) {
@@ -54,10 +42,11 @@ void setup() {
     }
 
     Sleep_onSync(getData);
+    // Sleep_initialConfig(setConfig);
 
     // Configurem nodes a qui notificar missatges de sincronització
     #if IS_GATEWAY
-        node_address_t node = 0x00;
+        node_address_t node = 0x01;
     #else
         node_address_t node = 0x02;
         #endif
@@ -71,7 +60,6 @@ void setup() {
 
     // Després de `sleep_init()` no hi hauria d'haver transmissions, a banda de les que 
     // sleep genera.
-    // Només s'haurien d'iniciar transmissions després de rebre SYNC `Sleep_onSync()`
     if(!Sleep_init()) {
         Serial.println("Sleep init failed");
         while(1) delay(1);
@@ -81,3 +69,5 @@ void setup() {
 void loop() {
     scheduler_run();
 }
+
+

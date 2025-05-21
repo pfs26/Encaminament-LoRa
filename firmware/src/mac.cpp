@@ -314,6 +314,12 @@ static void _onLoraReceived(void) {
         return;
     }
 
+    // Per ser vàlid mínim a de tenir la mida del header, sense dades, que seria un ACK
+    if(len < MAC_PDU_HEADER_SIZE) {
+        _PW("[MAC] Frame too short (%d)", len);
+        return;
+    }
+
     mac_pdu_t receivedPDU;
 
     _LoraToPDU(data, len, &receivedPDU);
@@ -341,13 +347,6 @@ static void _onLoraReceived(void) {
             _mac_fsm(mac_event_t::RX_ACK_E);
         }
         else { // Si no és ACK, són dades
-
-            // PER RECEPTOR I PROVES ALEATORIES
-            if (esp_random() % 100 < SLEEP_RANDOM_TEST_PROB) {
-                _PE("[MAC] Simulated error");
-                return;
-            }
-
             lastFramesIDs.enqueue(rcvID);
             framesReceived++;
             _PI("[MAC] Frame for higher layer");

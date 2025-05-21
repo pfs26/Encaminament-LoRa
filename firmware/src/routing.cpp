@@ -227,6 +227,13 @@ void _onMacReceived(void) {
     size_t MAClength = 0;
     // Podem copiar directament sobre PDU, ja es farà el mapeig correcte
     node_address_t tx = MAC_receive((mac_data_t*)&rxPDU, &MAClength);
+
+    // La mida ha de ser com a mínim la del header, si no no és vàlid
+    if (MAClength < ROUTING_HEADERS_SIZE) {
+        _PW("[ROUTING] Packet too short (%d)", MAClength);
+        return;
+    }
+
     _processReceivedPacket(MAClength);
 }
 
