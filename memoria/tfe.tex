@@ -1163,7 +1163,7 @@ Quan un dispositiu inicia el mode de funcionament normal, espera rebre un missat
 
 El funcionament canvia quan el dispositiu és el de referència. En aquest cas, l'inici del cicle de funcionament comença immediatament, generant i transmetent el missatge de sincronització. A continuació pot fer la seva lectura, i transmetre-la com qualsevol altre node.
 
-Aquest plantejamen introdueix un fet important: el dispositiu de referència ha de despertar del mode de baix consum més tard que els dispositius a qui ha d'enviar el missatge de sincronització, ja que si no aquests no el rebrien. Aquest temps ha de ser, com a mínim, igual al temps de transmissió del missatge de sincronització. Una solució fàcil per aconseguir-ho és restant aquest temps del de baix consum, de manera que despertarà abans. 
+Aquest plantejament introdueix un fet important: el dispositiu de referència ha de despertar del mode de baix consum més tard que els dispositius a qui ha d'enviar el missatge de sincronització, ja que si no aquests no el rebrien. Aquest temps ha de ser, com a mínim, igual al temps de transmissió del missatge de sincronització. Una solució fàcil per aconseguir-ho és restant aquest temps del de baix consum, de manera que despertarà abans. 
 
 A la \autoref{fig:app_opcioSyncExp1} es representa aquest comportament. El dispositiu de referència és \fitx{D1} (ressaltat en negreta), i el dispositiu amb capacitats LoRaWAN és el \fitx{D4} (ressaltat en verd). Les dades es transmeten en direcció al \est{gateway}, creuant els dispositius intermedis fins a arribar a \fitx{D4}. Es representen els missatges de sincronització com a \fitx{TX_S}, i els de dades com a \fitx{TX_Dn}, on \fitx{n} indica l'origen de les dades. Les recepcions respectives d'aquests missatges s'identifiquen amb el prefix \fitx{RX}. S'indica també quan cada dispositiu desperta i inicia el mode de baix consum, amb línies verdes i vermelles respectivament, i amb el període de baix consum ressaltat en vermell clar. L'eix horitzontal es correspon al temps, i el vertical als dispositius, que es podria entendre com una distància.
 
@@ -1197,7 +1197,7 @@ S'observa com el la durada del cicle és de vuit unitats de temps, sent dues d'a
     \label{fig:app_opcioSyncExp1}
 \end{figure}
 
-Aquest mecanisme podria semblar correcte, però s'observen problemes quan es considera un fet mencionat anteriorment: el dispositiu veí que no és receptor també rep els missatges transmesos, provocant co\l.lisions. Per exemple, la transmissió de les dades de \fitx{D1} coincideix amb el missatge de sincronització enviar per \fitx{D2} a \fitx{D3}. En aquest moment \fitx{D2} es posa en recepció momentàniament per obtenir l'\acro{ack} de \fitx{D3}, però també rep la transmissió de \fitx{D1}. Això fa que cap de les dues transmissions sigui satisfactòria.
+Aquest mecanisme podria semblar correcte, però s'observen problemes quan es considera un fet mencionat anteriorment: el dispositiu veí que no és receptor també rep els missatges transmesos, provocant co\l.lisions. Per exemple, la transmissió de les dades de \fitx{D1} coincideix amb el missatge de sincronització enviat per \fitx{D2} a \fitx{D3}. En aquest moment \fitx{D2} es posa en recepció momentàniament per obtenir l'\acro{ack} de \fitx{D3}, però també rep la transmissió de \fitx{D1}. Això fa que cap de les dues transmissions sigui satisfactòria.
 
 Per tant, aquest mecanisme no és viable si dos nodes veïns transmeten alhora, fent que les  les co\l.lisions siguin inevitables.
 Es vol destacar que el diagrama no està complet ni representa totes les transmissions, sinó que únicament s'han mostrat les necessàries per trobar la primera co\l.lisió. 
@@ -1277,7 +1277,7 @@ El funcionament d'aquest mecanisme és el següent:
 
 
 % Explicar qui és referència i qui dades
-Una qüestió important és determinar quin dispositiu és el de referència. Inicialment es va considerar utilitzar el dispositiu més proper al \est{gateway}, de manera que la sincronització es propagaria en un únic sentit (des del \est{gateway} cap a l’extrem de la xarxa), mentre que les dades circularien en sentit contrari. Aquesta situació es mostra a la \autoref{fig:app_opcioSyncAcum1}, on el dispositiu \fitx{D1}, el més proper al \est{gateway}, inicia el missatge de sincronització. Per altra banda, el dispositiu \fitx{D4}, situat a l’extrem oposat, és l’encarregat d’iniciar la transmissió de dades després de sincronitzar-se. Les transmissions de dades s’identifiquen com \fitx{TX_Dm:n}, on \fitx{m} representa el dispositiu que ha afegit les primeres dades, i \fitx{n} el dispositiu que ha afegit les últimes.
+Una qüestió important és determinar quin dispositiu és el de referència. Inicialment es va considerar utilitzar el dispositiu més proper al \est{gateway}, de manera que la sincronització es propagaria en un únic sentit (des del \est{gateway} cap a l’extrem de la xarxa), mentre que les dades circularien en sentit contrari. Aquesta situació es mostra a la \autoref{fig:app_opcioSyncAcum1}, on el dispositiu \fitx{D1}, el més proper al \est{gateway}, inicia el missatge de sincronització. Per altra banda, el dispositiu \fitx{D6}, situat a l’extrem oposat, és l’encarregat d’iniciar la transmissió de dades després de sincronitzar-se. Les transmissions de dades s’identifiquen com \fitx{TX_Dm:n}, on \fitx{m} representa el dispositiu que ha afegit les primeres dades, i \fitx{n} el dispositiu que ha afegit les últimes.
 
 \begin{figure}[ht]
     \centering
@@ -1312,7 +1312,7 @@ Una qüestió important és determinar quin dispositiu és el de referència. In
 En analitzar el diagrama, es pot observar com els dispositius més propers al \est{gateway} ---que són els primers en sincronitzar-se i els últims en rebre les dades---  tenen un temps d'espera entre la sincronització i la recepció de les dades elevat. Aquest fet fa que, a causa que han d'estar durant més temps en mode de funcionament, el consum energètic sigui també major. També provoca que els consums entre dispositiu no siguin homogenis, dificultant com s'ha dit el manteniment. Aquest inconvenient, a més, s'accentua amb el nombre de dispositius, ja que tant el temps de propagació de la sincronització com el de les dades seria major. 
 
 
-Una segona opció que intenta minimitzar aquest efecte es pot veure representat a la \autoref{fig:app_opcioSyncAcum1}. En aquest cas s'utilitza com a referència un dispositiu més pròxim a l'extrem oposat, que és qui inicia l'enviament de dades. A causa de trobar-se entre dos dispositius, és necessari que enviï el missatge de sincronització als seus dos veïns, fent que aquest es propagi simultàniament en ambdós sentits. Per evitar una co\l.lisió és necessari que entre els dos missatges de sincronització que transmet deixi un marge de temps, equivalent al temps de transmissió del missatge de sincronització. Això permet que el dispositiu que rep el missatge de sincronització pugui propagar-lo sense que es superposi amb el segon missatge de sincronització. El dispositiu que inicia l'enviament de dades continua sent el de l'extrem oposat al que té capacitats LoRaWAN, el més llunyà al \est{gateway}.
+Una segona opció que intenta minimitzar aquest efecte es pot veure representat a la \autoref{fig:app_opcioSyncAcum2}. En aquest cas s'utilitza com a referència un dispositiu més pròxim a l'extrem oposat, que és qui inicia l'enviament de dades. A causa de trobar-se entre dos dispositius, és necessari que enviï el missatge de sincronització als seus dos veïns, fent que aquest es propagi simultàniament en ambdós sentits. Per evitar una co\l.lisió és necessari que entre els dos missatges de sincronització que transmet deixi un marge de temps, equivalent al temps de transmissió d'aquest missatge. Això permet que el dispositiu que rep el primer pugui propagar-lo sense que es superposi amb el segon missatge de sincronització. El dispositiu que inicia l'enviament de dades continua sent el de l'extrem oposat al que té capacitats LoRaWAN, el més llunyà al \est{gateway}.
 
 \begin{figure}[ht]
     \centering
@@ -1393,11 +1393,90 @@ En aquesta segona situació s'observa com el temps d'espera entre la recepció d
 
 Amb aquesta nova estratègia s'observa com el temps d'espera entre la sincronització i la recepció de les dades és el mínim possible sense que hi hagi co\l.lisions i, a més, és constant per a tots els dispositius ---excepte els dels extrems, que o bé no rep la sincronització, ja que la genera, o bé no l'ha de propagar---. Això provoca que el temps de funcionament normal sigui també igual per a tots, en aquest exemple de 5 unitats de temps, excepte pel de referència, que no ha d'iniciar abans ja que no ha de rebre la sincronització.
 
-No obstant això, encara hi ha un fet crític: què passa si la capa d'accés al medi ha de realitzar retransmissions? En aquest cas, i ja que s'ha dissenyat per tal que el temps d'espera sigui mínim, una retransmissió d'un missatge de sincronització provocaria co\l.lisions.
+No obstant això, encara hi ha un fet crític: què passa si la capa d'accés al medi ha de realitzar retransmissions, o aplicar \acro{beb} per accedir al canal? En aquest cas, i ja que s'ha dissenyat per tal que el temps d'espera sigui mínim, una retransmissió d'un missatge de sincronització provocaria co\l.lisions. A la \autoref{fig:app_opcioSyncAcum3Err} es mostra una retransmissió en la situació anterior, la qual produeix una co\l.lisió.
 
-% // TODO: REPRESENTAR COL·LISIO AMB UN EXEMPLE PETITO???
+\begin{figure}[ht]
+    \centering
+    \setlength{\extrarowheight}{0pt}
+\addtolength{\extrarowheight}{\aboverulesep}
+\addtolength{\extrarowheight}{\belowrulesep}
+\setlength{\aboverulesep}{0pt}
+\setlength{\belowrulesep}{0pt}
+\arrayrulecolor{black}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{!{\vrule width \heavyrulewidth}c!{\vrule width \heavyrulewidth}ccccccccccc!{\vrule width \heavyrulewidth}} 
+    \multicolumn{1}{c}{\est{gateway}} & \multicolumn{11}{c}{} \\
+\toprule
 
+\textbf{\textcolor[rgb]{0,0.502,0}{D1}} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{\tiny err. rebent} & \multicolumn{1}{c|}{RX\_S} & \multicolumn{1}{c|}{~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_D6:2} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D6:1}  & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+
+\hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}---->{\arrayrulecolor{black}}------>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}}
+{D2} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_S} & \multicolumn{1}{c|}{TX\_S} & \multicolumn{1}{c|}{TX\_S} & \multicolumn{1}{c|}{RX\_D6:3} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D6:2}  & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+
+\hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}--->{\arrayrulecolor{black}}------>{\arrayrulecolor[rgb]{1,0.847,0.808}}-->{\arrayrulecolor{black}}}
+{D3} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_S} & \multicolumn{1}{c|}{TX\_S} & \multicolumn{1}{c|}{~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{\textbf{\textcolor[rgb]{1, 0.1, 0.1}{RX\_D6:4}}} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D6:3} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+
+\hhline{~>{\arrayrulecolor{black}}-----------}
+{D4} & ~~~~~~~~~~~~~~ &\multicolumn{9}{c}{\dots} & ~~~~~~~~~~~~~~\\
+
+\toprule
+\end{tabular}
+}
+    \caption{Transmissió de dades acumulades. Representació co\l.lisió en cas de reintents.}
+    \label{fig:app_opcioSyncAcum3Err}
+\end{figure}
 % // TODO: A PARTIR D'AQUI QUEDA PENDENT REVISAR 
+
+Es pot veure com una única retransmissió del missatge de sincronització, causada per no haver rebut el missatge de reconeixement de la capa d'accés al medi, ha causat una co\l.lisió pel dispositiu \fitx{D3}: en el moment que aquest estava rebent les dades s'ha retransmès la sincronització des de \fitx{D2} cap a \fitx{D1}, fent que ambdues transmissions es superposessin.
+L'única possible solució per reduir aquest problema és deixar més marge entre l'enviament de la sincronització i el de les dades, que és just el contrari del que buscava aquesta estratègia. 
+
+\subsection{Disseny final}
+En l'últim disseny, l'estratègia que se seguia era la següent:
+\begin{enumerate}
+    \item Pel dispositiu de referència, generar i transmetre el missatge de sincronització, deixar un temps d'espera equivalent al de la transmissió del missatge de sincronització i, seguidament, transmetre les dades i iniciar el mode de baix consum.
+    \item Pels altres dispositius, esperar a rebre el missatge de sincronització, propagar-lo, i esperar a rebre les dades. En rebre les dades, afegir-hi les seves, transmetre-les i iniciar el mode de baix consum.
+\end{enumerate}
+
+Deixant de banda el problema de les co\l.lisions si hi ha retransmissions, aquesta estratègia és poc òptima: es realitza una transmissió completa per enviar únicament el missatge de sincronització, que no aporta informació «útil» i, poc després, es realitza una nova transmissió al mateix dispositiu amb les dades (informació «útil»). Combinant ambdós missatges en un d'únic s'aconsegueix reduir el nombre de transmissions a la meitat i, per tant, també el temps de cicle. Així, podríem considerar que el missatge de sincronització és implícit en el de dades.
+
+\begin{figure}[ht]
+    \centering
+    \setlength{\extrarowheight}{0pt}
+    \addtolength{\extrarowheight}{\aboverulesep}
+    \addtolength{\extrarowheight}{\belowrulesep}
+    \setlength{\aboverulesep}{0pt}
+    \setlength{\belowrulesep}{0pt}
+    \arrayrulecolor{black}
+    \resizebox{\linewidth}{!}{%
+        \begin{tabular}{!{\vrule width \heavyrulewidth}c!{\vrule width \heavyrulewidth}cccccccc!{\vrule width \heavyrulewidth}} 
+            \multicolumn{1}{c}{\est{gateway}} & \multicolumn{7}{c}{} \\
+            \toprule
+            % \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}--~-->{\arrayrulecolor[rgb]{1,0.847,0.808}}----->{\arrayrulecolor{black}}}
+            \textbf{\textcolor[rgb]{0,0.502,0}{D1}} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_D:6:2} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D6:1} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+            \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}---->{\arrayrulecolor{black}}--->{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}}
+            {D2} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_D:6:3} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D6:2} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+            \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}--->{\arrayrulecolor{black}}--->{\arrayrulecolor[rgb]{1,0.847,0.808}}-->{\arrayrulecolor{black}}}
+            {D3} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_D:6:4} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D6:3} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+            \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}-->{\arrayrulecolor{black}}--->{\arrayrulecolor[rgb]{1,0.847,0.808}}--->{\arrayrulecolor{black}}}
+            {D4} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_D:6:5} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D6:4} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+            \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}--->{\arrayrulecolor[rgb]{1,0.847,0.808}}---->{\arrayrulecolor{black}}}
+            {D5} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_D:6:6} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D6:5} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+            \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}-->{\arrayrulecolor[rgb]{1,0.847,0.808}}----->{\arrayrulecolor{black}}}
+            \textbf{D6} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D6:6} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+            \toprule
+        \end{tabular}
+    }
+    \caption{Sincronització implícita. Disseny inicial.}
+    \label{fig:app_opcioSyncFin1}
+\end{figure}
+
+
+
+
+A més, així també s'elimina l'inconvenient de les co\l.lisions. En cada moment únicament un dispositiu de la xarxa estarà transmetent, fent que pugui fer totes les retransmissions establertes sense que generi col.lisions.
+
+
+s'ha observat com el principal inconvenient són les co\l.lisions causades per les retransmissions
 
 % explicar com poden determinar el temps de sleep cada tipus de dispositiu
 
@@ -1406,7 +1485,6 @@ No obstant això, encara hi ha un fet crític: què passa si la capa d'accés al
 
 % En solució final, fer un petit resum de totes les funcionalitats (timeout, que permet saber on hi pot haver un error, etc.)
 
-\subsection{Sincronització implícita}
 % \subsection{Avantatges i inconvenients de cada enfocament}
 % \subsection{Compromisos entre consum i generalitat del protocol}
 
