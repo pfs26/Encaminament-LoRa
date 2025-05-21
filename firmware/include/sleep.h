@@ -23,28 +23,31 @@
 
 // Defineix si és un node "iniciador" de xarxa.
 // Enviarà SYNC sense esperar a rebre'l. 
-// #define SLEEP_IS_INITIATOR !IS_GATEWAY
-#define SLEEP_IS_INITIATOR true
+#define SLEEP_IS_INITIATOR !IS_GATEWAY
+// #define SLEEP_IS_INITIATOR true
 
 // Durada d'un cicle de funcionament, en `ms`
-// #define SLEEP_CYCLE_DURATION S_TO_MS(30)
-#define SLEEP_CYCLE_DURATION H_TO_MS(1)
+#define SLEEP_CYCLE_DURATION (uint64_t) MIN_TO_MS(2.5)
+// #define SLEEP_CYCLE_DURATION H_TO_MS(1)
 // Temps de funcionament normal, després de rebre SYNC, en `ms`
 // #define SLEEP_WORK_TIME S_TO_MS(30)
 
 // Error del clock, en `ppm`
 // Expirementalment s'ha vist com, passats 15 minuts teòrics, s'ha despertat 25 segons abans
 
-// AMB PROVES S'HA VIST COM LA VELLA TÉ DE MITJANA -5660, I LA NOVA -4777
-#define SLEEP_CLOCK_ERROR (-4777)
+// AMB PROVES S'HA VIST COM LA VELLA TÉ DE MITJANA +5660, I LA NOVA +4777 --> AMBDUES DESPERTEN ABANS DE L'ESPERAT
+// L'error és positiu si el rellotge és MÉS RÀPID, fent que el microcontrolador dormi MENYS de l'esperat
+// L'error és negatiu si el rellotge és MÉS LENT, fent que el microcontrolador dormi MÉS de l'esperat
+
+// Provant sembla que +8500 va bé si és listener???
+#define SLEEP_CLOCK_ERROR (0)
 // Temps de correcció d'error del clock, en `ms`
-// TODO: Potser hauria de ser per dos? Si un dispositiu té el clock amb +5000ppm, i l'altre amb -5000ppm, 
-// l'error total és de 10000ppm, i no de 5000ppm
-#define SLEEP_CLOCK_CORRECTION (((int64_t)SLEEP_CYCLE_DURATION * SLEEP_CLOCK_ERROR / 1000000.0))
+#define SLEEP_CLOCK_CORRECTION (int64_t)((SLEEP_CYCLE_DURATION * SLEEP_CLOCK_ERROR / 1000000.0))
 
 // Temps extra d'espera de recepció de SYNC, i previ a primera recepció esperada, en `ms`
 // No hauria de ser molt gran; temps DELTA ja considera el temps màxim teòric
-#define SLEEP_EXTRA_TIME MIN_TO_MS(3) 
+// #define SLEEP_EXTRA_TIME MIN_TO_MS(3) 
+#define SLEEP_EXTRA_TIME (uint64_t) S_TO_MS(1) 
 
 // Percentatge addicional que s'aplicarà a temps delta, per considerar CSMA, etc.
 #define SLEEP_DELTA_EXTRA 0.25
@@ -92,7 +95,8 @@ void Sleep_deinit(void);
 bool Sleep_setForwardNode(node_address_t node);
 /// @brief Registrar un callback a executar quan s'ha rebut el missatge de sincronització.
 /// 
-/// La funció *HA* de retornar un apuntador a dades, amb `SLEEP_DATASIZE_PER_NODE` Bytes definits.
+/// La funció *HA* d'escriure les seves dades, de mida `SLEEP_DATASIZE_PER_NODE`, a
+/// l'apuntador de dades passat com a paràmetre.
 /// En cas contrari, el funcionament pot no ser el correcte, així com la informació afegida.
 /// @param cb Funció a executar, amb la signatura `uint8_t* callback()`
 void Sleep_onSync(sleep_callback_t cb);
