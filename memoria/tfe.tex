@@ -1392,9 +1392,9 @@ En aquesta segona situació s'observa com el temps d'espera entre la recepció d
     \label{fig:app_opcioSyncAcum3}
 \end{figure}
 
-Amb aquesta nova estratègia s'observa com el temps d'espera entre la sincronització i la recepció de les dades és el mínim possible sense que hi hagi co\l.lisions i, a més, és constant per a tots els dispositius ---excepte els dels extrems, que o bé no rep la sincronització, ja que la genera, o bé no l'ha de propagar---. Això provoca que el temps de funcionament normal sigui també igual per a tots, en aquest exemple de 5 unitats de temps, excepte pel de referència, que no ha d'iniciar abans ja que no ha de rebre la sincronització.
+Amb aquesta nova estratègia s'observa com el temps d'espera entre la sincronització i la recepció de les dades és el mínim possible sense que hi hagi co\l.lisions i, a més, és constant per a tots els dispositius ---excepte els dels extrems, que o bé no rep la sincronització, ja que la genera, o bé no l'ha de propagar---. Això provoca que el temps de funcionament normal sigui també igual per a tots, en aquest exemple, de 5 unitats de temps, excepte pel de referència, que no ha d'iniciar abans ja que no ha de rebre la sincronització.
 
-No obstant això, encara hi ha un fet crític: què passa si la capa d'accés al medi ha de realitzar retransmissions, o aplicar \acro{beb} per accedir al canal? En aquest cas, i ja que s'ha dissenyat per tal que el temps d'espera sigui mínim, una retransmissió d'un missatge de sincronització provocaria co\l.lisions. A la \autoref{fig:app_opcioSyncAcum3Err} es mostra una retransmissió en la situació anterior, la qual produeix una co\l.lisió.
+No obstant això, encara hi ha un fet crític: què passa si la capa d'accés al medi ha de realitzar retransmissions, o aplicar \acro{beb} per accedir al canal? En aquest cas, i ja que s'ha dissenyat per tal que el temps d'espera sigui mínim, qualsevol retard en la transmissió provocaria una co\l.lisió.
 
 \begin{figure}[ht]
     \centering
@@ -1426,15 +1426,14 @@ No obstant això, encara hi ha un fet crític: què passa si la capa d'accés al
     \caption{Transmissió de dades acumulades. Representació co\l.lisió en cas de reintents.}
     \label{fig:app_opcioSyncAcum3Err}
 \end{figure}
-% // TODO: A PARTIR D'AQUI QUEDA PENDENT REVISAR 
 
-Es pot veure com una única retransmissió del missatge de sincronització, causada per no haver rebut el missatge de reconeixement de la capa d'accés al medi, ha causat una co\l.lisió pel dispositiu \fitx{D3}: en el moment que aquest estava rebent les dades s'ha retransmès la sincronització des de \fitx{D2} cap a \fitx{D1}, fent que ambdues transmissions es superposessin.
-L'única possible solució per reduir aquest problema és deixar més marge entre l'enviament de la sincronització i el de les dades, que és just el contrari del que buscava aquesta estratègia. 
+Aquesta situació es representa a la \autoref{fig:app_opcioSyncAcum3Err}, on una única retransmissió del missatge de sincronització, causada per no haver rebut el missatge de reconeixement de la capa d'accés al medi, ha causat una co\l.lisió. Quan el dispositiu \fitx{D3} estava rebent el missatge de dades, el dispositiu \fitx{D2} retransmet el missatge de sincronització cap a \fitx{D1}, fent que ambdues transmissions es superposessin.
 
-% // TODO: Potser fer que sigui section i no subsection?
+L'única possible solució per reduir aquest problema és deixar més marge de temps entre l'enviament de la sincronització i el de les dades. Aquesta solució, però, és totalment contrària al que es buscava en aquesta estratègia, que era minimitzar el temps d'espera.
+
 
 \section{Disseny final}
-Després de les iteracions anteriors s'ha arribat a un disseny final que soluciona els problemes observats. En aquest apartat es presenta el funcionament general d'aquesta estratègia. Seguidament es consideren situacions no ideals que poden produir-se i que cal considerar per garantir el correcte funcionament, i les solucions proposades. A continuació es presenta la implementació realitzada a nivell d'aplicació, amb el format i estructura dels missatges. Finalment, es presenta la correcta utilització del sistema, com per exemple com afegir nous dispositius a la xarxa, i les proves i resultats obtinguts.
+Després de les iteracions anteriors, s'ha arribat a un disseny final que resol els problemes observats. En aquest apartat es presenta el funcionament general d'aquesta estratègia. Seguidament es consideren situacions no ideals que poden produir-se i que cal considerar per garantir el correcte funcionament, i les solucions proposades. A continuació es presenta la implementació realitzada a nivell d'aplicació, amb el format i estructura dels missatges. Finalment, es presenta la correcta utilització del sistema, com per exemple com afegir nous dispositius a la xarxa, i les proves i resultats obtinguts.
 
 \subsection{Funcionament general}
 En l'últim disseny, l'estratègia que se seguia era la següent:
@@ -1443,12 +1442,12 @@ En l'últim disseny, l'estratègia que se seguia era la següent:
     \item Pels altres dispositius, esperar a rebre el missatge de sincronització, propagar-lo, i esperar a rebre les dades. En rebre les dades, afegir-hi les seves, transmetre-les i iniciar el mode de baix consum.
 \end{itemize}
 
-Deixant de banda el problema de les co\l.lisions si hi ha retransmissions, aquesta estratègia és poc òptima: es realitza una transmissió completa per enviar únicament el missatge de sincronització, que no aporta informació «útil» i, poc després, es realitza una nova transmissió al mateix dispositiu amb les dades (informació «útil»). Combinant ambdós missatges en un d'únic s'aconsegueix reduir el nombre de transmissions a la meitat i, per tant, també el temps de cicle. Així, podríem considerar que el missatge de sincronització és implícit en el de dades.
+Deixant de banda el problema de les co\l.lisions en cas de retransmissions, aquesta estratègia és poc òptima: es realitza una transmissió completa per enviar únicament el missatge de sincronització, que no conté informació «útil». Poc després, es realitza una nova transmissió cap al mateix dispositiu amb les dades (informació «útil»). Si es combinessin ambdós missatges en un de sol, es reduiria el nombre de transmissions a la meitat, fent també escurçar el temps de cicle. Així, podríem considerar que el missatge de sincronització queda implícit dins el de dades.
 
 Llavors, el funcionament seria el següent:
 \begin{itemize}
-    \item Pel dispositiu de referència, en despertar de mode de baix consum, generar missatge amb les dades, transmetre'l, i iniciar mode de baix consum.
-    \item Pels altres dispositius, esperar a rebre el missatge de dades, que indica també l'instant de sincronització, afegir-hi les seves dades, transmetre-les i iniciar mode de baix consum.
+    \item El dispositiu de referència, en despertar del mode de baix consum, genera missatge amb les seves dades, el transmet, i inicia de nou el mode de baix consum.
+    \item La resta de dispositius, en sortir del mode de baix consum, s'esperen a rebre el missatge de dades, que indica també l'instant de sincronització. Llavors hi afegeixen les seves dades, el transmeten, i inicien el mode de baix consum.
 \end{itemize}
 
 \begin{figure}[ht]
@@ -1483,9 +1482,11 @@ Llavors, el funcionament seria el següent:
 \end{figure}
 
 
-No només s'aconsegueixen reduir les transmissions, sinó que també s'elimina l'inconvenient de les co\l.lisions causades per les retransmissions. Com que en qualsevol moment únicament un dispositiu de la xarxa estarà transmetent (ja que la resta o bé ja han transmès i, per tant, estan en baix consum, o bé estan esperant rebre les dades), la capa d'accés al medi d'aquest pot realitzar transmissions sense causar co\l.lisions als dispositius veïns.
+Aquesta estratègia no només permet reduir el nombre de transmissions, sinó que també elimina l'inconvenient de les co\l.lisions provocades per retransmissions. Com que en qualsevol moment únicament un dispositiu de la xarxa estarà transmetent (la resta o bé ja han transmès i han passat al mode de baix consum, o bé estan esperant rebre les dades), la capa d'accés al medi d'aquest pot realitzar transmissions sense causar co\l.lisions als dispositius veïns.
 
-A més, s'observa també com el temps de funcionament normal de cada dispositiu, en condicions ideals ---sense que existeixin retransmissions---, és el mateix per a tots, i és constant. Tampoc existeix un temps d'espera entre la recepció del missatge de sincronització i del de dades, ja que el missatge de sincronització és implícit, fent que a més sigui el mínim possible, reduint el consum energètic.
+A més, s'observa també com el temps de funcionament normal de cada dispositiu, en condicions ideals ---sense que existeixin retransmissions---, és el mateix per a tots, i és constant. Tampoc existeix un temps d'espera entre la recepció del missatge de sincronització i el de dades, ja que el missatge de sincronització és implícit, fent que a més sigui el mínim possible, reduint el consum energètic.
+
+S'ha optat per utilitzar segments no fiables a LA capa de transport per transmetre les dades. Cal tenir en compte que aquestes dades s'enviaran al següent dispositiu, el qual ja és el destí final. Així, en aquesta transmissió ja s'apliquen els reconeixements de la capa d'accés al medi i, per tant, és incoherent i poc òptim incloure-hi també un missatge de reconeixement a nivell de transport.
 
 % explicar com poden determinar el temps de sleep cada tipus de dispositiu
 
@@ -1509,17 +1510,36 @@ En l'anterior subapartat s'ha presentat el funcionament del sistema en condicion
     Una solució a aquest problema és afegir un temps de marge entre l'inici de funcionament normal i l'instant en què espera rebre les dades. Aquest temps de marge ha de ser superior al màxim error que es pot produir en els rellotges dels dispositius, i és fàcilment calculable a partir del temps de cicle total i l'error, normalment expresat en parts per millió (\acro{ppm}):
     $$t_{\text{marge}} \geq t_{\text{cicle}} \cdot \epsilon_{\text{\acro{ppm}}} \cdot 10^{-6}$$
     
-    \item \emph{Retransmissions}. La capa d'accés al medi d'un dispositiu pot necessitar realitzar retransmissions si no rep el missatge de reconeixement, o aplicar \acro{beb} si el canal està ocupat per un altre dispositiu ---aliè a la xarxa---. Això provoca que el següent dispositiu rebi la sincronització més tard de l'esperat i, per tant, com que també el propagarà més tard, passarà el mateix per la resta de dispositius. Aquest fet provoca que els dispositius prenguin com a referència un instant invàlid, fent que en el següent cicle es despertin més tard i, si ara no és necessari realitzar retransmissions, no rebin les dades (o rebin una retransmissió que l'anterior dispositiu ha hagut de fer ja que no han enviat reconeixement perquè encara estaven en baix consum).
+    \item \emph{Retransmissions}. La capa d'accés al medi d'un dispositiu pot necessitar realitzar retransmissions si no rep el missatge de reconeixement, o aplicar \acro{beb} si el canal està ocupat per un altre dispositiu ---aliè a la xarxa---. Aquestes retransmissions impliquen que el missatge de dades arribi amb retard al següent dispositiu i, en conseqüència, que aquest també el propagui més tard, afectant a la resta de la xarxa. 
     
-    A la \autoref{fig:syncDeltaTimeErr} es mostra un exemple d'aquesta situació. S'han representat els instants de temps d'inici de funcionament normal i de baix consum, \fitx{w} i \fitx{s} respectivament, així com l'instant que es pren com a referència en la sincronització, \fitx{sync}. En aquest exemple la durada de cicle ($t_c$) és de 7 unitats de temps, i els dispositius que no són de referència apliquen un marge ($t_m$) d'1 unitat de temps. S'observa com en el segon cicle \fitx{D2} ha hagut de fer una retransmissió; llavors \fitx{D1} pren l'instant de recepció de la retransmissió com el temps de sincronització. En el següent cicle, com que desperta més tard, no rep la transmissió del primer intent i, per tant, les torna a rebre en el segon intent. Tot i que les retransmissions no provoquen co\l.lisions, és important reduir-les al mínim ja que incrementen el consum. A més, el simple fet de perdre la primera transmissió provoca que hi hagi menys probabilitats que rebi les dades, perquè hi ha menys intents «reals», en els quals \fitx{D1} està actiu. És a dir, si el límit d'intents fos 2 i el primer el perdés sempre perquè està en baix consum, només disposaria d'1 intent per rebre les dades i, si aquest fallés, el dispositiu no es sincronitzaria.
+    A causa d'aquest retard provoca que els dispositius prenguin com a referència un instant de sincronització invàlid. En el següent cicle, a causa d'haver rebut l'anterior sincronització més tard, també iniciaran el funcionament normal més tard. Si ara no és necessari realitzar retransmissions, no rebran les dades o, en el millor dels casos, les rebran gràcies a les retransmissions de la capa d'accés al medi, generades ja que no havien enviat el reconeixement.
     
-    La solució que s'ha implementat és sortir del mode de baix consum un temps «delta», el qual es correspon a la diferència entre els instants de temps en què pot rebre l'últim i el primer missatge de sincronització possible:
+    A la \autoref{fig:syncDeltaTimeErr} es mostra un exemple d'aquesta situació. S'han representat els instants de temps d'inici de funcionament normal i del mode de baix consum, \fitx{w} i \fitx{s} respectivament, així com l'instant que es pren com a referència en la sincronització, \fitx{sync}. En aquest exemple la durada de cicle ($t_c$) és de 7 unitats de temps, i els dispositius que no són de referència apliquen un marge ($t_m$) d'1 unitat de temps. 
+    
+    S'observa com en el segon cicle \fitx{D2} ha hagut de fer una retransmissió; llavors \fitx{D1} pren l'instant de recepció de la retransmissió com el temps de sincronització. En el següent cicle, com que desperta més tard, no rep la transmissió del primer intent i, per tant, les torna a rebre en el segon intent. Tot i que les retransmissions no provoquen co\l.lisions, és important reduir-les al mínim ja que incrementen el consum. 
+    
+    A més, cal destacar que perdre la primera transmissió redueix la probabilitat de sincronització, ja que disminueix el nombre d'intents «reals» en què \fitx{D1} està actiu. Per exemple, si el límit d'intents fos 2 i el primer es perdés sempre perquè està en baix consum, només disposaria d'1 intent per rebre les dades i, si aquest fallés, el dispositiu no es sincronitzaria.
+
+    La solució que s'ha implementat és sortir del mode de baix consum un temps addicional de tolerància ($t_t$). Aquest temps es correspon a la diferència entre els instants en què pot rebre el primer i l'últim missatge de dades ---i sincronització--- possible:
     \begin{itemize}
-        \item \emph{Primer possible}. Tots els dispositius anteriors a ell han enviat les dades en el primer intent, i sense necessitat d'aplicar \acro{beb} per accedir al canal. 
-        \item \emph{Últim possible}. Tots els dispositius anteriors a ell han enviat les dades en l'últim intent possible. Per considerar els retard d'accés al medi a causa del \acro{beb}, s'aplica un factor incrementatiu al resultat anterior, per exemple del 25\%. 
+        \item \emph{Primer possible}. Tots els dispositius han transmès correctament en el primer intent, sense necessitat de retransmissions ni d'esperes provocades en aplicar \acro{beb} per accedir al canal. 
+        \item \emph{Últim possible}. Tots els dispositius anteriors han utilitzat el nombre màxim d'intents de transmissió i, a més, han hagut d'aplicar \acro{beb} per accedir al canal. Per tenir en compte aquest temps addicional, el qual és imprevisible, es pot aplicar un factor al temps màxim, per exemple incrementant-lo en un 
+        \%.
     \end{itemize} 
 
+    Gràcies a aquest temps addicional, es garanteix que el dispositiu estigui actiu durant tota la finestra de temps en què es pot rebre el missatge de dades. És cert que implica un augment del temps en mode actiu, però ofereix una major probabilitat de rebre les dades i, per tant, major robustesa del sistema. 
+
+    % // TODO: A PARTIR D'AQUI QUEDA PENDENT REVISAR 
+
+    Aquest temps de tolerància depèn del nombre màxim d'intents de retransmissió, de la quantitat de dispositius anteriors ---ja que són qui han de propagar el missatge---, de la mida del missatge, i dels paràmetres LoRa establerts, com ara l'amplada de banda o l'\acro{sf}. Per simplicitat, s'ha considerat la mida màxima de dades d'un missatge LoRa (\SI{255}{\byte}). No només cal considerar la transmissió del missatge de dades, també és important considerar la dels missatges de reconeixement de la capa d'accés al medi, i la mida d'aquests. Així, podem determinar aquest temps amb l'expressió:
+    $$t_t =  (N \cdot (R+1) \cdot (t_{{tx}} + K_{\text{ack}} \cdot t_{\text{ack}})) \cdot (1 + f)$$
+    \begin{itemize}
+        \item $N$: nombre de nodes anteriors al dispositiu pel qual es calcula el temps de tolerància.
+        \item $R$: nombre màxim de reintents de transmissió de la capa d'accés al medi. Se n'afegeix un, per tenir en compte la primera transmissió que no és un reintent.
+        \item 
+    \end{itemize}
     \item \emph{Sense recepció de dades.}
+    \item \emph{Limit de dades.} % fragmetnació
 
 \end{itemize}
 
