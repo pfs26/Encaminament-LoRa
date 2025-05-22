@@ -350,7 +350,7 @@ El principal avantatge d'aplicar \acro{beb} és que distribueix en el temps els 
 % Parlar sobre ACK
 Per tal d'assegurar la correcta transmissió del missatge, s'ha implementat un mecanisme de reconeixement (\est{Acknowledgment}, \acro{ack}). Després de realitzar una transmissió, el transmissor espera rebre un missatge de reconeixement del receptor, indicant que ha rebut les dades correctament i sense errors. Si no es rep el missatge de reconeixement després d'un temps d'espera, el transmissor reintenta de nou la transmissió, incrementant el valor del camp de reintents de la trama.
 
-El temps d'espera de recepció de l'\acro{ack} es determina a través de l'expressió $3 \cdot k \cdot t_{tx}$, on $t_{tx}$ és el temps de transmissió (també conegut com a \est{airtime}) del missatge, i $k$ és un factor constant major o igual a 1. Així, el temps d'espera serà, com a mínim, de tres vegades el temps de transmissió, permetent que el receptor tingui temps de rebre el missatge enviat (requerint un temps de recepció igual al de transmissió), enviar el missatge de reconeixement, i que el transmissor original tingui temps de rebre'l. El factor ${k}$ permet ajustar el marge que es vol deixar, per exemple per si el receptor no pot enviar el missatge de reconeixement immediatament; per exemple, si $k=2$, el temps d'espera seria el doble del necessari. És important mencionar que el temps de transmissió es pot determinar prèviament, coneixent l'ample de banda, el factor d'espargiment i la longitud del missatge.
+El temps d'espera de recepció de l'\acro{ack} es determina a través de l'expressió $k \cdot t_{tx}$, on $t_{tx}$ és el temps de transmissió (també conegut com a \est{airtime}) del missatge, i $k$ és un factor constant major o igual a 1. Així, el temps d'espera serà, com a mínim, igual al temps de transmissió del missatge de reconeixement, per tal que el receptor el pugui enviar. Tot i això, aquest factor hauria de ser superior per considerar temps de propagació i processament. És important mencionar que el temps de transmissió es pot determinar prèviament, coneixent l'ample de banda, el factor d'espargiment i la longitud del missatge.
 
 Una característica dels missatges de reconeixement és que l'identificador no és aleatori, sinó que és el mateix que el missatge que reconeix, l'«original». Això permet que el transmissor pugui identificar correctament l'\acro{ack}, i sapiga a quines dades fa referència. Si no fos així, el transmissor podria rebre un reconeixement d'una transmissió que havia considerat fallida, després d'haver-ne realitzat una altra; com que no sabria que fa referència a la primera, pensaria que la segona s'ha realitzat correctament. A més, el camp d'\acro{ack} dels \est{flags} està actiu, i el camp de dades no conté informació.
 
@@ -1529,17 +1529,33 @@ En l'anterior subapartat s'ha presentat el funcionament del sistema en condicion
 
     Gràcies a aquest temps addicional, es garanteix que el dispositiu estigui actiu durant tota la finestra de temps en què es pot rebre el missatge de dades. És cert que implica un augment del temps en mode actiu, però ofereix una major probabilitat de rebre les dades i, per tant, major robustesa del sistema. 
 
-    % // TODO: A PARTIR D'AQUI QUEDA PENDENT REVISAR 
 
     Aquest temps de tolerància depèn del nombre màxim d'intents de retransmissió, de la quantitat de dispositius anteriors ---ja que són qui han de propagar el missatge---, de la mida del missatge, i dels paràmetres LoRa establerts, com ara l'amplada de banda o l'\acro{sf}. Per simplicitat, s'ha considerat la mida màxima de dades d'un missatge LoRa (\SI{255}{\byte}). No només cal considerar la transmissió del missatge de dades, també és important considerar la dels missatges de reconeixement de la capa d'accés al medi, i la mida d'aquests. Així, podem determinar aquest temps amb l'expressió:
     $$t_t =  (N \cdot (R+1) \cdot (t_{{tx}} + K_{\text{ack}} \cdot t_{\text{ack}})) \cdot (1 + f)$$
     \begin{itemize}
         \item $N$: nombre de nodes anteriors al dispositiu pel qual es calcula el temps de tolerància.
         \item $R$: nombre màxim de reintents de transmissió de la capa d'accés al medi. Se n'afegeix un, per tenir en compte la primera transmissió que no és un reintent.
-        \item 
+        \item $t_{tx}$: temps de transmissió de les dades, considerant els paràmetres LoRa i la mida màxima de les dades (\SI{255}{\byte}).
+        \item $K_{\text{ack}}$: factor de temps d'espera per la recepció del missatge de reconeixement de la capa d'accés al medi. Veure \autoref{subsubsec:integritat}.
+        \item $t_{\text{ack}}$: temps de transmissió del missatge de reconeixement de la capa d'accés al medi, considerant la mida d'aquest (\SI{7}{\byte}, la mida dels \est{headers} d'una trama d'accés al medi).
+        \item $f$: factor d'increment del temps màxim de transmissió, per tenir en compte el temps d'espera en aplicar \acro{beb} per accedir al canal. Per exemple, 0.25 si es vol incrementar en un 25\%.
     \end{itemize}
-    \item \emph{Sense recepció de dades.}
-    \item \emph{Limit de dades.} % fragmetnació
+    
+
+    \item \emph{Limit de dades.} El fet que cada dispositiu afegeix-hi les dades en un mateix missatge pot provocar que aquest acabi superant la mida màxima permesa ser transmès. En aquest cas, una solució és fragmentar el missatge en múltiples, i transmetre'ls de forma seqüencial. Com que no existeix fragmentació en el protocol, seria necessari implementar-lo a nivell d'aplicació. Això implica que el missatge de dades hauria de contenir informació addicional per indicar si es tracta d'un missatge fragmentat o no, per exemple un camp boleà: si està actiu significa que està fragmentat; en cas contrari, significa que no ho està, o que és l'últim fragment.
+    
+    El flux de funcionament en enviar o rebre un missatge fragmentat seria el següent:
+    \begin{itemize}
+        \item Si la quantitat de dades és superior a la màxima, dividir-les en múltiples missatges, activant el camp boleà de fragmentació de tots aquells que no són l'últim.
+        \item Enviar de forma ordenada els fragments. Si no s'aconsegueix enviar un fragment, el missatge es considera perdut i no es transmeten els següents.
+        \item En rebre un missatge, comprovar el camp boleà i, si està actiu, esperar a rebre tots els fragments. 
+        \item En rebre'ls tots, afegir les seves dades ---les de la lectura de dispositiu--- a l'últim segment (fragmentant-lo si és necessari), i transmetre com s'ha vist anteriorment.
+    \end{itemize}
+
+    % // TODO: Afegir diagrama de fragmentacions?
+    % // TODO: A PARTIR D'AQUI QUEDA PENDENT REVISAR
+
+    \item \emph{Pèrdua de dades.} Tot i existir mecanismes que intenten assegurar la integritat dels missatges, és possible que un dispositiu no rebi correctament les dades. Això pot ser degut a interferències, o bé a que el dispositiu que ha d'enviar les dades s'ha espatllat
 
 \end{itemize}
 
