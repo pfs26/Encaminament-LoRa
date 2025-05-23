@@ -1540,14 +1540,14 @@ En l'anterior subapartat s'ha presentat el funcionament del sistema en condicion
     Aquest temps de tolerància depèn del nombre màxim d'intents de retransmissió, de la quantitat de dispositius anteriors ---ja que són qui han de propagar el missatge---, de la mida del missatge, i dels paràmetres LoRa establerts, com ara l'amplada de banda o l'\acro{sf}. Per simplicitat, s'ha considerat la mida màxima de dades d'un missatge LoRa (\SI{255}{\byte}). No només cal considerar la transmissió del missatge de dades, també és important considerar la dels missatges de reconeixement de la capa d'accés al medi, i la mida d'aquests. Així, podem determinar aquest temps amb l'expressió:
     $$t_t =  (N \cdot (R+1) \cdot (t_{{tx}} + K_{\text{ack}} \cdot t_{\text{ack}})) \cdot (1 + f)$$
     \begin{itemize}
-        \item $N$: nombre de nodes anteriors al dispositiu pel qual es calcula el temps de tolerància.
+        \item $N$: nombre de dispositius anteriors al dispositiu pel qual es calcula el temps de tolerància.
         \item $R$: nombre màxim de reintents de transmissió de la capa d'accés al medi. Se n'afegeix un, per tenir en compte la primera transmissió que no és un reintent.
         \item $t_{tx}$: temps de transmissió de les dades, considerant els paràmetres LoRa i la mida màxima de les dades (\SI{255}{\byte}).
         \item $K_{\text{ack}}$: factor de temps d'espera per la recepció del missatge de reconeixement de la capa d'accés al medi. Veure \autoref{subsubsec:integritat}.
         \item $t_{\text{ack}}$: temps de transmissió del missatge de reconeixement de la capa d'accés al medi, considerant la mida d'aquest (\SI{7}{\byte}, la mida dels \est{headers} d'una trama d'accés al medi).
         \item $f$: factor d'increment del temps màxim de transmissió, per tenir en compte el temps d'espera en aplicar \acro{beb} per accedir al canal. Per exemple, 0.25 si es vol incrementar en un 25\%.
     \end{itemize}
-    
+    % // TODO: El nombre de dispositius hauria de ser fixat ABANS. Si no, si un falla i llavors es torna a recuperar, el temps de tolerància estaria malament i no rebria les dades.
 
     \item \emph{Limit de dades.} El fet que cada dispositiu afegeix-hi les dades en un mateix missatge pot provocar que aquest acabi superant la mida màxima permesa ser transmès. En aquest cas, una solució és fragmentar el missatge en múltiples, i transmetre'ls de forma seqüencial. Com que no existeix fragmentació en el protocol, seria necessari implementar-lo a nivell d'aplicació. Això implica que el missatge de dades hauria de contenir informació addicional per indicar si es tracta d'un missatge fragmentat o no, per exemple un camp boleà: si està actiu significa que està fragmentat; en cas contrari, significa que no ho està, o que és l'últim fragment.
     
@@ -1561,44 +1561,68 @@ En l'anterior subapartat s'ha presentat el funcionament del sistema en condicion
     \end{itemize}
 
     % // TODO: Dir que NO s'ha acabat implementant fragmentació!
-    \begin{figure}[ht]
-    \centering
-    \setlength{\extrarowheight}{0pt}
-    \addtolength{\extrarowheight}{\aboverulesep}
-    \addtolength{\extrarowheight}{\belowrulesep}
-    \setlength{\aboverulesep}{0pt}
-    \setlength{\belowrulesep}{0pt}
-    \arrayrulecolor{black}
-    \resizebox{\linewidth}{!}{%
-        \begin{tabular}{!{\vrule width \heavyrulewidth}c!{\vrule width \heavyrulewidth}cccccccc!{\vrule width \heavyrulewidth}} 
-            \multicolumn{1}{c}{\est{gateway}} & \multicolumn{7}{c}{} \\
-            \toprule
-            {\textcolor[rgb]{0,0.502,0}{D1}} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_D4:3} & \multicolumn{1}{c|}{RX\_D2:2} & \multicolumn{1}{c|}{TX\_D4:3} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D2:1} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
-            
-            \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}-->{\arrayrulecolor{black}}----->{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}}
-            {D2} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_D4:3} & \multicolumn{1}{c|}{TX\_4:3} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D2:2} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
-            
-            \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}---->{\arrayrulecolor[rgb]{1,0.847,0.808}}--->{\arrayrulecolor{black}}}
-            {D3} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_D4:4} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D4:3} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+    \begin{figure}
+        \centering
+        \setlength{\extrarowheight}{0pt}
+        \addtolength{\extrarowheight}{\aboverulesep}
+        \addtolength{\extrarowheight}{\belowrulesep}
+        \setlength{\aboverulesep}{0pt}
+        \setlength{\belowrulesep}{0pt}
+        \arrayrulecolor{black}
+        \resizebox{\linewidth}{!}{%
+            \begin{tabular}{!{\vrule width \heavyrulewidth}c!{\vrule width \heavyrulewidth}cccccccc!{\vrule width \heavyrulewidth}} 
+                \multicolumn{1}{c}{\est{gateway}} & \multicolumn{7}{c}{} \\
+                \toprule
+                {\textcolor[rgb]{0,0.502,0}{D1}} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_D4:3} & \multicolumn{1}{c|}{RX\_D2:2} & \multicolumn{1}{c|}{TX\_D4:3} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D2:1} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+                
+                \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}-->{\arrayrulecolor{black}}----->{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}}
+                {D2} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_D4:3} & \multicolumn{1}{c|}{TX\_4:3} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D2:2} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+                
+                \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}---->{\arrayrulecolor[rgb]{1,0.847,0.808}}--->{\arrayrulecolor{black}}}
+                {D3} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_D4:4} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D4:3} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
 
-            \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}-->{\arrayrulecolor[rgb]{1,0.847,0.808}}----->{\arrayrulecolor{black}}}
-            \textbf{D4} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D4:4} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
-            \midrule
-            {Mida (B)} & ~~~~~~~~~~~~~~ & 5 & 10 & 10 & 5 & 10 & 10 & ~~~~~~~~~~~~~~ \\
-            {Fragmentat} & ~~~~~~~~~~~~~~ & 0 & 0 & 1 & 0 & 1 & 0 & ~~~~~~~~~~~~~~ \\
-            \toprule
-        \end{tabular}
-    }
-    \caption{Fragmentació en transmissió de dades acumulades, amb mida màxima de \SI{10}{\byte}.}
-    \label{fig:app_fragmentacio}
-\end{figure}
+                \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}-->{\arrayrulecolor[rgb]{1,0.847,0.808}}----->{\arrayrulecolor{black}}}
+                \textbf{D4} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D4:4} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+                \midrule
+                {Mida (B)} & ~~~~~~~~~~~~~~ & 5 & 10 & 10 & 5 & 10 & 10 & ~~~~~~~~~~~~~~ \\
+                {Fragmentat} & ~~~~~~~~~~~~~~ & 0 & 0 & 1 & 0 & 1 & 0 & ~~~~~~~~~~~~~~ \\
+                \toprule
+            \end{tabular}
+        }
+        \caption{Fragmentació en transmissió de dades acumulades, amb mida màxima de \SI{10}{\byte}.}
+        \label{fig:app_fragmentacio}
+    \end{figure}
 
+    A la \autoref{fig:app_fragmentacio} s'ha representat com seria una comunicació amb fragmentació. Per simplicitat, s'ha considerat que la mida màxima de les dades és de \SI{10}{\byte} per missatge, i que cada dispositiu afegeix \SI{5}{\byte}. Per a cada transmissió es representa la mida de les dades, i si el camp boleà que indica si està fragmentat està actiu o no.
 
-    % // TODO: Afegir diagrama de fragmentacions?
     % // TODO: A PARTIR D'AQUI QUEDA PENDENT REVISAR
 
     \item \emph{Pèrdua de dades.} Tot i existir mecanismes que intenten assegurar la integritat dels missatges, és possible que un dispositiu no rebi correctament les dades. Això pot ser degut a interferències, o bé a que el dispositiu que ha d'enviar les dades s'ha espatllat
+    
+    Aquest cas provocaria que un dispositiu que no és el de referència quedés esperant la recepció de dades indefinidament, sense entrar en mode de baix consum. A més, implicaria la pèrdua de les dades de tota la xarxa. Per evitar-ho, s'ha implementat un temporitzador que, en cas de no rebre les dades en aquest temps, el dispositiu assumeix que no les rebrà, i pren la iniciativa d'iniciar ell la transmissió de dades cap al següent dispositiu.
 
+    Els següents dispositius rebrien el nou missatge de dades, i actuarien de forma normal. Com que els dispositius més propers al de referència inicien el mode de funcionament normal abans, també finalitzaran aquest temps d'espera abans, garantint que un dispositiu més llunyà no prengui la iniciativa d'iniciar la transmissió de dades abans que un de més proper.
+
+    Amb aquesta solució obtenim dos avantatges principals:
+    \begin{itemize}
+        \item No perdem les dades de tots els dispositius de la xarxa. Com que un nou dispositiu iniciarà la transmissió, els següents a aquest sí que rebran el missatge i, per tant, hi afegiran les seves dades. 
+        \item Permet detectar en quin punt de la xarxa hi ha hagut l'últim error. Si al servidor d'aplicació de LoRaWAN rebem un missatge amb \SI{10}{\byte} de dades, i sabem que cada dispositiu afegeix \SI{2}{\byte}, es dedueix que els últims 5 dispositius funcionen adequadament, i que el problema es troba en el sisè dispositiu, o en l'enllaç entre aquest i el cinquè. Tot i això, no es pot assegurar que aquest sigui l'únic error, ja que en podrien existir més en dispositius anteriors al sisè.  
+    \end{itemize}
+
+    Per establir aquest temps d'espera cal considerar de nou el temps de tolerància ($t_t$) exposat anteriorment, que expresa la diferència entre el primer i últim missatge de dades vàlid que un dispositiu pot rebre. Per un dispositiu, suposem el següent:
+    \begin{enumerate}
+        \item Rep el missatge de dades a l'instant $t_1$. En el següent cicle, esperarà rebre'l a l'instant $t_2 = t_1 + t_c$.
+        \item Com que no conèix quin missatge va rebre en el cicle anterior, surt del mode de baix consum a l'instant $t_2 - t_t$. Consdierant els extrems, tenim les següents situacions:
+        \begin{itemize}
+            \item Si en l'anterior cicle havia rebut el primer missatge, i ara també rep el primer possible, el rebrà a l'instant $t_2$, com esperava. 
+            \item Si havia rebut el primer, i ara rep l'últim possible, el rebrà a l'instant $t_2 + t_t$.
+            \item Si havia rebut l'últim missatge, i ara rep el primer possible, el rebrà a l'instant $t_2 - t_t$. En aplicar la tolerància, ja estarà actiu.
+            \item Si havia rebut l'últim, i ara també rep l'últim possible, el rebrà a l'instant $t_2$.
+            \item Per qualsevol altra possible combinació, el missatge de dades es rebrà entre els instants $t_2 \pm t_t$.
+        \end{itemize}
+    \end{enumerate} 
+
+    Així, s'observa com el límit de temps en què pot rebre el missatge de dades és $t_2 + t_t$. Per tant, el temps d'espera és el mateix que el temps de tolerància, centrat en l'instant on hauria de finalitzar el cicle ($t_2$). Cal tenir en compte, però, que surt del mode de baix consum a $t_2 - t_t$ i, per tant, el temps d'espera programat en el temporitzador en iniciar el funcionament normal ha de ser de $2 \cdot t_t$.
 \end{itemize}
 
 \chapter{Conclusions}
