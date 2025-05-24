@@ -10,6 +10,7 @@
 \usepackage{caption}
 \usepackage{bytefield}
 \usepackage{tabularx}
+\usepackage{xcolor}
 
 \usepackage{makecell}
 \usepackage{array}
@@ -18,8 +19,10 @@
 \usepackage{vcell}
 \usepackage{rotating}
 
+\usepackage{listings}
+
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta, positioning, calc, decorations.markings, shapes.geometric}
+\usetikzlibrary{arrows.meta, positioning, calc, decorations.markings, shapes.geometric, automata}
 
 \tikzstyle{startstop} = [rectangle, rounded corners, minimum width=2cm, minimum height=1cm,text centered, draw=black, fill=gray!30]
 \tikzstyle{process} = [rectangle, minimum width=2, minimum height=1cm, text centered, draw=black, fill=blue!20]
@@ -32,6 +35,7 @@
 \renewcommand{\subsectionautorefname}{apartat}
 \renewcommand{\subsubsectionautorefname}{subapartat}
 \renewcommand{\chapterautorefname}{capítol}
+\renewcommand{\equationautorefname}{equació}
 
 
 \tikzset{
@@ -53,8 +57,8 @@
 % Indica quines bd bibliografiques usarem
 \addbibresource{tfe.bib}
 
-% \title{Disseny d’un protocol LoRa amb encaminament estàtic per aplicacions de monitoratge}
-\title{Disseny d’un protocol LoRa amb encaminament estàtic per aplicacions de monitoratge}
+% \title{Disseny d'un protocol LoRa amb encaminament estàtic per aplicacions de monitoratge}
+\title{Disseny d'un protocol LoRa amb encaminament estàtic per aplicacions de monitoratge}
 \subtitle{Aplicació en xarxes de baix consum mitjançant sincronització temporal}
 % \subtitle{Adaptació per a escenaris de baix consum mitjançant sincronització temporal}
 
@@ -217,7 +221,7 @@ Un altre inconvenient és que, a causa que els dispositius no saben quan altres 
 
 Durant el desenvolupament d'aquest treball, Meshtastic ha iniciat la implementació d'un protocol d'encaminament per a missatges entre dos únics dispositius. La idea d'aquest protocol és descobrir la ruta més òptima entre dos dispositius utilitzant el mecanisme d'«inundació controlada»; un cop el destí rep el missatge, respon amb un nou missatge amb la informació de la ruta, que conté tots els dispositius que han de retransmetre el missatge per arribar fins a ell. En el procés de fer arribar aquesta resposta al transmissor del missatge, tots els nodes intermedis poden generar la seva taula de rutes. En les següents transmissions, si es coneix la ruta, els missatges els reenvien únicament els nodes de la ruta. Els detalls de la implementació i funcionament d'aquest protocol es poden consultar a \cite{open_source_mesh_nodate}.
 
-\section{LoRaMesher}
+\subsection{LoRaMesher}
 Es tracta d'una llibreria que implementa un protocol d'encaminament per a ser utilitzat en xarxes basades en LoRa. 
 
 Cada dispositiu consta d'una taula d'encaminament, on es defineixen quin és el següent dispositiu a qui han d'enviar un missatge per fer-lo arribar al destí final. De forma periòdica, cada node transmet informació sobre la seva taula d'encaminament; els nodes que es troben a l'abast reben el missatge i actualitzen la seva taula d'encaminament amb la informació rebuda, no només coneixent informació sobre els seus veïns directes, sinó també sobre els veïns dels seus veïns, i així successivament. Es poden consultar els detalls d'aquesta implementació a \cite{sole_implementation_2022}.
@@ -265,7 +269,7 @@ Per realitzar el desenvolupament, s'han utilitzat dues llibreries externes:
 
 \section{Disseny per capes}
 Com en la majoria de protocols moderns, s'ha dissenyat seguint un model per capes. L'estructura es basa en el model \acro{tcp/ip}, amb la diferència de la capa física, que el model \acro{tcp/ip} no contempla de forma explícita. 
-A continuació es descriuen les diferents capes del protocol, des de la capa física fins a la capa d’aplicació, indicant-ne les funcions principals, i les decisions de disseny adoptades per optimitzar el rendiment i la simplicitat del sistema.
+A continuació es descriuen les diferents capes del protocol, des de la capa física fins a la capa d'aplicació, indicant-ne les funcions principals, i les decisions de disseny adoptades per optimitzar el rendiment i la simplicitat del sistema.
 
 A la \autoref{fig:diagrama_protocols} es pot observar, de forma introductòria, com s'estructura el protocol amb les diverses capes, les quals s'explicaran amb més detall en els seus respectius apartats. 
 \begin{figure}
@@ -339,7 +343,7 @@ Per acabar, al final de la trama s'ha inclòs un camp de \acro{crc}, per intenta
 % « »
 Quan un dispositiu vol transmetre un missatge, és primordial que no interrompi una transmissió en curs. En cas contrari, es podria produir una interferència entre ambdues transmissions, provocant que cap dels missatges arribi al seu destí. 
 
-Per tal d’evitar co\l.lisions en l’accés al canal, es pot utilitzar una estratègia \acro{csma} (\est{Carrier Sense Multiple Access}), que consisteix a verificar si el canal està lliure abans d’iniciar una transmissió. Molts transductors LoRa incorporen la funcionalitat \acro{cad} (\est{Channel Activity Detection}), que permet detectar preàmbuls d'altres transmissions. En alguns transductors, com l'utilitzat en aquest treball, \acro{sx1262}, aquesta detecció es veu millorada, ja que també permet identificar dades del paquet LoRa, i no únicament el seu preambul, fent el procés més eficaç.
+Per tal d'evitar co\l.lisions en l'accés al canal, es pot utilitzar una estratègia \acro{csma} (\est{Carrier Sense Multiple Access}), que consisteix a verificar si el canal està lliure abans d'iniciar una transmissió. Molts transductors LoRa incorporen la funcionalitat \acro{cad} (\est{Channel Activity Detection}), que permet detectar preàmbuls d'altres transmissions. En alguns transductors, com l'utilitzat en aquest treball, \acro{sx1262}, aquesta detecció es veu millorada, ja que també permet identificar dades del paquet LoRa, i no únicament el seu preambul, fent el procés més eficaç.
 
 Mitjançant aquesta funcionalitat, el dispositiu comprova, a través de la interfície proporcionada per la capa d'abstracció LoRa, si hi ha una transmissió en curs. Si el canal està lliure, s'inicia la transmissió, proporcionant el missatge a la capa inferior; en cas contrari, s'aplica un mecanisme d'espera aleatori conegut com a \est{Binary Exponential Backoff} (\acro{beb}). Aquest consisteix a esperar un temps aleatori que depèn del nombre de reintents d'accés previs, multiplicant per dos el temps màxim d'espera per cada intent. Així, el rang de possibles valors ve donat per l'expressió $[0, 2^r-1]\cdot K$, on ${r}$ és el nombre de reintents realitzats, i ${K}$ una constant de temps, coneguda com a  «temps d'\est{slot}». Per exemple, si és el segon reintent d'accés al canal, i la constant és de \SI{100}{\milli\second}, el rang de temps d'espera és $[0, 2^2-1]\cdot100=[0, 300]\cdot K$ mi\l.lisegons. 
 
@@ -372,13 +376,13 @@ Seguidament es verifica si el dispositiu és el destinatari de la trama. Si no h
 S'exposa una interfície que permet a la capa superior obtenir les dades de la trama rebuda, la qual únicament s'hauria d'utilitzar després que s'hagi notificat a través de l'anterior \est{callback}. En cas contrari, les dades que s'obtinguin podrien ser incorrectes o duplicades.
 \subsubsection{Cues de transmissió i recepció}
 % « »
-Sense la implementació d'una cua de transmissió, després d'iniciar un enviament, no seria possible realitzar-ne cap altre fins que aquest finalitzés, ja sigui per la recepció d’un \acro{ack} o per esgotament dels reintents. Això faria que la interfície de transmissió exposada a la capa superior quedés bloquejada. En conseqüència, si una capa superior volgués iniciar una nova transmissió, també hauria de quedar-se bloquejada, propagant el bloqueig cap amunt, o bé descartar l’enviament.
+Sense la implementació d'una cua de transmissió, després d'iniciar un enviament, no seria possible realitzar-ne cap altre fins que aquest finalitzés, ja sigui per la recepció d'un \acro{ack} o per esgotament dels reintents. Això faria que la interfície de transmissió exposada a la capa superior quedés bloquejada. En conseqüència, si una capa superior volgués iniciar una nova transmissió, també hauria de quedar-se bloquejada, propagant el bloqueig cap amunt, o bé descartar l'enviament.
 
 Per evitar-ho, s'ha implementat una cua de transmissió. Quan es vol realitzar un nou enviament, es comprova si n'hi ha una en curs: si és així, s'afegeix la trama a la cua de transmissió; en cas contrari, s'inicia directament l'enviament. Un cop finalitzada una transmissió, es comprova si hi ha més trames a la cua i, si n'hi ha, s'inicia el seu enviament.
 
-Un aspecte important d’aquesta cua és la gestió dels reconeixements. Si un \acro{ack} es trametés a través de la cua, caldria esperar a transmetre totes les trames anteriors, fet que podria retardar excessivament el seu enviament. Això podria provocar que el transmissor considerés que la transmissió havia fallat. Per evitar-ho, els missatges de reconeixement s’envien de manera immediata, sense passar per la cua, minimitzant així el temps de resposta.
+Un aspecte important d'aquesta cua és la gestió dels reconeixements. Si un \acro{ack} es trametés a través de la cua, caldria esperar a transmetre totes les trames anteriors, fet que podria retardar excessivament el seu enviament. Això podria provocar que el transmissor considerés que la transmissió havia fallat. Per evitar-ho, els missatges de reconeixement s'envien de manera immediata, sense passar per la cua, minimitzant així el temps de resposta.
 
-Pel que fa a la recepció, també s’ha implementat una cua. Un cop processada una trama rebuda, explicat anteriorment, aquesta es guarda a la cua i es notifica la seva arribada a la capa superior. S’hi exposen dues interfícies: una permet conèixer el nombre de trames emmagatzemades, i l’altra, obtenir les dades de la primera trama. Aquesta implementació proporciona més flexibilitat a la capa superior per gestionar els missatges rebuts, evitant el risc de sobrescriure dades rebudes prèviament.
+Pel que fa a la recepció, també s'ha implementat una cua. Un cop processada una trama rebuda, explicat anteriorment, aquesta es guarda a la cua i es notifica la seva arribada a la capa superior. S'hi exposen dues interfícies: una permet conèixer el nombre de trames emmagatzemades, i l'altra, obtenir les dades de la primera trama. Aquesta implementació proporciona més flexibilitat a la capa superior per gestionar els missatges rebuts, evitant el risc de sobrescriure dades rebudes prèviament.
 
 La implementació de la cua de transmissió introdueix un problema: en notificar a la capa superior que s'ha transmès un missatge, aquesta no coneix quin missatge s'ha enviat. Per solucionar-ho, quan la capa superior inicia una transmissió, se li retorna l'identificador de la trama. Un cop s'ha enviat, el \est{callback} de fi de transmissió rep com a paràmetre l'identificador de la trama, permetent així a la capa superior saber quin missatge ha estat enviat. A més, s'afegeix un \est{callback} de transmissió errònia, que notifica a la capa superior quan no s'ha pogut realitzar una transmissió (per exemple, per esgotament de reintents), proporcionant també l'identificador de la trama.
 \subsubsection{Detalls d'implementació}
@@ -592,14 +596,14 @@ Aquest mateix comportament es podria fins i tot obtenir amb una única ràdio, d
 % // TODO: ESTEM AQUI, QUEDA FER AIXO
 
 \subsection{Encaminament estàtic}
-La funció d'aquesta capa és la de determinar quin és el següent dispositiu a qui s'ha d'enviar un missatge perquè arribi al destí final. Tal com s’ha comentat anteriorment, s’utilitza un encaminament estàtic, de manera que les taules que defineixen les rutes s’han de configurar prèviament. Aquesta capa també és responsable de gestionar i accedir a aquestes taules quan sigui necessari.
+La funció d'aquesta capa és la de determinar quin és el següent dispositiu a qui s'ha d'enviar un missatge perquè arribi al destí final. Tal com s'ha comentat anteriorment, s'utilitza un encaminament estàtic, de manera que les taules que defineixen les rutes s'han de configurar prèviament. Aquesta capa també és responsable de gestionar i accedir a aquestes taules quan sigui necessari.
 
-Una altra tasca important que duu a terme és la de commutar entre l’ús del protocol definit, a través de la capa d’accés al medi, i l’ús de LoRaWAN, mitjançant la capa d’abstracció de LoRaWAN comentada anteriorment. D’aquesta manera, la capa d’encaminament es comunica amb la capa d’accés al medi, rebent notificacions de final de transmissió i de recepció de missatges a través del protocol personalitzat, i també amb la capa d’abstracció de LoRaWAN, rebent notificacions de recepció de missatges a través de LoRaWAN.
+Una altra tasca important que duu a terme és la de commutar entre l'ús del protocol definit, a través de la capa d'accés al medi, i l'ús de LoRaWAN, mitjançant la capa d'abstracció de LoRaWAN comentada anteriorment. D'aquesta manera, la capa d'encaminament es comunica amb la capa d'accés al medi, rebent notificacions de final de transmissió i de recepció de missatges a través del protocol personalitzat, i també amb la capa d'abstracció de LoRaWAN, rebent notificacions de recepció de missatges a través de LoRaWAN.
 
-\subsubsection{Estructura de les trames}
-És necessari que aquesta capa pugui saber quin és el destí final del missatge, per tal de determinar quin és el següent dispositiu a qui s'ha d'enviar. Per tant, ha de contenir un camp amb l'adreça del dispositiu de \emph{destí}. També s'inclou l'adreça del dispositiu \emph{emissor}, permetent saber d'on s'ha originat el missatge. Ambdós camps tenen la mateixa longitud que els de la capa d’accés al medi, és a dir, \SI{1}{\byte}, la qual cosa permet reutilitzar les mateixes adreces en les dues capes i simplifica la implementació.
+\subsubsection{Estructura dels paquets}
+És necessari que aquesta capa pugui saber quin és el destí final del missatge, per tal de determinar quin és el següent dispositiu a qui s'ha d'enviar. Per tant, ha de contenir un camp amb l'adreça del dispositiu de \emph{destí}. També s'inclou l'adreça del dispositiu \emph{emissor}, permetent saber d'on s'ha originat el missatge. Ambdós camps tenen la mateixa longitud que els de la capa d'accés al medi, és a dir, \SI{1}{\byte}, la qual cosa permet reutilitzar les mateixes adreces en les dues capes i simplifica la implementació.
 
-Per tal d'evitar transmissions infinites ---per exemple, si ruta resulta en un bucle--- s'afegeix un camp de \acro{ttl} (\est{Time To Live}), que indica el nombre màxim de salts que pot fer un missatge abans de ser descartat. Per exemple, si l'emissor genera un missatge amb un \acro{ttl} d'1, aquest només podrà ser transmès al següent dispositiu de la ruta. El camp \acro{ttl} ocupa \SI{1}{\byte}, permetent un màxim de 255 salts. Tenint en compte que la xarxa està limitada a un màxim de 253 dispositius, aquesta longitud és suficient, ja que no haurien d'existir rutes de longitud superior al màxim de dispositius.
+Per tal d'evitar transmissions infinites ---per exemple, si una ruta resulta en un bucle--- s'afegeix un camp de \acro{ttl} (\est{Time To Live}), que indica el nombre màxim de salts que pot fer un missatge abans de ser descartat. Per exemple, si l'emissor genera un missatge amb un \acro{ttl} d'1, aquest només podrà ser transmès al següent dispositiu de la ruta. El camp \acro{ttl} ocupa \SI{1}{\byte}, permetent un màxim de 255 salts. Tenint en compte que la xarxa està limitada a un màxim de 253 dispositius, aquesta longitud és suficient, ja que no haurien d'existir rutes de longitud superior al màxim de dispositius.
 
 Per acabar, s'ha inclòs un camp de \emph{longitud}, que indica la longitud de les dades del missatge. Com en el protocol d'accés al medi, permet saber quants bytes s'han de llegir per obtenir les dades. Es reserva també un byte, ja que la longitud màxima de les dades del protocol d'accés al medi és de \SI{248}{\byte}. Així, les \emph{dades} podran tenir una longitud màxima de \SI{244}{\byte}, sent els \SI{4}{\byte} restants per a la resta de camps.
 
@@ -618,7 +622,7 @@ Seguint el model \acro{tcp/ip}, el missatges d'aquesta capa s'anomenen \emph{paq
 \end{figure}
 \subsubsection{Gestió de la taula d'encaminament}
 % comentar que implementa interfície per afegir/eliminar taules, per si mai es defineix un mecanisme d'encaminament dinàmic
-La taula d'encaminament és l'encarregada de definir quin és el següent dispositiu al qual s’ha d’enviar un paquet per tal que arribi al seu destí final. Per simplicitat, s’ha optat per permetre una única ruta per a cada dispositiu, establint així una relació un a un entre cada adreça de destí i el següent salt. Això limita la mida màxima de la taula d’encaminament a 254 entrades (253 dispositius i un \est{gateway}). A la \autoref{tab:taula_encaminament} es mostra un exemple de taula d'encaminament, on es pot veure que el dispositiu té comunicació directa amb els dispositius \fitx{0x4E} i \fitx{0xA1}, i si es vol enviar un paquet al \est{gateway}, aquest s’ha de fer arribar a través de \fitx{0x4E}.
+La taula d'encaminament és l'encarregada de definir quin és el següent dispositiu al qual s'ha d'enviar un paquet per tal que arribi al seu destí final. Per simplicitat, s'ha optat per permetre una única ruta per a cada dispositiu, establint així una relació un a un entre cada adreça de destí i el següent salt. Això limita la mida màxima de la taula d'encaminament a 254 entrades (253 dispositius i un \est{gateway}). A la \autoref{tab:taula_encaminament} es mostra un exemple de taula d'encaminament, on es pot veure que el dispositiu té comunicació directa amb els dispositius \fitx{0x4E} i \fitx{0xA1}, i si es vol enviar un paquet al \est{gateway}, aquest s'ha de fer arribar a través de \fitx{0x4E}.
 
 \begin{table}
     \centering
@@ -649,9 +653,9 @@ La taula d'encaminament és l'encarregada de definir quin és el següent dispos
 
 Una propietat important de la taula d'encaminament és que aquesta ha de ser persistent. Això vol dir que si el dispositiu es reinicia, aquest ha de poder recuperar la taula d'encaminament anteriorment configurada. En cas contrari, com que no es genera de forma dinàmica, aquesta capa quedaria inoperativa. Per evitar-ho, s'utilitza de nou la memòria no volàtil \acro{NVS}. La mida màxima de la taula serà de \SI{508}{\byte} (254 entrades, 2 adreces d'\SI{1}{\byte} per entrada), fet que no és problema en el dispositiu utilitzat (ESP32).
 
-Per evitar fer lectures a la memòria \acro{nvs} per a cada consulta de ruta, es carrega tota la taula a la memòria volàtil en inicialitzar la capa, fent que les lectures siguin molt més ràpides. El format d’emmagatzematge consisteix en una seqüència de bytes, on cada parell representa una entrada: el primer byte indica l’adreça de destí i el segon, el següent salt. Aquest format facilita el bolcat de la taula entre memòria volàtil i no volàtil, ja que no cal fer cap conversió. A la \autoref{fig:emmgatzematge_taula_encaminament} es pot observar com s'emmagatzemaria part de la taula d'encaminament representada anteriorment. 
+Per evitar fer lectures a la memòria \acro{nvs} per a cada consulta de ruta, es carrega tota la taula a la memòria volàtil en inicialitzar la capa, fent que les lectures siguin molt més ràpides. El format d'emmagatzematge consisteix en una seqüència de bytes, on cada parell representa una entrada: el primer byte indica l'adreça de destí i el segon, el següent salt. Aquest format facilita el bolcat de la taula entre memòria volàtil i no volàtil, ja que no cal fer cap conversió. A la \autoref{fig:emmgatzematge_taula_encaminament} es pot observar com s'emmagatzemaria part de la taula d'encaminament representada anteriorment. 
 
-S’han implementat interfícies per afegir, eliminar i actualitzar entrades de la taula d’encaminament. Tot i que no són estrictament necessàries per al protocol d’encaminament estàtic, poden resultar útils si en el futur es vol implementar un encaminament dinàmic. En aquest cas, després de fer una modificació de la taula de rutes, s'actualitza la taula a la memòria \acro{nvs}, per tal de garantir la seva persistència.
+S'han implementat interfícies per afegir, eliminar i actualitzar entrades de la taula d'encaminament. Tot i que no són estrictament necessàries per al protocol d'encaminament estàtic, poden resultar útils si en el futur es vol implementar un encaminament dinàmic. En aquest cas, després de fer una modificació de la taula de rutes, s'actualitza la taula a la memòria \acro{nvs}, per tal de garantir la seva persistència.
 
 La implementació s'ha fet en un mòdul independent, consultable al fitxer \fitx{routing_table.cpp}, permetent que sigui reutilitzable en altres possibles protocols d'encaminament.
 \subsubsection{Transmissió}
@@ -672,9 +676,9 @@ A més, cal també tenir en compte que la capa d'accés al medi implementa notif
 \subsubsection{Recepció}
 \label{subsubsec:routing_rx}
 % « »
-Quan la capa d’accés al medi notifica a la capa d’encaminament la recepció d’un paquet, mitjançant el \est{callback} corresponent, aquesta rep el paquet i verifica quin és el seu destí final. Si n'és el destí final, es notifica a la capa superior perquè el processi i es dona per finalitzat el procés. En canvi, si el paquet no és per a ell, es consulta la taula d’encaminament per determinar quin és el següent salt.
+Quan la capa d'accés al medi notifica a la capa d'encaminament la recepció d'un paquet, mitjançant el \est{callback} corresponent, aquesta rep el paquet i verifica quin és el seu destí final. Si n'és el destí final, es notifica a la capa superior perquè el processi i es dona per finalitzat el procés. En canvi, si el paquet no és per a ell, es consulta la taula d'encaminament per determinar quin és el següent salt.
 
-Si no existeix cap entrada a la taula per a l’adreça de destí del paquet rebut, aquest es descarta. Encara que podria semblar lògic generar un missatge de «no-reconeixement» per informar l’emissor, s’ha decidit no implementar aquest mecanisme. Fer-ho implicaria assignar tasques a la capa d’encaminament, que van més enllà de determinar la ruta del paquet. A més, aquest tipus de notificació incrementaria el nombre de transmissions, fet no desitjat en un protocol de baix consum. Tampoc hauria de ser necessari si la configuració de les taules d’encaminament s'ha realitzat correctament, ja que les rutes no canvien dinàmicament.
+Si no existeix cap entrada a la taula per a l'adreça de destí del paquet rebut, aquest es descarta. Encara que podria semblar lògic generar un missatge de «no-reconeixement» per informar l'emissor, s'ha decidit no implementar aquest mecanisme. Fer-ho implicaria assignar tasques a la capa d'encaminament, que van més enllà de determinar la ruta del paquet. A més, aquest tipus de notificació incrementaria el nombre de transmissions, fet no desitjat en un protocol de baix consum. Tampoc hauria de ser necessari si la configuració de les taules d'encaminament s'ha realitzat correctament, ja que les rutes no canvien dinàmicament.
 
 Si el valor del \acro{ttl} del paquet rebut és 1 (i el paquet no és per ell, verificat prèviament), es descarta el paquet, ja que no pot fer més salts. En cas contrari, es decrementa el valor del \acro{ttl} i es transmet el paquet al següent salt a través de la capa d'accés al medi o de LoRaWAN, segons correspongui.
 
@@ -682,7 +686,7 @@ Gràcies a la capa d'abstracció de LoRaWAN, que implementa la recepció de paqu
 
 Com s'ha comentat anteriorment, la finalització de la transmissió d'aquest paquet encaminat no es notificarà a la capa superior, ja que no s'hi ha originat.
 \subsubsection{Detalls d'implementació}
-La implementació d’aquesta capa no s’ha basat en una màquina d’estats perquè no és necessari mantenir cap estat entre transmissions ni recepcions. En aquest cas, el comportament de la capa d’encaminament és totalment síncron, permetent basar la implementació com una seqüència de mètodes i condicions. Basar la implementació en una \acro{fsm} requeriria un disseny més complex, sense aportar cap avantatge. 
+La implementació d'aquesta capa no s'ha basat en una màquina d'estats perquè no és necessari mantenir cap estat entre transmissions ni recepcions. En aquest cas, el comportament de la capa d'encaminament és totalment síncron, permetent basar la implementació com una seqüència de mètodes i condicions. Basar la implementació en una \acro{fsm} requeriria un disseny més complex, sense aportar cap avantatge. 
  
 A la \autoref{fig:routing_flux_tx} i a la \autoref{fig:routing_flux_rx} es mostren dos diagrames de flux, representant la transmissió i recepció de paquets respectivament. Ambdós diagrames es basen en el disseny exposat en els subapartats anteriors. A la \autoref{fig:routing_flux_txdone} es mostra el diagrama de flux de la transmissió completada, on es pot observar la notificació a la capa superior si aquesta s'hi havia originat. 
 
@@ -867,7 +871,7 @@ La gestió de la recepció de missatges duplicats és també una qüestió impor
 A més, s'encarrega també de gestionar els missatges de les diferents aplicacions que poden existir a la capa d'aplicació, redirigint cada missatge a la seva aplicació corresponent.
 
 
-\subsubsection{Estructura de les trames}
+\subsubsection{Estructura dels segments}
 Seguint l'estructura del model \acro{tcp/ip}, els missatges d'aquesta capa s'anomenen \emph{segments}, permetent diferenciar-los dels paquets de la capa d'encaminament, o de les trames de la capa d'accés al medi. 
 
 Per tal de poder identificar cada missatge, i evitar duplicitats, s'inclou un \emph{identificador} de missatge. S'ha dissenyat d'una longitud de \SI{2}{\byte}, permetent així un màxim de \num{65535} missatges diferents. La distinció entre aquest identificador i el de la capa d'accés al medi és que aquest és global, mantenint-se des de l'emissor fins al receptor final. En canvi, l'identificador de la capa d'accés al medi és local, i es reinicia cada vegada que es realitza una nova transmissió. Així, la probabilitat de co\l.lisió d'identificadors és menor que en la capa d'accés al medi, ja que la quantitat d'identificadors generats és menor. Malgrat això, s'ha optat per mantenir la mateixa longitud d'identificador, reduïnt la probabilitat de co\l.isió d'identifiadors en aquesta capa, incrementant així la fiabilitat d'extrem a extrem. 
@@ -1041,16 +1045,16 @@ Seguidament, el dispositiu \fitx{0x03} realitza dues transmissions no fiables ca
     \label{fig:transport_exemple_1}
 \end{figure}
 
-\subsection{Capa d’aplicació}
+\subsection{Capa d'aplicació}
 La capa d'aplicació és la més alta del protocol, i s'encarrega de gestionar les aplicacions que l'utilitzen. Tot i que no forma part del protocol, actua com a interfície entre aquest i les aplicacions, permetent que cada aplicació pugui definir i implementar la seva pròpia capa d'aplicació de manera independent, sense interferir amb la resta. 
 
 En ser independent, poden coexistir múltiples aplicacions, on cadascuna defineix la seva pròpia estructura de dades. Tal com s'ha vist en la capa de transport, cada aplicació s'identifica mitjançant un port, que ha de ser únic. Gràcies a la implementació de la capa de transport, les aplicacions només són notificades dels missatges que els corresponen, de manera que no cal que cada una filtri els missatges rebuts.
 
 Així, el desenvolupament de la capa d'aplicació és una tasca de l'usuari final, i dependrà completament dels requisits i característiques específiques de cada cas. A continuació s'indiquen, com a exemple, alguns protocols de capa d'aplicació que podrien existir:
 \begin{itemize}
-    \item \emph{Configuració dinàmica}. Permet modificar paràmetres del protocol durant el seu funcionament, com ara la potència de transmissió, el nombre d’intents de retransmissió o el temps d’espera per a la recepció dels \acro{ack} de la capa d’accés al medi.
+    \item \emph{Configuració dinàmica}. Permet modificar paràmetres del protocol durant el seu funcionament, com ara la potència de transmissió, el nombre d'intents de retransmissió o el temps d'espera per a la recepció dels \acro{ack} de la capa d'accés al medi.
     \item \emph{Gestió de la xarxa}. Ofereix la possibilitat d'afegir o eliminar nodes i, per tant, de modificar les taules de rutes dels dispositius.
-    \item \emph{Baix consum}. Gestiona els modes de baix consum dels nodes, proporcionant mecanismes de sincronització amb la resta de dispositius per evitar la pèrdua de funcionalitat d’encaminament.
+    \item \emph{Baix consum}. Gestiona els modes de baix consum dels nodes, proporcionant mecanismes de sincronització amb la resta de dispositius per evitar la pèrdua de funcionalitat d'encaminament.
 \end{itemize}
 
 Al \autoref{chap:adaptacio_baix_consum} es detalla la implementació de l'últim exemple, definint la situació d'ús i els mecanismes utilitzats.
@@ -1085,7 +1089,7 @@ Una característica de les comunicacions és que el receptor no coneix quan un t
 
 En aquest capítol es presenta, primerament, les limitacions del protocol implementat sense optimitzacions energètiques addicionals. Seguidament, es presenten les estratègies considerades, basades en la sincronització entre nodes per permetre modes de baix consum, i implementades a la capa d'aplicació. Finalment, es presenten les proves realitzades per verificar el correcte funcionament de la solució, i els seus resultats i limitacions.
 
-\section{Descripció de l’escenari: xarxa lineal de sensors}
+\section{Descripció de l'escenari: xarxa lineal de sensors}
 L'adaptació s'ha realitzat en un entorn concret i conegut, aprofitant les característiques de la xarxa per implementar i optimitzar la solució. Aquest fet permet que la solució sigui eficient en aquest context, però no garanteix que pugui ser aplicable en altres topologies. 
 
 L'escenari considerat és una xarxa lineal de dispositius, amb connectivitat a un \est{gateway} LoRaWAN a través d'un dels seus extrems. Per simplicitat, es considera també que cada dispositiu es pot comunicar únicament amb els dos veïns immediats. Això es pot assegurar mitjançant les taules d'encaminament, definint les rutes per tal que cada dispositiu utilitzi únicament els seus veïns. 
@@ -1215,7 +1219,7 @@ Aquesta segona opció, tot i reduir el risc de co\l.lisions, afegeix major compl
 \end{itemize}
 
 
-En qualsevol dels dos casos, aquesta solució implica una coordinació temporal molt més precisa, ja que cal definir per a cada node quan ha de transmetre i quan pot tornar al mode de baix consum. El funcionament resultant s’assembla molt a un esquema de \acro{tdma} (Time Division Multiple Access), on cada dispositiu disposa d’un interval de temps específic per accedir al canal.
+En qualsevol dels dos casos, aquesta solució implica una coordinació temporal molt més precisa, ja que cal definir per a cada node quan ha de transmetre i quan pot tornar al mode de baix consum. El funcionament resultant s'assembla molt a un esquema de \acro{tdma} (Time Division Multiple Access), on cada dispositiu disposa d'un interval de temps específic per accedir al canal.
 
 A la \autoref{fig:app_opcioSyncExp2} es representa aquest comportament, on cal recordar que \fitx{D1} ara és qui té capacitats LoRaWAN i també actua com a referència. El diagrama no representa totes les transmissions, ja que això el faria massa complex i complicat de llegir; per aquest motiu es representen únicament les del bloc senar, i les inicials del bloc parell.
 
@@ -1259,7 +1263,7 @@ Es va considerar la possibilitat d'utilitzar més de dos blocs, per exemple en m
 Finalment, es va descartar la implementació de qualsevol de les opcions anteriors, ja que requereixen una quantitat molt elevada de transmissions. Amb \fitx{N} dispositius, el nombre total de transmissions (incloent-hi les dades i missatges de sincronització) és aproximadament $\sum{N} + N$, fet que incrementa el consum energètic i la saturació del canal. A més, la lògica de funcionament és excessivament complexa, dificultant la implementació d'aquesta solució. 
 
 \subsection{Dades acumulades}
-Com s’ha comentat, un dels principals inconvenients de les solucions anteriors és l’elevat nombre de transmissions que es realitzen en cada cicle. Això es deu al fet que cada dispositiu genera el seu propi segment de dades amb destí final al gateway. Ja que la topologia és lineal, aquest segment ha de ser encaminat a través dels dispositius intermedis, els quals han de retransmetre’l fins al seu destí, fent que el nombre de transmissions i l'ús del canal creixi de forma exponencial amb el nombre de dispositius. 
+Com s'ha comentat, un dels principals inconvenients de les solucions anteriors és l'elevat nombre de transmissions que es realitzen en cada cicle. Això es deu al fet que cada dispositiu genera el seu propi segment de dades amb destí final al gateway. Ja que la topologia és lineal, aquest segment ha de ser encaminat a través dels dispositius intermedis, els quals han de retransmetre'l fins al seu destí, fent que el nombre de transmissions i l'ús del canal creixi de forma exponencial amb el nombre de dispositius. 
 
 Per tal de reduir aquest nombre de transmissions, s'ha optat per acumular les dades de tots els dispositius en un únic missatge. És important recordar que s'havia limitat el comportament dels dispositius a un únic missatge, i amb el mateix destí final, el \est{gateway}. Si no s'haguessin près aquestes limitacions, aquesta estratègia no seria possible.
 
@@ -1278,7 +1282,7 @@ El funcionament d'aquest mecanisme és el següent:
 
 
 % Explicar qui és referència i qui dades
-Una qüestió important és determinar quin dispositiu és el de referència. Inicialment es va considerar utilitzar el dispositiu més proper al \est{gateway}, de manera que la sincronització es propagaria en un únic sentit (des del \est{gateway} cap a l’extrem de la xarxa), mentre que les dades circularien en sentit contrari. Aquesta situació es mostra a la \autoref{fig:app_opcioSyncAcum1}, on el dispositiu \fitx{D1}, el més proper al \est{gateway}, inicia el missatge de sincronització. Per altra banda, el dispositiu \fitx{D6}, situat a l’extrem oposat, és l’encarregat d’iniciar la transmissió de dades després de sincronitzar-se. Les transmissions de dades s’identifiquen com \fitx{TX_Dm:n}, on \fitx{m} representa el dispositiu que ha afegit les primeres dades, i \fitx{n} el dispositiu que ha afegit les últimes.
+Una qüestió important és determinar quin dispositiu és el de referència. Inicialment es va considerar utilitzar el dispositiu més proper al \est{gateway}, de manera que la sincronització es propagaria en un únic sentit (des del \est{gateway} cap a l'extrem de la xarxa), mentre que les dades circularien en sentit contrari. Aquesta situació es mostra a la \autoref{fig:app_opcioSyncAcum1}, on el dispositiu \fitx{D1}, el més proper al \est{gateway}, inicia el missatge de sincronització. Per altra banda, el dispositiu \fitx{D6}, situat a l'extrem oposat, és l'encarregat d'iniciar la transmissió de dades després de sincronitzar-se. Les transmissions de dades s'identifiquen com \fitx{TX_Dm:n}, on \fitx{m} representa el dispositiu que ha afegit les primeres dades, i \fitx{n} el dispositiu que ha afegit les últimes.
 
 \begin{figure}[ht]
     \centering
@@ -1486,12 +1490,23 @@ Aquesta estratègia no només permet reduir el nombre de transmissions, sinó qu
 
 A més, s'observa també com el temps de funcionament normal de cada dispositiu, en condicions ideals ---sense que existeixin retransmissions---, és el mateix per a tots, i és constant. Tampoc existeix un temps d'espera entre la recepció del missatge de sincronització i el de dades, ja que el missatge de sincronització és implícit, fent que a més sigui el mínim possible, reduint el consum energètic.
 
-S'ha optat per utilitzar segments no fiables a LA capa de transport per transmetre les dades. Cal tenir en compte que aquestes dades s'enviaran al següent dispositiu, el qual ja és el destí final. Així, en aquesta transmissió ja s'apliquen els reconeixements de la capa d'accés al medi i, per tant, és incoherent i poc òptim incloure-hi també un missatge de reconeixement a nivell de transport.
+S'ha optat per utilitzar segments no fiables a la capa de transport per transmetre les dades. Cal tenir en compte que aquestes dades s'enviaran al següent dispositiu, el qual ja és el destí final. Així, en aquesta transmissió ja s'apliquen els reconeixements de la capa d'accés al medi i, per tant, és incoherent i poc òptim incloure-hi també un missatge de reconeixement a nivell de transport.
+\\
+D'ara endavant es considerarà l'instant en que es rep el missatge de sincronització com a $t_s$, i l'instant previ a iniciar el mode de baix consum com a $t_d$. El temps de funcionament normal, $t_n$, és la diferència entre ambdós: $t_n = t_d - t_s$. És important mencionar que un dispositiu coneix, en tot moment, el temps que ha transcorregut des que s'ha inicialitzat i, per tant, pot determinar l'instant de temps de cada un dels anteriors esdeveniments.
+El temps de cicle, $t_c$, és el temps que transcorre entre dos instants consecutius de sincronització, que en situacions ideals hauria de ser invariant en el temps.
+
+
+% D'ara endavant, es considerarà com a temps de cicle, $t_c$, el temps que transcorre entre dos instants consecutius de sincronització, i com a temps de \est{sleep}, $t_s$, el temps que un dispositiu està en mode de baix consum. L'instant en que un dispositiu rep el missatge de sincronització, $t_s$, és l'instant en què ha d'iniciar el seu cicle de funcionament, i l'instant previ a iniciar el mode de baix consum es coneix com a $t_d$. El temps de funcionament normal, $t_n$, és la diferència entre el temps de 
+
+% El temps de funcionament normal, $t_n$, és la diferència entre ambdós. Abans d'entrar en mode de baix consum, un dispositiu conèix el seu temps de funcionament normal, que és exactament el temps que ha transcorregut des que s'ha inicialitzat.
+
+Per garantir la sincronització, és important que els dispositius determinin correctament el temps de baix consum, $t_b$. El seu càlcul és diferent segons el tipus de dispositiu:
+\begin{itemize}
+    \item \est{Referència}. Pel dispositiu de referència, el temps de baix consum és directament la diferència entre el temps de cicle i el temps de funcionament normal: $t_b = t_c - t_n$. El seu instant de sincronització és a $t=0$, ja que és el de referència i, per tant, $t_b = t_c - t_d$.
+    \item \est{No referència}. Per la resta de dispositius, i en situacions ideals, és important que es despertin abans que l'anterior dispositiu iniciï la transmissió de la sincronització. A més, han de basar l'inici del seu cicle en l'instant en que han rebut la sincronització. Així, han de despertar-se com a mínim $t_{tx}$ abans de l'esperat: $t_b = t_c - t_n - t_{tx} = t_c - (t_d - t_s) - t_{tx}$.
+\end{itemize}
 
 % explicar com poden determinar el temps de sleep cada tipus de dispositiu
-
-% EXPLICAR LIMITACIONS MIDA DADES I SOLUCIO DE FRAGMENTACIÓ
-% sino potser explicar-ho a la secció de solució final???
 
 % En solució final, fer un petit resum de totes les funcionalitats (timeout, que permet saber on hi pot haver un error, etc.)
 
@@ -1503,7 +1518,7 @@ S'ha optat per utilitzar segments no fiables a LA capa de transport per transmet
 % Si veiem que tot falla, resincronitzar tot des de 0: reiniciar dispositius començant pel de referència, la resta quedaran actius fins que referència enviï.
 
 \subsection{Situacions no ideals}
-En l'anterior subapartat s'ha presentat el funcionament del sistema en condicions ideals. Tot i això, hi ha certes situacions que cal tenir en compte:
+En l'anterior subapartat s'ha presentat el funcionament del sistema en condicions ideals. Tot i això, hi ha certes situacions que cal tenir en compte per garantir la fiabilitat i robustesa del sistema. En aquest apartat es presenten aquestes situacions i les solucions proposades. 
 
 \subsubsection{Errors del rellotge}
 Com s'ha vist a la \autoref{section:estrategiesSync}, els rellotges dels dispositius no són totalment precisos. Això provoca que, tot i indicar-li que estigui en mode de baix consum durant un temps determinat, el temps real en què hi està sigui diferent. Per un dispositiu que espera rebre les dades, si el seu rellotge és més lent de l'esperat, es trobarà en mode de baix consum durant més estona del que li correspondria. Això provocaria que, en despertar-se i esperar rebre les dades, aquestes ja s'haguessin transmès, fent que no les rebés.
@@ -1628,9 +1643,103 @@ Per establir aquest temps d'espera cal considerar de nou el temps de tolerància
 
 Així, s'observa com el límit de temps en què pot rebre el missatge de dades és $t_2 + t_t$. Per tant, el temps d'espera és el mateix que el temps de tolerància, centrat en l'instant on hauria de finalitzar el cicle ($t_2$). Cal tenir en compte, però, que surt del mode de baix consum a $t_2 - t_t$ i, per tant, el temps d'espera programat en el temporitzador en iniciar el funcionament normal ha de ser de $2 \cdot t_t$.
 
-\subsection{Implementació}
+En el cas que es produís una fi de temps d'espera, el dispositiu assumeix que la seva sincronització era vàlida i que l'error introduit és petit. Així, el càlcul de temps de baix consum el realitzarà com si fos el dispositiu de referència. 
+\\ \\
+Després de considerar aquestes no-idealitats, és necessari modificar l'expressió de càlcul dels temps de baix consum:
+\begin{itemize}
+    \item \est{Referència}. En tractar-se del dispositiu de referència, i com que és qui marca la referència, el seu temps de cicle no es veu modificat. Així, continua venint determinat per
+    \begin{equation}
+        t_b = t_c - t_d
+        \label{eq:calculSleepRef}
+    \end{equation}
+    
+    \item \est{No referència}. Per la resta de dispositius, ara és necessari considerar l'error del rellotge del dispositiu anterior, i el temps de tolerància. A més, també cal considerar si s'ha produït una fi de temps d'espera:
+    \begin{itemize}
+        \item Si no s'ha produït, el càlcul considera també l'error del rellotge, i el temps de tolerància: 
+        \begin{equation}
+            t_b = t_c - (t_d - t_s) - t_{tx} - t_m - t_t
+            \label{eq:calculSleepList}
+        \end{equation}
+        \item Si s'ha produït, es determina com si fos el dispositiu de referència, vist a l'expressió \ref{eq:calculSleepRef}.
+    \end{itemize}
+\end{itemize}
 
-\subsection{Funcionament}
+
+\subsection{Implementació}
+La implementació del disseny final s'ha realitzat a la capa d'aplicació del protocol implementat. Així, es disposa de totes les funcionalitats que aquest implementa: gestió d'accés al canal, detecció d'errors, retransmissions, etc. En aquest subapartat es presenta l'estructura dels missatges, les decisions d'implementació que s'han près i el funcionament del protocol.
+
+\subsubsection{Estructura dels missatges}
+En tractar-se d'una capa del protocol, és important definir l'estructura dels missatges que aquest utilitza. Aquests consten de tres únics camps:
+\begin{itemize}
+    \item \emph{Dades}. Les dades que s'envien en el missatge. En aquest camp cada dispositiu hi inclou les seves dades abans de transmetre-les. És important mencionar que tots els dispositius de la xarxa conèixen la quantitat de dades que han d'enviar, i és la mateixa per a tots. Té una longitud màxima de \SI{238}{\byte}, donat que la mida màxima de les dades a la capa de transport és de \SI{240}{\byte}, i que cal reservar \SI{2}{\byte} per als camps de longitud i ordre. 
+    \item \emph{Longitud de les dades}. Indica la quantitat de dades, en bytes, que conté el camp de dades del missatge. Té una longitud d'\SI{1}{\byte}, suficient per a indicar la mida màxima de dades (\SI{238}{\byte}). 
+    \item \emph{Ordre}. Indica ordres addicionals als dispositius. Tot i no ser utilitzat en la implementació final, s'ha considerat oportú incloure'l per a futures millores. Té una longitud d'\SI{1}{\byte}, i podria ser utilitzat per donar instruccions als dispositius, com ara «després de propagar el missatge, manten-te actiu indefinidament», o de més complexes com ara modificar el temps de cicle. En qualsevol cas, els dispositius afegirien les seves dades al missatge, i el propagarien a la resta com fins ara.
+\end{itemize}
+
+\begin{figure}
+    \centering
+    \begin{bytefield}[bitwidth=1.2em]{16}
+        \bitheader{0,7,8,15} \\
+        \bitbox{8}{Ordre} & \bitbox{8}{Longitud} \\
+        \wordbox{3}{Data \tiny {(màx. \SI{238}{\byte})}}
+    \end{bytefield}
+    \caption{Estructura del missatge de l'aplicació de baix consum.}
+    \label{fig:missatge_app}
+\end{figure}
+
+\subsubsection{Lectura de dades}
+Per tal de facilitar l'obtenció de les dades, s'ha implementat un \textit{callback} que pot ser configurat per qualsevol altra part del programa. Aquest \textit{callback} rep com a paràmetre un punter a les dades del missatge i és l'encarregat d'afegir-hi la informació que es vol transmetre. De manera automàtica, la capa d'aplicació executa aquest \textit{callback} just abans de propagar les dades.
+
+Aquesta estratègia ofereix flexibilitat, ja que permet que qualsevol part del programar defineix-hi com s'obtenen les dades a transmetre, sense necessitat de modificar la capa d'aplicació. A més, també treu responsabilitat a la capa que obté les dades, que no s'ha de preocupar de quan s'han d'enviar: la capa d'aplicació és qui li ho notificarà.
+
+\subsubsection{Funcionament}
+L'aplicació s'ha implementat com una màquina d'estats. El seu diagrama es pot veure a la \autoref{fig:app_maquina_estats}. Consta de quatre estats:
+\begin{itemize}
+    \item \emph{1r Sync}. És l'estat inicial, en què el dispositiu espera rebre el primer missatge de sincronització. En aquest estat el dispositiu roman actiu de forma indefinida, fins a rebre la sincronització. En el cas que el dispositiu sigui el de referència ---iniciador---, genera el missatge i el transmet directament, sense esperar.
+    \item \emph{Propagar}. En aquest estat el dispositiu propaga el missatge de dades cap al següent dispositiu. Executa el \est{callback} d'obtenció de dades, i utilitza la interfície de la capa de transport per enviar el missatge. Quan aquesta mateixa capa notifica de fi de transmissió, o d'error en aquesta, canvia al següent estat.
+    \item \emph{Dormir}. En aquest estat el dispositiu entra en mode de baix consum, determinant la seva durada a través de les expressions \ref{eq:calculSleepRef} i \ref{eq:calculSleepList}.
+\end{itemize}
+
+\begin{figure}
+    \centering
+    \begin{tikzpicture}[shorten >=1pt, node distance=4cm, on grid, auto]
+        \tikzstyle{state}=[
+            circle,
+            draw, 
+            minimum size=1.5cm, % uniform size
+            inner sep=0pt, 
+            align=center
+        ]
+
+        \node[state] (first) {\scriptsize 1r Sync};
+        \node[state] (prop) [right=of first] {\scriptsize Propagar};
+        \node[state] (sleep) [below=of prop] {\scriptsize Dormir};
+        \node[state] (sync) [left=of sleep] {\scriptsize Sync};
+
+        \draw[->] (-2,0) -- (first);
+
+        \path[->]
+        (first) edge[bend left=15] node {\tiny iniciador} node[below] {\tiny \emph{generar missatge}} (prop)
+        (first) edge[bend right=15] node[below] {\tiny sync} (prop)
+
+        (prop) edge[bend left=15] node[sloped, above] {\tiny tx ok} (sleep)
+
+        (prop) edge[bend right=15] node[sloped, above] {\tiny tx err} (sleep)
+        (sleep) edge node[above] {\tiny fi timer} node {\tiny \emph{inici timer sync}} (sync)
+        (sync) edge[bend left=15] node[sloped, above] {\tiny sync} (prop)
+        (sync) edge[bend right=15] node[sloped, above] {\tiny fi timer || iniciador}
+            node[sloped, below] {\tiny\emph{generar missatge}}
+            (prop);
+
+    \end{tikzpicture}
+    \caption{Diagrama de la màquina d'estats de la capa d'aplicació.}
+    \label{fig:app_maquina_estats}
+\end{figure}
+
+\subsection{Utilització}
+% Afegir nous dispositius
+    % explicar quins dispositius s'han de modificar
+% Sincronització inicial
 
 \subsection{Validació i resultats}
 % aqui parlar de l'error del clock?
@@ -1660,6 +1769,8 @@ Així, s'observa com el límit de temps en què pot rebre el missatge de dades �
 % ABANS D'ENTREGAR MIRAR QUE L·L ESTIGUIN BEN ESCRITES AMB \l.l
 % // TODO: Falta diagrama FSM de capa MAC
 % // TODO: Diagrama funcionament transport
+
+% // TODO: Modiciar ’ per '
 
 % « »
 % « »
