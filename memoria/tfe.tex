@@ -1504,127 +1504,136 @@ S'ha optat per utilitzar segments no fiables a LA capa de transport per transmet
 
 \subsection{Situacions no ideals}
 En l'anterior subapartat s'ha presentat el funcionament del sistema en condicions ideals. Tot i això, hi ha certes situacions que cal tenir en compte:
+
+\subsubsection{Errors del rellotge}
+Com s'ha vist a la \autoref{section:estrategiesSync}, els rellotges dels dispositius no són totalment precisos. Això provoca que, tot i indicar-li que estigui en mode de baix consum durant un temps determinat, el temps real en què hi està sigui diferent. Per un dispositiu que espera rebre les dades, si el seu rellotge és més lent de l'esperat, es trobarà en mode de baix consum durant més estona del que li correspondria. Això provocaria que, en despertar-se i esperar rebre les dades, aquestes ja s'haguessin transmès, fent que no les rebés.
+    
+Una solució a aquest problema és afegir un temps de marge entre l'inici de funcionament normal i l'instant en què espera rebre les dades. Aquest temps de marge ha de ser superior al màxim error que es pot produir en els rellotges dels dispositius, i és fàcilment calculable a partir del temps de cicle total i l'error, normalment expresat en parts per millió (\acro{ppm}):
+$$t_{\text{marge}} \geq t_{\text{cicle}} \cdot \epsilon_{\text{\acro{ppm}}} \cdot 10^{-6}$$
+
+\subsubsection{Retransmissions}
+La capa d'accés al medi d'un dispositiu pot necessitar realitzar retransmissions si no rep el missatge de reconeixement, o aplicar \acro{beb} si el canal està ocupat per un altre dispositiu ---aliè a la xarxa---. Aquestes retransmissions impliquen que el missatge de dades arribi amb retard al següent dispositiu i, en conseqüència, que aquest també el propagui més tard, afectant a la resta de la xarxa. 
+    
+A causa d'aquest retard provoca que els dispositius prenguin com a referència un instant de sincronització invàlid. En el següent cicle, a causa d'haver rebut l'anterior sincronització més tard, també iniciaran el funcionament normal més tard. Si ara no és necessari realitzar retransmissions, no rebran les dades o, en el millor dels casos, les rebran gràcies a les retransmissions de la capa d'accés al medi, generades ja que no havien enviat el reconeixement.
+
+A la \autoref{fig:syncDeltaTimeErr} es mostra un exemple d'aquesta situació. S'han representat els instants de temps d'inici de funcionament normal i del mode de baix consum, \fitx{w} i \fitx{s} respectivament, així com l'instant que es pren com a referència en la sincronització, \fitx{sync}. En aquest exemple la durada de cicle ($t_c$) és de 7 unitats de temps, i els dispositius que no són de referència apliquen un marge ($t_m$) d'1 unitat de temps. 
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.95\linewidth]{imatges/errorDeltaInconvenients.drawio.pdf}
+    \caption{Representació mala sincronització a causa de retransmissions.}
+    \label{fig:syncDeltaTimeErr}
+\end{figure}
+
+S'observa com en el segon cicle \fitx{D2} ha hagut de fer una retransmissió; llavors \fitx{D1} pren l'instant de recepció de la retransmissió com el temps de sincronització. En el següent cicle, com que desperta més tard, no rep la transmissió del primer intent i, per tant, les torna a rebre en el segon intent. Tot i que les retransmissions no provoquen co\l.lisions, és important reduir-les al mínim ja que incrementen el consum. 
+
+A més, cal destacar que perdre la primera transmissió redueix la probabilitat de sincronització, ja que disminueix el nombre d'intents «reals» en què \fitx{D1} està actiu. Per exemple, si el límit d'intents fos 2 i el primer es perdés sempre perquè està en baix consum, només disposaria d'1 intent per rebre les dades i, si aquest fallés, el dispositiu no es sincronitzaria.
+
+La solució que s'ha implementat és sortir del mode de baix consum un temps addicional de tolerància ($t_t$). Aquest temps es correspon a la diferència entre els instants en què pot rebre el primer i l'últim missatge de dades ---i sincronització--- possible:
 \begin{itemize}
-    \item \emph{Errors del rellotge}. Com s'ha vist a la \autoref{section:estrategiesSync}, els rellotges dels dispositius no són totalment precisos. Això provoca que, tot i indicar-li que estigui en mode de baix consum durant un temps determinat, el temps real en què hi està sigui diferent. Per un dispositiu que espera rebre les dades, si el seu rellotge és més lent de l'esperat, es trobarà en mode de baix consum durant més estona del que li correspondria. Això provocaria que, en despertar-se i esperar rebre les dades, aquestes ja s'haguessin transmès, fent que no les rebés.
+    \item \emph{Primer possible}. Tots els dispositius han transmès correctament en el primer intent, sense necessitat de retransmissions ni d'esperes provocades en aplicar \acro{beb} per accedir al canal. 
+    \item \emph{Últim possible}. Tots els dispositius anteriors han utilitzat el nombre màxim d'intents de transmissió i, a més, han hagut d'aplicar \acro{beb} per accedir al canal. Per tenir en compte aquest temps addicional, el qual és imprevisible, es pot aplicar un factor al temps màxim, per exemple incrementant-lo en un 
+    \%.
+\end{itemize} 
+
+Gràcies a aquest temps addicional, es garanteix que el dispositiu estigui actiu durant tota la finestra de temps en què es pot rebre el missatge de dades. És cert que implica un augment del temps en mode actiu, però ofereix una major probabilitat de rebre les dades i, per tant, major robustesa del sistema. 
+
+
+Aquest temps de tolerància depèn del nombre màxim d'intents de retransmissió, de la quantitat de dispositius anteriors ---ja que són qui han de propagar el missatge---, de la mida del missatge, i dels paràmetres LoRa establerts, com ara l'amplada de banda o l'\acro{sf}. Per simplicitat, s'ha considerat la mida màxima de dades d'un missatge LoRa (\SI{255}{\byte}). No només cal considerar la transmissió del missatge de dades, també és important considerar la dels missatges de reconeixement de la capa d'accés al medi, i la mida d'aquests. Així, podem determinar aquest temps amb l'expressió:
+$$t_t =  (N \cdot (R+1) \cdot (t_{{tx}} + K_{{ack}} \cdot t_{{ack}})) \cdot (1 + f)$$
+\begin{itemize}
+    \item $N$: nombre de dispositius anteriors al dispositiu pel qual es calcula el temps de tolerància.
+    \item $R$: nombre màxim de reintents de transmissió de la capa d'accés al medi. Se n'afegeix un, per tenir en compte la primera transmissió que no és un reintent.
+    \item $t_{tx}$: temps de transmissió de les dades, considerant els paràmetres LoRa que s'utilitzen en aquell moment i la mida màxima de les dades (\SI{255}{\byte}).
+    \item $K_{{ack}}$: factor de temps d'espera per la recepció del missatge de reconeixement de la capa d'accés al medi. Veure \autoref{subsubsec:integritat}.
+    \item $t_{{ack}}$: temps de transmissió del missatge de reconeixement de la capa d'accés al medi, considerant la mida d'aquest (\SI{7}{\byte}, la mida dels \est{headers} d'una trama d'accés al medi).
+    \item $f$: factor d'increment del temps màxim de transmissió, per tenir en compte el temps d'espera en aplicar \acro{beb} per accedir al canal. Per exemple, 0.25 si es vol incrementar en un 25\%.
+\end{itemize}
+% // TODO: El nombre de dispositius hauria de ser fixat ABANS. Si no, si un falla i llavors es torna a recuperar, el temps de tolerància estaria malament i no rebria les dades.
+
+\subsubsection{Límit de dades}
+El fet que cada dispositiu afegeix-hi les dades en un mateix missatge pot provocar que aquest acabi superant la mida màxima permesa ser transmès. En aquest cas, una solució és fragmentar el missatge en múltiples, i transmetre'ls de forma seqüencial. Com que no existeix fragmentació en el protocol, seria necessari implementar-lo a nivell d'aplicació. Això implica que el missatge de dades hauria de contenir informació addicional per indicar si es tracta d'un missatge fragmentat o no, per exemple un camp boleà: si està actiu significa que està fragmentat; en cas contrari, significa que no ho està, o que és l'últim fragment.
     
-    Una solució a aquest problema és afegir un temps de marge entre l'inici de funcionament normal i l'instant en què espera rebre les dades. Aquest temps de marge ha de ser superior al màxim error que es pot produir en els rellotges dels dispositius, i és fàcilment calculable a partir del temps de cicle total i l'error, normalment expresat en parts per millió (\acro{ppm}):
-    $$t_{\text{marge}} \geq t_{\text{cicle}} \cdot \epsilon_{\text{\acro{ppm}}} \cdot 10^{-6}$$
-    
-    \item \emph{Retransmissions}. La capa d'accés al medi d'un dispositiu pot necessitar realitzar retransmissions si no rep el missatge de reconeixement, o aplicar \acro{beb} si el canal està ocupat per un altre dispositiu ---aliè a la xarxa---. Aquestes retransmissions impliquen que el missatge de dades arribi amb retard al següent dispositiu i, en conseqüència, que aquest també el propagui més tard, afectant a la resta de la xarxa. 
-    
-    A causa d'aquest retard provoca que els dispositius prenguin com a referència un instant de sincronització invàlid. En el següent cicle, a causa d'haver rebut l'anterior sincronització més tard, també iniciaran el funcionament normal més tard. Si ara no és necessari realitzar retransmissions, no rebran les dades o, en el millor dels casos, les rebran gràcies a les retransmissions de la capa d'accés al medi, generades ja que no havien enviat el reconeixement.
-    
-    A la \autoref{fig:syncDeltaTimeErr} es mostra un exemple d'aquesta situació. S'han representat els instants de temps d'inici de funcionament normal i del mode de baix consum, \fitx{w} i \fitx{s} respectivament, així com l'instant que es pren com a referència en la sincronització, \fitx{sync}. En aquest exemple la durada de cicle ($t_c$) és de 7 unitats de temps, i els dispositius que no són de referència apliquen un marge ($t_m$) d'1 unitat de temps. 
-    
-    \begin{figure}
-        \centering
-        \includegraphics[width=0.95\linewidth]{imatges/errorDeltaInconvenients.drawio.pdf}
-        \caption{Representació mala sincronització a causa de retransmissions.}
-        \label{fig:syncDeltaTimeErr}
-    \end{figure}
+El flux de funcionament en enviar o rebre un missatge fragmentat seria el següent:
+\begin{itemize}
+    \item Si la quantitat de dades és superior a la màxima, dividir-les en múltiples missatges, activant el camp boleà de fragmentació de tots aquells que no són l'últim.
+    \item Enviar de forma ordenada els fragments. Si no s'aconsegueix enviar un fragment, el missatge es considera perdut i no es transmeten els següents.
+    \item En rebre un missatge, comprovar el camp boleà i, si està actiu, esperar a rebre tots els fragments. 
+    \item En rebre'ls tots, afegir les seves dades ---les de la lectura del mateix dispositiu--- a l'últim missatge (fragmentant-lo si és necessari), i transmetre com s'ha vist anteriorment.
+    \item Seria necessari també afegir un temporitzador per determinar si s'ha perdut un fragment. En aquest cas, s'haurien de considerar tots els fragments prèviament rebuts com a perduts, i no transmetre'ls.
+\end{itemize}
 
-    S'observa com en el segon cicle \fitx{D2} ha hagut de fer una retransmissió; llavors \fitx{D1} pren l'instant de recepció de la retransmissió com el temps de sincronització. En el següent cicle, com que desperta més tard, no rep la transmissió del primer intent i, per tant, les torna a rebre en el segon intent. Tot i que les retransmissions no provoquen co\l.lisions, és important reduir-les al mínim ja que incrementen el consum. 
-    
-    A més, cal destacar que perdre la primera transmissió redueix la probabilitat de sincronització, ja que disminueix el nombre d'intents «reals» en què \fitx{D1} està actiu. Per exemple, si el límit d'intents fos 2 i el primer es perdés sempre perquè està en baix consum, només disposaria d'1 intent per rebre les dades i, si aquest fallés, el dispositiu no es sincronitzaria.
+% // TODO: Dir que NO s'ha acabat implementant fragmentació!
+\begin{figure}
+    \centering
+    \setlength{\extrarowheight}{0pt}
+    \addtolength{\extrarowheight}{\aboverulesep}
+    \addtolength{\extrarowheight}{\belowrulesep}
+    \setlength{\aboverulesep}{0pt}
+    \setlength{\belowrulesep}{0pt}
+    \arrayrulecolor{black}
+    \resizebox{\linewidth}{!}{%
+        \begin{tabular}{!{\vrule width \heavyrulewidth}c!{\vrule width \heavyrulewidth}cccccccc!{\vrule width \heavyrulewidth}} 
+            \multicolumn{1}{c}{\est{gateway}} & \multicolumn{7}{c}{} \\
+            \toprule
+            {\textcolor[rgb]{0,0.502,0}{D1}} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_D4:3} & \multicolumn{1}{c|}{RX\_D2:2} & \multicolumn{1}{c|}{TX\_D4:3} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D2:1} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+            
+            \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}-->{\arrayrulecolor{black}}----->{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}}
+            {D2} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_D4:3} & \multicolumn{1}{c|}{TX\_4:3} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D2:2} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+            
+            \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}---->{\arrayrulecolor[rgb]{1,0.847,0.808}}--->{\arrayrulecolor{black}}}
+            {D3} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_D4:4} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D4:3} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
 
-    La solució que s'ha implementat és sortir del mode de baix consum un temps addicional de tolerància ($t_t$). Aquest temps es correspon a la diferència entre els instants en què pot rebre el primer i l'últim missatge de dades ---i sincronització--- possible:
-    \begin{itemize}
-        \item \emph{Primer possible}. Tots els dispositius han transmès correctament en el primer intent, sense necessitat de retransmissions ni d'esperes provocades en aplicar \acro{beb} per accedir al canal. 
-        \item \emph{Últim possible}. Tots els dispositius anteriors han utilitzat el nombre màxim d'intents de transmissió i, a més, han hagut d'aplicar \acro{beb} per accedir al canal. Per tenir en compte aquest temps addicional, el qual és imprevisible, es pot aplicar un factor al temps màxim, per exemple incrementant-lo en un 
-        \%.
-    \end{itemize} 
+            \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}-->{\arrayrulecolor[rgb]{1,0.847,0.808}}----->{\arrayrulecolor{black}}}
+            \textbf{D4} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D4:4} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
+            \midrule
+            {Mida (B)} & ~~~~~~~~~~~~~~ & 5 & 10 & 10 & 5 & 10 & 10 & ~~~~~~~~~~~~~~ \\
+            {Fragmentat} & ~~~~~~~~~~~~~~ & 0 & 0 & 1 & 0 & 1 & 0 & ~~~~~~~~~~~~~~ \\
+            \toprule
+        \end{tabular}
+    }
+    \caption{Fragmentació en transmissió de dades acumulades, amb mida màxima de \SI{10}{\byte}.}
+    \label{fig:app_fragmentacio}
+\end{figure}
 
-    Gràcies a aquest temps addicional, es garanteix que el dispositiu estigui actiu durant tota la finestra de temps en què es pot rebre el missatge de dades. És cert que implica un augment del temps en mode actiu, però ofereix una major probabilitat de rebre les dades i, per tant, major robustesa del sistema. 
-
-
-    Aquest temps de tolerància depèn del nombre màxim d'intents de retransmissió, de la quantitat de dispositius anteriors ---ja que són qui han de propagar el missatge---, de la mida del missatge, i dels paràmetres LoRa establerts, com ara l'amplada de banda o l'\acro{sf}. Per simplicitat, s'ha considerat la mida màxima de dades d'un missatge LoRa (\SI{255}{\byte}). No només cal considerar la transmissió del missatge de dades, també és important considerar la dels missatges de reconeixement de la capa d'accés al medi, i la mida d'aquests. Així, podem determinar aquest temps amb l'expressió:
-    $$t_t =  (N \cdot (R+1) \cdot (t_{{tx}} + K_{\text{ack}} \cdot t_{\text{ack}})) \cdot (1 + f)$$
-    \begin{itemize}
-        \item $N$: nombre de dispositius anteriors al dispositiu pel qual es calcula el temps de tolerància.
-        \item $R$: nombre màxim de reintents de transmissió de la capa d'accés al medi. Se n'afegeix un, per tenir en compte la primera transmissió que no és un reintent.
-        \item $t_{tx}$: temps de transmissió de les dades, considerant els paràmetres LoRa i la mida màxima de les dades (\SI{255}{\byte}).
-        \item $K_{\text{ack}}$: factor de temps d'espera per la recepció del missatge de reconeixement de la capa d'accés al medi. Veure \autoref{subsubsec:integritat}.
-        \item $t_{\text{ack}}$: temps de transmissió del missatge de reconeixement de la capa d'accés al medi, considerant la mida d'aquest (\SI{7}{\byte}, la mida dels \est{headers} d'una trama d'accés al medi).
-        \item $f$: factor d'increment del temps màxim de transmissió, per tenir en compte el temps d'espera en aplicar \acro{beb} per accedir al canal. Per exemple, 0.25 si es vol incrementar en un 25\%.
-    \end{itemize}
-    % // TODO: El nombre de dispositius hauria de ser fixat ABANS. Si no, si un falla i llavors es torna a recuperar, el temps de tolerància estaria malament i no rebria les dades.
-
-    \item \emph{Limit de dades.} El fet que cada dispositiu afegeix-hi les dades en un mateix missatge pot provocar que aquest acabi superant la mida màxima permesa ser transmès. En aquest cas, una solució és fragmentar el missatge en múltiples, i transmetre'ls de forma seqüencial. Com que no existeix fragmentació en el protocol, seria necessari implementar-lo a nivell d'aplicació. Això implica que el missatge de dades hauria de contenir informació addicional per indicar si es tracta d'un missatge fragmentat o no, per exemple un camp boleà: si està actiu significa que està fragmentat; en cas contrari, significa que no ho està, o que és l'últim fragment.
-    
-    El flux de funcionament en enviar o rebre un missatge fragmentat seria el següent:
-    \begin{itemize}
-        \item Si la quantitat de dades és superior a la màxima, dividir-les en múltiples missatges, activant el camp boleà de fragmentació de tots aquells que no són l'últim.
-        \item Enviar de forma ordenada els fragments. Si no s'aconsegueix enviar un fragment, el missatge es considera perdut i no es transmeten els següents.
-        \item En rebre un missatge, comprovar el camp boleà i, si està actiu, esperar a rebre tots els fragments. 
-        \item En rebre'ls tots, afegir les seves dades ---les de la lectura del mateix dispositiu--- a l'últim missatge (fragmentant-lo si és necessari), i transmetre com s'ha vist anteriorment.
-        \item Seria necessari també afegir un temporitzador per determinar si s'ha perdut un fragment. En aquest cas, s'haurien de considerar tots els fragments prèviament rebuts com a perduts, i no transmetre'ls.
-    \end{itemize}
-
-    % // TODO: Dir que NO s'ha acabat implementant fragmentació!
-    \begin{figure}
-        \centering
-        \setlength{\extrarowheight}{0pt}
-        \addtolength{\extrarowheight}{\aboverulesep}
-        \addtolength{\extrarowheight}{\belowrulesep}
-        \setlength{\aboverulesep}{0pt}
-        \setlength{\belowrulesep}{0pt}
-        \arrayrulecolor{black}
-        \resizebox{\linewidth}{!}{%
-            \begin{tabular}{!{\vrule width \heavyrulewidth}c!{\vrule width \heavyrulewidth}cccccccc!{\vrule width \heavyrulewidth}} 
-                \multicolumn{1}{c}{\est{gateway}} & \multicolumn{7}{c}{} \\
-                \toprule
-                {\textcolor[rgb]{0,0.502,0}{D1}} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_D4:3} & \multicolumn{1}{c|}{RX\_D2:2} & \multicolumn{1}{c|}{TX\_D4:3} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D2:1} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
-                
-                \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}-->{\arrayrulecolor{black}}----->{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}}
-                {D2} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_D4:3} & \multicolumn{1}{c|}{TX\_4:3} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D2:2} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
-                
-                \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}---->{\arrayrulecolor[rgb]{1,0.847,0.808}}--->{\arrayrulecolor{black}}}
-                {D3} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c|}{RX\_D4:4} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D4:3} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
-
-                \hhline{~>{\arrayrulecolor[rgb]{1,0.847,0.808}}->{\arrayrulecolor{black}}-->{\arrayrulecolor[rgb]{1,0.847,0.808}}----->{\arrayrulecolor{black}}}
-                \textbf{D4} & \multicolumn{1}{c!{\color[rgb]{0.451,0.804,0.443}\vrule width \heavyrulewidth}}{{\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~} & \multicolumn{1}{c!{\color[rgb]{1,0.349,0.349}\vrule width \heavyrulewidth}}{TX\_D4:4} & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ & {\cellcolor[rgb]{1,0.847,0.808}}~~~~~~~~~~~~~~ \\
-                \midrule
-                {Mida (B)} & ~~~~~~~~~~~~~~ & 5 & 10 & 10 & 5 & 10 & 10 & ~~~~~~~~~~~~~~ \\
-                {Fragmentat} & ~~~~~~~~~~~~~~ & 0 & 0 & 1 & 0 & 1 & 0 & ~~~~~~~~~~~~~~ \\
-                \toprule
-            \end{tabular}
-        }
-        \caption{Fragmentació en transmissió de dades acumulades, amb mida màxima de \SI{10}{\byte}.}
-        \label{fig:app_fragmentacio}
-    \end{figure}
-
-    A la \autoref{fig:app_fragmentacio} s'ha representat com seria una comunicació amb fragmentació. Per simplicitat, s'ha considerat que la mida màxima de les dades és de \SI{10}{\byte} per missatge, i que cada dispositiu afegeix \SI{5}{\byte}. Per a cada transmissió es representa la mida de les dades, i si el camp boleà que indica si està fragmentat està actiu o no.
+A la \autoref{fig:app_fragmentacio} s'ha representat com seria una comunicació amb fragmentació. Per simplicitat, s'ha considerat que la mida màxima de les dades és de \SI{10}{\byte} per missatge, i que cada dispositiu afegeix \SI{5}{\byte}. Per a cada transmissió es representa la mida de les dades, i si el camp boleà que indica si està fragmentat està actiu o no.
 
     % // TODO: A PARTIR D'AQUI QUEDA PENDENT REVISAR
 
-    \item \emph{Pèrdua de dades.} Tot i existir mecanismes que intenten assegurar la integritat dels missatges, és possible que un dispositiu no rebi correctament les dades. Això pot ser degut a interferències, o bé a que el dispositiu que ha d'enviar les dades s'ha espatllat
-    
-    Aquest cas provocaria que un dispositiu que no és el de referència quedés esperant la recepció de dades indefinidament, sense entrar en mode de baix consum. A més, implicaria la pèrdua de les dades de tota la xarxa. Per evitar-ho, s'ha implementat un temporitzador que, en cas de no rebre les dades en aquest temps, el dispositiu assumeix que no les rebrà, i pren la iniciativa d'iniciar ell la transmissió de dades cap al següent dispositiu.
+\subsubsection{Pèrdua de dades}
+Tot i existir mecanismes que intenten assegurar la integritat dels missatges, és possible que un dispositiu no rebi correctament les dades. Això pot ser degut a interferències, o bé a que el dispositiu que ha d'enviar les dades s'ha espatllat
 
-    Els següents dispositius rebrien el nou missatge de dades, i actuarien de forma normal. Com que els dispositius més propers al de referència inicien el mode de funcionament normal abans, també finalitzaran aquest temps d'espera abans, garantint que un dispositiu més llunyà no prengui la iniciativa d'iniciar la transmissió de dades abans que un de més proper.
+Aquest cas provocaria que un dispositiu que no és el de referència quedés esperant la recepció de dades indefinidament, sense entrar en mode de baix consum. A més, implicaria la pèrdua de les dades de tota la xarxa. Per evitar-ho, s'ha implementat un temporitzador que, en cas de no rebre les dades en aquest temps, el dispositiu assumeix que no les rebrà, i pren la iniciativa d'iniciar ell la transmissió de dades cap al següent dispositiu.
 
-    Amb aquesta solució obtenim dos avantatges principals:
-    \begin{itemize}
-        \item No perdem les dades de tots els dispositius de la xarxa. Com que un nou dispositiu iniciarà la transmissió, els següents a aquest sí que rebran el missatge i, per tant, hi afegiran les seves dades. 
-        \item Permet detectar en quin punt de la xarxa hi ha hagut l'últim error. Si al servidor d'aplicació de LoRaWAN rebem un missatge amb \SI{10}{\byte} de dades, i sabem que cada dispositiu afegeix \SI{2}{\byte}, es dedueix que els últims 5 dispositius funcionen adequadament, i que el problema es troba en el sisè dispositiu, o en l'enllaç entre aquest i el cinquè. Tot i això, no es pot assegurar que aquest sigui l'únic error, ja que en podrien existir més en dispositius anteriors al sisè.  
-    \end{itemize}
+Els següents dispositius rebrien el nou missatge de dades, i actuarien de forma normal. Com que els dispositius més propers al de referència inicien el mode de funcionament normal abans, també finalitzaran aquest temps d'espera abans, garantint que un dispositiu més llunyà no prengui la iniciativa d'iniciar la transmissió de dades abans que un de més proper.
 
-    Per establir aquest temps d'espera cal considerar de nou el temps de tolerància ($t_t$) exposat anteriorment, que expresa la diferència entre el primer i últim missatge de dades vàlid que un dispositiu pot rebre. Per un dispositiu, suposem el següent:
-    \begin{enumerate}
-        \item Rep el missatge de dades a l'instant $t_1$. En el següent cicle, esperarà rebre'l a l'instant $t_2 = t_1 + t_c$.
-        \item Com que no conèix quin missatge va rebre en el cicle anterior, surt del mode de baix consum a l'instant $t_2 - t_t$. Consdierant els extrems, tenim les següents situacions:
-        \begin{itemize}
-            \item Si en l'anterior cicle havia rebut el primer missatge, i ara també rep el primer possible, el rebrà a l'instant $t_2$, com esperava. 
-            \item Si havia rebut el primer, i ara rep l'últim possible, el rebrà a l'instant $t_2 + t_t$.
-            \item Si havia rebut l'últim missatge, i ara rep el primer possible, el rebrà a l'instant $t_2 - t_t$. En aplicar la tolerància, ja estarà actiu.
-            \item Si havia rebut l'últim, i ara també rep l'últim possible, el rebrà a l'instant $t_2$.
-            \item Per qualsevol altra possible combinació, el missatge de dades es rebrà entre els instants $t_2 \pm t_t$.
-        \end{itemize}
-    \end{enumerate} 
-
-    Així, s'observa com el límit de temps en què pot rebre el missatge de dades és $t_2 + t_t$. Per tant, el temps d'espera és el mateix que el temps de tolerància, centrat en l'instant on hauria de finalitzar el cicle ($t_2$). Cal tenir en compte, però, que surt del mode de baix consum a $t_2 - t_t$ i, per tant, el temps d'espera programat en el temporitzador en iniciar el funcionament normal ha de ser de $2 \cdot t_t$.
+Amb aquesta solució obtenim dos avantatges principals:
+\begin{itemize}
+    \item No perdem les dades de tots els dispositius de la xarxa. Com que un nou dispositiu iniciarà la transmissió, els següents a aquest sí que rebran el missatge i, per tant, hi afegiran les seves dades. 
+    \item Permet detectar en quin punt de la xarxa hi ha hagut l'últim error. Si al servidor d'aplicació de LoRaWAN rebem un missatge amb \SI{10}{\byte} de dades, i sabem que cada dispositiu afegeix \SI{2}{\byte}, es dedueix que els últims 5 dispositius funcionen adequadament, i que el problema es troba en el sisè dispositiu, o en l'enllaç entre aquest i el cinquè. Tot i això, no es pot assegurar que aquest sigui l'únic error, ja que en podrien existir més en dispositius anteriors al sisè.  
 \end{itemize}
 
+Per establir aquest temps d'espera cal considerar de nou el temps de tolerància ($t_t$) exposat anteriorment, que expresa la diferència entre el primer i últim missatge de dades vàlid que un dispositiu pot rebre. Per un dispositiu, suposem el següent:
+\begin{enumerate}
+    \item Rep el missatge de dades a l'instant $t_1$. En el següent cicle, esperarà rebre'l a l'instant $t_2 = t_1 + t_c$.
+    \item Com que no conèix quin missatge va rebre en el cicle anterior, surt del mode de baix consum a l'instant $t_2 - t_t$. Consdierant els extrems, tenim les següents situacions:
+    \begin{itemize}
+        \item Si en l'anterior cicle havia rebut el primer missatge, i ara també rep el primer possible, el rebrà a l'instant $t_2$, com esperava. 
+        \item Si havia rebut el primer, i ara rep l'últim possible, el rebrà a l'instant $t_2 + t_t$.
+        \item Si havia rebut l'últim missatge, i ara rep el primer possible, el rebrà a l'instant $t_2 - t_t$. En aplicar la tolerància, ja estarà actiu.
+        \item Si havia rebut l'últim, i ara també rep l'últim possible, el rebrà a l'instant $t_2$.
+        \item Per qualsevol altra possible combinació, el missatge de dades es rebrà entre els instants $t_2 \pm t_t$.
+    \end{itemize}
+\end{enumerate} 
+
+Així, s'observa com el límit de temps en què pot rebre el missatge de dades és $t_2 + t_t$. Per tant, el temps d'espera és el mateix que el temps de tolerància, centrat en l'instant on hauria de finalitzar el cicle ($t_2$). Cal tenir en compte, però, que surt del mode de baix consum a $t_2 - t_t$ i, per tant, el temps d'espera programat en el temporitzador en iniciar el funcionament normal ha de ser de $2 \cdot t_t$.
+
+\subsection{Implementació}
+
+\subsection{Funcionament}
+
+\subsection{Validació i resultats}
+% aqui parlar de l'error del clock?
 \chapter{Conclusions}
 % \section{Resultats assolits}
 % \section{Limitacions del disseny final}

@@ -1,0 +1,111 @@
+[200~[2025-05-24 09:01:11.002543] ets Jul 29 2019 12:21:46
+[2025-05-24 09:01:11.002691] 
+[2025-05-24 09:01:11.007336] rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-24 09:01:11.010088] configsip: 0, SPIWP:0xee
+[2025-05-24 09:01:11.015646] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-24 09:01:11.018536] mode:DIO, clock div:2
+[2025-05-24 09:01:11.021130] load:0x3fff0030,len:1184
+[2025-05-24 09:01:11.023923] load:0x40078000,len:13232
+[2025-05-24 09:01:11.024005] load:0x40080400,len:3028
+[2025-05-24 09:01:11.027161] entry 0x400805e4
+[2025-05-24 09:01:11.203666] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-24 09:01:11.207651] Delay 1 seconds
+[2025-05-24 09:01:11.214460] [I]       20 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-24 09:01:12.208838] Sleeping for 148980 ms
+[2025-05-24 09:03:39.545637] ets Jul 29 2019 12:21:46
+[2025-05-24 09:03:39.545730] 
+[2025-05-24 09:03:39.551102] rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-24 09:03:39.553945] configsip: 0, SPIWP:0xee
+[2025-05-24 09:03:39.559425] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-24 09:03:39.562228] mode:DIO, clock div:2
+[2025-05-24 09:03:39.564996] load:0x3fff0030,len:1184
+[2025-05-24 09:03:39.567891] load:0x40078000,len:13232
+[2025-05-24 09:03:39.567934] load:0x40080400,len:3028
+[2025-05-24 09:03:39.571245] entry 0x400805e4
+[2025-05-24 09:03:39.612167] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-24 09:03:39.616652] Delay 2 seconds
+[2025-05-24 09:03:39.623632] [I]       20 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-24 09:03:41.617242] Sleeping for 147980 ms
+[2025-05-24 09:06:07.847531] ets Jul 29 2019 12:21:46
+[2025-05-24 09:06:07.852181] 
+[2025-05-24 09:06:07.852336] rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-24 09:06:07.852372] configsip: 0, SPIWP:0xee
+[2025-05-24 09:06:07.852396] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-24 09:06:07.854946] mode:DIO, clock div:2
+[2025-05-24 09:06:07.857726] load:0x3fff0030,len:1184
+[2025-05-24 09:06:07.860513] load:0x40078000,len:13232
+[2025-05-24 09:06:07.860635] load:0x40080400,len:3028
+[2025-05-24 09:06:07.864048] entry 0x400805e4
+[2025-05-24 09:06:07.905670] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-24 09:06:07.909242] Delay 10 seconds
+[2025-05-24 09:06:07.916976] [I]       20 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-24 09:06:17.901780] Sleeping for 139980 ms
+[2025-05-24 09:08:35.786359] ets Jul 29 2019 12:21:46
+[2025-05-24 09:08:35.786491] 
+[2025-05-24 09:08:35.791277] rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-24 09:08:35.793968] configsip: 0, SPIWP:0xee
+[2025-05-24 09:08:35.799583] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-24 09:08:35.802465] mode:DIO, clock div:2
+[2025-05-24 09:08:35.805077] load:0x3fff0030,len:1184
+[2025-05-24 09:08:35.807959] load:0x40078000,len:13232
+[2025-05-24 09:08:35.808058] load:0x40080400,len:3028
+[2025-05-24 09:08:35.811432] entry 0x400805e4
+[2025-05-24 09:08:35.852009] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-24 09:08:35.856640] Delay 25 seconds
+[2025-05-24 09:08:35.863707] [I]       20 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-24 09:08:45.854848] [I]    10020 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 2, Heap: 331884
+[2025-05-24 09:08:55.837155] [I]    20020 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 2, Heap: 331884
+[2025-05-24 09:09:00.824143] Sleeping for 124980 ms
+[2025-05-24 09:11:03.738039] ets Jul 29 2019 12:21:46
+[2025-05-24 09:11:03.738161] 
+[2025-05-24 09:11:03.743752] rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-24 09:11:03.746382] configsip: 0, SPIWP:0xee
+[2025-05-24 09:11:03.751880] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-24 09:11:03.754987] mode:DIO, clock div:2
+[2025-05-24 09:11:03.757864] load:0x3fff0030,len:1184
+[2025-05-24 09:11:03.760263] load:0x40078000,len:13232
+[2025-05-24 09:11:03.760330] load:0x40080400,len:3028
+[2025-05-24 09:11:03.763803] entry 0x400805e4
+[2025-05-24 09:11:03.804283] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-24 09:11:03.808954] Delay 50 seconds
+[2025-05-24 09:11:03.816233] [I]       20 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-24 09:11:13.805300] [I]    10020 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 2, Heap: 331884
+[2025-05-24 09:11:23.787526] [I]    20020 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 2, Heap: 331884
+[2025-05-24 09:11:33.776019] [I]    30020 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 2, Heap: 331884
+[2025-05-24 09:11:43.770003] [I]    40020 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 2, Heap: 331884
+[2025-05-24 09:11:53.764086] [I]    50020 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 2, Heap: 331884
+[2025-05-24 09:11:53.764225] Sleeping for 99980 ms
+[2025-05-24 09:13:32.064225] ets Jul 29 2019 12:21:46
+[2025-05-24 09:13:32.064430] 
+[2025-05-24 09:13:32.069774] rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-24 09:13:32.072531] configsip: 0, SPIWP:0xee
+[2025-05-24 09:13:32.078077] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-24 09:13:32.080916] mode:DIO, clock div:2
+[2025-05-24 09:13:32.083626] load:0x3fff0030,len:1184
+[2025-05-24 09:13:32.086528] load:0x40078000,len:13232
+[2025-05-24 09:13:32.088245] load:0x40080400,len:3028
+[2025-05-24 09:13:32.089945] entry 0x400805e4
+[2025-05-24 09:13:32.130648] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-24 09:13:32.135325] Delay 75 seconds
+[2025-05-24 09:13:32.142315] [I]       20 scheduler.cpp       :  77 | [SCHED] Cleanup started
+[2025-05-24 09:13:42.128311] [I]    10020 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 2, Heap: 331884
+[2025-05-24 09:13:52.117118] [I]    20020 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 2, Heap: 331884
+[2025-05-24 09:14:02.110716] [I]    30020 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 2, Heap: 331884
+[2025-05-24 09:14:12.103056] [I]    40020 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 2, Heap: 331884
+[2025-05-24 09:14:22.093989] [I]    50020 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 2, Heap: 331884
+[2025-05-24 09:14:32.071337] [I]    60020 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 2, Heap: 331884
+[2025-05-24 09:14:42.040951] [I]    70020 scheduler.cpp       :  55 | [SCHED] Cleanup started. Tasks: 2, Heap: 331884
+[2025-05-24 09:14:47.017703] Sleeping for 74980 ms
+[2025-05-24 09:16:00.694214] ets Jul 29 2019 12:21:46
+[2025-05-24 09:16:00.694270] 
+[2025-05-24 09:16:00.699682] rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-24 09:16:00.702460] configsip: 0, SPIWP:0xee
+[2025-05-24 09:16:00.708087] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-24 09:16:00.710760] mode:DIO, clock div:2
+[2025-05-24 09:16:00.713589] load:0x3fff0030,len:1184
+[2025-05-24 09:16:00.716319] load:0x40078000,len:13232
+[2025-05-24 09:16:00.716387] load:0x40080400,len:3028
+[2025-05-24 09:16:00.719835] entry 0x400805e4
+[2025-05-24 09:16:00.760489] [     7][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-24 09:16:00.764505] Done
+

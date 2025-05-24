@@ -1,3 +1,16 @@
+/*
+    Primera prova és sense delay: enviar un missatge i dormir.
+    Segona prova és despertar i dormir automàticament sense enviar.
+    Tercera prova és fer enviament a través de MAC per descartar que el problema sigui de capes superiors a MAC
+    Quarta prova és despertar, esperar 10 segons, i dormir.
+    Cinquena prova és en un dispositiu despertar, enviar i dormir, i en l'altre dispositiu queda despert un temps
+        similar al que es triga a enviar, i dormir
+
+        De la 5ena prova s'extreu que els temps d'error són MOLT similars, i que per tant
+        no depenen de si es fa transmissió o no.
+        Es dedueix que l'error s'introdueix en tenir el dispositiu actiu durant un temps determinat.
+
+*/
 
 #include <Arduino.h>
 #include "transport.h"
@@ -50,12 +63,7 @@ void setup() {
     // Prova 1
     Transport_onEvent(0x01, nullptr, onSend, onSend);
     // Transport_send(0x09, 0x01, nullptr, 0, false);
-
-    // Esperem 10 segons (ja que listener estaria despert també un temps abans esperant recepció)
-    // i llavors enviem
-    delaySend();
-    // scheduler_once(delaySend, 10000);
-    
+  
     // Prova 2. Necessari per forçar sleep
     // onSend();
     
@@ -63,6 +71,14 @@ void setup() {
     // MAC_onSend(onSendMac);
     // MAC_onTxFailed(onSendMac);
     // MAC_send(0x09, nullptr, 0);
+
+    // Prova 4.
+    // Esperem 10 segons (ja que listener estaria despert també un temps abans esperant recepció)
+    // i llavors enviem
+    // scheduler_once(delaySend, 10000);
+
+    // Prova 5. Pel dispositiu que no envia. Temps fet a mà.
+    // scheduler_once(onSend, 970);
 }
 
 void loop() {
