@@ -1695,14 +1695,15 @@ Aquesta estratègia ofereix flexibilitat, ja que permet que qualsevol part del p
 \subsubsection{Funcionament}
 L'aplicació s'ha implementat com una màquina d'estats. El seu diagrama es pot veure a la \autoref{fig:app_maquina_estats}. Consta de quatre estats:
 \begin{itemize}
-    \item \emph{1r Sync}. És l'estat inicial, en què el dispositiu espera rebre el primer missatge de sincronització. En aquest estat el dispositiu roman actiu de forma indefinida, fins a rebre la sincronització. En el cas que el dispositiu sigui el de referència ---iniciador---, genera el missatge i el transmet directament, sense esperar.
+    \item \emph{1r Sync}. És l'estat inicial, en què el dispositiu no ha estat mai sincronitzat i espera rebre el primer missatge de sincronització. En aquest estat el dispositiu roman actiu de forma indefinida, fins a rebre la sincronització. En el cas que el dispositiu sigui el de referència ---iniciador---, genera el missatge i el transmet directament, sense esperar.
     \item \emph{Propagar}. En aquest estat el dispositiu propaga el missatge de dades cap al següent dispositiu. Executa el \est{callback} d'obtenció de dades, i utilitza la interfície de la capa de transport per enviar el missatge. Quan aquesta mateixa capa notifica de fi de transmissió, o d'error en aquesta, canvia al següent estat.
     \item \emph{Dormir}. En aquest estat el dispositiu entra en mode de baix consum, determinant la seva durada a través de les expressions \ref{eq:calculSleepRef} i \ref{eq:calculSleepList}.
+    \item \emph{Sync}. En aquest estat el dispositiu espera rebre el missatge de sincronització, aplicant el temporitzador de fi de temps d'espera en sortir del mode de baix consum (recordem, de durada $2\cdot t_t$).
 \end{itemize}
 
 \begin{figure}
     \centering
-    \begin{tikzpicture}[shorten >=1pt, node distance=4cm, on grid, auto]
+    \begin{tikzpicture}[shorten >=1pt, node distance=4.5cm, on grid, auto]
         \tikzstyle{state}=[
             circle,
             draw, 
@@ -1722,12 +1723,22 @@ L'aplicació s'ha implementat com una màquina d'estats. El seu diagrama es pot 
         (first) edge[bend left=15] node {\tiny iniciador} node[below] {\tiny \emph{generar missatge}} (prop)
         (first) edge[bend right=15] node[below] {\tiny sync} (prop)
 
-        (prop) edge[bend left=15] node[sloped, above] {\tiny tx ok} (sleep)
+        (prop) edge[bend left=45] 
+            node[sloped, above] {\tiny tx ok || tx err} 
+            node[sloped, below] {\tiny \emph{inici timer sleep}} 
+        (sleep)
 
-        (prop) edge[bend right=15] node[sloped, above] {\tiny tx err} (sleep)
-        (sleep) edge node[above] {\tiny fi timer} node {\tiny \emph{inici timer sync}} (sync)
-        (sync) edge[bend left=15] node[sloped, above] {\tiny sync} (prop)
-        (sync) edge[bend right=15] node[sloped, above] {\tiny fi timer || iniciador}
+        % (prop) edge[bend right=15] node[sloped, above] {\tiny tx err} (sleep)
+        
+        (sleep) edge node[above] {\tiny fi sleep} node {\tiny \emph{inici timer sync}}  (sync)
+        (sleep) edge 
+            node[sloped, above] {\tiny fi sleep \&\& iniciador}
+            node[sloped, below] {\tiny \emph{generar missatge}}
+            (prop)
+
+
+        (sync) edge[bend left=15] node[sloped, above] {\tiny sync} node[sloped, below] {\tiny \emph{stop timer}} (prop)
+        (sync) edge[bend right=15] node[sloped, above] {\tiny fi timer}
             node[sloped, below] {\tiny\emph{generar missatge}}
             (prop);
 
