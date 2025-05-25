@@ -78,7 +78,7 @@ typedef struct {
     uint8_t data[SLEEP_MAX_DATA_SIZE];
 } sleep_pdu_t;
 
-typedef void (*sleep_callback_t)(uint8_t* data);
+typedef void (*sleep_callback_t)(uint8_t* data, size_t dataSize);
 
 /// @brief Inicialitza l'aplicació de SLEEP, inicialitzant capes inferiors.
 /// 

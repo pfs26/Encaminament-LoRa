@@ -185,7 +185,7 @@ static void forwardSync() {
         if (onSync != nullptr) {
             // onSync ha de copiar les dades que li interessi a l'apuntador
             uint8_t* data = receivedPDU.data + receivedPDU.dataLen;
-            onSync(data);
+            onSync(data, SLEEP_DATASIZE_PER_NODE);
             
             // Copiem les dades que afegeix onSync() a les dades de la PDU
             // i incrementem la mida de les dades
