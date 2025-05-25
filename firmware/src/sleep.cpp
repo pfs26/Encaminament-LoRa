@@ -3,16 +3,6 @@
 #include "utils.h"
 #include "sleep.h"
 
-static void decodePDU();
-static void onSyncReceived();
-static void goToSleep();
-static void syncTimeout();
-static void received();
-static void sent();
-static void sendError();
-static long computeDeltaTime();
-static void forwardSync();
-
 static node_address_t forwardCmdTo = NODE_ADDRESS_NULL; // Nodes a qui reenviar el SYNC
 
 // PDU rebuda
@@ -53,6 +43,52 @@ typedef enum {
 } sleep_event_t;
 
 static RTC_DATA_ATTR sleep_state_t sleepState = SLEEP_WAIT_FIRST_SYNC;
+
+
+static void decodePDU();
+static void onSyncReceived();
+static void goToSleep();
+static void syncTimeout();
+static void received();
+static void sent();
+static void sendError();
+static long computeDeltaTime();
+static void forwardSync();
+static void sleep_fsm(sleep_event_t);
+
+bool Sleep_init(void) {
+    // REQUEREIX TRANSPORT INICIALITZAT!
+    // No s'inicialitza aquí per evitar haver de conèixer @ node.
+    // Programa principal és qui hauria d'inicialitzar el protocol
+
+    Transport_onEvent(SLEEP_PORT, received, sent, sendError);
+
+    // Generem esdeveniment a FSM d'inici
+    sleep_fsm(SLEEP_IS_INITIATOR ? SLEEP_INITIATOR_E : SLEEP_NON_INITIATOR_E);
+
+    return true;
+}
+
+void Sleep_deinit(void) {
+    // Deshabilitem callbacks
+    onSync = nullptr;
+    // Cancel·lem tasques programades
+    if(timeoutTask != nullptr) {
+        scheduler_stop(timeoutTask);
+        timeoutTask = nullptr;
+    }
+    isSync = false;
+    // Deshabilitem transport a port de SLEEP
+    Transport_deinit(SLEEP_PORT);
+}
+
+bool Sleep_setForwardNode(node_address_t node) {
+    forwardCmdTo = node;
+    _PI("[SLEEP] Set forward node to %d", node);
+    return true; // sempre true, de moment. Si fos més d'un node, canviaria la cosa
+}
+
+void Sleep_onSync(sleep_callback_t cb) { onSync = cb; }
 
 static void sleep_fsm(sleep_event_t event) {
     switch(sleepState) {
@@ -137,39 +173,6 @@ static void sleep_fsm(sleep_event_t event) {
     }
 }
 
-bool Sleep_init(void) {
-    // REQUEREIX TRANSPORT INICIALITZAT!
-    // No s'inicialitza aquí per evitar haver de conèixer @ node.
-    // Programa principal és qui hauria d'inicialitzar el protocol
-
-    Transport_onEvent(SLEEP_PORT, received, sent, sendError);
-
-    // Generem esdeveniment a FSM d'inici
-    sleep_fsm(SLEEP_IS_INITIATOR ? SLEEP_INITIATOR_E : SLEEP_NON_INITIATOR_E);
-
-    return true;
-}
-
-void Sleep_deinit(void) {
-    // Deshabilitem callbacks
-    onSync = nullptr;
-    // Cancel·lem tasques programades
-    if(timeoutTask != nullptr) {
-        scheduler_stop(timeoutTask);
-        timeoutTask = nullptr;
-    }
-    isSync = false;
-    // Deshabilitem transport a port de SLEEP
-    Transport_deinit(SLEEP_PORT);
-}
-
-bool Sleep_setForwardNode(node_address_t node) {
-    forwardCmdTo = node;
-    _PI("[SLEEP] Set forward node to %d", node);
-    return true; // sempre true, de moment. Si fos més d'un node, canviaria la cosa
-}
-
-void Sleep_onSync(sleep_callback_t cb) { onSync = cb; }
 
 static long computeDeltaTime() {
     // N per nodes anteriors, (R+1) pels intents totals de TX
