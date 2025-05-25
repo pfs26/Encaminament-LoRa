@@ -40,6 +40,10 @@
 // Bytes de dades que cada node pot afegir
 #define SLEEP_DATASIZE_PER_NODE 1 
 
+// Quantitat de dispositius de la xarxa. Ha de ser igual a major als dispositius reals de la xarxa.
+// Es recomana que sigui major per facilitar la tasca d'afegir-ne de nous, i evitar haver de programar-los tots de nou
+#define SLEEP_QUANTITAT_DISPOSITIUS 5
+
 // Enum per definir ordres possibles. Definició per ús futur
 enum sleep_command_t : uint8_t {
     SLEEP_CMD_NONE,

@@ -24,9 +24,6 @@ static sleep_callback_t onSync = nullptr;
 // Instant en que s'ha rebut el SYNC, en `milisegons`
 static unsigned long tempsSync = 0;
 
-// Quantitat de nodes de la xarxa, per calcular temps de tolerància. Hauria de ser major o igual als nodes de la xarxa
-static uint8_t quantitatDispositius = 5;
-
 typedef enum {
     SLEEP_WAIT_FIRST_SYNC,
     SLEEP_PROPAGATE,
@@ -184,9 +181,9 @@ static long computeDeltaTime() {
     
     uint64_t max_ack_time_ms = US_TO_MS(LoRaRAW_getTimeOnAir(MAC_PDU_HEADER_SIZE)); // Un ACK de MAC té mida del header
     uint64_t tx_time_ms = US_TO_MS(LoRaRAW_getTimeOnAir(LORA_MAX_SIZE));
-    deltaTime = quantitatDispositius * (MAC_MAX_RETRIES + 1) * (tx_time_ms + MAC_ACK_TIMEOUT_FACTOR * max_ack_time_ms);
+    deltaTime = SLEEP_QUANTITAT_DISPOSITIUS * (MAC_MAX_RETRIES + 1) * (tx_time_ms + MAC_ACK_TIMEOUT_FACTOR * max_ack_time_ms);
     deltaTime = deltaTime * (1 + SLEEP_DELTA_EXTRA); // 25% marge per CSMA
-    _PI("[SLEEP] Delta time compute: TX time = %llu ms + ACK time = %llu ms (%d ACK factor) for %d nodes up to (%d+1) txs, with %.2f extra", tx_time_ms, max_ack_time_ms, MAC_ACK_TIMEOUT_FACTOR, quantitatDispositius, MAC_MAX_RETRIES, SLEEP_DELTA_EXTRA);
+    _PI("[SLEEP] Delta time compute: TX time = %llu ms + ACK time = %llu ms (%d ACK factor) for %d nodes up to (%d+1) txs, with %.2f extra", tx_time_ms, max_ack_time_ms, MAC_ACK_TIMEOUT_FACTOR, SLEEP_QUANTITAT_DISPOSITIUS, MAC_MAX_RETRIES, SLEEP_DELTA_EXTRA);
     return deltaTime;
 }
 
@@ -277,7 +274,7 @@ static void goToSleep() {
     // Nomes calculem cicle si no som iniciadors i hem rebut sincronització
     if (!SLEEP_IS_INITIATOR && isSync) {
         // Mida de les dades que espera rebre el node, per calcular temps de transmissió (que ha d'estar despert abans)
-        uint8_t expectedRcvSize = quantitatDispositius * SLEEP_DATASIZE_PER_NODE + LORA_MAX_SIZE - SLEEP_MAX_DATA_SIZE;
+        uint8_t expectedRcvSize = SLEEP_QUANTITAT_DISPOSITIUS * SLEEP_DATASIZE_PER_NODE + LORA_MAX_SIZE - SLEEP_MAX_DATA_SIZE;
         long transmitTime = US_TO_MS(LoRaRAW_getTimeOnAir(expectedRcvSize));
 
         // Obtenim el tempsDone (fi) tant a prop com sigui possible de dormir

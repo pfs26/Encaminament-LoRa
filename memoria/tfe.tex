@@ -18,11 +18,39 @@
 \usepackage{multirow}
 \usepackage{vcell}
 \usepackage{rotating}
+\usepackage{courier} % Uses Courier font for monospace
 
-\usepackage{listings}
 
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta, positioning, calc, decorations.markings, shapes.geometric, automata}
+
+\usepackage{listings}
+\lstdefinestyle{cppStyle}{
+  language=C++,
+  basicstyle=\scriptsize\ttfamily,     % Small font and monospaced
+  numbers=left,                          % Line numbers on the left
+  numberstyle=\tiny\color{gray},        % Style of line numbers
+  stepnumber=1,                          % Line numbering step
+  numbersep=10pt,                        % Space between numbers and code
+  backgroundcolor=\color{white},        % Background color of the code
+  frame=single,                          % Frame around the code
+  rulecolor=\color{black},              % Frame border color
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  tabsize=4,
+  captionpos=b,                         % Caption position
+  breaklines=true,                      % Line breaking
+  breakatwhitespace=false,
+  keywordstyle=\color{blue},           % Keywords in blue
+  commentstyle=\color{gray}\itshape,   % Comments in gray italics
+  stringstyle=\color{red},             % Strings in red
+  emph={getData,setup,loop,Transport_init,Sleep_onSync,
+        RoutingTable_addRoute,Sleep_setForwardNode,Sleep_init,
+        scheduler_run},                         % Function names
+  emphstyle=\color{purple},                    % Color for function names
+}
+\renewcommand{\lstlistingname}{Codi}
 
 \tikzstyle{startstop} = [rectangle, rounded corners, minimum width=2cm, minimum height=1cm,text centered, draw=black, fill=gray!30]
 \tikzstyle{process} = [rectangle, minimum width=2, minimum height=1cm, text centered, draw=black, fill=blue!20]
@@ -1555,9 +1583,12 @@ Gràcies a aquest temps addicional, es garanteix que el dispositiu estigui actiu
 
 
 Aquest temps de tolerància depèn del nombre màxim d'intents de retransmissió, de la quantitat de dispositius anteriors ---ja que són qui han de propagar el missatge---, de la mida del missatge, i dels paràmetres LoRa establerts, com ara l'amplada de banda o l'\acro{sf}. Per simplicitat, s'ha considerat la mida màxima de dades d'un missatge LoRa (\SI{255}{\byte}). No només cal considerar la transmissió del missatge de dades, també és important considerar la dels missatges de reconeixement de la capa d'accés al medi, i la mida d'aquests. Així, podem determinar aquest temps amb l'expressió:
-$$t_t =  (N \cdot (R+1) \cdot (t_{{tx}} + K_{{ack}} \cdot t_{{ack}})) \cdot (1 + f)$$
+\begin{equation}
+    t_t =  (N \cdot (R+1) \cdot (t_{{tx}} + K_{{ack}} \cdot t_{{ack}})) \cdot (1 + f)
+    \label{eq:app_tolerancia}
+\end{equation}
 \begin{itemize}
-    \item $N$: nombre de dispositius anteriors al dispositiu pel qual es calcula el temps de tolerància.
+    \item $N$: nombre de dispositius anteriors al dispositiu pel qual es calcula el temps de tolerància. Per simplicitat hauria de ser igual al nombre de dispositius totals, o major a aquest si mai es volen afegir nous dispositius.
     \item $R$: nombre màxim de reintents de transmissió de la capa d'accés al medi. Se n'afegeix un, per tenir en compte la primera transmissió que no és un reintent.
     \item $t_{tx}$: temps de transmissió de les dades, considerant els paràmetres LoRa que s'utilitzen en aquell moment i la mida màxima de les dades (\SI{255}{\byte}).
     \item $K_{{ack}}$: factor de temps d'espera per la recepció del missatge de reconeixement de la capa d'accés al medi. Veure \autoref{subsubsec:integritat}.
@@ -1613,19 +1644,18 @@ El flux de funcionament en enviar o rebre un missatge fragmentat seria el següe
 
 A la \autoref{fig:app_fragmentacio} s'ha representat com seria una comunicació amb fragmentació. Per simplicitat, s'ha considerat que la mida màxima de les dades és de \SI{10}{\byte} per missatge, i que cada dispositiu afegeix \SI{5}{\byte}. Per a cada transmissió es representa la mida de les dades, i si el camp boleà que indica si està fragmentat està actiu o no.
 
-    % // TODO: A PARTIR D'AQUI QUEDA PENDENT REVISAR
 
 \subsubsection{Pèrdua de dades}
-Tot i existir mecanismes que intenten assegurar la integritat dels missatges, és possible que un dispositiu no rebi correctament les dades. Això pot ser degut a interferències, o bé a que el dispositiu que ha d'enviar les dades s'ha espatllat
+Tot i existir mecanismes que intenten garantir la integritat dels missatges, és possible que un dispositiu no rebi correctament les dades. Això pot ser degut a interferències en la comunicació, o al mal funcionament del dispositiu encarregat de transmetre-les.
 
-Aquest cas provocaria que un dispositiu que no és el de referència quedés esperant la recepció de dades indefinidament, sense entrar en mode de baix consum. A més, implicaria la pèrdua de les dades de tota la xarxa. Per evitar-ho, s'ha implementat un temporitzador que, en cas de no rebre les dades en aquest temps, el dispositiu assumeix que no les rebrà, i pren la iniciativa d'iniciar ell la transmissió de dades cap al següent dispositiu.
+Aquest situació provocaria que un dispositiu que no és el de referència es quedi esperant indefinidament la recepció de dades, sense entrar en mode de baix consum. A més, comportaria la pèrdua de les dades del cicle actual de tota la xarxa. Per evitar-ho, s'ha implementat un temporitzador. En cas que no es rebin les dades dins d'aquest temps, el dispositiu assumeix que no les rebrà, i pren la iniciativa d'iniciar ell la transmissió de dades cap al següent node.
 
-Els següents dispositius rebrien el nou missatge de dades, i actuarien de forma normal. Com que els dispositius més propers al de referència inicien el mode de funcionament normal abans, també finalitzaran aquest temps d'espera abans, garantint que un dispositiu més llunyà no prengui la iniciativa d'iniciar la transmissió de dades abans que un de més proper.
+Els següents dispositius rebrien el nou missatge de dades, i actuarien de forma normal. Aquest mecanisme es basa en el fet que els dispositius més propers al de referència inicien el mode de funcionament normal abans, i per tant també finalitzen abans el temps d'espera. Això assegura que un dispositiu situat més lluny no iniciï prematurament la transmissió de dades, mantenint l'ordre de propagació.
 
 Amb aquesta solució obtenim dos avantatges principals:
 \begin{itemize}
     \item No perdem les dades de tots els dispositius de la xarxa. Com que un nou dispositiu iniciarà la transmissió, els següents a aquest sí que rebran el missatge i, per tant, hi afegiran les seves dades. 
-    \item Permet detectar en quin punt de la xarxa hi ha hagut l'últim error. Si al servidor d'aplicació de LoRaWAN rebem un missatge amb \SI{10}{\byte} de dades, i sabem que cada dispositiu afegeix \SI{2}{\byte}, es dedueix que els últims 5 dispositius funcionen adequadament, i que el problema es troba en el sisè dispositiu, o en l'enllaç entre aquest i el cinquè. Tot i això, no es pot assegurar que aquest sigui l'únic error, ja que en podrien existir més en dispositius anteriors al sisè.  
+    \item Permet detectar en quin punt de la xarxa hi ha hagut l'últim error. Si al servidor d'aplicació de LoRaWAN rebem un missatge amb \SI{10}{\byte} de dades, i sabem que cada dispositiu afegeix \SI{2}{\byte}, es dedueix que els últims 5 dispositius funcionen correctament, i que el problema es troba en el sisè dispositiu, o en l'enllaç entre aquest i el cinquè. Tot i això, no es pot assegurar que aquest sigui l'únic error, ja que en podrien existir més en dispositius anteriors al sisè.  
 \end{itemize}
 
 Per establir aquest temps d'espera cal considerar de nou el temps de tolerància ($t_t$) exposat anteriorment, que expresa la diferència entre el primer i últim missatge de dades vàlid que un dispositiu pot rebre. Per un dispositiu, suposem el següent:
@@ -1641,10 +1671,11 @@ Per establir aquest temps d'espera cal considerar de nou el temps de tolerància
     \end{itemize}
 \end{enumerate} 
 
-Així, s'observa com el límit de temps en què pot rebre el missatge de dades és $t_2 + t_t$. Per tant, el temps d'espera és el mateix que el temps de tolerància, centrat en l'instant on hauria de finalitzar el cicle ($t_2$). Cal tenir en compte, però, que surt del mode de baix consum a $t_2 - t_t$ i, per tant, el temps d'espera programat en el temporitzador en iniciar el funcionament normal ha de ser de $2 \cdot t_t$.
+Així, s'observa com el límit de temps en què pot rebre el missatge de dades és $t_2 + t_t$. Per tant, el temps d'espera és el mateix que el temps de tolerància, centrat en l'instant on hauria de finalitzar el cicle ($t_2$). Cal tenir en compte, però, que surt del mode de baix consum a $t_2 - t_t$, fent que el temps d'espera programat en el temporitzador en iniciar el funcionament normal hagi de ser de $2 \cdot t_t$.
 
-En el cas que es produís una fi de temps d'espera, el dispositiu assumeix que la seva sincronització era vàlida i que l'error introduit és petit. Així, el càlcul de temps de baix consum el realitzarà com si fos el dispositiu de referència. 
+En el cas que es produís una fi de temps d'espera, el dispositiu assumeix que la seva sincronització era vàlida i que l'error introduit és petit. Per aquest motiu, el càlcul de temps de baix consum el realitzarà com si fos el dispositiu de referència. 
 \\ \\
+    % // TODO: A PARTIR D'AQUI QUEDA PENDENT REVISAR
 Després de considerar aquestes no-idealitats, és necessari modificar l'expressió de càlcul dels temps de baix consum:
 \begin{itemize}
     \item \est{Referència}. En tractar-se del dispositiu de referència, i com que és qui marca la referència, el seu temps de cicle no es veu modificat. Així, continua venint determinat per
@@ -1688,17 +1719,21 @@ En tractar-se d'una capa del protocol, és important definir l'estructura dels m
 \end{figure}
 
 \subsubsection{Lectura de dades}
-Per tal de facilitar l'obtenció de les dades, s'ha implementat un \textit{callback} que pot ser configurat per qualsevol altra part del programa. Aquest \textit{callback} rep com a paràmetre un punter a les dades del missatge i és l'encarregat d'afegir-hi la informació que es vol transmetre. De manera automàtica, la capa d'aplicació executa aquest \textit{callback} just abans de propagar les dades.
+Per tal de facilitar l'obtenció de les dades, s'ha implementat un \emph{callback} que pot ser configurat per qualsevol altra part del programa. De manera automàtica, la capa d'aplicació l'executa just abans de propagar les dades. Aquest \emph{callback} rep dos paràmetres:
+\begin{itemize}
+    \item \emph{DataSize}. Indica la quantitat de dades que el \emph{callback} ha d'escriure en el paràmetre \emph{dades}.
+    \item \emph{Dades}. És un punter a les dades del missatge. És responsabilitat del \emph{callback} d'escriure tants bytes com el paràmetre \emph{dataSize} indica, i no més. Si n'escriu menys dels que s'indiquen, els bytes restants seran considerats zero. Si n'escriu més dels indicats, el comportament és indefinit, i pot provocar errors.
+\end{itemize}
 
-Aquesta estratègia ofereix flexibilitat, ja que permet que qualsevol part del programar defineix-hi com s'obtenen les dades a transmetre, sense necessitat de modificar la capa d'aplicació. A més, també treu responsabilitat a la capa que obté les dades, que no s'ha de preocupar de quan s'han d'enviar: la capa d'aplicació és qui li ho notificarà.
+Aquesta estratègia ofereix flexibilitat, ja que permet que qualsevol part del programar defineix-hi com s'obtenen les dades a transmetre, sense necessitat de modificar la capa d'aplicació. A més, també treu responsabilitat a la capa que obté les dades, que no s'ha de preocupar de quan s'han d'enviar: la capa d'aplicació és qui li ho notificarà. Al \autoref{subsubsec:exemple_app} es mostra un exemple d'aquest \emph{callback}.
 
 \subsubsection{Funcionament}
 L'aplicació s'ha implementat com una màquina d'estats. El seu diagrama es pot veure a la \autoref{fig:app_maquina_estats}. Consta de quatre estats:
 \begin{itemize}
     \item \emph{1r Sync}. És l'estat inicial, en què el dispositiu no ha estat mai sincronitzat i espera rebre el primer missatge de sincronització. En aquest estat el dispositiu roman actiu de forma indefinida, fins a rebre la sincronització. En el cas que el dispositiu sigui el de referència ---iniciador---, genera el missatge i el transmet directament, sense esperar.
     \item \emph{Propagar}. En aquest estat el dispositiu propaga el missatge de dades cap al següent dispositiu. Executa el \est{callback} d'obtenció de dades, i utilitza la interfície de la capa de transport per enviar el missatge. Quan aquesta mateixa capa notifica de fi de transmissió, o d'error en aquesta, canvia al següent estat.
-    \item \emph{Dormir}. En aquest estat el dispositiu entra en mode de baix consum, determinant la seva durada a través de les expressions \ref{eq:calculSleepRef} i \ref{eq:calculSleepList}.
-    \item \emph{Sync}. En aquest estat el dispositiu espera rebre el missatge de sincronització, aplicant el temporitzador de fi de temps d'espera en sortir del mode de baix consum (recordem, de durada $2\cdot t_t$).
+    \item \emph{Dormir}. En aquest estat el dispositiu entra en mode de baix consum, determinant la seva durada a través de les expressions \ref{eq:calculSleepRef} i \ref{eq:calculSleepList}. En finalitzar-se el temps, canvia a l'estat de propagació si és l'iniciador, o a l'estat d'espera de recepció de sincronització en cas contrari.
+    \item \emph{Sync}. En aquest estat el dispositiu espera rebre el missatge de sincronització, aplicant el temporitzador de fi de temps d'espera en sortir del mode de baix consum (recordem, de durada $2\cdot t_t$). En rebre el missatge de sincronització atura el temporitzador, i canvia a l'estat de propagació; si finalitza el temps d'espera, genera el missatge de la capa d'aplicació com si fos el de referència, i el propaga.
 \end{itemize}
 
 \begin{figure}
@@ -1748,9 +1783,80 @@ L'aplicació s'ha implementat com una màquina d'estats. El seu diagrama es pot 
 \end{figure}
 
 \subsection{Utilització}
-% Afegir nous dispositius
-    % explicar quins dispositius s'han de modificar
-% Sincronització inicial
+Aquest apartat descriu com utilitzar l'aplicació de baix consum, i com implementar-la en una xarxa de dispositius. Tot i que el funcionament de la sincronització i propagació de dades és automàtic, existeixen determinades operacions que requereixen intervenció manual. Es proporciona també un exemple de funcionament mínim de l'aplicació.
+
+\subsubsection{Configuració inicial}
+Un cop es disposa de la xarxa de dispositius establerta i dissenyada, cal configurar de forma individual cada dispositiu per indicar-li quin és el seu dispositiu veí, al qual li ha de propagar els missatges. També cal indicar-li si és el dispositiu de referència, i la quantitat de dispositius de la xarxa.
+
+Amb tots els dispositiu correctament configurats i programats, es pot iniciar el sistema. Els dispositius s'han d'iniciar de forma inversa a com es propaguen les dades, és a dir, començant pel dispositiu més llunyà al de referència (i més proper al \est{gateway}), i acabant pel de referència. Això és necessari per garantir que els dispositius es trobin el mínim de temps possible ---el temps a iniciar-los tots i iniciar el de referència--- en l'estat d'espera de la sincronització inicial, on es troben actius de forma indefinida. En cas de fer-ho en el sentit invers, s'activaria el dispositiu de referència, que intentaria transmetre les dades, quan els següents dispositius encara estan inactius. En activar-los, aquests dispositius esperarien la sincronització un temps gairabé igual al temps de cicle.
+
+Es vol destacar el fet que els dispositius no estan restringits a haver de transmetre tots la mateixa quantitat de dades. Així, un dispositiu podria estar configurat per haver de transmetre \SI{2}{\byte}, mentre que un altre \SI{10}{\byte}. Tot i això, aquesta situació requeriria més complexitat en el servidor d'aplicació LoRaWAN encarregat de descodificar les dades. 
+
+\subsubsection{Configuració de nous dispositius}
+Pot haver de ser necessari afegir nous dispositius a la xarxa. En aquest cas, es distingeixen dues situacions depenent del rol del dispositiu a afegir:
+\begin{itemize}
+    \item \emph{Referència}. Si es vol afegir un dispositiu nou a l'extrem més allunyat al \est{gateway}, aquest serà el de referència. 
+    \begin{enumerate}
+        \item Configurar el nou dispositiu amb el rol de referència, i indicar-li qui és el seu veí a qui ha d'enviar les dades.
+        \item Configurar l'antic dispositiu de referència, per indicar-li que ja no té aquest rol. El seu veí no es veu modificat, continua sent el mateix.
+        \item Resincronitzar tots els dispositius de la xarxa, aturant-los tots i tornant-los a iniciar en l'ordre vist anteriorment.
+    \end{enumerate}
+
+    \item \emph{No referència}. Si es vol afegir un dispositiu nou a la xarxa, però no és el de referència, cal seguir els següents passos:
+    \begin{enumerate}
+        \item Configurar el nou dispositiu indicant-li qui és el seu veí a qui ha d'enviar les dades.
+        \item Reconfigurar el dispositiu anterior al nou, per indicar-li la nova adreça del seu veí, que ara és la del dispositiu nou. 
+        \item Iniciar ambdós dispositius, que entraran en mode de recepció de forma indefinida fins a rebre la primera sincronització. 
+    \end{enumerate}
+\end{itemize}
+
+És important considerar que la capa d'aplicació necessita conèixer la quantitat de dispositius anteriors al que s'afegeix per calcular correctament el temps de tolerància (veure \autoref{eq:app_tolerancia}). 
+
+Si la quantitat de dispositius anteriors és major que la que s'ha configurat, el càlcul del temps de tolerància serà incorrecte, i no es pot garantir la sincronització. Si això passés, seria necessari modificar aquest paràmetre en tots els dispositius següents al que s'afegeix, i reiniciar-los tots. Pel que fa als dispositius anteriors, aquest valor seria el mateix i, per tant, no és necessari modificar-lo. Per aquest motiu, si es té pensat afegir nous dispositius, es recomana establir aquest paràmetre un valor superior al necessari.
+
+Això es pot evitar si els dispositius s'afegeixen únicament en l'extrem del \est{gateway}, ja que aquest seria l'últim dispositiu de la cadena. Llavors, seria únicament necessari modificar el dispositiu anterior al que s'afegeix per indicar-li el nou veí, i establir que no té capacitats LoRaWAN.
+
+\subsubsection{Resincronització de la xarxa}
+Tot i que l'aplicació intenta garantir la sincronització de tots els dispositius de la xarxa, i la robustesa i fiabilitat, és possible que es produeixin errors que puguin dur a una desincronització total de la xarxa. En tal cas, caldria reiniciar tots els dispositius de la xarxa, i iniciar-los de nou com si fos la primera vegada. En aquest procediment també es recomana detectar l'error que ha provocat la desincronització, i corregir-lo si és possible. A continuació es mostren algunes possibles causes d'error, i la seva solució:
+\begin{itemize}
+    \item Mal enllaç entre dispositius. Si la desincronització és causada per un mal enllaç entre dispositius, es podrien modificar els paràmetres de transmissió LoRa, o bé afegir un dispositiu intermig per millorar la comunicació.
+    \item Sincronització rebuda en baix consum. Si la sincronització es rep quan el dispositiu encara es troba en mode de baix consum, és possible que el temps de marge, encarregat de contrarestar l'error del rellotge, sigui massa petit. 
+    \item Consums excessius. Si es detecta que un dispositiu té consums d'energia excessius i dispars amb la resta, pot ser causat a reinicis del microcontrolador, fent que es quedi en mode de sincronització inicial. És important verificar que l'alimentació del dispositiu és suficient per alimentar el microcontrolador i el mòdul de comunicació, que pot tenir un consum elevat en el moment de la transmissió.
+\end{itemize}
+
+\subsubsection{Exemple}
+\label{subsubsec:exemple_app}
+\begin{lstlisting}[style=cppStyle, caption={Exemple de funcionament mínim de l'aplicació de baix consum.}]
+#include "sleep.h"
+#include "transport.h"
+
+void getData(uint8_t* data, size_t size) {
+    // Omplir `size` bytes amb dades.
+    // Aqui es farien lectures
+    for(int i = 0; i < size; i++) {
+        data[i] = esp_random() % 256;
+    }
+}
+
+void setup() {
+    // Iniciar stack protocol
+    if(!Transport_init(NODE_ADDRESS, IS_GATEWAY))
+        while(1) delay(1);
+
+    Sleep_onSync(getData); // Configurar callback dades
+    RoutingTable_addRoute(0x02, 0x02); // Configurar taula rutes
+    
+    if(!Sleep_setForwardNode(0x02)) // Configurar node a propagar
+        while(1) delay(1);
+
+    if(!Sleep_init()) // Iniciar aplicacio
+        while(1) delay(1);
+}
+
+void loop() {
+    scheduler_run(); // Unic metode a executar a loop
+}
+\end{lstlisting}
 
 \subsection{Validació i resultats}
 % aqui parlar de l'error del clock?
@@ -1763,6 +1869,10 @@ L'aplicació s'ha implementat com una màquina d'estats. El seu diagrama es pot 
 % \section{Suport a topologies més complexes}
 % \section{Optimització del consum energètic}
 % \section{Integració amb LoRaWAN o altres protocols}
+
+% fragmentació a nivell de protocol o a nivell d'aplicació
+% configuració dinàmica de dispositius
+% 
 
 \listoftables
 \listoffigures
