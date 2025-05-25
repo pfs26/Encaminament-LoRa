@@ -25,6 +25,20 @@
 \usetikzlibrary{arrows.meta, positioning, calc, decorations.markings, shapes.geometric, automata}
 
 \usepackage{listings}
+\lstdefinelanguage{JavaScript}{
+  keywords={break, case, catch, const, continue, debugger, default, delete, do, else, export, finally, for, function, if, import, in, instanceof, let, new, return, super, switch, this, throw, try, typeof, var, void, while, with, yield},
+  keywordstyle=\color{blue}\bfseries,
+  ndkeywords={class,export,boolean,throw,implements,interface,package,private,protected,public,static,yield,await,async},
+  ndkeywordstyle=\color{blue}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=true,
+  comment=[l]//,
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{gray}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
+}
 \lstdefinestyle{cppStyle}{
   language=C++,
   basicstyle=\scriptsize\ttfamily,     % Small font and monospaced
@@ -43,13 +57,34 @@
   breaklines=true,                      % Line breaking
   breakatwhitespace=false,
   keywordstyle=\color{blue},           % Keywords in blue
-  commentstyle=\color{gray}\itshape,   % Comments in gray italics
+  commentstyle=\color{gray},   % Comments in gray italics
   stringstyle=\color{red},             % Strings in red
   emph={getData,setup,loop,Transport_init,Sleep_onSync,
         RoutingTable_addRoute,Sleep_setForwardNode,Sleep_init,
         scheduler_run},                         % Function names
   emphstyle=\color{purple},                    % Color for function names
 }
+\lstdefinestyle{jsStyle}{
+    language=JavaScript,
+    backgroundcolor=\color{white},   
+    commentstyle=\color{gray}\itshape,   % Comments in gray italics
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{gray},
+    frame=single,                          % Frame around the code
+    stringstyle=\color{red},             % Strings in red
+    basicstyle=\ttfamily\scriptsize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=10pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=4
+}
+
 \renewcommand{\lstlistingname}{Codi}
 
 \tikzstyle{startstop} = [rectangle, rounded corners, minimum width=2cm, minimum height=1cm,text centered, draw=black, fill=gray!30]
@@ -1552,7 +1587,9 @@ En l'anterior subapartat s'ha presentat el funcionament del sistema en condicion
 Com s'ha vist a la \autoref{section:estrategiesSync}, els rellotges dels dispositius no són totalment precisos. Això provoca que, tot i indicar-li que estigui en mode de baix consum durant un temps determinat, el temps real en què hi està sigui diferent. Per un dispositiu que espera rebre les dades, si el seu rellotge és més lent de l'esperat, es trobarà en mode de baix consum durant més estona del que li correspondria. Això provocaria que, en despertar-se i esperar rebre les dades, aquestes ja s'haguessin transmès, fent que no les rebés.
     
 Una solució a aquest problema és afegir un temps de marge entre l'inici de funcionament normal i l'instant en què espera rebre les dades. Aquest temps de marge ha de ser superior al màxim error que es pot produir en els rellotges dels dispositius, i és fàcilment calculable a partir del temps de cicle total i l'error, normalment expresat en parts per millió (\acro{ppm}):
-$$t_{\text{marge}} \geq t_{\text{cicle}} \cdot \epsilon_{\text{\acro{ppm}}} \cdot 10^{-6}$$
+\begin{equation}
+    t_{\text{marge}} \geq t_{\text{cicle}} \cdot \epsilon_{\text{\acro{ppm}}} \cdot 10^{-6}
+\end{equation}
 
 \subsubsection{Retransmissions}
 La capa d'accés al medi d'un dispositiu pot necessitar realitzar retransmissions si no rep el missatge de reconeixement, o aplicar \acro{beb} si el canal està ocupat per un altre dispositiu ---aliè a la xarxa---. Aquestes retransmissions impliquen que el missatge de dades arribi amb retard al següent dispositiu i, en conseqüència, que aquest també el propagui més tard, afectant a la resta de la xarxa. 
@@ -1661,7 +1698,7 @@ Amb aquesta solució obtenim dos avantatges principals:
 Per establir aquest temps d'espera cal considerar de nou el temps de tolerància ($t_t$) exposat anteriorment, que expresa la diferència entre el primer i últim missatge de dades vàlid que un dispositiu pot rebre. Per un dispositiu, suposem el següent:
 \begin{enumerate}
     \item Rep el missatge de dades a l'instant $t_1$. En el següent cicle, esperarà rebre'l a l'instant $t_2 = t_1 + t_c$.
-    \item Com que no conèix quin missatge va rebre en el cicle anterior, surt del mode de baix consum a l'instant $t_2 - t_t$. Consdierant els extrems, tenim les següents situacions:
+    \item Com que no conèix quin missatge va rebre en el cicle anterior, surt del mode de baix consum a l'instant $t_2 - t_t$. Considerant els extrems, tenim les següents situacions:
     \begin{itemize}
         \item Si en l'anterior cicle havia rebut el primer missatge, i ara també rep el primer possible, el rebrà a l'instant $t_2$, com esperava. 
         \item Si havia rebut el primer, i ara rep l'últim possible, el rebrà a l'instant $t_2 + t_t$.
@@ -1671,11 +1708,16 @@ Per establir aquest temps d'espera cal considerar de nou el temps de tolerància
     \end{itemize}
 \end{enumerate} 
 
-Així, s'observa com el límit de temps en què pot rebre el missatge de dades és $t_2 + t_t$. Per tant, el temps d'espera és el mateix que el temps de tolerància, centrat en l'instant on hauria de finalitzar el cicle ($t_2$). Cal tenir en compte, però, que surt del mode de baix consum a $t_2 - t_t$, fent que el temps d'espera programat en el temporitzador en iniciar el funcionament normal hagi de ser de $2 \cdot t_t$.
+Així, s'observa com el límit de temps en què pot rebre el missatge de dades és $t_2 + t_t$. Per tant, el temps d'espera és el mateix que el temps de tolerància, centrat en l'instant on hauria de finalitzar el cicle ($t_2$). Cal tenir en compte, però, que surt del mode de baix consum a $t_2 - t_t$, fent que el temps d'espera programat en el temporitzador en iniciar el funcionament normal hagi de ser de $2 \cdot t_t$. A més, és important considerar també l'error del rellotge del dispositiu. Per aquest motiu, es considera de nou el temps de marge ($t_m$) que s'ha d'afegir al càlcul del temps d'espera. Així, el temps d'espera final és:
+\begin{equation}
+    t_{espera} = 2 \cdot t_t + 2\cdot t_m
+    \label{eq:app_t_espera}
+\end{equation}
+on $t_t$ i $t_m$ és necessari que siguin multiplicats per dos, ja que aquests també s'apliquen per despertar-se abans del mode de baix consum.
 
 En el cas que es produís una fi de temps d'espera, el dispositiu assumeix que la seva sincronització era vàlida i que l'error introduit és petit. Per aquest motiu, el càlcul de temps de baix consum el realitzarà com si fos el dispositiu de referència. 
-\\ \\
-    % // TODO: A PARTIR D'AQUI QUEDA PENDENT REVISAR
+\newline
+\newline
 Després de considerar aquestes no-idealitats, és necessari modificar l'expressió de càlcul dels temps de baix consum:
 \begin{itemize}
     \item \est{Referència}. En tractar-se del dispositiu de referència, i com que és qui marca la referència, el seu temps de cicle no es veu modificat. Així, continua venint determinat per
@@ -1695,6 +1737,7 @@ Després de considerar aquestes no-idealitats, és necessari modificar l'express
     \end{itemize}
 \end{itemize}
 
+    % // TODO: A PARTIR D'AQUI QUEDA PENDENT REVISAR
 
 \subsection{Implementació}
 La implementació del disseny final s'ha realitzat a la capa d'aplicació del protocol implementat. Així, es disposa de totes les funcionalitats que aquest implementa: gestió d'accés al canal, detecció d'errors, retransmissions, etc. En aquest subapartat es presenta l'estructura dels missatges, les decisions d'implementació que s'han près i el funcionament del protocol.
@@ -1826,9 +1869,13 @@ Tot i que l'aplicació intenta garantir la sincronització de tots els dispositi
 
 \subsubsection{Exemple}
 \label{subsubsec:exemple_app}
+A continuació es presenta un exemple de funcionament mínim de l'aplicació. Es mostra com configurar la capa d'aplicació, i com implementar el \emph{callback} encarregat d'obtenir les dades a transmetre. Seguidament, es mostra un exemple de descodificador d'\est{uplinks} al servidor d'aplicació, configurable a través del portal de \acro{ttn}. Aquest mostra la informació del paquet (estructura de dades de la capa d'encaminament), que a les seves dades conté el segment de transport i les dades del missatge d'aplicació.
+
 \begin{lstlisting}[style=cppStyle, caption={Exemple de funcionament mínim de l'aplicació de baix consum.}]
 #include "sleep.h"
 #include "transport.h"
+
+#define SLEEP_IS_INITIATOR false
 
 void getData(uint8_t* data, size_t size) {
     // Omplir `size` bytes amb dades.
@@ -1843,11 +1890,9 @@ void setup() {
     if(!Transport_init(NODE_ADDRESS, IS_GATEWAY))
         while(1) delay(1);
 
-    Sleep_onSync(getData); // Configurar callback dades
     RoutingTable_addRoute(0x02, 0x02); // Configurar taula rutes
-    
-    if(!Sleep_setForwardNode(0x02)) // Configurar node a propagar
-        while(1) delay(1);
+    Sleep_onSync(getData); // Configurar callback dades
+    Sleep_setForwardNode(0x02); // Configurar node a propagar
 
     if(!Sleep_init()) // Iniciar aplicacio
         while(1) delay(1);
@@ -1855,6 +1900,29 @@ void setup() {
 
 void loop() {
     scheduler_run(); // Unic metode a executar a loop
+}
+\end{lstlisting}
+
+\begin{lstlisting}[style=jsStyle, caption={Exemple de descodificador de dades al servidor d'aplicació.}]
+function decodeUplink(input) {
+    var data = {};
+
+    data.src = input.bytes[0];
+    data.dest = input.bytes[1];
+    data.ttl = input.bytes[2];
+    data.dataLen = input.bytes[3]
+    data.transport = {};
+    data.transport.flags = {};
+    data.transport.id = (input.bytes[5]<<8)+(input.bytes[4]);
+    //data.transport.flags.raw = input.bytes[6];
+    data.transport.flags.ackreq = input.bytes[6] & 0x01;
+    data.transport.flags.ackresp = (input.bytes[6] & 0x02) >>> 1;
+    data.transport.flags.port = (input.bytes[6] & 0xFC) >>> 2;
+    data.transport.dataLen = input.bytes[7];
+    data.transport.data = input.bytes.slice(8, 8 + data.transport.dataLen);
+    return {
+        data: data
+    };
 }
 \end{lstlisting}
 
