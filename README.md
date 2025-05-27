@@ -21,9 +21,10 @@ The system features a **static routing mechanism**, **adaptive retransmission st
   - Nodes with LoRaWAN access can relay packets to the gateway
   - Handles end-to-end acknowledgment since LoRaWAN gateways cannot do this natively
   
-- **Application Layer (I2C Support)**
-  - Allows communication with **multiple sensors/devices** over I2C
-  - Sensor data can be transmitted across multiple LoRa nodes until reaching a LoRaWAN-capable node for final transmission
+- **Application Layer**
+  - User-defined and fully customizable
+  - Includes built-in low-power management, to be run on port `0x01`
+  - Supports any logic needed, such as I2C sensor communication, dynamic configuration, etc.
 
 ## Repository Structure
 ```
@@ -32,9 +33,7 @@ The system features a **static routing mechanism**, **adaptive retransmission st
 │   ├── include/       # Header files
 │   ├── config/        # LoRa settings
 │   └── main.cpp       # Entry point
-├── hardware/          # Node PCB and enclosure design
-├── docs/              # Project documentation
-├── simulations/       # Network simulation scripts
+├── memoria/           # Design and code documentation
 └── README.md          # This file
 ```
 
@@ -44,13 +43,15 @@ The protocol is structured into multiple layers, each handling specific aspects 
 ### LoRa Physical Layer
 - Uses **SX1262 transceivers**
 - Configurable modulation settings (SF, BW, TX power)
-- Parameters can be set **at compile-time** or updated via a **web interface**, stored in **NVS**
 
 ### MAC Layer
 - **CSMA** with **Listen Before Talk (LBT)** to reduce collisions
 - **Binary Exponential Backoff (BEB)** if the channel is busy
+
+### Routing Layer
 - **Static routing with runtime updates** via API (`RoutingTable_*()` functions)
 - **TTL enforcement** to prevent looping packets
+- Multiple LoRa interfaces support, for different configurations (raw LoRa vs LoRaWAN, or multiple raw LoRa transceivers)
 
 ### LoRaWAN Support
 - Nodes with LoRaWAN access can forward packets to the gateway
@@ -62,47 +63,9 @@ The protocol is structured into multiple layers, each handling specific aspects 
 - **Segment deduplication** using a unique **Segment ID**
 - **End-to-end acknowledgment** ensures reliable delivery
 - Automatic retransmissions if no acknowledgment is recevied, applying an exponential backoff after each attempt
+- Unrealiable segments for quick end-to-end messaging
 
-### Application Layer (I2C Communication)
-- Supports communication with **multiple sensors/devices** over I2C
-- Any connected sensor can send data through the mesh network
-- Data hops through multiple nodes until reaching a LoRaWAN-capable node
-
-<!-- ## Installation
-### Prerequisites
-- **ESP32-S3** development board
-- **SX1262 LoRa transceiver**
-- **PlatformIO** for firmware development
-- **RadioLib** library for LoRa communication
-
-### Installation
-1. Clone the repository:
-   ```sh
-   git clone https://github.com/pfs26/TFG
-   ```
-2. Install dependencies:
-   ```sh
-   platformio run
-   ```
-3. Flash the firmware:
-   ```sh
-   platformio run --target upload
-   ```
-
-## API
-The protocol provides APIs for:
-- **Routing Table Management** (`RoutingTable_addRoute(dst, nexthop)`, etc.)
-- **Transmission & Acknowledgment Handling**
-- **I2C Sensor Integration**
-
-## Testing
-Currently tested using:
-- **ESP32-S3 nodes**
-- **Real-world LoRa communication tests**
-- **Packet loss & network performance monitoring**
-
-## Future Improvements
-- Implement **multi-packet segmentation** for large data transfers
-- Enhance **dynamic routing strategies**
-- Improve **security & encryption** for LoRa transmissions
- -->
+### Application Layer
+- Customisable by the user, depending on requirements
+- Uses the full protocol stack underneath
+- **Built-in low-power** management application
