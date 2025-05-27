@@ -84,6 +84,21 @@
     showtabs=false,                  
     tabsize=4
 }
+\lstdefinestyle{bashStyle}{
+  language=bash,
+  backgroundcolor=\color{white},
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{blue},
+%   commentstyle=\color{gray},
+%   stringstyle=\color{red},
+  showstringspaces=false,
+%   columns=fullflexible,
+%   keepspaces=true,
+%   frame=single,
+  breaklines=true,
+  emph={picocom,ts,echo,cat,sudo,chmod},         % commands you want to highlight
+%   emphstyle=\color{blue},
+}
 
 \renewcommand{\lstlistingname}{Codi}
 
@@ -122,7 +137,7 @@
 
 % \title{Disseny d'un protocol LoRa amb encaminament estàtic per aplicacions de monitoratge}
 \title{Disseny d'un protocol LoRa amb encaminament estàtic per aplicacions de monitoratge}
-\subtitle{Aplicació en xarxes de baix consum mitjançant sincronització temporal}
+\subtitle{Aplicació en xarxes de baix consum}
 % \subtitle{Adaptació per a escenaris de baix consum mitjançant sincronització temporal}
 
 % L'autor del treball. Admet gènere (vegeu 9.2 del manual) fent \author[f]{}
@@ -160,9 +175,8 @@
 \end{abstract}
 
 
-
-
 \begin{document}
+\listoffigures
 
 % Si feu servir apèndixs, descomenteu
 %\part{Memòria}
@@ -296,7 +310,7 @@ En aquest capítol es presenta el disseny i implementació del protocol de comun
 
 En un primer moment es fa un anàlisi de les característiques del protocol, així com la seva estructura. A continuació, es descriu l'entorn de desenvolupament i llibreries utilitzades. Seguidament, es presenta el disseny per capes del protocol, seguint l'estructura vista a la \autoref{sec:protocols}. Finalment, es mostra la implementació del protocol en un dispositiu real, i les verificacions realitzades per validar el funcionament.
 
-No es farà especial menció a la implementació específica en codi de cada funcionalitat, si no que més bé es detallaran els criteris de disseny adoptats i les decisions preses. Es considera que, amb un disseny ben definit, la implementació del protocol és una tasca trivial. Malgrat això, es pot consultar la total del codi a \url{https://github.com/pfs26/Encaminament-LoRa/tree/main/firmware}.
+No es farà especial menció a la implementació específica en codi de cada funcionalitat, si no que més bé es detallaran els criteris de disseny adoptats i les decisions preses. Es considera que, amb un disseny ben definit, la implementació del protocol és una tasca trivial. Malgrat això, es pot consultar la totalitat del codi a \url{https://github.com/pfs26/Encaminament-LoRa/tree/main/firmware}.
 
 \section{Característiques}
 El disseny del protocol està fortament influenciat pel model \acro{tcp/ip}, presentat a la \autoref{sec:protocols}. El protocol presentat es basa en una pila de protocols, on cada capa s'encarrega d'una part específica del procés de comunicació. Això permet un disseny modular, i la possibilitat de modificar les funcionalitats d'una capa sense afectar la resta.
@@ -1589,6 +1603,7 @@ Com s'ha vist a la \autoref{section:estrategiesSync}, els rellotges dels disposi
 Una solució a aquest problema és afegir un temps de marge entre l'inici de funcionament normal i l'instant en què espera rebre les dades. Aquest temps de marge ha de ser superior al màxim error que es pot produir en els rellotges dels dispositius, i és fàcilment calculable a partir del temps de cicle total i l'error, normalment expresat en parts per millió (\acro{ppm}):
 \begin{equation}
     t_{\text{marge}} \geq t_{\text{cicle}} \cdot \epsilon_{\text{\acro{ppm}}} \cdot 10^{-6}
+    \label{eq:temps_marge}
 \end{equation}
 
 \subsubsection{Retransmissions}
@@ -1737,15 +1752,13 @@ Després de considerar aquestes no-idealitats, és necessari modificar l'express
     \end{itemize}
 \end{itemize}
 
-    % // TODO: A PARTIR D'AQUI QUEDA PENDENT REVISAR
-
 \subsection{Implementació}
-La implementació del disseny final s'ha realitzat a la capa d'aplicació del protocol implementat. Així, es disposa de totes les funcionalitats que aquest implementa: gestió d'accés al canal, detecció d'errors, retransmissions, etc. En aquest subapartat es presenta l'estructura dels missatges, les decisions d'implementació que s'han près i el funcionament del protocol.
+La implementació del disseny final s'ha realitzat a la capa d'aplicació del protocol implementat. Així, es disposa de totes les funcionalitats que aquest implementa, com ara la gestió d'accés al canal, detecció d'errors i retransmissions, entre d'altres. Aquest subapartat presenta l'estructura dels missatges, les decisions d'implementació preses, així com el funcionament de l'aplicació.
 
 \subsubsection{Estructura dels missatges}
-En tractar-se d'una capa del protocol, és important definir l'estructura dels missatges que aquest utilitza. Aquests consten de tres únics camps:
+En tractar-se d'una capa del protocol, és fonamental definir l'estructura dels missatges que utilitza. Aquests consten de tres camps:
 \begin{itemize}
-    \item \emph{Dades}. Les dades que s'envien en el missatge. En aquest camp cada dispositiu hi inclou les seves dades abans de transmetre-les. És important mencionar que tots els dispositius de la xarxa conèixen la quantitat de dades que han d'enviar, i és la mateixa per a tots. Té una longitud màxima de \SI{238}{\byte}, donat que la mida màxima de les dades a la capa de transport és de \SI{240}{\byte}, i que cal reservar \SI{2}{\byte} per als camps de longitud i ordre. 
+    \item \emph{Dades}. Les dades que s'envien en el missatge. En aquest camp cada dispositiu hi inclou les seves dades abans de transmetre-les. És important mencionar que tots els dispositius de la xarxa conèixen la quantitat de dades que han d'enviar. Té una longitud màxima de \SI{238}{\byte}, tenint en compte que la capa de transport permet un màxim de \SI{240}{\byte}, i que s'han de reservar \SI{2}{\byte} per als camps de longitud i ordre. 
     \item \emph{Longitud de les dades}. Indica la quantitat de dades, en bytes, que conté el camp de dades del missatge. Té una longitud d'\SI{1}{\byte}, suficient per a indicar la mida màxima de dades (\SI{238}{\byte}). 
     \item \emph{Ordre}. Indica ordres addicionals als dispositius. Tot i no ser utilitzat en la implementació final, s'ha considerat oportú incloure'l per a futures millores. Té una longitud d'\SI{1}{\byte}, i podria ser utilitzat per donar instruccions als dispositius, com ara «després de propagar el missatge, manten-te actiu indefinidament», o de més complexes com ara modificar el temps de cicle. En qualsevol cas, els dispositius afegirien les seves dades al missatge, i el propagarien a la resta com fins ara.
 \end{itemize}
@@ -1764,19 +1777,19 @@ En tractar-se d'una capa del protocol, és important definir l'estructura dels m
 \subsubsection{Lectura de dades}
 Per tal de facilitar l'obtenció de les dades, s'ha implementat un \emph{callback} que pot ser configurat per qualsevol altra part del programa. De manera automàtica, la capa d'aplicació l'executa just abans de propagar les dades. Aquest \emph{callback} rep dos paràmetres:
 \begin{itemize}
-    \item \emph{DataSize}. Indica la quantitat de dades que el \emph{callback} ha d'escriure en el paràmetre \emph{dades}.
-    \item \emph{Dades}. És un punter a les dades del missatge. És responsabilitat del \emph{callback} d'escriure tants bytes com el paràmetre \emph{dataSize} indica, i no més. Si n'escriu menys dels que s'indiquen, els bytes restants seran considerats zero. Si n'escriu més dels indicats, el comportament és indefinit, i pot provocar errors.
+    \item \emph{DataSize}. Indica la quantitat de bytes que el \emph{callback} ha d'escriure en el paràmetre \emph{dades}.
+    \item \emph{Dades}. És un punter a les dades del missatge. És responsabilitat del \emph{callback} d'escriure exactament el nombre de bytes indicats pel paràmetre \emph{dataSize}. Si n'escriu menys, els bytes restants seran considerats zero. Si n'escriu més, el comportament és indefinit, i pot provocar errors.
 \end{itemize}
 
 Aquesta estratègia ofereix flexibilitat, ja que permet que qualsevol part del programar defineix-hi com s'obtenen les dades a transmetre, sense necessitat de modificar la capa d'aplicació. A més, també treu responsabilitat a la capa que obté les dades, que no s'ha de preocupar de quan s'han d'enviar: la capa d'aplicació és qui li ho notificarà. Al \autoref{subsubsec:exemple_app} es mostra un exemple d'aquest \emph{callback}.
 
 \subsubsection{Funcionament}
-L'aplicació s'ha implementat com una màquina d'estats. El seu diagrama es pot veure a la \autoref{fig:app_maquina_estats}. Consta de quatre estats:
+L'aplicació s'ha implementat com una màquina d'estats, el diagrama de la qual es pot veure a la \autoref{fig:app_maquina_estats}. Consta de quatre estats:
 \begin{itemize}
-    \item \emph{1r Sync}. És l'estat inicial, en què el dispositiu no ha estat mai sincronitzat i espera rebre el primer missatge de sincronització. En aquest estat el dispositiu roman actiu de forma indefinida, fins a rebre la sincronització. En el cas que el dispositiu sigui el de referència ---iniciador---, genera el missatge i el transmet directament, sense esperar.
-    \item \emph{Propagar}. En aquest estat el dispositiu propaga el missatge de dades cap al següent dispositiu. Executa el \est{callback} d'obtenció de dades, i utilitza la interfície de la capa de transport per enviar el missatge. Quan aquesta mateixa capa notifica de fi de transmissió, o d'error en aquesta, canvia al següent estat.
+    \item \emph{1r Sync}. Estat inicial, en què el dispositiu no ha estat mai sincronitzat i espera rebre el primer missatge de sincronització. En aquest estat el dispositiu roman actiu de forma indefinida, fins a rebre la sincronització. En el cas que el dispositiu sigui el de referència ---iniciador---, genera el missatge i el transmet directament, sense esperar.
+    \item \emph{Propagar}. En aquest estat el dispositiu propaga el missatge de dades cap al següent dispositiu. Executa el \est{callback} d'obtenció de dades, i utilitza la interfície de la capa de transport per enviar el missatge. Quan aquesta mateixa capa notifica que la transmissió ha finalitzat (ja sigui amb èxit o error), canvia al següent estat.
     \item \emph{Dormir}. En aquest estat el dispositiu entra en mode de baix consum, determinant la seva durada a través de les expressions \ref{eq:calculSleepRef} i \ref{eq:calculSleepList}. En finalitzar-se el temps, canvia a l'estat de propagació si és l'iniciador, o a l'estat d'espera de recepció de sincronització en cas contrari.
-    \item \emph{Sync}. En aquest estat el dispositiu espera rebre el missatge de sincronització, aplicant el temporitzador de fi de temps d'espera en sortir del mode de baix consum (recordem, de durada $2\cdot t_t$). En rebre el missatge de sincronització atura el temporitzador, i canvia a l'estat de propagació; si finalitza el temps d'espera, genera el missatge de la capa d'aplicació com si fos el de referència, i el propaga.
+    \item \emph{Sync}. En aquest estat el dispositiu espera rebre el missatge de sincronització, aplicant el temporitzador de fi de temps d'espera en sortir del mode de baix consum (recordem, de durada $2\cdot (t_t+t_m)$). En rebre el missatge de sincronització atura el temporitzador, i canvia a l'estat de propagació; si finalitza el temps d'espera, genera el missatge de la capa d'aplicació com si fos el de referència, i el propaga.
 \end{itemize}
 
 \begin{figure}
@@ -1826,14 +1839,15 @@ L'aplicació s'ha implementat com una màquina d'estats. El seu diagrama es pot 
 \end{figure}
 
 \subsection{Utilització}
-Aquest apartat descriu com utilitzar l'aplicació de baix consum, i com implementar-la en una xarxa de dispositius. Tot i que el funcionament de la sincronització i propagació de dades és automàtic, existeixen determinades operacions que requereixen intervenció manual. Es proporciona també un exemple de funcionament mínim de l'aplicació.
+Aquest apartat descriu com utilitzar l'aplicació de baix consum, i la seva implementació en una xarxa de dispositius. Tot i que el funcionament de la sincronització i propagació de dades és automàtic, existeixen determinades operacions que requereixen intervenció manual. Es proporciona també un exemple de funcionament mínim de l'aplicació.
 
 \subsubsection{Configuració inicial}
 Un cop es disposa de la xarxa de dispositius establerta i dissenyada, cal configurar de forma individual cada dispositiu per indicar-li quin és el seu dispositiu veí, al qual li ha de propagar els missatges. També cal indicar-li si és el dispositiu de referència, i la quantitat de dispositius de la xarxa.
 
-Amb tots els dispositiu correctament configurats i programats, es pot iniciar el sistema. Els dispositius s'han d'iniciar de forma inversa a com es propaguen les dades, és a dir, començant pel dispositiu més llunyà al de referència (i més proper al \est{gateway}), i acabant pel de referència. Això és necessari per garantir que els dispositius es trobin el mínim de temps possible ---el temps a iniciar-los tots i iniciar el de referència--- en l'estat d'espera de la sincronització inicial, on es troben actius de forma indefinida. En cas de fer-ho en el sentit invers, s'activaria el dispositiu de referència, que intentaria transmetre les dades, quan els següents dispositius encara estan inactius. En activar-los, aquests dispositius esperarien la sincronització un temps gairabé igual al temps de cicle.
+Amb tots els dispositiu correctament configurats i programats, es pot iniciar el sistema. Els dispositius s'han d'iniciar de forma inversa a com es propaguen les dades, és a dir, començant pel dispositiu més llunyà al de referència (i més proper al \est{gateway}), i acabant pel de referència. Això és necessari per garantir que cada dispositiu trobi el seu veí actiu quan s'inicia, i redueix el temps que els dispositius es troben en l'estat d'espera de sincronització inicial. Si s'iniciés en l'ordre contrari, el dispositiu de referència començaria a transmetre quan la resta encara estrarien apagats. En encendre'ls posteriorment, aquests quedarien esperant una sincronització que ja s'hauria produït, i haurien de romandre actius gairebé tot un cicle complet abans de rebre'l.
 
-Es vol destacar el fet que els dispositius no estan restringits a haver de transmetre tots la mateixa quantitat de dades. Així, un dispositiu podria estar configurat per haver de transmetre \SI{2}{\byte}, mentre que un altre \SI{10}{\byte}. Tot i això, aquesta situació requeriria més complexitat en el servidor d'aplicació LoRaWAN encarregat de descodificar les dades. 
+Es vol destacar el fet que els dispositius no estan restringits a haver de transmetre tots la mateixa quantitat de dades. Així, un dispositiu podria estar configurat per haver de transmetre \SI{2}{\byte}, mentre que un altre \SI{10}{\byte}. Tot i això, aquesta situació requeriria més complexitat en el servidor d'aplicació LoRaWAN encarregat de descodificar les dades, que hauria de considerar aquestes longituds diferents. 
+% // TODO: A PARTIR D'AQUI QUEDA PENDENT REVISAR
 
 \subsubsection{Configuració de nous dispositius}
 Pot haver de ser necessari afegir nous dispositius a la xarxa. En aquest cas, es distingeixen dues situacions depenent del rol del dispositiu a afegir:
@@ -1927,6 +1941,34 @@ function decodeUplink(input) {
 \end{lstlisting}
 
 \subsection{Validació i resultats}
+\subsubsection{Entorn de proves}
+Les proves s'han realitzat utilitzant dos microcontroladors ESP32, juntament amb el transductor LoRa \acro{sx1262}. Per verificar el correcte funcionament a través de LoRaWAN, es disposava també de connectivitat a un \est{gateway} Mikrotik wAP-LR8.
+
+S'ha utilitzat el codi d'exemple mostrat al \autoref{subsubsec:exemple_app}, tant per als microcontroladors com per al descodificador de dades al portal de \acro{ttn}. El nivell de les traces utilitzat, definit mitjançant l'opció \fitx{LOG_LEVEL}, és el nivell 1, que correspon al nivell d'informació. Això permet veure la màxima quantitat de 
+traces, facilitant-ne l'anàlisi i detecció d'errors.
+
+Per verificar el correcte funcionament de l'aplicació de baix consum, s'ha afegit un punt de depuració específic amb el prefix \fitx{[SLEEP_STATS]}. Aquest punt proporciona informació detallada sobre els temps de sincronització, la finalització del cicle de funcionament, el temps de baix consum i l'estat de sincronització, entre d'altres. Aquesta informació es transmet a través del port sèrie, i es pot observar en temps real mitjançant eines com \est{picocom}.
+
+Per afegir marques temporals (\emph{timestamps}) a cada línia de sortida, s'ha utilitza l'eina \emph{ts}, la qual permet registrar l'instant en què s'ha rebut cada missatge. Amb aquesta informació és possible determinar si els cicles de baix consum es realitzen correctament. A més, aquesta informació s'ha redirigit a un fitxer per al seu posterior anàlisi. L'ordre utilitzada per obtenir aquesta informació és la següent:
+
+\begin{lstlisting}[style=bashStyle]
+picocom --omap spchex,tabhex,crhex,lfhex --baud 115200 --imap lfcrlf <port_UBS> | ts "[%Y-%m-%d %H:%M:%.S]" >> <nom_fitxer>
+\end{lstlisting}
+
+\subsubsection{Proves}
+Abans d'iniciar les proves, es va comprovar quin era l'error del rellotge dels microcontroladors en mode de baix consum. Es va fer un petit programa que posava el dispositiu en mode de baix consum durant un temps conegut, enviant un missatge de depuració abans i després d'aquest mode. Gràcies a les marques de temps, era possible determinar la durada real del mode de baix consum, i determinar l'error en \acro{ppm} a partir de la durada esperada. Aquest experiment es va repetir per a diferents temps de cicle, i múltiples vegades. Es pot observar el codi i els resultats obtinguts a la carpeta \fitx{tests/CalculErrorPPM}.
+
+Per a cada microcontrolador, l'error obtingut va ser de -4700 \acro{ppm} i -5700 \acro{ppm}. Així, el temps transcorregut «real» és menor al que el rellotge intern considera: si li indiquem que estigui en mode de baix consum durant 1 minut, realment hi estarà $1+1\cdot (-5700)\cdot10^-6=0.994$ minuts, considerant l'error del segon dispositiu. 
+\newline
+\newline
+Es va començar realitzant proves amb un temps de cicle de 5 minuts. A partir de l'error dels rellotges, es va determinar el temps de marge ($t_m$) a través de l'expressió \ref{eq:temps_marge}, obtenint que $t_m \ge 1.71$, i establint-lo a 2 segons. 
+
+La situació dels dispositius era la següent:
+\begin{itemize}
+    \item \emph{Dispositiu 1}. El dispositiu de referència, amb adreça \fitx{0x03}. Té definit el dispositiu \fitx{0x02} com a veí.
+    \item \emph{Dispositiu 2}. Té capacitats LoRaWAN. Espera rebre el missatge de dades, i té definida l'adreça \fitx{0x01} ---l'adreça virtual del \est{gateway}--- com a veí.
+\end{itemize}
+
 % aqui parlar de l'error del clock?
 \chapter{Conclusions}
 % \section{Resultats assolits}
@@ -1942,8 +1984,7 @@ function decodeUplink(input) {
 % configuració dinàmica de dispositius
 % 
 
-\listoftables
-\listoffigures
+% \listoftables
 
 \printbibliography
 
@@ -1977,5 +2018,3 @@ function decodeUplink(input) {
 %%% TeX-master: t
 %%% LaTeX-biblatex-use-Biber: t
 %%% End:
-
-
