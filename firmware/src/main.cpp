@@ -16,20 +16,14 @@
 uint16_t RTC_DATA_ATTR bootCount = 0;
 uint16_t RTC_DATA_ATTR syncCount = 0;
 
-void getData(uint8_t* data) {
+void getData(uint8_t* data, size_t size) {
     Serial.printf("[%d] Ready to send data: ", millis());
     syncCount++;
-    for(int i = 0; i < SLEEP_DATASIZE_PER_NODE; i++) {
+    for(int i = 0; i < size; i++) {
         data[i] = esp_random() % 256;
         Serial.printf("%02X ", data[i]);
     }
     Serial.println();
-    
-    // uint32_t txTime = US_TO_MS(LoRaRAW_getTimeOnAir(25));
-    // Temps entre [TX, TX*r*k], on r són nombre intents màxim (no reintents)
-    // uint32_t delayRandom = (esp_random() % (MAC_ACK_TIMEOUT_FACTOR * MAC_MAX_RETRIES * txTime)) + txTime;
-    // Serial.printf("Delay random: %dms\n", delayRandom);
-    // delay(delayRandom);
 }
 
 void setup() {
@@ -42,7 +36,6 @@ void setup() {
     }
 
     Sleep_onSync(getData);
-    // Sleep_initialConfig(setConfig);
 
     // Configurem nodes a qui notificar missatges de sincronització
     #if IS_GATEWAY
@@ -69,5 +62,3 @@ void setup() {
 void loop() {
     scheduler_run();
 }
-
-
