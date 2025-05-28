@@ -1,8 +1,0 @@
-En cicle de 30 minuts, el listener: 14h27m13.907364s+1810.745s-14h56m57.311054s = 27.341310s
-En cicle de 30 minuts, l'iniciador: 14h27m13.914021s+1809.805s-14h57m08.422658s = 15.296362s
-
-Si restem el temps de correció:
-	Per listener (8000 ppm) tenim 27.341310s - 15.3s  = 12.04131s
-	Per iniciador (5660ppm) tenim 15.296362s - 10.08s = 5.216362s
-
-En cicle de 5 minuts, s'ha vist abans com l'error era aproximadament d'1 segon per listener. VEURE SI AIXÒ ÉS AIXÍ O NO
