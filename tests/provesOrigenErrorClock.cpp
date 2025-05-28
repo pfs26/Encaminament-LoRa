@@ -1,15 +1,14 @@
 /*
-    Primera prova és sense delay: enviar un missatge i dormir.
-    Segona prova és despertar i dormir automàticament sense enviar.
-    Tercera prova és fer enviament a través de MAC per descartar que el problema sigui de capes superiors a MAC
-    Quarta prova és despertar, esperar 10 segons, i dormir.
-    Cinquena prova és en un dispositiu despertar, enviar i dormir, i en l'altre dispositiu queda despert un temps
-        similar al que es triga a enviar, i dormir
+    Bateria de proves per buscar l'origen de l'error del rellotge.
+    Amb tests `calculErrorPPM` s'obtenen valors semblants per ambdós dispositius, en
+    implementar protocol, es converteixen en +8000 i +16000 PPM.
 
-        De la 5ena prova s'extreu que els temps d'error són MOLT similars, i que per tant
-        no depenen de si es fa transmissió o no.
-        Es dedueix que l'error s'introdueix en tenir el dispositiu actiu durant un temps determinat.
-
+    Diferents combinacions de:
+    - Enviar un missatge i dormir
+    - Despertar i dormir automàticament sense enviar
+    - Enviar a través de MAC per descartar que el problema sigui de capes superiors a MAC
+    - Despertar, esperar, i enviar. Procediment que fa el listener d'APP.
+    - Despertar, esperar un temps similar al que triga a enviar el de referència, i dormir, sense enviar.
 */
 
 #include <Arduino.h>
@@ -60,24 +59,24 @@ void setup() {
 
     RoutingTable_addRoute(0x09, 0x09);
 
-    // Prova 1
+    // Prova 1. Enviar per transport i dormir.
     Transport_onEvent(0x01, nullptr, onSend, onSend);
     // Transport_send(0x09, 0x01, nullptr, 0, false);
   
-    // Prova 2. Necessari per forçar sleep
+    // Prova 2. Despertar i dormir automàticament sense enviar.
     // onSend();
     
-    // Prova 3
+    // Prova 3. Enviar a través de MAC per descartar que el problema sigui de capes superiors a MAC.
     // MAC_onSend(onSendMac);
     // MAC_onTxFailed(onSendMac);
     // MAC_send(0x09, nullptr, 0);
 
-    // Prova 4.
+    // Prova 4. Despertar, esperar 10 segons, i enviar. Procediemtn semblant al que fa "listener" d'APP.
     // Esperem 10 segons (ja que listener estaria despert també un temps abans esperant recepció)
     // i llavors enviem
     // scheduler_once(delaySend, 10000);
 
-    // Prova 5. Pel dispositiu que no envia. Temps fet a mà.
+    // Prova 5. Despertar, esperar temps semblant al que triga a enviar el de referència, i dormir.
     // scheduler_once(onSend, 970);
 }
 

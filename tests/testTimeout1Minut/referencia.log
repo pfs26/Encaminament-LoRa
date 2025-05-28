@@ -1,0 +1,140 @@
+[2025-05-28 11:00:57.627164] picocom v3.1
+[2025-05-28 11:00:57.627251] 
+[2025-05-28 11:00:57.627268] port is        : /dev/ttyUSB0
+[2025-05-28 11:00:57.627279] flowcontrol    : none
+[2025-05-28 11:00:57.627290] baudrate is    : 115200
+[2025-05-28 11:00:57.627300] parity is      : none
+[2025-05-28 11:00:57.627310] databits are   : 8
+[2025-05-28 11:00:57.627320] stopbits are   : 1
+[2025-05-28 11:00:57.627330] escape is      : C-a
+[2025-05-28 11:00:57.627340] local echo is  : no
+[2025-05-28 11:00:57.627350] noinit is      : no
+[2025-05-28 11:00:57.627360] noreset is     : no
+[2025-05-28 11:00:57.627370] hangup is      : no
+[2025-05-28 11:00:57.627380] nolock is      : no
+[2025-05-28 11:00:57.627390] send_cmd is    : sz -vv
+[2025-05-28 11:00:57.627400] receive_cmd is : rz -vv -E
+[2025-05-28 11:00:57.627410] imap is        : lfcrlf,
+[2025-05-28 11:00:57.627420] omap is        : spchex,tabhex,crhex,lfhex,
+[2025-05-28 11:00:57.627430] emap is        : crcrlf,delbs,
+[2025-05-28 11:00:57.627440] logfile is     : none
+[2025-05-28 11:00:57.627450] initstring     : none
+[2025-05-28 11:00:57.627460] exit_after is  : not set
+[2025-05-28 11:00:57.627470] exit is        : no
+[2025-05-28 11:00:57.627480] 
+[2025-05-28 11:01:01.953652] picocom v3.1
+[2025-05-28 11:01:01.953724] 
+[2025-05-28 11:01:01.953742] port is        : /dev/ttyUSB0
+[2025-05-28 11:01:01.953758] flowcontrol    : none
+[2025-05-28 11:01:01.953773] baudrate is    : 115200
+[2025-05-28 11:01:01.953787] parity is      : none
+[2025-05-28 11:01:01.953802] databits are   : 8
+[2025-05-28 11:01:01.953816] stopbits are   : 1
+[2025-05-28 11:01:01.953830] escape is      : C-a
+[2025-05-28 11:01:01.953844] local echo is  : no
+[2025-05-28 11:01:01.953858] noinit is      : no
+[2025-05-28 11:01:01.953872] noreset is     : no
+[2025-05-28 11:01:01.953886] hangup is      : no
+[2025-05-28 11:01:01.953900] nolock is      : no
+[2025-05-28 11:01:01.953914] send_cmd is    : sz -vv
+[2025-05-28 11:01:01.953928] receive_cmd is : rz -vv -E
+[2025-05-28 11:01:01.953941] imap is        : lfcrlf,
+[2025-05-28 11:01:01.953955] omap is        : spchex,tabhex,crhex,lfhex,
+[2025-05-28 11:01:01.953969] emap is        : crcrlf,delbs,
+[2025-05-28 11:01:01.953983] logfile is     : none
+[2025-05-28 11:01:01.953997] initstring     : none
+[2025-05-28 11:01:01.954011] exit_after is  : not set
+[2025-05-28 11:01:01.954025] exit is        : no
+[2025-05-28 11:01:01.954039] 
+[2025-05-28 11:01:01.954058] Type [C-a] [C-h] to see available commands
+[2025-05-28 11:01:01.954071] Terminal ready
+[2025-05-28 11:02:02.355162] picocom v3.1
+[2025-05-28 11:02:02.355234] 
+[2025-05-28 11:02:02.355254] port is        : /dev/ttyUSB0
+[2025-05-28 11:02:02.355272] flowcontrol    : none
+[2025-05-28 11:02:02.355292] baudrate is    : 115200
+[2025-05-28 11:02:02.355311] parity is      : none
+[2025-05-28 11:02:02.355330] databits are   : 8
+[2025-05-28 11:02:02.355346] stopbits are   : 1
+[2025-05-28 11:02:02.355366] escape is      : C-a
+[2025-05-28 11:02:02.355385] local echo is  : no
+[2025-05-28 11:02:02.355404] noinit is      : no
+[2025-05-28 11:02:02.355422] noreset is     : no
+[2025-05-28 11:02:02.355442] hangup is      : no
+[2025-05-28 11:02:02.355461] nolock is      : no
+[2025-05-28 11:02:02.355480] send_cmd is    : sz -vv
+[2025-05-28 11:02:02.355500] receive_cmd is : rz -vv -E
+[2025-05-28 11:02:02.355519] imap is        : lfcrlf,
+[2025-05-28 11:02:02.355538] omap is        : spchex,tabhex,crhex,lfhex,
+[2025-05-28 11:02:02.355558] emap is        : crcrlf,delbs,
+[2025-05-28 11:02:02.355578] logfile is     : none
+[2025-05-28 11:02:02.355597] initstring     : none
+[2025-05-28 11:02:02.355617] exit_after is  : not set
+[2025-05-28 11:02:02.355636] exit is        : no
+[2025-05-28 11:02:02.355656] 
+[2025-05-28 11:02:02.355675] Type [C-a] [C-h] to see available commands
+[2025-05-28 11:02:02.355694] Terminal ready
+[2025-05-28 11:02:03.257271] ets Jul 29 2019 12:21:46
+[2025-05-28 11:02:03.257375] 
+[2025-05-28 11:02:03.262205] rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+[2025-05-28 11:02:03.264221] configsip: 0, SPIWP:0xee
+[2025-05-28 11:02:03.271290] clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+[2025-05-28 11:02:03.273377] mode:DIO, clock div:2
+[2025-05-28 11:02:03.275463] load:0x3fff0030,len:1184
+[2025-05-28 11:02:03.277457] load:0x40078000,len:13232
+[2025-05-28 11:02:03.280255] load:0x40080400,len:3028
+[2025-05-28 11:02:03.281098] entry 0x400805e4
+[2025-05-28 11:02:03.493209] [    27][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[2025-05-28 11:02:03.503021] Boot: 0	Sync: 0
+[2025-05-28 11:02:03.510003] [32m[I]       39 transport.cpp       :  54 | [TRANSPORT] Initializing...[0m
+[2025-05-28 11:02:03.554037] [32m[I]       92 lora.cpp            :  32 | [LORA] Init[0m
+[2025-05-28 11:02:03.560024] [32m[I]       92 scheduler.cpp       :  77 | [SCHED] Cleanup started[0m
+[2025-05-28 11:02:03.572055] [32m[I]      109 loraraw.cpp         : 185 | [LR] Started Receiving[0m
+[2025-05-28 11:02:03.578045] [32m[I]      109 loraraw.cpp         :  46 | [LR] Init[0m
+[2025-05-28 11:02:03.583658] [32m[I]      120 mac.cpp             : 103 | [MAC] Init[0m
+[2025-05-28 11:02:03.593116] [32m[I]      121 routing_table.cpp   :  49 | [RTABLE] Routing table initialized. (4 B, 2 routes) Heap: 328328[0m
+[2025-05-28 11:02:03.599022] [32m[I]      132 routing.cpp         :  64 | [ROUTING] Initialized[0m
+[2025-05-28 11:02:03.606022] [32m[I]      132 transport.cpp       :  74 | [TRANSPORT] Initialized[0m
+[2025-05-28 11:02:03.613065] [33m[W]      143 routing_table.cpp   :  84 | [RTABLE] Route for 0x02 already exists[0m
+[2025-05-28 11:02:03.620051] [32m[I]      153 sleep.cpp           :  84 | [SLEEP] Set forward node to 2[0m
+[2025-05-28 11:02:03.628320] [32m[I]      153 transport.cpp       : 168 | [TRANSPORT] Registered event(s) for port 1[0m
+[2025-05-28 11:02:03.635063] [32m[I]      164 sleep.cpp           : 220 | [SLEEP] Sync received[0m
+[2025-05-28 11:02:03.637163] [174] Ready to send data: 9D 
+[2025-05-28 11:02:03.644246] [32m[I]      174 transport.cpp       :  93 | [TRANSPORT] Preparing to send[0m
+[2025-05-28 11:02:03.655181] [32m[I]      185 transport.cpp       : 368 | [TRANSPORT] SEGMENT: ID=19948 PORT=1 ACKreq=0 ACKResp=0 D-LEN=3 DATA=ù[0m
+[2025-05-28 11:02:03.661041] [32m[I]      195 routing.cpp         :  90 | [ROUTING] Sending packet:[0m
+[2025-05-28 11:02:03.671159] [32m[I]      195 routing.cpp         : 299 | [ROUTING] PACKET: SRC=03 DST=02 TTL=5 D-LEN=7 DATA=ÏMù[0m
+[2025-05-28 11:02:03.679063] [32m[I]      206 routing_table.cpp   :  74 | [RTABLE] Queried route for 0x02, through 0x02[0m
+[2025-05-28 11:02:03.686326] [32m[I]      216 mac.cpp             : 115 | [MAC] Preparing to send[0m
+[2025-05-28 11:02:03.691224] [32m[I]      226 mac.cpp             : 128 | [MAC] PDU ready[0m
+[2025-05-28 11:02:03.703184] [32m[I]      226 mac.cpp             : 565 | [MAC] FRAME: TX=03 RX=02 ID=10594 D-LEN=11 DATA=ÏMù CRC=102 ACK=0 RETRY=0[0m
+[2025-05-28 11:02:03.710073] [32m[I]      237 mac.cpp             : 141 | [MAC] FSM transmission scheduled[0m
+[2025-05-28 11:02:03.719162] [32m[I]      247 routing.cpp         : 132 | [ROUTING] Added packet to send queue (ID: 10594)[0m
+[2025-05-28 11:02:03.730290] [32m[I]      258 transport.cpp       : 133 | [TRANSPORT] Scheduled to send segment (Segment ID: 19948, Frame ID: 10594)[0m
+[2025-05-28 11:02:03.737222] [32m[I]      268 sleep.cpp           : 259 | [SLEEP] Sync forwarded to node 2[0m
+[2025-05-28 11:02:03.751194] [32m[I]      287 loraraw.cpp         : 155 | [LR] Set power to -9 dBm[0m
+[2025-05-28 11:02:03.757308] [32m[I]      287 loraraw.cpp         :  57 | [LR] Preparing to send[0m
+[2025-05-28 11:02:03.772409] [32m[I]      306 loraraw.cpp         : 235 | [LR] Packet: 03026229F80B03020507EC4D040301019D66[0m
+[2025-05-28 11:02:03.834189] [32m[I]      371 loraraw.cpp         : 185 | [LR] Started Receiving[0m
+[2025-05-28 11:02:03.843053] [32m[I]      371 mac.cpp             : 484 | [MAC] Frame sent successfully, waiting for ACK[0m
+[2025-05-28 11:02:03.851025] [32m[I]      388 loraraw.cpp         : 185 | [LR] Started Receiving[0m
+[2025-05-28 11:02:03.859120] [32m[I]      388 mac.cpp             : 510 | [MAC] Timeout d'ACK: 108ms (36096us airtime)[0m
+[2025-05-28 11:02:03.943064] [32m[I]      479 loraraw.cpp         : 219 | [LR] Data received. SNR: 13, RSSI: -52[0m
+[2025-05-28 11:02:03.949061] [32m[I]      479 mac.cpp             : 308 | [MAC] Frame rcv[0m
+[2025-05-28 11:02:03.959131] [32m[I]      496 loraraw.cpp         : 185 | [LR] Started Receiving[0m
+[2025-05-28 11:02:03.966254] [32m[I]      496 mac.cpp             : 334 | Received valid PDU from LORA[0m
+[2025-05-28 11:02:03.976164] [32m[I]      507 mac.cpp             : 565 | [MAC] FRAME: TX=02 RX=03 ID=10594 D-LEN=0 DATA= CRC=93 ACK=1 RETRY=0[0m
+[2025-05-28 11:02:03.983401] [32m[I]      517 mac.cpp             : 346 | [MAC] ACK Received from 0x02[0m
+[2025-05-28 11:02:03.989326] [32m[I]      525 mac.cpp             : 408 | [MAC] ACK received[0m
+[2025-05-28 11:02:03.996073] [32m[I]      525 mac.cpp             : 539 | [MAC] Sent. Notify higher layer?[0m
+[2025-05-28 11:02:04.004126] [32m[I]      541 loraraw.cpp         : 185 | [LR] Started Receiving[0m
+[2025-05-28 11:02:04.013126] [32m[I]      542 transport.cpp       : 248 | [TRANSPORT] TX done for UDP segment 19948 (frame 10594)[0m
+[2025-05-28 11:02:04.020174] [32m[I]      552 sleep.cpp           : 333 | [SLEEP] Forwarded data[0m
+[2025-05-28 11:02:04.028135] [32m[I]      554 routing_table.cpp   :  60 | [RTABLE] Routing table de-initialized. Heap: 327872[0m
+[2025-05-28 11:02:04.034313] [32m[I]      564 mac.cpp             : 108 | [MAC] Deinit[0m
+[2025-05-28 11:02:04.040243] [32m[I]      574 lora.cpp            :  37 | [LORA] Deinit[0m
+[2025-05-28 11:02:04.051249] [32m[I]      588 routing.cpp         :  75 | [ROUTING] Deinitialized[0m
+[2025-05-28 11:02:04.057268] [32m[I]      588 transport.cpp       :  88 | [TRANSPORT] De-initialized[0m
+[2025-05-28 11:02:04.067240] [32m[I]      598 sleep.cpp           : 299 | [SLEEP] Sleep breakdown: 59402 ms = 60000 ms - 598 ms + 0 ms[0m
+[2025-05-28 11:02:04.081020] [31m[E]      608 sleep.cpp           : 306 | [SLEEP-STATS] Sync: 1	Sleep time: 59402 ms	Sync time: 0 ms	Done time: 598 ms	Delta Time: 0 ms	Clk correction: 0 ms	[0m
+[2025-05-28 11:02:04.088138] [33m[W]      619 sleep.cpp           : 309 | [SLEEP] Extra 21 ms (59381)[0m
