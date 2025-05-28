@@ -18,8 +18,10 @@
 \usepackage{multirow}
 \usepackage{vcell}
 \usepackage{rotating}
-\usepackage{courier} % Uses Courier font for monospace
+\usepackage{courier}
 
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
 
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta, positioning, calc, decorations.markings, shapes.geometric, automata}
@@ -1972,7 +1974,7 @@ Ambdós es van configurar per enviar un byte de dades generades aleatòriament.
 
 % // TODO: A PARTIR D'AQUI QUEDA PENDENT REVISAR
 
-Després de realitzar la sincronització inicial, es va deixar en funcionament poc més de 4 hores, realitzant un total de 50 cicles. En tots aquests, la sincronització es va realitzar correctament, i es van obtenir els dos bytes de dades ---un per dispositiu--- a la consola de \acro{ttn}. El temps de sincronització mitjà pel segon dispositiu era de 16.6 segons després de sortir del mode de baix consum. Aquest temps és coherent, considerant que el temps de tolerància, calculat durant la compilació, era de 12.6 segons, i que el temps de marge afegit era de 2 segons, resultant en un total 14.6 segons. Els dos segons restants semblaven, en un primer moment, poder ser causats per temps d'iniciació o processament del microcontrolador, o simplement per l'error del rellotge.
+Després de realitzar la sincronització inicial, es va deixar en funcionament poc més de 4 hores, realitzant un total de 50 cicles. En tots aquests, la sincronització es va realitzar correctament, i es van obtenir els dos bytes de dades ---un per dispositiu--- a la consola de \acro{ttn}. El temps de sincronització mitjà pel segon dispositiu era de 16.6 segons després de sortir del mode de baix consum. Aquest temps és coherent, considerant que el temps de tolerància, calculat durant la compilació, era de 12.6 segons, i que el temps de marge afegit era de 2 segons, resultant en un total 14.6 segons. Els dos segons restants semblaven, en un primer moment, poder ser causats per temps d'iniciació o processament del microcontrolador, o simplement per l'error del rellotge, fet que més endavant es confirmarà. Si es volen consultar les traces de la prova, es poden trobar a la carpeta \fitx{tests/test5Minuts}.
 
 A continuació es va verificar el temps de baix consum d'ambdós dispositius, gràcies a les marques de temps afegides amb l'eina \emph{ts}. Amb aquest temps, es va determinar de nou l'error, i comprovar que fos coherent amb els que s'havien obtingut prèviament. El resultats es poden observar a la \autoref{tab:app_resultatsErrClock}, sent els temps els valors mitjans.
 
@@ -2001,63 +2003,43 @@ Per descobrir l'origen d'aquest error, es va dur a terme una bateria de proves (
     \item \emph{Retorn a baix consum després d'un retard}. Es va simular el comportament del dispositiu de referència, però en lloc de realitzar la transmissió, aplicava un retard de durada igual a la de la transmissió. Es van obtenir errors similars als obtinguts quan sí que es realitza la transmissió, descartant que aquest increment en l'error fos causat per les transmissions.  
 \end{itemize}
 
-De l'última prova es va obtenir que l'error augmentava únicament per tenir el dispositiu actiu, i que no era causat per realitzar una transmissió o utilitzar el protocol. Es va descobrir que el rellotge intern utilitzat en mode de baix consum és, per defecte, un osci\l.lador RC de \SI{150}{\kilo\hertz}, el qual es veu greument afectat per la temperatura. La hipòtesi que es va considerar és que, en trobar-se en mode actiu, la temperatura del microcontrolador augmenta lleugerament, fent que l'error del rellotge es vegi afectat.
+De l'última prova es va obtenir que l'error augmentava únicament per tenir el dispositiu actiu, i que no era causat per realitzar una transmissió o utilitzar el protocol. Es va descobrir que el rellotge intern utilitzat en mode de baix consum és, per defecte, un osci\l.lador RC de \SI{150}{\kilo\hertz}, el qual es veu greument afectat per la temperatura \cite{espressif_system_nodate}. La hipòtesi que es va considerar és que, en trobar-se en mode actiu, la temperatura del microcontrolador augmenta lleugerament, fent que l'error del rellotge es vegi afectat.
 
-Per verificar aquesta hipòtesi, es va realitzar una nova prova, modificant el rendiment de cicle i obtenint l'error en cada un d'ells. És a dir, per a un temps de cicle determinar (2.5 minuts), es va modificar el temps que el microcontrolador estava actiu, i trobant-se la resta del cicle en mode de baix consum. De nou, per a cada rendiment de cicle es va determinar l'error del rellotge. Els resultats obtinguts, per a cada microcontrolador, es poden observar a la \autoref{tab:app_resultatsRendiment}.
+Per verificar aquesta hipòtesi, es va realitzar una nova prova, modificant el rendiment de cicle i obtenint l'error en cada un d'ells. És a dir, per a un temps de cicle determinar (2.5 minuts), es va modificar el temps que el microcontrolador estava actiu, i trobant-se la resta del cicle en mode de baix consum. De nou, per a cada rendiment de cicle es va determinar l'error del rellotge. Els resultats obtinguts, per a cada microcontrolador, es poden observar a la \autoref{tab:app_resultatsRendiment}, els quals verifiquen la hipòtesi plantejada: a major rendiment de cicle, major és el temps que el microcontrolador es troba actiu, i major és l'error del rellotge. És important tenir en compte que tot i que l'error en segons disminueix, l'error en \acro{ppm} depèn del temps en baix consum, el qual també disminueix, i no del temps de cicle total.
 
-
-%   Temps actiu     |Cicle % | Sleep | Error   | Error (ppm)  |
-%   ----------------|--------|-------|---------|--------------|
-%   1               |0.6667  |148.990|1.643201 |11029
-%                             148.962|1.618333 |10864
-%   2               |1.3333  |147.980|1.749711 & 11824 \\
-%                             147.962|1.851677 & 12515 \\
-%   10              |6.6667  |139.980|2.095421 & 14969 \\
-%                             139.961|2.051842 & 14660 \\
-%   25              |16.6667 |124.980|2.066104 & 16531 \\
-%                             124.960|2.032617 & 16266 \\
-%   50              |33.3333 |99.980 |1.680000 & 16803 \\
-%                             99.961|1.683075 & 16837 \\
-%   75              |50.0000 |74.980 |1.303489 & 17384 \\
-%                             74.961|1.233312 & 16453 \\
-  
-  
-%   Vella:
-%   Temps actiu     |Sleep  | Error   | Error (ppm)  |
-%   ----------------|-------|---------|--------------|
-%   
-1               |148.962|1.618333 |10864         |
-%   
-2               |147.962|1.851677 |12515         |
-%   
-10              |139.961|2.051842 |14660         |
-%   
-25              |124.960|2.032617 |16266         |
-%   
-50              |99.961 |1.683075 |16837         |
-%   
-75              |74.961 |1.233312 |16453         |
-
-
-
-\begin{table}[h!]
+\begin{table}
 \centering
-\caption{Exemple de taula amb rowspan (\texttt{multirow})}
-\begin{tabular}{SSSS}
-\hline
-{Temps actiu} & {Baix consum} & {Error} & {Error (ppm)} \\
-\hline
-\multirow{2}{*}{1} &  148.990 & 1.643201 & 11029 \\
-                   &  148.962 & 1.618333 & 10864 \\
-\multirow{2}{*}{2} &  & \\
-                   &  & \\
-\hline
-\end{tabular}
-    \caption{Resultats d'error per diferents rendiments de cicle.}
+    \begin{tabular}{rrSSS}
+        \toprule
+        {Temps actiu (s)} & {Rendiment (\%)} & {Baix consum (s)} & {Error (s)} & {Error (ppm)} \\
+        \midrule
+        \multirow{2}{*}{1}  & \multirow{2}{*}{0.67}  & \footnotesize 148.990 & \footnotesize 1.643201 & \footnotesize 11029 \\
+                            &                        & \footnotesize 148.962 & \footnotesize 1.618333 & \footnotesize 10864 \\
+        \multirow{2}{*}{2}  & \multirow{2}{*}{1.33}  & \footnotesize 147.980 & \footnotesize 1.749711 & \footnotesize 11824 \\
+                            &                        & \footnotesize 147.962 & \footnotesize 1.851677 & \footnotesize 12515 \\
+        \multirow{2}{*}{10} & \multirow{2}{*}{6.67}  & \footnotesize 139.980 & \footnotesize 2.095421 & \footnotesize 14969 \\
+                            &                        & \footnotesize 139.961 & \footnotesize 2.051842 & \footnotesize 14660 \\
+        \multirow{2}{*}{25} & \multirow{2}{*}{16.67} & \footnotesize 124.980 & \footnotesize 2.066104 & \footnotesize 16531 \\
+                            &                        & \footnotesize 124.960 & \footnotesize 2.032617 & \footnotesize 16266 \\
+        \multirow{2}{*}{50} & \multirow{2}{*}{33.33} & \footnotesize 99.980  & \footnotesize 1.680000 & \footnotesize 16803 \\
+                            &                        & \footnotesize 99.961  & \footnotesize 1.683075 & \footnotesize 16837 \\
+        \multirow{2}{*}{75} & \multirow{2}{*}{50.00} & \footnotesize 74.980  & \footnotesize 1.303489 & \footnotesize 17384 \\
+                            &                        & \footnotesize 74.961  & \footnotesize 1.233312 & \footnotesize 16453 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Resultats d'error per diferents rendiments de cicle. Cicle de \SI{150}{\second}.}
     \label{tab:app_resultatsRendiment}
 \end{table}
 
-% aqui parlar de l'error del clock?
+Aquests resultats permeten explicar el comportament observat, principalment, en el dispositiu que espera la sincronització, que és qui es troba durant més temps actiu i, per tant, qui té un major rendiment de cicle. Aquest fet permet explicar els dos segons restants del temps de sincronització obtingut en les proves.
+
+\subsubsection{Fi temps d'espera}
+A causa de les idealitats en l'entorn de proves, per verificar el funcionament del fi de temps d'espera de la recepció de la sincronització, es va modificar el codi de l'aplicació per simular que el dispositiu de referència no enviava la sincronització amb un 50\% de probabilitats. 
+
+Havent verificat el funcionament de l'aplicació en les proves anteriors, es va reduir el temps de cicle a 1 minut per tal d'alleugerir la durada de les proves. També es va augmentar el temps de marge a 5 segons, a causa de l'error del rellotge que, com s'ha verificat anteriorment, és més gran del que s'esperava inicialment.
+
+Després de la sincronització inicial, es va deixar en funcionament poc més de dues hores i mitja (150 cicles), dels quals en un 45.34\% es va realitzar la sincronització correctament, valor pròxim al 50\% establert en el dispositiu de referència. Tot i això, el dispositiu que esperava la sincronització generava i propagava correctament les dades quan no rebia la sincronització. Els resultats d'aquesta prova es poden trobar a \fitx{tests/testTimeout1Minut}, on es troben els fitxers amb les traces de depuració de cada dispositiu, així com els registres del \acro{ttn} amb els enviaments. Per facilitar la tasca d'analitzar els registres de traces, s'ha fet un petit programa en Python que analitza el fitxer, disponible a \fitx{tests/analisis.py}.
+
 \chapter{Conclusions}
 % \section{Resultats assolits}
 % \section{Limitacions del disseny final}
