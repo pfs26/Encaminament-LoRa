@@ -1,7 +1,6 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
-
 /* ======== */
 /*   LORA   */
 /* ======== */
@@ -11,7 +10,7 @@
 #define LORA_NRESET 22
 #define LORA_BUSY 4
 
-// Configuracions per defecte - Modificable via UI
+// Configuracions per defecte
 #define LORA_FREQ 868.0 // En MHz 
 #define LORA_BW 125.0   // En kHz 
 #define LORA_SF 7   // Entre 7 i 12 (a menor SF, major velocitat, però menor distància)
@@ -19,13 +18,10 @@
 #define LORA_MAX_TX_POW -9 // en dBm, entre -9 i 22. A EU, màxim de 14 dBm
 #define LORA_TX_POW -9  // en dBm, entre -9 i 22
 #define LORA_SYNC_WORD 0x23 // Sync word privat (per defecte) per evitar interferències amb altres xarxes
-// #define LORA_DATARATE 5 // entre 0 i 7
 
 /* ======= */
 /*   MAC   */
 /* ======= */
-// **NO** modificable via UI
-
 // Número màxim de reintents, sense comptar primera transmissió (així, serien 4 intents)
 // Aquest define és ÚNICAMENT per tenir-ho tot en un mateix lloc. Incrementar-lo a més de 3 generaria problemes
 // ja que camp que indica reintents a PDU és de 2 bits (i per tant valor màxim 3)
@@ -43,13 +39,14 @@
 #define MAC_QUEUE_SIZE 5
 // Polinomi per CRC8 (x^8+x^2+1). 
 #define MAC_CRC8_POLY 0x07
-// Percentatge de duty cycle màxim, per complir amb regulacions, en tant per cent. No definir si no es vol complir
+// Percentatge de duty cycle màxim, per complir amb regulacions, en tant per cent. No definir si no es vol complir.
+// Pot donar errors si moltes TX. Millor mantenir comentat. No verificat el seu funcionament. Feina futura o millores
 // #define MAC_DUTY_CYCLE 1
 
 /* =========== */
 /*   ROUTING   */
 /* =========== */
-// TTL per a cada paquet. Es descarta si arriba a 0. No modificable
+// TTL per a cada paquet. Es descarta si arriba a 0.
 #define ROUTING_MAX_TTL 5
 
 /* ============= */
@@ -79,12 +76,7 @@ Value is specified in ms! */
 /* =========== */
 #define LOG_LEVEL 1 // "4 = none; 1 = info; 2 = warn; 3 = err"
 
-#define SELF_ADDRESS 0x03 // Adreça per defecte del node (uint8_t) - Modificable
-#define IS_GATEWAY false  // Es un gateway? (true/false) - Modificable  
-
-#define WIFI_SSID "LORA"       // Nom de la xarxa que genera el dispositiu
-#define WIFI_PASSWORD NULL     // Contrasenya; NULL si és obert; sinó, de més de 8 caràcters en string ("12345678")
-
-#define SLEEP_RANDOM_TEST_PROB 25 // Probabilitat de no acceptar un frame rebut a MAC (per simular error). En `%`
+#define SELF_ADDRESS 0x03 // Adreça per defecte del node (uint8_t)
+#define IS_GATEWAY true  // Es un gateway? (true/false) 
 
 #endif
