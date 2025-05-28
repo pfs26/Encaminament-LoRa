@@ -115,6 +115,7 @@
 \renewcommand{\chapterautorefname}{capítol}
 \renewcommand{\equationautorefname}{equació}
 
+\newcommand{\multrow}[1]{\begin{tabular}{@{}c@{}} #1 \end{tabular}}
 
 \tikzset{
   cross at end/.style={
@@ -1215,11 +1216,11 @@ En el període de funcionament, és important que els dispositius es trobin acti
 \begin{enumerate}
     \item \emph{Rellotge intern}. Cada dispositiu disposa d'un rellotge intern que li permet determinar la durada dels períodes de baix consum i de funcionament. Establint el mateix cicle en tots els dispositius, i iniciant-los simultàniament, s'aconsegueix mantenir-los sincronitzats. Malgrat ser una solució senzilla d'implementar, presenta una limitació important: l'error del rellotge. Aquest error s'acumula amb el pas del temps, fent que els dispositius s'acabin desincronitzant.
     
-    Tot i que l'error podria semblar insignificant, s'ha observat que el rellotge utilitzat en mode de baix consum pot tenir desviacions superiors a 5000 parts per millió (\emph{ppm}), equivalents de més de set minuts per dia de funcionament \cite{nikki_smith_esp32_2022}. A més, aquest error depèn també de la temperatura, fent-lo imprevisible. Malgrat existir mecanismes per reduir aquest error, com ara utilitzar osci\l.ladors externs, l'error no és mai nul, i s'acaba acumulant mb el temps, desincronitzant els dispositius.
+    Encara que l'error podria semblar insignificant, s'ha observat que el rellotge utilitzat en mode de baix consum pot tenir desviacions superiors a 5000 parts per millió (\emph{ppm}), equivalents a més de set minuts per dia de funcionament \cite{nikki_smith_esp32_2022}. A més, aquest error depèn també de la temperatura, fent-lo imprevisible. Malgrat existir mecanismes per reduir aquest error, com ara utilitzar osci\l.ladors externs, l'error no és mai nul, i s'acaba acumulant mb el temps, desincronitzant els dispositius.
     
     \item \emph{Sincronització externa}. Es basa en un mecanisme de sincronització entre dispositius, on un dels dispositius actua com a referència, i la resta s'ajusten a aquest. Això es pot aconseguir mitjançant un missatge de sincronització generat per aquest dispositiu, el qual, en rebre's, indica l'inici del cicle de funcionament durant una període conegut i igual per a cada dispositiu. Aquest missatge es trobaria a nivell d'aplicació. 
     
-    Malgrat seguir utilitzant el rellotge intern per regular el temps de baix consum i funcionament, la sincronització amb el dispositiu de referència permet corregir l'error acumulat. 
+    Tot i seguir utilitzant el rellotge intern per regular el temps de baix consum i funcionament, la sincronització amb el dispositiu de referència permet corregir l'error acumulat. 
     Continua sent important que els dispositius es trobin actius abans de rebre el missatge de sincronització; en cas contrari, no existeix sincronització i, per tant, no es corregeix l'error que ha introduït el rellotge intern.
 \end{enumerate}
 
@@ -1847,21 +1848,20 @@ Un cop es disposa de la xarxa de dispositius establerta i dissenyada, cal config
 Amb tots els dispositiu correctament configurats i programats, es pot iniciar el sistema. Els dispositius s'han d'iniciar de forma inversa a com es propaguen les dades, és a dir, començant pel dispositiu més llunyà al de referència (i més proper al \est{gateway}), i acabant pel de referència. Això és necessari per garantir que cada dispositiu trobi el seu veí actiu quan s'inicia, i redueix el temps que els dispositius es troben en l'estat d'espera de sincronització inicial. Si s'iniciés en l'ordre contrari, el dispositiu de referència començaria a transmetre quan la resta encara estrarien apagats. En encendre'ls posteriorment, aquests quedarien esperant una sincronització que ja s'hauria produït, i haurien de romandre actius gairebé tot un cicle complet abans de rebre'l.
 
 Es vol destacar el fet que els dispositius no estan restringits a haver de transmetre tots la mateixa quantitat de dades. Així, un dispositiu podria estar configurat per haver de transmetre \SI{2}{\byte}, mentre que un altre \SI{10}{\byte}. Tot i això, aquesta situació requeriria més complexitat en el servidor d'aplicació LoRaWAN encarregat de descodificar les dades, que hauria de considerar aquestes longituds diferents. 
-% // TODO: A PARTIR D'AQUI QUEDA PENDENT REVISAR
 
 \subsubsection{Configuració de nous dispositius}
 Pot haver de ser necessari afegir nous dispositius a la xarxa. En aquest cas, es distingeixen dues situacions depenent del rol del dispositiu a afegir:
 \begin{itemize}
-    \item \emph{Referència}. Si es vol afegir un dispositiu nou a l'extrem més allunyat al \est{gateway}, aquest serà el de referència. 
+    \item \emph{Referència}. Si es vol afegir un dispositiu nou a l'extrem més allunyat al \est{gateway}, aquest actuarà com a nou iniciador de la sincronització. 
     \begin{enumerate}
-        \item Configurar el nou dispositiu amb el rol de referència, i indicar-li qui és el seu veí a qui ha d'enviar les dades.
+        \item Configurar el nou dispositiu amb el rol de referència, i indicar-li qui és el seu veí (el que fins ara era el de referència) al qual ha d'enviar les dades.
         \item Configurar l'antic dispositiu de referència, per indicar-li que ja no té aquest rol. El seu veí no es veu modificat, continua sent el mateix.
         \item Resincronitzar tots els dispositius de la xarxa, aturant-los tots i tornant-los a iniciar en l'ordre vist anteriorment.
     \end{enumerate}
 
     \item \emph{No referència}. Si es vol afegir un dispositiu nou a la xarxa, però no és el de referència, cal seguir els següents passos:
     \begin{enumerate}
-        \item Configurar el nou dispositiu indicant-li qui és el seu veí a qui ha d'enviar les dades.
+        \item Configurar el nou dispositiu indicant-li qui és el seu veí al qual ha d'enviar les dades.
         \item Reconfigurar el dispositiu anterior al nou, per indicar-li la nova adreça del seu veí, que ara és la del dispositiu nou. 
         \item Iniciar ambdós dispositius, que entraran en mode de recepció de forma indefinida fins a rebre la primera sincronització. 
     \end{enumerate}
@@ -1869,9 +1869,9 @@ Pot haver de ser necessari afegir nous dispositius a la xarxa. En aquest cas, es
 
 És important considerar que la capa d'aplicació necessita conèixer la quantitat de dispositius anteriors al que s'afegeix per calcular correctament el temps de tolerància (veure \autoref{eq:app_tolerancia}). 
 
-Si la quantitat de dispositius anteriors és major que la que s'ha configurat, el càlcul del temps de tolerància serà incorrecte, i no es pot garantir la sincronització. Si això passés, seria necessari modificar aquest paràmetre en tots els dispositius següents al que s'afegeix, i reiniciar-los tots. Pel que fa als dispositius anteriors, aquest valor seria el mateix i, per tant, no és necessari modificar-lo. Per aquest motiu, si es té pensat afegir nous dispositius, es recomana establir aquest paràmetre un valor superior al necessari.
+Si la quantitat de dispositius anteriors és major que la que s'ha configurat, el càlcul del temps de tolerància serà incorrecte, i no es pot garantir la sincronització. Si això passés, seria necessari modificar aquest paràmetre en tots els dispositius següents al que s'afegeix, i reiniciar-los tots. Pel que fa als dispositius anteriors, aquest valor seria el mateix i, per tant, no és necessari modificar-lo. Per aquest motiu, si es preveu afegir nous dispositius, es recomana establir aquest paràmetre un valor superior al necessari.
 
-Això es pot evitar si els dispositius s'afegeixen únicament en l'extrem del \est{gateway}, ja que aquest seria l'últim dispositiu de la cadena. Llavors, seria únicament necessari modificar el dispositiu anterior al que s'afegeix per indicar-li el nou veí, i establir que no té capacitats LoRaWAN.
+Això es pot evitar si els dispositius s'afegeixen en l'extrem més proper al \est{gateway}, ja que aquest seria l'últim dispositiu de la cadena. En aquest cas, seria únicament necessari modificar el dispositiu anterior al que s'afegeix per indicar-li el nou veí, i establir que no té capacitats LoRaWAN.
 
 \subsubsection{Resincronització de la xarxa}
 Tot i que l'aplicació intenta garantir la sincronització de tots els dispositius de la xarxa, i la robustesa i fiabilitat, és possible que es produeixin errors que puguin dur a una desincronització total de la xarxa. En tal cas, caldria reiniciar tots els dispositius de la xarxa, i iniciar-los de nou com si fos la primera vegada. En aquest procediment també es recomana detectar l'error que ha provocat la desincronització, i corregir-lo si és possible. A continuació es mostren algunes possibles causes d'error, i la seva solució:
@@ -1942,10 +1942,9 @@ function decodeUplink(input) {
 
 \subsection{Validació i resultats}
 \subsubsection{Entorn de proves}
-Les proves s'han realitzat utilitzant dos microcontroladors ESP32, juntament amb el transductor LoRa \acro{sx1262}. Per verificar el correcte funcionament a través de LoRaWAN, es disposava també de connectivitat a un \est{gateway} Mikrotik wAP-LR8.
+Les proves s'han realitzat utilitzant dos microcontroladors \acro{esp32}, cadascun equipat amb un transductor LoRa \acro{sx1262}. Per verificar el correcte funcionament a través de LoRaWAN, es disposava de connectivitat a un \est{gateway} Mikrotik wAP-LR8.
 
-S'ha utilitzat el codi d'exemple mostrat al \autoref{subsubsec:exemple_app}, tant per als microcontroladors com per al descodificador de dades al portal de \acro{ttn}. El nivell de les traces utilitzat, definit mitjançant l'opció \fitx{LOG_LEVEL}, és el nivell 1, que correspon al nivell d'informació. Això permet veure la màxima quantitat de 
-traces, facilitant-ne l'anàlisi i detecció d'errors.
+Com a base per a les proves, s'ha utilitzat el codi d'exemple mostrat al \autoref{subsubsec:exemple_app}, tant per als microcontroladors com per al descodificador de dades al portal de \acro{ttn}. El nivell de les traces utilitzat, definit mitjançant l'opció \fitx{LOG_LEVEL}, és el nivell 1, que correspon al nivell d'informació. Això permet veure la màxima quantitat de traces, facilitant-ne l'anàlisi i detecció d'errors.
 
 Per verificar el correcte funcionament de l'aplicació de baix consum, s'ha afegit un punt de depuració específic amb el prefix \fitx{[SLEEP_STATS]}. Aquest punt proporciona informació detallada sobre els temps de sincronització, la finalització del cicle de funcionament, el temps de baix consum i l'estat de sincronització, entre d'altres. Aquesta informació es transmet a través del port sèrie, i es pot observar en temps real mitjançant eines com \est{picocom}.
 
@@ -1956,18 +1955,107 @@ picocom --omap spchex,tabhex,crhex,lfhex --baud 115200 --imap lfcrlf <port_UBS> 
 \end{lstlisting}
 
 \subsubsection{Proves}
-Abans d'iniciar les proves, es va comprovar quin era l'error del rellotge dels microcontroladors en mode de baix consum. Es va fer un petit programa que posava el dispositiu en mode de baix consum durant un temps conegut, enviant un missatge de depuració abans i després d'aquest mode. Gràcies a les marques de temps, era possible determinar la durada real del mode de baix consum, i determinar l'error en \acro{ppm} a partir de la durada esperada. Aquest experiment es va repetir per a diferents temps de cicle, i múltiples vegades. Es pot observar el codi i els resultats obtinguts a la carpeta \fitx{tests/CalculErrorPPM}.
+Abans d'iniciar les proves, es va determinar quin era l'error del rellotge dels microcontroladors en mode de baix consum. Es va desenvolupar un petit programa que posava el dispositiu en mode de baix consum durant un temps conegut, enviant un missatge de depuració abans i després d'aquest mode. Gràcies a les marques de temps, era possible determinar la durada real del mode de baix consum, i calcular l'error en \acro{ppm} a partir de la durada esperada. Aquest experiment es va repetir per a diferents temps de cicle, i múltiples vegades. Es pot observar el codi i els resultats obtinguts a la carpeta \fitx{tests/CalculErrorPPM}.
 
 Per a cada microcontrolador, l'error obtingut va ser de -4700 \acro{ppm} i -5700 \acro{ppm}. Així, el temps transcorregut «real» és menor al que el rellotge intern considera: si li indiquem que estigui en mode de baix consum durant 1 minut, realment hi estarà $1+1\cdot (-5700)\cdot10^-6=0.994$ minuts, considerant l'error del segon dispositiu. 
 \newline
 \newline
-Es va començar realitzant proves amb un temps de cicle de 5 minuts. A partir de l'error dels rellotges, es va determinar el temps de marge ($t_m$) a través de l'expressió \ref{eq:temps_marge}, obtenint que $t_m \ge 1.71$, i establint-lo a 2 segons. 
+Es va començar realitzant proves amb un temps de cicle de 5 minuts. A partir de l'error dels rellotges, es va determinar el temps de marge ($t_m$) a través de l'expressió \ref{eq:temps_marge}, obtenint que $t_m \ge 1.71$, i establint-lo a 2 segons per disposar d'un marge de seguretat afegit. 
 
 La situació dels dispositius era la següent:
 \begin{itemize}
     \item \emph{Dispositiu 1}. El dispositiu de referència, amb adreça \fitx{0x03}. Té definit el dispositiu \fitx{0x02} com a veí.
     \item \emph{Dispositiu 2}. Té capacitats LoRaWAN. Espera rebre el missatge de dades, i té definida l'adreça \fitx{0x01} ---l'adreça virtual del \est{gateway}--- com a veí.
 \end{itemize}
+
+Ambdós es van configurar per enviar un byte de dades generades aleatòriament.
+
+% // TODO: A PARTIR D'AQUI QUEDA PENDENT REVISAR
+
+Després de realitzar la sincronització inicial, es va deixar en funcionament poc més de 4 hores, realitzant un total de 50 cicles. En tots aquests, la sincronització es va realitzar correctament, i es van obtenir els dos bytes de dades ---un per dispositiu--- a la consola de \acro{ttn}. El temps de sincronització mitjà pel segon dispositiu era de 16.6 segons després de sortir del mode de baix consum. Aquest temps és coherent, considerant que el temps de tolerància, calculat durant la compilació, era de 12.6 segons, i que el temps de marge afegit era de 2 segons, resultant en un total 14.6 segons. Els dos segons restants semblaven, en un primer moment, poder ser causats per temps d'iniciació o processament del microcontrolador, o simplement per l'error del rellotge.
+
+A continuació es va verificar el temps de baix consum d'ambdós dispositius, gràcies a les marques de temps afegides amb l'eina \emph{ts}. Amb aquest temps, es va determinar de nou l'error, i comprovar que fos coherent amb els que s'havien obtingut prèviament. El resultats es poden observar a la \autoref{tab:app_resultatsErrClock}, sent els temps els valors mitjans.
+
+\begin{table}
+    \centering
+    \begin{tabular}{ccccc}
+        \toprule
+        \textbf{Dispositiu} & \textbf{Esperat (s)} & \textbf{Real (s)} & \textbf{Error (s)} & \textbf{Error (PPM)} \\
+        \midrule
+        \fitx{Dispositiu 1} & 299.4 & 297 & 2.4 & 8080 \\
+        \fitx{Dispositiu 2} & 278.64 & 274.21 & 4.43 & 16160 \\
+        \bottomrule    
+    \end{tabular}
+    \caption{Resultats d'error en temps de baix consum.}
+    \label{tab:app_resultatsErrClock}
+\end{table}
+
+S'observa com els resultats d'error obtingut no es corresponen amb cap dels errors obtinguts prèviament, indicant que per algun motiu aquest error ha augmentat en implementar el protocol i l'aplicació de baix consum. A més, sorprèn el fet que el segon dispositiu tingui un error més, tenint en compte que la implementació entre dispositius acaba sent molt semblant. Aquests errors no són menyspreables, tenint en compte que l'error s'ha més que duplicat respecte dels errors obtinguts prèviament i, a més, semblen ser imprevisibles.
+
+Per descobrir l'origen d'aquest error, es va dur a terme una bateria de proves (\fitx{tests/provesOrigenErrorClock.cpp}). Les proves consistien en simular el funcionament de la capa d'aplicació per a cada dispositiu, però sense utilitzar la capa d'aplicació. Les proves realitzades van ser:
+\begin{itemize}
+    \item \emph{Transmissió després de baix consum}. Simula el comportament del dispositiu de referència, que en sortir del mode de baix consum realitza una transmissió automàticament, i torna al mode de baix consum durant un temps determinat. Els resultats, per a diferents temps de baix consum, es corresponien amb els errors obtinguts prèviament pel dispositiu iniciador. Es va descartar que l'error pel dispositiu de referència fos causat per l'aplicació.
+    \item \emph{Retorn a baix consum automàticament}. Es va repetir la prova que determinava l'error dels rellotges, però inicialitzant el protocol i el transductor LoRa. Els resultats obtinguts per ambdues plaques van ser similars als obtinguts en determinar l'error dels rellotges. Es va descartar que l'error fos causat per aquestes inicialitzacions, o per utilitzar la ràdio. Va donar la idea que aquest increment en l'error podia ser causat en realitzar una transmissió.
+    \item \emph{Transmissió a través d'accés al medi}. Es va repetir la prova anterior però realitzant la transmissió directament a través de la capa d'accés al medi, sense passar per transport o encaminament. Els resultats obtinguts van ser els mateixos, i es va descartar que l'error s'originés en aquestes capes.
+    \item \emph{Transmissió després de retard}. Simula el comportament del dispositiu que espera la sincronització, el qual espera rebre les dades després de sortir del mode de baix consum, per després propagar-les i iniciar de nou el mode de baix consum. Els resultats es corresponien amb els obtinguts en executar l'aplicació, amb errors de 16000 \acro{ppm}. Es va descartar que l'error en aquest dispositiu s'originés a la capa d'aplicació, per exemple per un mal càlcul del temps de baix consum.
+    \item \emph{Retorn a baix consum després d'un retard}. Es va simular el comportament del dispositiu de referència, però en lloc de realitzar la transmissió, aplicava un retard de durada igual a la de la transmissió. Es van obtenir errors similars als obtinguts quan sí que es realitza la transmissió, descartant que aquest increment en l'error fos causat per les transmissions.  
+\end{itemize}
+
+De l'última prova es va obtenir que l'error augmentava únicament per tenir el dispositiu actiu, i que no era causat per realitzar una transmissió o utilitzar el protocol. Es va descobrir que el rellotge intern utilitzat en mode de baix consum és, per defecte, un osci\l.lador RC de \SI{150}{\kilo\hertz}, el qual es veu greument afectat per la temperatura. La hipòtesi que es va considerar és que, en trobar-se en mode actiu, la temperatura del microcontrolador augmenta lleugerament, fent que l'error del rellotge es vegi afectat.
+
+Per verificar aquesta hipòtesi, es va realitzar una nova prova, modificant el rendiment de cicle i obtenint l'error en cada un d'ells. És a dir, per a un temps de cicle determinar (2.5 minuts), es va modificar el temps que el microcontrolador estava actiu, i trobant-se la resta del cicle en mode de baix consum. De nou, per a cada rendiment de cicle es va determinar l'error del rellotge. Els resultats obtinguts, per a cada microcontrolador, es poden observar a la \autoref{tab:app_resultatsRendiment}.
+
+
+%   Temps actiu     |Cicle % | Sleep | Error   | Error (ppm)  |
+%   ----------------|--------|-------|---------|--------------|
+%   1               |0.6667  |148.990|1.643201 |11029
+%                             148.962|1.618333 |10864
+%   2               |1.3333  |147.980|1.749711 & 11824 \\
+%                             147.962|1.851677 & 12515 \\
+%   10              |6.6667  |139.980|2.095421 & 14969 \\
+%                             139.961|2.051842 & 14660 \\
+%   25              |16.6667 |124.980|2.066104 & 16531 \\
+%                             124.960|2.032617 & 16266 \\
+%   50              |33.3333 |99.980 |1.680000 & 16803 \\
+%                             99.961|1.683075 & 16837 \\
+%   75              |50.0000 |74.980 |1.303489 & 17384 \\
+%                             74.961|1.233312 & 16453 \\
+  
+  
+%   Vella:
+%   Temps actiu     |Sleep  | Error   | Error (ppm)  |
+%   ----------------|-------|---------|--------------|
+%   
+1               |148.962|1.618333 |10864         |
+%   
+2               |147.962|1.851677 |12515         |
+%   
+10              |139.961|2.051842 |14660         |
+%   
+25              |124.960|2.032617 |16266         |
+%   
+50              |99.961 |1.683075 |16837         |
+%   
+75              |74.961 |1.233312 |16453         |
+
+
+
+\begin{table}[h!]
+\centering
+\caption{Exemple de taula amb rowspan (\texttt{multirow})}
+\begin{tabular}{SSSS}
+\hline
+{Temps actiu} & {Baix consum} & {Error} & {Error (ppm)} \\
+\hline
+\multirow{2}{*}{1} &  148.990 & 1.643201 & 11029 \\
+                   &  148.962 & 1.618333 & 10864 \\
+\multirow{2}{*}{2} &  & \\
+                   &  & \\
+\hline
+\end{tabular}
+    \caption{Resultats d'error per diferents rendiments de cicle.}
+    \label{tab:app_resultatsRendiment}
+\end{table}
 
 % aqui parlar de l'error del clock?
 \chapter{Conclusions}
