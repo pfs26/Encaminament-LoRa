@@ -1,15 +1,15 @@
 #include "config.h"
 
-// Define log levels
+// Nivells log
 #define LOG_LEVEL_INFO  1
 #define LOG_LEVEL_WARN  2
 #define LOG_LEVEL_ERROR 3
 
 // ANSI color codes
 #define COLOR_RESET  "\033[0m"
-#define COLOR_INFO   "\033[32m"  // Green
-#define COLOR_WARN   "\033[33m"  // Yellow
-#define COLOR_ERROR  "\033[31m"  // Red
+#define COLOR_INFO   "\033[32m"  // Verd
+#define COLOR_WARN   "\033[33m"  // Groc
+#define COLOR_ERROR  "\033[31m"  // Vermell
 #define COLOR_GRAY   "\033[37m"
 
 // Amplades per aliniar
