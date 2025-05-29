@@ -172,9 +172,11 @@
 
 
 \begin{resum}
+% Aquest treball presenta el disseny i implementació d'un protocol de comunicació LoRa amb encaminament estàtic, destinat a xarxes de dispositiusde monitoratge. L'objectiu és reduir la dependència dels \est{gateways} en entorns on la presència humana és limitada, com ara túnels o vies de tren. El protocol permet que els nodes transmetin dades de manera eficient, aprofitant camins de comunicació predefinits.
 \end{resum}
 
 \begin{abstract}
+% This work presents the design and implementation of a LoRa communication protocol with static routing, aimed at monitoring device networks. The goal is to reduce the dependency on gateways in environments where human presence is limited, such as tunnels or railway tracks. The protocol allows nodes to transmit data efficiently, leveraging predefined communication paths.
 \end{abstract}
 
 
@@ -183,11 +185,29 @@
 
 \chapter{Introducció}
 
-La capacitat de disposar de dades, per posteriorment analitzar-les, ha esdevingut un element clau per a la prevenció de fallades i la millora de processos. Disposar d'informació sobre l'estat de màquines, estructures o entorns permet detectar anomalies, realitzar manteniments preventius, i entendre millor el comportament d'un sistema. Aquest tipus de monitoratge és especialment rellevant en entorns extensos o aïllats, com ara túnels o vies de tren, on la presència humana constant no és viable i la fiabilitat dels sistemes instal·lats és fonamental.
+La capacitat de disposar de dades per, posteriorment, analitzar-les, ha esdevingut un element clau per a la prevenció de fallades i la millora de processos. Disposar d'informació sobre l'estat de màquines, estructures o entorns permet detectar anomalies, realitzar manteniments preventius, i entendre millor el comportament d'un sistema. Aquest tipus de monitoratge és especialment rellevant en entorns extensos o aïllats, com ara túnels o vies de tren, on la presència humana constant no és viable i la fiabilitat dels sistemes insta\l.lats és fonamental.
 
-% Objectius principals: dissenyar protocol amb encaminament per evitar molts gatewasy. Aplicar protocol a aplicació de baix consum 
+Tecnologies com LoRaWAN han guanyat protagonisme en aquests escenaris, gràcies a la seva capacitat de transmetre dades a llargues distàncies amb un consum energètic reduït. No obstant això, solen requerir de \est{gateways}, dispositius que actuen com a punt d'accés entre els nodes ---els dispositius de monitoratge--- i internet. Aquests \est{gateways} són més complexos i cars que els dispositius finals i, per tant, en grans insta\l.lacions, el seu ús pot resultar en costos elevats i tasques de manteniment més complexes.
+
+Aquest treball té com a objectiu dissenyar una solució per a xarxes de dispositius de monitoratge que permeti reduir la dependència dels \est{gateways}, partint de la premissa que aquestes xarxes són, en general, estàtiques, permetent utilitzar rutes de comunicació prèviament definides. 
+
+El resultat del treball ha sigut el disseny i desenvolupament d'un protocol de comunicació fiable i modular, basat en tecnologia LoRa, amb encaminament estàtic i compatible amb LoRaWAN. A més, s'ha implementat una aplicació de baix consum energètic, construïda sobre aquest protocol, dissenyada específicament per a topologies lineals i basada en una estratègia de sincronització entre dispositius. 
+
+El desenvolupament del treball s'ha vist limitat per la disponibilitat de material, fent difícil la validació de les solucions proposades en escenaris reals. No obstant això, les proves realitzades ---intentant simular escenaris reals--- han demostrat que el protocol és capaç de transmetre dades de manera fiable i eficient, i que l'aplicació de baix consum permet reduir el consum energètic dels dispositius finals.
+
+Els objectius principals d'aquest treball han estat:
+\begin{itemize}
+    \item Dissenyar i implementar un protocol amb encaminament estàtic per a xarxes de dispositius sense mobilitat, pensat per reduir la necessitat de \est{gateways} i optimitzar la recollida de dades en entorns extensos.
+    \item Desenvolupar una aplicació de baix consum energètic, basada en el protocol dissenyat, pensada específicament per a xarxes lineals, que permeti reduir el consum energètic dels dispositius finals sense renunciar a les funcionalitats d'encaminament.
+\end{itemize}
+
 % EStructura: 3 parts, una teòria, una pel protocol, i una per l'aplicació
-
+Pel que fa a l'estructura d'aquesta memòria, s'ha organitzat per tal de facilitar-ne la seva comprensió, i consta de tres grans blocs:
+\begin{itemize}
+    \item La primera part introdueix els conceptes teòrics necessaris per entendre el projecte, com la tecnologia LoRa/LoRaWAN i els models de capes de protocols. S'ha exposat de forma breu, però s'han inclòs les referències necessàries per si s'hi vol aprofundir.
+    \item El segon bloc presenta el disseny i la implementació del protocol, detallant el funcionament de cada capa. Es fa especial èmfasi en el disseny de cada capa, considerant que, amb un disseny ben definit, la seva implementació esdevé una tasca relativament trivial.
+    \item Finalment, es mostra l'evolució de l'aplicació de baix consum, des de les primeres iteracions fins al disseny final. S'hi descriuen les seves característiques, el seu comportament, les proves realitzades, i els problemes i resultats obtinguts.
+\end{itemize}
 
 \section{Objectius}
 \section{Limitacions i abast del treball}
