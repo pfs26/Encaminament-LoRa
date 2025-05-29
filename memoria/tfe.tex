@@ -181,10 +181,14 @@
 \begin{document}
 \listoffigures
 
-% Si feu servir apèndixs, descomenteu
-%\part{Memòria}
-
 \chapter{Introducció}
+
+La capacitat de disposar de dades, per posteriorment analitzar-les, ha esdevingut un element clau per a la prevenció de fallades i la millora de processos. Disposar d'informació sobre l'estat de màquines, estructures o entorns permet detectar anomalies, realitzar manteniments preventius, i entendre millor el comportament d'un sistema. Aquest tipus de monitoratge és especialment rellevant en entorns extensos o aïllats, com ara túnels o vies de tren, on la presència humana constant no és viable i la fiabilitat dels sistemes instal·lats és fonamental.
+
+% Objectius principals: dissenyar protocol amb encaminament per evitar molts gatewasy. Aplicar protocol a aplicació de baix consum 
+% EStructura: 3 parts, una teòria, una pel protocol, i una per l'aplicació
+
+
 \section{Objectius}
 \section{Limitacions i abast del treball}
 \section{Estructura de la memòria}
@@ -2038,7 +2042,7 @@ A causa de les idealitats en l'entorn de proves, per verificar el funcionament d
 
 Havent verificat el funcionament de l'aplicació en les proves anteriors, es va reduir el temps de cicle a 1 minut per tal d'alleugerir la durada de les proves. També es va augmentar el temps de marge a 5 segons, a causa de l'error del rellotge que, com s'ha verificat anteriorment, és més gran del que s'esperava inicialment.
 
-Després de la sincronització inicial, es va deixar en funcionament poc més de dues hores i mitja (150 cicles), dels quals en un 45.34\% es va realitzar la sincronització correctament, valor pròxim al 50\% establert en el dispositiu de referència. Tot i això, el dispositiu que esperava la sincronització generava i propagava correctament les dades quan no rebia la sincronització. Els resultats d'aquesta prova es poden trobar a \fitx{tests/testTimeout1Minut}, on es troben els fitxers amb les traces de depuració de cada dispositiu, així com els registres del \acro{ttn} amb els enviaments. Per facilitar la tasca d'analitzar els registres de traces, s'ha fet un petit programa en Python que analitza el fitxer, disponible a \fitx{tests/analisis.py}.
+Després de la sincronització inicial, es va deixar en funcionament poc més de dues hores i mitja (150 cicles), dels quals en un 45.34\% es va realitzar la sincronització correctament, valor pròxim al 50\% de probabilitat de sincronització, establert en el dispositiu de referència. Tot i això, el dispositiu que esperava la sincronització generava i propagava correctament les dades quan no rebia la sincronització. Els resultats d'aquesta prova es poden trobar a \fitx{tests/testTimeout1Minut}, on es troben els fitxers amb les traces de depuració de cada dispositiu, així com els registres de \acro{ttn} amb els enviaments. Per facilitar la tasca d'analitzar els registres de traces, s'ha fet un petit programa en Python que analitza el fitxer, disponible a \fitx{tests/analisis.py}.
 
 \chapter{Conclusions}
 % \section{Resultats assolits}
