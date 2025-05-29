@@ -5,7 +5,7 @@ from datetime import datetime
 
 # Nom del fitxer amb el log
 # Si genera error de "frozen codecs", eliminar les primeres files generades per picocom
-NOM_LOG = "prova.log"
+NOM_LOG = "testTimeout1Minut/listener.log"
 
 # Aplicar regex per buscar sleep stats al log
 pattern = re.compile(
@@ -31,7 +31,9 @@ with open(NOM_LOG, "r") as f:
             matches.append(data)
 
 # Eliminem la primera entrada (1r SYNC), que no serà valida (sempre actiu fins 1r sync)
-df = pd.DataFrame(matches)[1:]
+df = pd.DataFrame(matches)[1:len(matches)//1]
+
+df["cicle_real"] = df["timestamp"].diff().dt.total_seconds() * 1000  # en ms
 
 on = df["sync_flag"] == 1
 sync_rate = on.sum() / len(df) * 100
@@ -41,12 +43,53 @@ fig, axes = plt.subplots(nrows=4, ncols=1, figsize=(14, 18), sharex=True)
 fig.suptitle("LoRa Sleep & SYNC Layer Analysis", fontsize=16)
 
 
-# Estat sync
-axes[0].plot(df["timestamp"], df["sync_flag"], marker='o', linestyle='', color='green')
+timestamps = df["timestamp"]
+flags = df["sync_flag"]
+
+start_idx = 0
+
+for i in range(1, len(df)):
+    if flags.iloc[i] != flags.iloc[i - 1] or i == len(df) - 1:
+        end_idx = i
+
+        if i == len(df) - 1:
+            end_idx = i + 1
+
+        estat = flags.iloc[start_idx]
+        color = 'green' if estat == 1 else 'red'
+
+        axes[0].fill_between(
+            timestamps.iloc[start_idx:end_idx],
+            0,
+            1,
+            color=color,
+            alpha=0.2,
+            step='post'
+        )
+
+        axes[0].step(
+            timestamps.iloc[start_idx:end_idx],
+            flags.iloc[start_idx:end_idx],
+            where='post',
+            color=color,
+            linewidth=1.5
+        )
+
+        start_idx = i
+
 axes[0].set_ylabel("SYNC?")
 axes[0].set_yticks([0, 1])
-axes[0].grid(True)
+axes[0].set_yticklabels(["No", "Sí"])
 axes[0].set_title(f"Sync status. Rate {sync_rate:.2f}%")
+axes[0].grid(True)
+
+axes[0].scatter(
+    df["timestamp"],
+    df["sync_flag"],
+    c=df["sync_flag"].map({0: "red", 1: "green"}),
+    s=10, 
+    marker='o'
+)
 
 
 # sync/done time
@@ -55,20 +98,19 @@ axes[1].plot(df["timestamp"], df["sync_time"], label="Sync Time")
 axes[1].set_ylabel("Time (ms)")
 axes[1].legend()
 axes[1].grid(True)
-axes[1].set_title("Core Timing Metrics")
+axes[1].set_title("Time metrics")
 
 # temps de cicle
 df["cycle_time"] = df["done_time"] + df["sleep_time"]
-axes[2].plot(df["timestamp"], df["cycle_time"], label="Cycle Time")
-axes[2].axhline(df["cycle_time"].mean(), color='red', linestyle='--', label="Mean")
+axes[2].plot(df["timestamp"], df["cycle_time"], label="Expected Cycle")
+axes[2].plot(df["timestamp"], df["cicle_real"], label="Actual Cycle")
+axes[2].axhline(df["cicle_real"].mean(), color='red', linestyle='--', label=f"Actual cycle mean ({df['cicle_real'].mean():.2f} ms)")
 axes[2].legend()
 axes[2].grid(True)
 axes[2].set_title("Cycle time")
 
 
-EXPECTED_CYCLE = df["sleep_time"].median() + df["done_time"].median() - df["sync_time"].median()
-# EXPECTED_CYCLE = 60*1000
-df["cycle_error"] = df["cycle_time"] - EXPECTED_CYCLE 
+df["cycle_error"] = df["cycle_time"] - df["cicle_real"] 
 axes[3].plot(df["timestamp"], df["cycle_error"], label="Cycle Time Error")
 axes[3].axhline(df["cycle_error"].mean(), color='red', linestyle='--', label=f"Mean {df['cycle_error'].mean():.2f} ms")
 axes[3].legend()
