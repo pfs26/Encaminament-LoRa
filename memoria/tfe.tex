@@ -172,15 +172,16 @@
 
 
 \begin{resum}
-Aquest treball presenta el disseny i implementació d'un protocol de comunicació basat en LoRa amb encaminament estàtic, destinat a xarxes de dispositius de monitoratge en entorns extensos o aïllats, on la presència humana és limitada. L'objectiu d'aquest és reduir la dependència dels \est{gateways} LoRaWAN, aprofitant que els dispositius són sovintment estàtics i permeten l'ús de rutes de comunicació prèviament definides.
+Aquest treball presenta el disseny i implementació d'un protocol de comunicació basat en LoRa amb encaminament estàtic, pensat per a xarxes de dispositius de monitoratge en entorns extensos o aïllats, on la presència humana és limitada. L'objectiu és reduir la dependència dels \est{gateways} LoRaWAN, aprofitant que els dispositius són habitualment estàtics i permeten l'ús de rutes de comunicació predefinides.
 
-Sobre aquest protocol s'ha desenvolupat una aplicació optimitzada per a xarxes lineals, una topologia útil en vies de tren o túnels, centrada en minimitzar el consum energètic dels dispositius. Aquesta solució es basa en una estratègia de sincronització entre nodes, que permet coordinar les seves transmissions i reduir el temps actiu dels dispositius, sense renunciar a la fiabilitat o als mecanismes d'encaminament que el protocol ofereix. Les proves realitzades han demostrat que la proposta és viable, escalable i eficient per a entorns on el consum energètic i la cobertura són crítics.
-
+Sobre aquest protocol s'ha desenvolupat una aplicació optimitzada per a xarxes lineals ---una topologia especialment útil en vies de tren o túnels--- centrada en minimitzar el consum energètic dels dispositius. Aquesta solució es basa en una estratègia de sincronització entre nodes, que permet coordinar-ne les transmissions i reduir el temps actiu dels dispositius, sense renunciar a la fiabilitat ni als mecanismes d'encaminament que el protocol ofereix. Les proves realitzades han demostrat que la proposta és viable, escalable i eficient en entorns on el consum energètic i la cobertura són crítics.
 \end{resum}
 
 
-
 \begin{abstract}
+This work presents the design and impementation of a communication protocol based on LoRa and static routing, inteded for monitoring device networks in extensive or isolated environments, where human presence is limited. The goal is to reduce the dependency on LoRaWAN gateways, taking advantage of the fact that devices are usually static and allow the use of predefined communication routes.
+
+An application optimized for linear networks ---a topology particularly useful in railway lines or tunnels--- has been developed based on this protocol. It focuses on minimizing the energy consumption of the devices through a synchronization strategy between nodes, which allows coordinating transmissions and reducing the active time of the devices, without compromising reliability or the routing mechanisms provided by the protocol. The conducted tests have demonstrated that the proposed solution is viable, scalable, and efficient in environments where energy consumption and coverage are critical.
 \end{abstract}
 
 
@@ -1966,7 +1967,14 @@ function decodeUplink(input) {
 
 \subsection{Validació i resultats}
 \subsubsection{Entorn de proves}
-Les proves s'han realitzat utilitzant dos microcontroladors \acro{esp32}, cadascun equipat amb un transductor LoRa \acro{sx1262}. Per verificar el correcte funcionament a través de LoRaWAN, es disposava de connectivitat a un \est{gateway} Mikrotik wAP-LR8.
+Les proves s'han realitzat utilitzant dos microcontroladors \acro{esp32}, cadascun equipat amb un transductor LoRa \acro{sx1262}. Per verificar el correcte funcionament a través de LoRaWAN, es disposava de connectivitat a un \est{gateway} Mikrotik wAP-LR8. Es poden observar els dispositius utilitzats a la \autoref{fig:dispositius_proves}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth]{imatges/plaques.jpeg}
+    \caption{Dispositius utilitzats en les proves.}
+    \label{fig:dispositius_proves}                                                                                  
+\end{figure}                            
 
 Com a base per a les proves, s'ha utilitzat el codi d'exemple mostrat al \autoref{subsubsec:exemple_app}, tant per als microcontroladors com per al descodificador de dades al portal de \acro{ttn}. El nivell de les traces utilitzat, definit mitjançant l'opció \fitx{LOG_LEVEL}, és el nivell 1, que correspon al nivell d'informació. Això permet veure la màxima quantitat de traces, facilitant-ne l'anàlisi i detecció d'errors.
 
@@ -2014,20 +2022,20 @@ A continuació es va verificar el temps de baix consum d'ambdós dispositius, gr
     \label{tab:app_resultatsErrClock}
 \end{table}
 
-S'observa com els resultats d'error obtingut no es corresponen amb cap dels errors obtinguts prèviament, indicant que per algun motiu aquest error ha augmentat en implementar el protocol i l'aplicació de baix consum. A més, sorprèn el fet que el segon dispositiu tingui un error més, tenint en compte que la implementació entre dispositius acaba sent molt semblant. Aquests errors no són menyspreables, tenint en compte que l'error s'ha més que duplicat respecte dels errors obtinguts prèviament i, a més, semblen ser imprevisibles.
+S'observa com els resultats d'error obtingut no es corresponen amb cap dels errors obtinguts prèviament, indicant que per algun motiu aquest error ha augmentat en implementar el protocol i l'aplicació de baix consum. A més, sorprèn el fet que el segon dispositiu tingui un error més, tenint en compte que la implementació entre dispositius acaba sent molt semblant. Aquests errors no són menyspreables, tenint en compte que l'error s'ha més que duplicat respecte dels obtinguts prèviament i, a més, semblen ser imprevisibles.
 
-Per descobrir l'origen d'aquest error, es va dur a terme una bateria de proves (\fitx{tests/provesOrigenErrorClock.cpp}). Les proves consistien en simular el funcionament de la capa d'aplicació per a cada dispositiu, però sense utilitzar la capa d'aplicació. Les proves realitzades van ser:
+Per descobrir l'origen d'aquest error, es va dur a terme una bateria de proves (\fitx{tests/provesOrigenErrorClock.cpp}). Les proves consistien en simular el funcionament de la capa d'aplicació per a cada dispositiu, però sense utilitzar-la directament. Les proves realitzades van ser:
 \begin{itemize}
-    \item \emph{Transmissió després de baix consum}. Simula el comportament del dispositiu de referència, que en sortir del mode de baix consum realitza una transmissió automàticament, i torna al mode de baix consum durant un temps determinat. Els resultats, per a diferents temps de baix consum, es corresponien amb els errors obtinguts prèviament pel dispositiu iniciador. Es va descartar que l'error pel dispositiu de referència fos causat per l'aplicació.
+    \item \emph{Transmissió després de baix consum}. Simula el comportament del dispositiu de referència, que en sortir del mode de baix consum realitza una transmissió automàticament, i torna a iniciar-lo durant un temps determinat. Els resultats, per a diferents temps de baix consum, es corresponien amb els errors obtinguts prèviament pel dispositiu iniciador. Es va descartar que l'error pel dispositiu de referència fos causat per l'aplicació.
     \item \emph{Retorn a baix consum automàticament}. Es va repetir la prova que determinava l'error dels rellotges, però inicialitzant el protocol i el transductor LoRa. Els resultats obtinguts per ambdues plaques van ser similars als obtinguts en determinar l'error dels rellotges. Es va descartar que l'error fos causat per aquestes inicialitzacions, o per utilitzar la ràdio. Va donar la idea que aquest increment en l'error podia ser causat en realitzar una transmissió.
-    \item \emph{Transmissió a través d'accés al medi}. Es va repetir la prova anterior però realitzant la transmissió directament a través de la capa d'accés al medi, sense passar per transport o encaminament. Els resultats obtinguts van ser els mateixos, i es va descartar que l'error s'originés en aquestes capes.
-    \item \emph{Transmissió després de retard}. Simula el comportament del dispositiu que espera la sincronització, el qual espera rebre les dades després de sortir del mode de baix consum, per després propagar-les i iniciar de nou el mode de baix consum. Els resultats es corresponien amb els obtinguts en executar l'aplicació, amb errors de 16000 \acro{ppm}. Es va descartar que l'error en aquest dispositiu s'originés a la capa d'aplicació, per exemple per un mal càlcul del temps de baix consum.
+    \item \emph{Transmissió a través d'accés al medi}. Es va repetir la primera prova, però realitzant la transmissió directament a través de la capa d'accés al medi, sense passar per transport o encaminament. Els resultats obtinguts van ser els mateixos, i es va descartar que l'error s'originés en aquestes capes.
+    \item \emph{Transmissió després de retard}. Simula el comportament del dispositiu que espera la sincronització, el qual espera rebre les dades, per després propagar-les i iniciar de nou el mode de baix consum. Els resultats es corresponien amb els obtinguts en executar l'aplicació, amb errors de 16000 \acro{ppm}. Es va descartar que l'error en aquest dispositiu s'originés a la capa d'aplicació, per exemple per un mal càlcul del temps de baix consum.
     \item \emph{Retorn a baix consum després d'un retard}. Es va simular el comportament del dispositiu de referència, però en lloc de realitzar la transmissió, aplicava un retard de durada igual a la de la transmissió. Es van obtenir errors similars als obtinguts quan sí que es realitza la transmissió, descartant que aquest increment en l'error fos causat per les transmissions.  
 \end{itemize}
 
-De l'última prova es va obtenir que l'error augmentava únicament per tenir el dispositiu actiu, i que no era causat per realitzar una transmissió o utilitzar el protocol. Es va descobrir que el rellotge intern utilitzat en mode de baix consum és, per defecte, un osci\l.lador RC de \SI{150}{\kilo\hertz}, el qual es veu greument afectat per la temperatura \cite{espressif_system_nodate}. La hipòtesi que es va considerar és que, en trobar-se en mode actiu, la temperatura del microcontrolador augmenta lleugerament, fent que l'error del rellotge es vegi afectat.
+De l'última prova es va veure que l'error augmentava únicament per tenir el dispositiu actiu, i que no era causat per realitzar una transmissió o utilitzar el protocol. Es va descobrir que el rellotge intern utilitzat en mode de baix consum és, per defecte, un osci\l.lador RC de \SI{150}{\kilo\hertz}, el qual es veu greument afectat per la temperatura \cite{espressif_system_nodate}. La hipòtesi que es va considerar és que, en trobar-se en mode actiu, la temperatura del microcontrolador augmenta lleugerament, fent que l'error del rellotge es vegi afectat.
 
-Per verificar aquesta hipòtesi, es va realitzar una nova prova, modificant el rendiment de cicle i obtenint l'error en cada un d'ells. És a dir, per a un temps de cicle determinar (2.5 minuts), es va modificar el temps que el microcontrolador estava actiu, i trobant-se la resta del cicle en mode de baix consum. De nou, per a cada rendiment de cicle es va determinar l'error del rellotge. Els resultats obtinguts, per a cada microcontrolador, es poden observar a la \autoref{tab:app_resultatsRendiment}, els quals verifiquen la hipòtesi plantejada: a major rendiment de cicle, major és el temps que el microcontrolador es troba actiu, i major és l'error del rellotge. És important tenir en compte que tot i que l'error en segons disminueix, l'error en \acro{ppm} depèn del temps en baix consum, el qual també disminueix, i no del temps de cicle total.
+Per verificar aquesta hipòtesi, es va realitzar una nova prova, modificant el rendiment de cicle i obtenint l'error en cada un d'ells. És a dir, per a un temps de cicle determinar (2.5 minuts), es va modificar el temps que el microcontrolador estava actiu, i trobant-se la resta del cicle en mode de baix consum. Els resultats obtinguts, per a cada microcontrolador, es poden observar a la \autoref{tab:app_resultatsRendiment}, els quals verifiquen la hipòtesi plantejada: a major rendiment de cicle, major és el temps que el microcontrolador es troba actiu, i major és l'error del rellotge. És important tenir en compte que tot i que l'error en segons disminueix, l'error en \acro{ppm} depèn del temps en baix consum, el qual també disminueix, i no del temps de cicle total.
 
 \begin{table}
 \centering
@@ -2060,7 +2068,20 @@ A causa de les idealitats en l'entorn de proves, per verificar el funcionament d
 
 Havent verificat el funcionament de l'aplicació en les proves anteriors, es va reduir el temps de cicle a 1 minut per tal d'alleugerir la durada de les proves. També es va augmentar el temps de marge a 5 segons, a causa de l'error del rellotge que, com s'ha verificat anteriorment, és més gran del que s'esperava inicialment.
 
-Després de la sincronització inicial, es va deixar en funcionament poc més de dues hores i mitja (150 cicles), dels quals en un 45.34\% es va realitzar la sincronització correctament, valor pròxim al 50\% de probabilitat de sincronització, establert en el dispositiu de referència. Tot i això, el dispositiu que esperava la sincronització generava i propagava correctament les dades quan no rebia la sincronització. Els resultats d'aquesta prova es poden trobar a \fitx{tests/testTimeout1Minut}, on es troben els fitxers amb les traces de depuració de cada dispositiu, així com els registres de \acro{ttn} amb els enviaments. Per facilitar la tasca d'analitzar els registres de traces, s'ha fet un petit programa en Python que analitza el fitxer, disponible a \fitx{tests/analisis.py}.
+Després de la sincronització inicial, es va deixar en funcionament poc més de dues hores i mitja (150 cicles), dels quals en un 45.34\% es va realitzar la sincronització correctament, valor pròxim al 50\% de probabilitat de sincronització, establert en el dispositiu de referència. Tot i això, el dispositiu que esperava la sincronització generava i propagava correctament les dades quan no rebia la sincronització. Els resultats d'aquesta prova es poden trobar a \fitx{tests/testTimeout1Minut}, on es troben els fitxers amb les traces de depuració de cada dispositiu, així com els registres de \acro{ttn} amb els enviaments. Per facilitar la tasca d'analitzar els registres de traces, s'ha fet un petit programa en Python que analitza el fitxer, disponible a \fitx{tests/analisis.py}, el qual permet observar de forma gràfica l'estat de les sincronitzacions, visible a la \autoref{fig:app_grafics_sinc}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\textwidth]{imatges/pantallaAnalisis.pdf}
+    \caption{Pantalla d'anàlisi d'estadístiques de l'aplicació.}
+    \label{fig:app_grafics_sinc}                                                                                  
+\end{figure} 
+
+\subsubsection{Reducció del consum}
+Per acabar, es va verificar que aquesta aplicació aconseguís reduir satisfactòriament el consum. Per fer-ho, es va comparar el consum d'un dispositiu sense implementar aquesta solució, que es trobava en mode actiu durant tot el cicle de 5 minuts, amb un altre que sí que implementava l'aplicació de baix consum. En la comparació no es va considerar el consum durant una transmissió, ja que en qualsevol de les situacions ambdós dispositius realitzarien el mateix nombre de transmissions.
+
+% veure quin es el consum en mode actiu. Multiplicar per 5 minuts.
+% veure consum en mode de baix consum, comentar que hi ha el LED sempre actiu, i multiplicar pel temps de baix consum real, sumarli el temps actiu pel consum en mode actiu. Comparar ambdós.
 
 \chapter{Conclusions}
 % \section{Resultats assolits}
