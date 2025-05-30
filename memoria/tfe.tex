@@ -1974,7 +1974,7 @@ Les proves s'han realitzat utilitzant dos microcontroladors \acro{esp32}, cadasc
     \includegraphics[width=0.6\textwidth]{imatges/plaques.jpeg}
     \caption{Dispositius utilitzats en les proves.}
     \label{fig:dispositius_proves}                                                                                  
-\end{figure}                            
+\end{figure} 
 
 Com a base per a les proves, s'ha utilitzat el codi d'exemple mostrat al \autoref{subsubsec:exemple_app}, tant per als microcontroladors com per al descodificador de dades al portal de \acro{ttn}. El nivell de les traces utilitzat, definit mitjançant l'opció \fitx{LOG_LEVEL}, és el nivell 1, que correspon al nivell d'informació. Això permet veure la màxima quantitat de traces, facilitant-ne l'anàlisi i detecció d'errors.
 
@@ -2061,7 +2061,11 @@ Per verificar aquesta hipòtesi, es va realitzar una nova prova, modificant el r
     \label{tab:app_resultatsRendiment}
 \end{table}
 
-Aquests resultats permeten explicar el comportament observat, principalment, en el dispositiu que espera la sincronització, que és qui es troba durant més temps actiu i, per tant, qui té un major rendiment de cicle. Aquest fet permet explicar els dos segons restants del temps de sincronització obtingut en les proves.
+Aquests resultats permeten explicar el comportament observat, especialment en el dispositiu que espera la sincronització. Aquest és qui es troba durant més temps actiu i, per tant, qui té un major rendiment de cicle. Aquest fet permet explicar els dos segons restants del temps de sincronització obtingut en les proves.
+
+Aquest error presenta un greu problema, considerant que en grans xarxes de monitoratge no es pot garantir una temperatura constant en tots els dispositius. En aquests casos, la temperatura ambient dels dispositius podria ser molt diferent, fent que l'error també ho fos, i impossibilitzant poder garantir la sincronització sense deixar grans temps de marge.
+
+La principal solució proposada consisteix en utilitzar un osci\l.lador de major precisió, com per exemple un de cristall. Aquests presenten una variació molt menor en el seu error en funció de la temperatura, fent que l'error dels dispositius fos més homogeni. En tractar-se d'un error més constant, seria possible establir un temps de marge més petit, sense renunciar a la fiabilitat del sistema.
 
 \subsubsection{Fi temps d'espera}
 A causa de les idealitats en l'entorn de proves, per verificar el funcionament del fi de temps d'espera de la recepció de la sincronització, es va modificar el codi de l'aplicació per simular que el dispositiu de referència no enviava la sincronització amb un 50\% de probabilitats. 
@@ -2080,6 +2084,10 @@ Després de la sincronització inicial, es va deixar en funcionament poc més de
 \subsubsection{Reducció del consum}
 Per acabar, es va verificar que aquesta aplicació aconseguís reduir satisfactòriament el consum. Per fer-ho, es va comparar el consum d'un dispositiu sense implementar aquesta solució, que es trobava en mode actiu durant tot el cicle de 5 minuts, amb un altre que sí que implementava l'aplicació de baix consum. En la comparació no es va considerar el consum durant una transmissió, ja que en qualsevol de les situacions ambdós dispositius realitzarien el mateix nombre de transmissions.
 
+En mode actiu, el dispositiu té un consum d'aproximadament \SI{80}{\milli\ampere}. En mode de baix consum, en canvi, aquest es redueix fins aproximadament \SI{13}{\milli\ampere}. És important tenir en compte que la placa de desenvolupament conté un \acro{led} vermell, el qual sempre es troba actiu, i presenta un consum afegit. En qualsevol dels casos, es pot observar com efectivament el consum s'ha vist reduït.
+
+Amb aquests resultats, es verifica com l'aplicació de baix consum ha reduit el consum en un $\frac{80-13}{80}\cdot100=83.75\%$. 
+
 % veure quin es el consum en mode actiu. Multiplicar per 5 minuts.
 % veure consum en mode de baix consum, comentar que hi ha el LED sempre actiu, i multiplicar pel temps de baix consum real, sumarli el temps actiu pel consum en mode actiu. Comparar ambdós.
 
@@ -2095,7 +2103,7 @@ Per acabar, es va verificar que aquesta aplicació aconseguís reduir satisfact�
 
 % fragmentació a nivell de protocol o a nivell d'aplicació
 % configuració dinàmica de dispositius
-% 
+% RTC extern. Alimentació del dispositiu controlat per aquest. S'atura totalment alimentació en baix consum, i només consumeix RTC.
 
 % \listoftables
 
