@@ -320,7 +320,7 @@ L'estratègia d'encaminament que utilitza es basa en «inundació» (\est{floodi
 
 Per intentar reduir aquest efecte, implementa un estil d'«inundació controlada». Quan un dispositiu rep un missatge, espera un temps proporcional a la relació senyal soroll (\acro{snr}) del missatge rebut abans de retransmetre, i cance\l.la l'enviament si un node realitza la transmissió abans. Així, un dispositiu més proper a l'origen (major \acro{snr}) esperarà més temps que un de llunyà i, per tant, el missatge el retransmetrà únicament el dispositiu llunyà. És cert que això redueix el nombre de transmissions que realitza cada dispositiu, però no evita que el missatge es retransmeti per tota la xarxa. 
 
-Un altre inconvenient és que, a causa que els dispositius no saben quan altres dispositius realitzaran una transmissió, hagin d'estar sempre actius i en mode de recepció. Això provoca que el consum energètic dels dispositius sigui elevat (de l'ordre dels \SI{10}{\milli\watt}), fent-los poc adequats per aplicacions de monitoratge.
+Un altre inconvenient és que, a causa que els dispositius no saben quan altres dispositius realitzaran una transmissió, hagin d'estar sempre actius i en mode de recepció. Això provoca que el consum dels dispositius sigui més elevat, fent-los poc adequats per aplicacions de monitoratge on no es pot assegurar el subministrament energètic.
 
 Durant el desenvolupament d'aquest treball, Meshtastic ha iniciat la implementació d'un protocol d'encaminament per a missatges entre dos únics dispositius. La idea d'aquest protocol és descobrir la ruta més òptima entre dos dispositius utilitzant el mecanisme d'«inundació controlada»; un cop el destí rep el missatge, respon amb un nou missatge amb la informació de la ruta, que conté tots els dispositius que han de retransmetre el missatge per arribar fins a ell. En el procés de fer arribar aquesta resposta al transmissor del missatge, tots els nodes intermedis poden generar la seva taula de rutes. En les següents transmissions, si es coneix la ruta, els missatges els reenvien únicament els nodes de la ruta. Els detalls de la implementació i funcionament d'aquest protocol es poden consultar a \cite{open_source_mesh_nodate}.
 
@@ -2092,9 +2092,19 @@ Amb aquests resultats, es verifica com l'aplicació de baix consum ha reduit el 
 % veure consum en mode de baix consum, comentar que hi ha el LED sempre actiu, i multiplicar pel temps de baix consum real, sumarli el temps actiu pel consum en mode actiu. Comparar ambdós.
 
 \chapter{Conclusions}
-% \section{Resultats assolits}
-% \section{Limitacions del disseny final}
-% \section{Punts clau de millora}
+Aquest treball ha presentat el disseny i la implementació d’un protocol de comunicació basat en LoRa, amb capacitats d'encaminament estàtic i compatible amb LoRaWAN, aconseguint reduir la dependència de \est{gateways} LoRaWAN en els dispositius de monitoratge. Això s’ha aconseguit fent possible que un dispositiu sense connectivitat directa amb un \est{gateway} transmeti les dades a un altre dispositiu que sí que en disposa, actuant aquest com a node encaminador. El protocol s'ha limitat a xarxes estàtiques, una característica pròpia de les aplicacions de monitoratge, on els dispositius tenen una ubicació fixa i es vol monitorar una situació concreta de forma continuada. Gràcies a això, s'elimina la necessitat d'un protocol de descubriment de rutes, simplificant-ne així la implementació i manteniment.
+
+Les proves realitzades, que s'han vist limitades a la disponibilitat d'únicament dos dispositius, han permès validar el funcionament del protocol i demostrar-ne la seva viabilitat. Els mecanismes d'accés al canal compartit, així com els mecanismes de retransmissió, asseguren una comunicació fiable i robusta. L'encaminament estàtic, tot i restringir-ne l'ús en xarxes dinàmiques, facilita la implementació i manteniment del protocol. Gràcies als segments de la capa de transport, s'aconsegueix una comunicació fiable d'extrem a extrem, i la capa d'aplicació permet la compatibilitat i adaptació del protocol a diferents escenaris i necessitats. 
+
+Sobre del protocol s'ha construït una aplicació encarregada de reduir el consum energètic dels dispositius. Això s'ha aconseguit mitjançant un mecanisme de sincronització, on un dispositiu inicia el cicle de funcionament i la resta es mantenen a l'espera de rebre un missatge de sincronització. Per minimitzar el nombre de transmissions, el missatge de dades també actua com a missatge de sincronització, i cada dispositiu aprofita aquest missatge per propagar les seves pròpies dades.  
+
+El mecanisme de temps màxim d'espera implementat evita que els dispositius romanguin en mode de recepció indefinidament. Això evita perdre les dades de tots els dispositius de la xarxa, conservar energia, i identificar on s'ha produit una fallada en la sincronització.
+
+Durant les proves de validació, s'ha detectat una limitació important en la precisió dels osci\l.ladors dels microcontroladors utilitzats en mode de baix consum. Els seus elevats errors i alta sensibilitat a la temperatura fan necessari deixar marges de temps de seguretat elevats, penalitzant l'eficiència energètica. Com a solució a aquest problema, es proposa l'ús d'osci\l.ladors de cristall, que presenten errors molt més reduits i constants, permetent així sincronitzacions més precises.
+
+Tot i aixó, les proves realitzades ---amb temps de cicle reduits--- han demostrat que l'aplicació proposada aconsegueix reduir el consum energètic dels dispositius en més d'un 80\% respecte d'un sistema sense aquesta optimització.
+
+En conjunt, aquest treball ha permès demostrar la viabilitat d'una solució de comunicació eficient per a entorns de monitoratge basats en LoRa, buscant l'equilibri entre simplicitat, fiabilitat i baix consum energètic. Si bé encara existeixes possibles millores futures i proves en entorns més extensos i situacions reals, el sistema desenvolupat ofereix una base sòlida sobre la qual construir-hi aplicacions reals.
 
 \chapter{Treball futur}
 % \section{Suport a topologies més complexes}
@@ -2104,6 +2114,9 @@ Amb aquests resultats, es verifica com l'aplicació de baix consum ha reduit el 
 % fragmentació a nivell de protocol o a nivell d'aplicació
 % configuració dinàmica de dispositius
 % RTC extern. Alimentació del dispositiu controlat per aquest. S'atura totalment alimentació en baix consum, i només consumeix RTC.
+
+Tot i que la solució proposada ha assolit els objectius principals
+
 
 % \listoftables
 
