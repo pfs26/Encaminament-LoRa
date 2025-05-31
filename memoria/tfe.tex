@@ -2115,8 +2115,13 @@ En conjunt, aquest treball ha permès demostrar la viabilitat d'una solució de 
 % configuració dinàmica de dispositius
 % RTC extern. Alimentació del dispositiu controlat per aquest. S'atura totalment alimentació en baix consum, i només consumeix RTC.
 
-Tot i que la solució proposada ha assolit els objectius principals
+Tot i que la solució proposada ha assolit els objectius principals, existeixen línies de treball futur que poden afegir-hi noves funcionalitats.
 
+\begin{itemize}
+    \item \emph{Altres tecnologies de comunicació}. El sistema actual es basa en utilitzar LoRaWAN per disposar de les dades de la xarxa. Una extensió possible seria substituir aquesta tecnologia per d'altres, com ara 4G, podent ser útil en entorns on LoRaWAN no és viable. Gràcies a la modularitat del protocol, aquesta implementació seria relativament senzilla, i podria aprofitar les mateixes capes d'encaminament i transport.
+    \item \emph{Fragmentació de dades}. En l'aplicació de baix consum s'ha mencionat la necessitat d'un mecanisme de fragmentació de dades, en entorns amb molts dispositius o amb molta quantitat de dades. Aquest mecanisme podria ser implementat a nivell d'aplicació o de protocol, i oferiria una major flexibilitat i adaptabilitat a diferents situacions.
+    \item \emph{Control extern de l'alimentació}. Una millora que podria reduir més el consum energètic és l'ús d'un circuit integrat capaç de desconnectar completament l'alimentació del microcontrolador i de la ràdio. Aquest circuit permetria definir un temps de desconnexió, al final del qual s'activaria de nou. El microcontrolador podria indicar quan desactivar l'alimentació, just abans del mode de baix consum. Aquesta millora oferiria consums extremadament reduïts, especialment útils per dispositius que requereixen una gran autonomia.  
+\end{itemize}
 
 % \listoftables
 
