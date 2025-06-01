@@ -710,11 +710,11 @@ Una altra tasca important que duu a terme és la de commutar entre l'ús del pro
 \subsubsection{Estructura dels paquets}
 És necessari que aquesta capa pugui saber quin és el destí final del missatge, per tal de determinar quin és el següent dispositiu a qui s'ha d'enviar. Per tant, ha de contenir un camp amb l'adreça del dispositiu de \emph{destí}. També s'inclou l'adreça del dispositiu \emph{emissor}, permetent saber d'on s'ha originat el missatge. Ambdós camps tenen la mateixa longitud que els de la capa d'accés al medi, és a dir, \SI{1}{\byte}, la qual cosa permet reutilitzar les mateixes adreces en les dues capes i simplifica la implementació.
 
-Per tal d'evitar transmissions infinites ---per exemple, si una ruta resulta en un bucle--- s'afegeix un camp de \acro{ttl} (\est{Time To Live}), que indica el nombre màxim de salts que pot fer un missatge abans de ser descartat. Per exemple, si l'emissor genera un missatge amb un \acro{ttl} d'1, aquest només podrà ser transmès al següent dispositiu de la ruta. El camp \acro{ttl} ocupa \SI{1}{\byte}, permetent un màxim de 255 salts. Tenint en compte que la xarxa està limitada a un màxim de 253 dispositius, aquesta longitud és suficient, ja que no haurien d'existir rutes de longitud superior al màxim de dispositius.
+Per tal d'evitar transmissions infinites ---per exemple, si una ruta provoca un bucle--- s'afegeix un camp de \acro{ttl} (\est{Time To Live}), que indica el nombre màxim de salts que pot fer un missatge abans de ser descartat. Per exemple, si l'emissor genera un missatge amb un \acro{ttl} d'1, aquest només podrà ser transmès al següent dispositiu de la ruta. El camp \acro{ttl} ocupa \SI{1}{\byte}, permetent un màxim de 255 salts. Tenint en compte que la xarxa està limitada a un màxim de 253 dispositius, aquesta longitud és suficient, ja que no haurien d'existir rutes de longitud superior al màxim de dispositius.
 
 Per acabar, s'ha inclòs un camp de \emph{longitud}, que indica la longitud de les dades del missatge. Com en el protocol d'accés al medi, permet saber quants bytes s'han de llegir per obtenir les dades. Es reserva també un byte, ja que la longitud màxima de les dades del protocol d'accés al medi és de \SI{248}{\byte}. Així, les \emph{dades} podran tenir una longitud màxima de \SI{244}{\byte}, sent els \SI{4}{\byte} restants per a la resta de camps.
 
-Seguint el model \acro{tcp/ip}, el missatges d'aquesta capa s'anomenen \emph{paquets}. La seva estructura, amb els camps prèviament esmentats, es pot observar a la \autoref{fig:paquet_encaminament}.
+Seguint el model \acro{tcp/ip}, els missatges d'aquesta capa s'anomenen \emph{paquets}. La seva estructura, amb els camps prèviament esmentats, es pot observar a la \autoref{fig:paquet_encaminament}.
 
 \begin{figure}
     \centering
@@ -728,7 +728,6 @@ Seguint el model \acro{tcp/ip}, el missatges d'aquesta capa s'anomenen \emph{paq
     \label{fig:paquet_encaminament}
 \end{figure}
 \subsubsection{Gestió de la taula d'encaminament}
-% comentar que implementa interfície per afegir/eliminar taules, per si mai es defineix un mecanisme d'encaminament dinàmic
 La taula d'encaminament és l'encarregada de definir quin és el següent dispositiu al qual s'ha d'enviar un paquet per tal que arribi al seu destí final. Per simplicitat, s'ha optat per permetre una única ruta per a cada dispositiu, establint així una relació un a un entre cada adreça de destí i el següent salt. Això limita la mida màxima de la taula d'encaminament a 254 entrades (253 dispositius i un \est{gateway}). A la \autoref{tab:taula_encaminament} es mostra un exemple de taula d'encaminament, on es pot veure que el dispositiu té comunicació directa amb els dispositius \fitx{0x4E} i \fitx{0xA1}, i si es vol enviar un paquet al \est{gateway}, aquest s'ha de fer arribar a través de \fitx{0x4E}.
 
 \begin{table}
@@ -758,7 +757,7 @@ La taula d'encaminament és l'encarregada de definir quin és el següent dispos
     \label{fig:emmgatzematge_taula_encaminament}
 \end{figure}
 
-Una propietat important de la taula d'encaminament és que aquesta ha de ser persistent. Això vol dir que si el dispositiu es reinicia, aquest ha de poder recuperar la taula d'encaminament anteriorment configurada. En cas contrari, com que no es genera de forma dinàmica, aquesta capa quedaria inoperativa. Per evitar-ho, s'utilitza de nou la memòria no volàtil \acro{NVS}. La mida màxima de la taula serà de \SI{508}{\byte} (254 entrades, 2 adreces d'\SI{1}{\byte} per entrada), fet que no és problema en el dispositiu utilitzat (ESP32).
+Una propietat important de la taula d'encaminament és que aquesta ha de ser persistent. Això vol dir que si el dispositiu es reinicia, aquest ha de poder recuperar la taula d'encaminament anteriorment configurada. En cas contrari, com que no es genera de forma dinàmica, aquesta capa quedaria inoperativa. Per evitar-ho, s'utilitza de nou la memòria no volàtil \acro{nvs}. La mida màxima de la taula serà de \SI{508}{\byte} (254 entrades, 2 adreces d'\SI{1}{\byte} per entrada), fet que no és problema en el dispositiu utilitzat (ESP32).
 
 Per evitar fer lectures a la memòria \acro{nvs} per a cada consulta de ruta, es carrega tota la taula a la memòria volàtil en inicialitzar la capa, fent que les lectures siguin molt més ràpides. El format d'emmagatzematge consisteix en una seqüència de bytes, on cada parell representa una entrada: el primer byte indica l'adreça de destí i el segon, el següent salt. Aquest format facilita el bolcat de la taula entre memòria volàtil i no volàtil, ja que no cal fer cap conversió. A la \autoref{fig:emmgatzematge_taula_encaminament} es pot observar com s'emmagatzemaria part de la taula d'encaminament representada anteriorment. 
 
@@ -775,23 +774,23 @@ Quan es vol realitzar una transmissió d'un paquet a un destí final, es realitz
 
 Pel que fa al valor de \acro{ttl}, s'assigna el valor configurat per defecte (definit en temps de compilació), que depèn de la mida de la xarxa i de cada situació, però que cal recordar que està limitat a 255.
 
-És important recordar que la capa d'accés al medi implementa una cua de transmissió, i que notifica a la capa d'encaminament quan la transmissió ha acabat. Per aquest motiu, la capa d'encaminament ofereix també la possibilitat de notificar a la capa superior de la finalització d'una transmissió, proporcionant de nou l'identificador. Aquestes notificacions (generades a través de \est{callback}) únicament es generaran per transmissions originades per la capa superior. És a dir, si la capa d'encaminament inicia una transmissió (per exemple, per encaminar un paquet rebut a través de la capa d'accés al medi), no es notificarà a la capa superior, ja que aquesta transmissió no s'hi ha originat. Aquest filtrat es pot realitzar guardant l'identificador de les trames transmeses (obtingut a través de la capa d'accés al medi) en una cua únicament si s'originen per la capa superior.
+És important recordar que la capa d'accés al medi implementa una cua de transmissió, i que notifica a la capa d'encaminament quan la transmissió ha acabat. Per aquest motiu, la capa d'encaminament ofereix també la possibilitat de notificar a la capa superior de la finalització d'una transmissió, proporcionant de nou l'identificador. Aquestes notificacions (generades a través de \est{callback}) únicament es generaran per transmissions originades per la capa superior. És a dir, si la capa d'encaminament inicia una transmissió (per exemple, per encaminar un paquet rebut a través de la capa d'accés al medi), no es notificarà a la capa superior, ja que aquesta transmissió no s'hi ha originat. Aquest filtratge es pot realitzar guardant l'identificador de les trames transmeses (obtingut a través de la capa d'accés al medi) en una cua únicament si s'originen per la capa superior.
 
 A més, cal també tenir en compte que la capa d'accés al medi implementa notificacions per transmissions fallides. De nou, aquesta notificació únicament es propagarà a la capa superior si el paquet s'hi havia originat, i no és una transmissió fallida d'un paquet encaminat. 
 
-És també important recordar que les transmissions mitjançant LoRaWAN són bloquejants. Així, l'estat de la transmissió es coneix en el mateix moment en que s'inicia la transmissió a través de la capa d'abstracció. Per mantenir la coherència amb la resta de capes, s'implementen notificacions de transmissió simulades, programant les notificacions de transmissió correcta i fallida a través del gestor de tasques.
+És també important recordar que les transmissions mitjançant LoRaWAN són bloquejants. Així, l'estat de la transmissió es coneix en el mateix moment en què s'inicia la transmissió a través de la capa d'abstracció. Per mantenir la coherència amb la resta de capes, s'implementen notificacions de transmissió simulades, programant les notificacions de transmissió correcta i fallida a través del gestor de tasques.
 \subsubsection{Recepció}
 \label{subsubsec:routing_rx}
 % « »
 Quan la capa d'accés al medi notifica a la capa d'encaminament la recepció d'un paquet, mitjançant el \est{callback} corresponent, aquesta rep el paquet i verifica quin és el seu destí final. Si n'és el destí final, es notifica a la capa superior perquè el processi i es dona per finalitzat el procés. En canvi, si el paquet no és per a ell, es consulta la taula d'encaminament per determinar quin és el següent salt.
 
-Si no existeix cap entrada a la taula per a l'adreça de destí del paquet rebut, aquest es descarta. Encara que podria semblar lògic generar un missatge de «no-reconeixement» per informar l'emissor, s'ha decidit no implementar aquest mecanisme. Fer-ho implicaria assignar tasques a la capa d'encaminament, que van més enllà de determinar la ruta del paquet. A més, aquest tipus de notificació incrementaria el nombre de transmissions, fet no desitjat en un protocol de baix consum. Tampoc hauria de ser necessari si la configuració de les taules d'encaminament s'ha realitzat correctament, ja que les rutes no canvien dinàmicament.
+Si no existeix cap entrada a la taula per a l'adreça de destí del paquet rebut, aquest es descarta. Encara que podria semblar lògic generar un missatge de «no-reconeixement» per informar l'emissor, s'ha decidit no implementar aquest mecanisme. Fer-ho implicaria assignar tasques a la capa d'encaminament que van més enllà de determinar la ruta del paquet. A més, aquest tipus de notificació incrementaria el nombre de transmissions, fet no desitjat en un protocol de baix consum. Tampoc hauria de ser necessari si la configuració de les taules d'encaminament s'ha realitzat correctament, ja que les rutes no canvien dinàmicament.
 
 Si el valor del \acro{ttl} del paquet rebut és 1 (i el paquet no és per ell, verificat prèviament), es descarta el paquet, ja que no pot fer més salts. En cas contrari, es decrementa el valor del \acro{ttl} i es transmet el paquet al següent salt a través de la capa d'accés al medi o de LoRaWAN, segons correspongui.
 
-Gràcies a la capa d'abstracció de LoRaWAN, que implementa la recepció de paquets a través de notificacions per \est{callback}, no hi ha diferència entre la recepció d'un paquet a través de LoRaWAN o a través del protocol personalitzat. En ambdós casos, la capa d'encaminament rep el paquet i realitza les mateixes operacions, explicades anteriorment.
+Gràcies a la capa d'abstracció de LoRaWAN, que implementa la recepció de paquets a través de notificacions per \est{callback}, no hi ha diferència entre la recepció d'un paquet a través de LoRaWAN o a través del protocol personalitzat. En ambdós casos, la capa d'encaminament rep el paquet i efectua les mateixes operacions, explicades anteriorment.
 
-Com s'ha comentat anteriorment, la finalització de la transmissió d'aquest paquet encaminat no es notificarà a la capa superior, ja que no s'hi ha originat.
+Com s'ha comentat, la finalització de la transmissió d'aquest paquet encaminat no es notificarà a la capa superior, ja que no s'hi ha originat.
 \subsubsection{Detalls d'implementació}
 La implementació d'aquesta capa no s'ha basat en una màquina d'estats perquè no és necessari mantenir cap estat entre transmissions ni recepcions. En aquest cas, el comportament de la capa d'encaminament és totalment síncron, permetent basar la implementació com una seqüència de mètodes i condicions. Basar la implementació en una \acro{fsm} requeriria un disseny més complex, sense aportar cap avantatge. 
  
@@ -829,7 +828,7 @@ En ambdós exemples es representen tres dispositius, on el tercer té capacitats
 
 Les taules d'encaminament de cada dispositiu i exemple es representen a la \autoref{tab:routing_taula_enc_exemples}.
 
-\begin{table}[h!]
+\begin{table}
     \centering
     \begin{tabular}{c c}
         \begin{tabular}{r|ccccc}
@@ -862,13 +861,13 @@ Les taules d'encaminament de cada dispositiu i exemple es representen a la \auto
 \end{table}
 
 
-A la \autoref{fig:routing_encaminament_basic_gateway} es mostra un exemple bàsic. Primerament el dispositiu \fitx{0x02} vol enviar un paquet al \fitx{0x04}: obté la ruta per aquest, transmetent-ho a \fitx{0x03}. Aquest rep el paquet, verifica el \acro{ttl}, i obté la següent ruta, que és \fitx{0x04}, el qual rep el paquet, comprova que és el destí final, i ho notifica a la capa superior. 
+A la \autoref{fig:routing_encaminament_basic_gateway} es mostra un exemple bàsic. Primerament, el dispositiu \fitx{0x02} vol enviar un paquet al \fitx{0x04}: obté la ruta per aquest, transmetent-ho a \fitx{0x03}. Aquest rep el paquet, verifica el \acro{ttl}, i obté la següent ruta, que és \fitx{0x04}, el qual rep el paquet, comprova que és el destí final, i ho notifica a la capa superior. 
 
-Un segon exemple de transmissió es realitza quan \fitx{0x02} vol enviar un paquet al \est{gateway}. El dispositiu 2 consulta la taula d'encaminament i veu que el següent salt és el dispositiu 3. Aquest rep el paquet i consulta la seva taula, veient que el següent salt és el \est{gateway}. En rebre el paquet a través de LoRaWAN, realitza la transmissió dels paquets en les finestres de recepció que el dispositiu \fitx{0x04} obre, en tractar-se d'un dispositiu de classe A. Es realitza l'encaminament d'aquest nou paquet, amb el mateix mecanisme que anteriorment.
+Un segon exemple de transmissió es realitza quan \fitx{0x02} vol enviar un paquet al \est{gateway}. El dispositiu 2 consulta la taula d'encaminament i veu que el següent salt és el dispositiu 3. Aquest rep el paquet, consulta la seva taula, i ho transmet al dispositiu \fitx{0x04}, qui ho encamina cap al \est{gateway} a través de LoRaWAN. En obrir les finestres de recepció, rep un paquet amb destí el dispositiu \fitx{0x03}, el qual és encaminat seguint el mateix procediment.
 
 Per acabar, es representa també com un paquet amb fi de temps de vida (\acro{ttl}) és descartat, de la mateixa manera que un paquet que no pot ser encaminat, ja que no existeix cap entrada a la taula d'encaminament del dispositiu. 
 
-\begin{figure}[h]
+\begin{figure}
     \centering
     \begin{tikzpicture}[
         device/.style={draw=none, minimum width=1cm, minimum height=0.8cm},
@@ -920,9 +919,10 @@ Per acabar, es representa també com un paquet amb fi de temps de vida (\acro{tt
     \label{fig:routing_encaminament_basic_gateway}
 \end{figure}
 
-Una altra situació més complexa es pot produir quan la xarxa es troba separada en dues xarxes, amb un \est{gateway} LoRaWAN al mig. En aquest cas, el comportament és similar a l'observat anteriorment, on el \est{gateway} fa les transmissions dels paquets únicament després de rebre'n un altre, ja que es tracten de dispositius de classe A. Així, si un dispositiu vol enviar un paquet a un dispositiu de la xarxa contrària, la correcta transmissió d'aquest paquet dependrà de la transmissió d'un altre paquet originat a la xarxa contraria, per tal que pugui obrir la finestra de recepció necessària.
 
-A més, es requereix també un servidor d'aplicació, encarregat de processar els paquets que el \est{gateway} rep, i generar els \est{downlinks} corresponents. Malgrat aquests requisits, aquest exemple permet i\l.lustrar les capacitats d'encaminament de la capa, que no tenen perquè estar limitades a una única xarxa. El seu diagrama es pot trobar representat a la \autoref{fig:routing_encaminament_complex_gateway}.
+Una altra situació més complexa es pot produir quan la xarxa es troba separada en dues, amb un \est{gateway} LoRaWAN al mig. En aquest cas, el comportament és similar a l'observat anteriorment, on el \est{gateway} fa les transmissions dels paquets únicament després de rebre'n un altre, ja que es tracten de dispositius de classe A. Així, si un dispositiu vol enviar un paquet a un dispositiu de la xarxa contrària, la correcta transmissió d'aquest paquet dependrà de la transmissió d'un altre paquet originat a l’altra xarxa, per tal que pugui obrir la finestra de recepció necessària.
+
+A més, es requereix també un servidor d'aplicació, encarregat de processar els paquets que el \est{gateway} rep i generar els \est{downlinks} corresponents. Malgrat aquests requisits, aquest exemple permet i\l.lustrar les capacitats d'encaminament de la capa, que no tenen per què estar limitades a una única xarxa. El seu diagrama es pot trobar representat a la \autoref{fig:routing_encaminament_complex_gateway}.
 
 \begin{figure}[h]
     \centering
@@ -965,8 +965,6 @@ A més, es requereix també un servidor d'aplicació, encarregat de processar el
     \caption{Exemple encaminament entre xarxes separades per \est{gateway} LoRaWAN.}
     \label{fig:routing_encaminament_complex_gateway}
 \end{figure}
-
-
 
 \subsection{Capa de transport}
 La funció d'aquesta capa és la de gestionar la transmissió de missatges entre el dispositiu transmissor, l'origen, i el receptor final, el destí. A més, també ofereix la possibilitat d'implementar un mecanisme de fiabilitat, intentant garantir que el missatge arribi correctament al destí final, i que no es rebin missatges duplicats. 
