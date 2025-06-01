@@ -1163,11 +1163,11 @@ Així, el desenvolupament de la capa d'aplicació és una tasca de l'usuari fina
 Al \autoref{chap:adaptacio_baix_consum} es detalla la implementació de l'últim exemple, definint la situació d'ús i els mecanismes utilitzats.
 
 \section{Proves i validació del protocol}
-Per tal de verificar el correcte funcionament del protocol, s'han desenvolupat fitxers de prova específics per a cada capa. Aquests fitxers implementen una situació de comunicació coneguda on el comportament del protocol és previsible, i permeten verificar-ne el seu correcte funcionament. Part d'aquestes situacions controlades s'han basat en els diagrames d'exemple exposats anteriorment. Aquests fitxers de prova són útils també com a exemple d'ús del protocol, i poden servir com a base per a nous protocols de cada capa. Es poden consultar a la ruta \fitx{firmware/exemples}.
+Per tal de verificar el correcte funcionament del protocol, s'han desenvolupat fitxers de prova específics per a cada capa. Aquests fitxers implementen una situació de comunicació coneguda on el comportament del protocol és previsible, i permeten verificar-ne el correcte funcionament. Part d'aquestes situacions controlades s'han basat en els diagrames d'exemple exposats anteriorment. Aquests fitxers de prova són útils també com a exemple d'ús del protocol, i poden servir com a base per a nous protocols de cada capa. Es poden consultar a la ruta \fitx{firmware/exemples}.
 
 La implementació del protocol inclou traces de depuració, distingides entre informació, avís, i error, amb les quals és possible conèixer l'estat del protocol en cada moment. 
 
-Les proves s'han realitzat de forma manual, observant l'estat del sistema a través de les traces, i verificant el comportament del protocol a través dels diagrames de funcionament previst. Part de les proves han requerit d'intervenció manual, com ara la desconnexió de dispositius (per simular-ne una fallada), o la programació d'enviaments de \est{downlinks} a través de \acro{ttn}.
+Les proves s'han realitzat de forma manual, observant l'estat del sistema a través de les traces, i verificant el comportament del protocol a través dels diagrames de funcionament previst. Part de les proves han requerit intervenció manual, com ara la desconnexió de dispositius (per simular-ne una fallada), o la programació d'enviaments de \est{downlinks} a través de \acro{ttn}.
 
 Una clara limitació ha estat la manca de dispositius. A causa de només disposar d'un \est{gateway} i de dos dispositius, no s'ha pogut verifica el funcionament del protocol en grans xarxes, o en topologies complexes. 
 
@@ -1177,9 +1177,9 @@ Una clara limitació ha estat la manca de dispositius. A causa de només disposa
 
 En el procés de validació es van observar inconsistències en el funcionament del protocol. Les més rellevants, que impedien el funcionament total del protocol, són les següents:
 \begin{itemize}
-    \item Els temps d'espera de recepció d'\acro{ack} no eren coherents, i resultaven en \est{timeouts} prematurs. Això es devia a iniciar el temporitzador de recepció d'\acro{ack} quan s'iniciava la transmissió, i no en la seva finalització.
-    \item Després de realitzar una verificació de l'estat del canal (a través de \acro{cad}), en transductor no es posava, de forma automàtica, en estat de recepció. Això provocava que no es produís la interrupció de recepció i, per tant, que no es processessin els missatges rebuts.
-    \item Configuració de la ràdio en LoRaWAN i LoRa. Després de realitzar una transmissió a través de LoRaWAN, no es rebien missatges enviats a través de LoRa. Això es devia a que la ràdio quedava amb la configuració de LoRaWAN, i no es tornava a configurar per a LoRa. Es va solucionar a través de la capa d'abstracció \est{LoRa}, superior a \est{LoRaWAN} i {LoRaRAW}.
+    \item Els temps d'espera de recepció d'\acro{ack} a la capa d’accés al medi no eren coherents, i resultaven en \est{timeouts} prematurs. Això es devia a iniciar el temporitzador de recepció d'\acro{ack} quan es començava la transmissió, i no en la seva finalització.
+    \item Després de realitzar una verificació de l'estat del canal (a través de \acro{cad}), el transductor no es posava en estat de recepció. Això provocava que no es produís la interrupció de recepció i, per tant, que no es processessin els missatges rebuts.
+    \item Configuració de la ràdio en LoRaWAN i LoRa. Després de realitzar una transmissió a través de LoRaWAN, no es rebien missatges enviats a través de LoRa. Això es devia al fet que la ràdio quedava amb la configuració de LoRaWAN, i no es tornava a configurar per a LoRa. Es va solucionar a través de la capa d'abstracció \est{LoRa}, superior a \est{LoRaWAN} i {LoRaRAW}.
 \end{itemize}
 
 Després de les verificacions, cada capa del protocol verifica els requisits prèviament definits, amb la fiabilitat i el baix consum de les transmissions com a objectius principals. Tot i que no s'han pogut realitzar proves en entorns reals i topologies més complexes, es considera que el protocol estableix una base funcional i estable per a la seva aplicació.
