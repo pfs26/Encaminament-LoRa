@@ -204,14 +204,16 @@ Pel que fa a l'estructura d'aquesta memòria, s'ha organitzat per tal de facilit
     \item Finalment, es mostra l'evolució de l'aplicació de baix consum, des de les primeres iteracions fins al disseny final. S'hi descriuen les seves característiques, el seu comportament, les proves realitzades, i els problemes i resultats obtinguts.
 \end{itemize}
 
+% TODO: CORREGIT FINS AQUI
+
 \chapter{Antecedents}
 \section{Protocols de comunicació: capes i modularitat}
 \label{sec:protocols}
 Un protocol de comunicació defineix com dos o més dispositius d'una xarxa poden intercanviar informació. Ho fa mitjançant regles i normes que determinen la sintaxi ---format dels missatges---, la semàntica ---el seu significat---, i mecanismes de detecció i correcció d'errors.
 
-Per tal que es pugui establir una comunicació, és necessari que els dispositius involucrats implementin el mateix protocol. Per facilitar-ho, es defineixen estàndards tècnics, publicats per organitzacions com l'\acro{iso} o l'\acro{ieee}, permetent que els fabricants puguin dissenyar dispositius compatibles. Un exemple de protocol estandaritzat és \acro{http}, amb el seu detall consultable a \cite{fielding_hypertext_2014}.
+Per tal que es pugui establir una comunicació, és necessari que els dispositius involucrats implementin el mateix protocol. Per facilitar-ho, es defineixen estàndards tècnics, publicats per organitzacions com l'\acro{iso} o l'\acro{ieee}, permetent que els fabricants puguin dissenyar dispositius compatibles. Un exemple de protocol estandarditzat és \acro{http}, amb el seu detall consultable a \cite{fielding_hypertext_2014}.
 
-Per facilitar el disseny i implementació dels protocols, sovint es descomposen en protocols més simples. Aquests es poden agrupar en capes, on cada capa s'encarrega d'una part específica del procés de comunicació. El resultat és el que es coneix com una pila de protocols. 
+Per facilitar el disseny i implementació dels protocols, sovint es descomponen en protocols més simples. Aquests es poden agrupar en capes, on cada capa s'encarrega d'una part específica del procés de comunicació. El resultat és el que es coneix com una pila de protocols. 
 En aquests dissenys, cada capa depèn de les capes inferiors per realitzar les seves funcions, i proporciona serveis a les capes superiors. El disseny i verificació de cada capa es pot fer de forma independent, i ofereixen la possibilitat d'implementar diferents protocols en cada capa, sempre que es mantingui la interfície definida entre elles.
 
 Un dels models més coneguts és el model \acro{osi}, definit per set capes. Tot i no ser utilitzat en sistemes reals, és de gran utilitat en entorns acadèmics per comprendre la divisió per capes. Per a més informació, es pot consultar \cite{noauthor_isoiec_1994}.
@@ -220,12 +222,10 @@ En sistemes reals, el model més utilitzat és el model \acro{tcp/ip}, que estab
 \begin{enumerate}
     \item \emph{Enllaç}. És la capa de més baix nivell. S'encarrega de la comunicació entre dispositius d'una mateixa xarxa ---és a dir, es poden comunicar directament---, i de la detecció i correcció d'errors produïts en la comunicació. També gestiona l'accés al medi físic per on es transmeten les dades, que sovint és compartit amb altres dispositius.
     \item \emph{Xarxa}. Gestiona la comunicació entre dispositius que es troben en xarxes diferents i, per tant, no es poden comunicar directament. Per fer-ho, s'utilitzen dispositius intermedis, coneguts com a encaminadors (\est{routers}), que determinen la ruta més eficient per fer arribar les dades al seu destí.
-    \item \emph{Transport}. Defineix la connexió d'extrem a extrem entre els dispositius origen i destí i, si és necessari, que la transmissió sigui fiable. Els protocols d'aquesta capa poden oferir mecanismes com l'ordenació de missatges, l'eliminació de missatges duplicats i la gestió de congestió. Els dos protocols més coneguts d'aquesta capa són \acro{tcp}, que garanteix la transmissió fiable de dades mitjançant confirmacions i retransmissions, i \acro{udp}, que no garanteix fiabilitat, però és més eficient per aplicacions en temps real com el contingut en estríming o videjocs.
+    \item \emph{Transport}. Defineix la connexió d'extrem a extrem entre els dispositius origen i destí i, si és necessari, que la transmissió sigui fiable. Els protocols d'aquesta capa poden oferir mecanismes com l'ordenació de missatges, l'eliminació de missatges duplicats i la gestió de congestió. Els dos protocols més coneguts d'aquesta capa són \acro{tcp}, que garanteix la transmissió fiable de dades mitjançant confirmacions i retransmissions, i \acro{udp}, que no garanteix fiabilitat, però és més eficient per aplicacions en temps real com el contingut en estríming o videojocs.
     \item \emph{Aplicació}. És la capa més alta i propera a l'usuari final. Defineix els protocols que utilitzen les aplicacions per comunicar-se a través de la xarxa, com ara \acro{http}, utilitzat per a la navegació web, o protocols de suport, com ara \acro{dns}, per a la resolució de noms de domini.
 \end{enumerate}
 Per a l'estàndard complet i més detall, es pot consultar \cite{braden_requirements_1989}. 
-
-% \subsection{Referència al model TCP/IP}
 \section{Tecnologia LoRa i LoRaWAN}
 Els termes \emph{LoRa} i \emph{LoRaWAN} sovint es confonen i s'utilitzen ambdós termes indistintament. Mentre que el primer és una tecnologia propietària, el segon és mantingut per una associació sense ànim de lucre. En aquest apartat es presenten ambdues tecnologies, indicant-ne les seves característiques i limitacions.
 
