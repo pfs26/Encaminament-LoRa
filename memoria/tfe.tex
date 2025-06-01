@@ -1028,7 +1028,6 @@ Les notificacions implementades en aquesta capa són similars a les de la capa d
     \item En segments no fiables, la notificació de fi de transmissió es genera quan la capa d'accés al medi ha pogut lliurar el segment al següent salt. Aquesta notificació no garanteix la recepció del segment per part del receptor final, i únicament indica que s'ha pogut transmetre. D'altra banda, si la capa d'accés al medi notifica que no s'ha pogut transmetre, es genera una notificació d'error de transmissió, indicant que el segment no s'ha pogut transmetre ni al següent salt.
 \end{itemize}
 Aplicar notificacions en un segment no fiable pot semblar contradictori, però pot ser útil per a les aplicacions que volen saber si el segment, com a mínim, s'ha pogut transmetre des del dispositiu. 
-
 \subsubsection{Recepció}
 Es produeix una recepció d'un segment quan la capa inferior, la d'encaminament, ho notifica a través del \est{callback} configurat. Quan es rep un segment, es verifica el camp \emph{ACKRequest} dels \est{flags}. En cas que el segment rebut so\l.liciti un reconeixement, es genera un segment amb el camp \emph{ACKResponse} actiu, i es transmet cap al transmissor de l'anterior segment, utilitzant el mecanisme exposat en el subapartat anterior.
 
@@ -1099,7 +1098,7 @@ Es vol destacar que la transmissió a través de LoRaWAN (línia discontínua) �
 
 Seguidament, el dispositiu \fitx{0x03} realitza dues transmissions no fiables cap a \fitx{0x01} i \fitx{0x04}. La primera d'elles és satisfactòria, i el dispositiu genera la notificació de fi de transmissió després de finalitzar la transmissió al següent dispositiu, que no té per què ser el destí final. La segona transmissió no es pot realitzar, i el dispositiu genera la notificació d'error de transmissió després del primer intent, sense aplicar temps d'espera.
 
-\begin{figure}[h]
+\begin{figure}
     \centering
     \begin{tikzpicture}[
         device/.style={draw=none, minimum width=1cm, minimum height=0.8cm},
