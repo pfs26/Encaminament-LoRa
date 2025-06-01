@@ -1186,7 +1186,7 @@ Després de les verificacions, cada capa del protocol verifica els requisits pr�
 
 \chapter{Adaptació a entorns de baix consum}
 \label{chap:adaptacio_baix_consum}
-En el desenvolupament del protocol, s'ha posat èmfasi en la reducció del consum energètic. En xarxes de monitoratge, com ara les agrícoles o ferroviàries, el subministrament energètic dels dispositius pot no estar garantit, i una mala gestió del consum pot resultar en temps d'ús molt reduïts.
+En el desenvolupament del protocol, s'ha posat èmfasi en la reducció del consum energètic. En xarxes de monitoratge, com ara les agrícoles o ferroviàries, el subministrament energètic dels dispositius pot no estar garantit, i una mala gestió del consum pot ocasionar temps de vida dels dispositius molt reduïts.
 
 Una característica de les comunicacions és que el receptor no coneix quan un transmissor enviarà un missatge. Això provoca que el receptor hagi d'estar, sempre que ell no vulgui transmetre, en estat de recepció, fent impossible aplicar modes de baix consum.
 
@@ -1208,24 +1208,23 @@ Aquesta topologia pot ser útil en entorns agrícoles, on els sensors es poden c
 
 També s'ha limitat el comportament i les funcionalitats del protocol:
 \begin{enumerate}
-    \item La comunicació és, únicament, unidireccional. És a dir, els nodes únicament envien dades, i no esperen rebre'n. Aquesta consideració és deguda a que en aplicacions de monitoratge és poc freqüent voler enviar dades cap a un dispositiu de lectura.
+    \item La comunicació és, únicament, unidireccional. És a dir, els nodes únicament envien dades, i no esperen rebre'n. Aquesta consideració és deguda al fet que en aplicacions de monitoratge és poc freqüent voler enviar dades cap a un dispositiu de lectura.
     \item Cada dispositiu vol enviar únicament un missatge, amb destí al \est{gateway}. En un cicle de funcionament del dispositiu, aquest envia la lectura de les seves dades al \est{gateway} el qual, si es vol, les farà arribar a un servidor d'aplicació d'internet per a processar-les.
     \item Els dispositius coneixen l'interval de temps entre transmissions ---la durada d'un cicle de funcionament---. Un cop transcorregut aquest temps, el dispositiu inicia una nova transmissió de la seva lectura cap al \est{gateway}.
 \end{enumerate}
 
 A la \autoref{fig:topologia_baix_consum} es pot veure representada la situació exposada, on el dispositiu \fitx{D4} és l'únic dispositiu amb capacitats LoRaWAN.
 
-A més, es vol garantir en la mesura del possible la fiabilitat a llarg termini. És a dir, es prefereix que l'aplicació funcioni incorrectament durant un període de temps curt, i que després es recuperi, a que la comunicació sigui fiable durant un període de temps més llarg, però deixi de funcionar permanent després d'un error. És una característica important, sobretot en dispositius on no es pot garantir l'alimentació: si un dispositiu s'atura, és millor que després pugui recuperar les seves funcionalitats automàticament, que no pas que es quedi aturat indefinidament.
-
+A més, es vol garantir, en la mesura del possible, la fiabilitat a llarg termini. És a dir, es prefereix que l'aplicació funcioni incorrectament durant un període de temps curt, i que després es recuperi, que no pas que la comunicació sigui fiable durant un període de temps més llarg, però deixi de funcionar permanent després d'un error. És una característica important, sobretot en dispositius on no es pot garantir l'alimentació: si un dispositiu s'atura, és millor que després pugui recuperar les seves funcionalitats automàticament, que no pas que es quedi aturat indefinidament.
 
 \section{Limitacions del protocol sense optimitzacions energètiques}
-Malgrat haver realitzat el disseny del protocol considerant el consum energètic, les optimitzacions realitzades no són suficients per fer-lo viable en entorns on el consum energètic és crític. Això és degut a que tots els dispositius han de trobar-se sempre en estat de recepció, per poder fer d'encaminadors d'altres dispositius. A causa d'això, existeix un consum energètic constant, que malgrat ser reduït, no és assumible per a dispositius que no disposen de subministrament energètic constant.
+Malgrat haver realitzat el disseny del protocol considerant el consum energètic, les optimitzacions realitzades no són suficients per fer-lo viable en entorns on el consum energètic és crític. La causa és que tots els dispositius han de trobar-se sempre en estat de recepció, per poder fer d'encaminadors d'altres dispositius. A causa d'això, existeix un consum energètic constant, que malgrat ser reduït, no és assumible per a dispositius que no disposen de subministrament energètic constant.
 
 Per posar-ho en context, s'ha observat de forma experimental com el consum de la placa de desenvolupament (que inclou el microcontrolador, reguladors de tensió, etc.) i de la ràdio en estat de recepció és, aproximadament, de \SI{75}{\milli\ampere}. Així, si considerem un dispositiu amb una bateria de \SI{2500}{\milli\ampere\hour}, una capacitat estàndard per bateries de mida física reduïda, el temps màxim d'ús del dispositiu és de 33.33 hores, poc més d'un dia.
 
 Podríem obtenir valors més optimistes si considerem únicament el consum del microcontrolador i de la ràdio, tenint en compte que es podrien utilitzar reguladors de tensió i perifèrics més eficients. A partir de dades de \cite{espressif_current_nodate}, s'obté que el microcontrolador consumeix, de forma activa, aproximadament \SI{20}{\milli\ampere}, i de \cite{semtech_sx1262_nodate} que el consum mínim de la ràdio en recepció és de \SI{5}{\milli\ampere}. Així, el consum total seria aproximadament de \SI{25}{\milli\ampere}, amb un temps màxim d'ús de 100 hores, poc més de 4 dies.
 
-S'observa com ni en el cas més optimista s'aconsegueix una temps de funcionament prolongat, fent que l'ús d'aquest protocol impliqués substitucions de bateries de forma regular, o bé l'ús de dispositius externs (com ara panells solars) per augmentar el temps de funcionament. 
+S'observa com ni en el cas més optimista s'aconsegueix un temps de funcionament prolongat, fent que l'ús d'aquest protocol impliqués substitucions de bateries de forma regular, o bé l'ús de dispositius externs (com ara panells solars) per augmentar el temps de funcionament. 
 
 \section{Estratègies de sincronització}
 \label{section:estrategiesSync}
@@ -1234,22 +1233,22 @@ Per tal de reduir el consum, podem tenir en compte les consideracions 1 i 2, que
 Podem dividir el cicle de funcionament dels dispositius en dues parts:
 \begin{enumerate}
     \item \emph{Baix consum}. És el temps on els dispositius es troben en mode de baix consum, i no realitzen cap altra funció. En aquest estat la ràdio no funciona, i per tant no poden realitzar cap funció d'encaminament.
-    \item \emph{Funcionament normal}. És el temps on els dispositius es troben actius, realitzen la seva lectura, generen el missatge de transmissió, i actuen com a encaminadors d'altres dispositius ---en aquest cas, únicament del dispositiu anterior a aquest---. 
+    \item \emph{Funcionament normal}. És el temps on els dispositius es troben actius, realitzen la seva lectura, generen el missatge de transmissió, i actuen com a encaminadors d'altres dispositius.
 \end{enumerate}
 
-En el període de funcionament, és important que els dispositius es trobin actius i en mode de recepció, per mantenir les funcionalitats d'encaminament. Per tal d'aconseguir-ho, els dispositius han de trobar-se sincronitzats, fent que es trobin en el mateix estat de funcionament al mateix temps. Això es pot aconseguir, principalment, mitjançant dues estratègies:
+En el període de funcionament és important que els dispositius es trobin actius i en mode de recepció per tal de mantenir les funcionalitats d'encaminament. Per aconseguir-ho, els dispositius han de trobar-se sincronitzats, fent que es trobin en el mateix estat de funcionament al mateix temps. Això es pot aconseguir, principalment, mitjançant dues estratègies:
 \begin{enumerate}
-    \item \emph{Rellotge intern}. Cada dispositiu disposa d'un rellotge intern que li permet determinar la durada dels períodes de baix consum i de funcionament. Establint el mateix cicle en tots els dispositius, i iniciant-los simultàniament, s'aconsegueix mantenir-los sincronitzats. Malgrat ser una solució senzilla d'implementar, presenta una limitació important: l'error del rellotge. Aquest error s'acumula amb el pas del temps, fent que els dispositius s'acabin desincronitzant.
+    \item \emph{Rellotge intern}. Cada dispositiu disposa d'un rellotge intern que li permet determinar la durada dels períodes de baix consum i de funcionament. Establint el mateix cicle en tots els dispositius, i iniciant-los simultàniament, s'aconsegueix mantenir-los sincronitzats. Malgrat ser una solució senzilla d'implementar, presenta una limitació important: l'error del rellotge. Aquest error s'acumula amb el pas del temps, fent que els dispositius s'acabin dessincronitzant.
     
-    Encara que l'error podria semblar insignificant, s'ha observat que el rellotge utilitzat en mode de baix consum pot tenir desviacions superiors a 5000 parts per millió (\emph{ppm}), equivalents a més de set minuts per dia de funcionament \cite{nikki_smith_esp32_2022}. A més, aquest error depèn també de la temperatura, fent-lo imprevisible. Malgrat existir mecanismes per reduir aquest error, com ara utilitzar osci\l.ladors externs, l'error no és mai nul, i s'acaba acumulant mb el temps, desincronitzant els dispositius.
+    Encara que l'error podria semblar insignificant, s'ha observat que el rellotge utilitzat en mode de baix consum pot tenir desviacions superiors a 5000 parts per milió (\emph{ppm}), equivalents a més de set minuts per dia de funcionament \cite{nikki_smith_esp32_2022}. A més, aquest error depèn també de la temperatura, fent-lo imprevisible. Malgrat existir mecanismes per reduir aquest error, com ara utilitzar osci\l.ladors externs, l'error no és mai nul, i s'acaba acumulant amb el temps, dessincronitzant els dispositius.
     
-    \item \emph{Sincronització externa}. Es basa en un mecanisme de sincronització entre dispositius, on un dels dispositius actua com a referència, i la resta s'ajusten a aquest. Això es pot aconseguir mitjançant un missatge de sincronització generat per aquest dispositiu, el qual, en rebre's, indica l'inici del cicle de funcionament durant una període conegut i igual per a cada dispositiu. Aquest missatge es trobaria a nivell d'aplicació. 
+    \item \emph{Sincronització externa}. Es basa en un mecanisme de sincronització entre dispositius, on un dels dispositius actua com a referència, i la resta s'ajusten a aquest. Això es pot aconseguir mitjançant un missatge de sincronització el qual, en rebre's, indica l'inici del cicle de funcionament durant un període conegut i igual per a cada dispositiu. Aquest missatge es trobaria a nivell d'aplicació. 
     
-    Tot i seguir utilitzant el rellotge intern per regular el temps de baix consum i funcionament, la sincronització amb el dispositiu de referència permet corregir l'error acumulat. 
+    Tot i continuar utilitzant el rellotge intern per regular el temps de baix consum i funcionament, la sincronització amb el dispositiu de referència permet corregir l'error acumulat. 
     Continua sent important que els dispositius es trobin actius abans de rebre el missatge de sincronització; en cas contrari, no existeix sincronització i, per tant, no es corregeix l'error que ha introduït el rellotge intern.
 \end{enumerate}
 
-Per tal de garantir la fiabilitat a llarg termini, i evitar la desincronització amb el pas del temps, s'ha optat per utilitzar el mecanisme de sincronització externa. 
+Per tal de garantir la fiabilitat a llarg termini, i evitar la dessincronització amb el pas del temps, s'ha optat per utilitzar el mecanisme de sincronització externa. 
 
 Per aconseguir que tots els dispositius es puguin sincronitzar, és important que cada dispositiu propagui aquest missatge al següent dispositiu (o dispositius). Així, quan l'aplicació, que d'ara endavant es denominarà \emph{aplicació de baix consum}, rebi un missatge de sincronització, el propagarà al següent dispositiu, del qual n'ha de conèixer l'adreça. Aquesta opció és més òptima que no pas fer que sigui el dispositiu de referència qui genera un missatge de sincronització per a cada dispositiu, ja que aquesta opció implicaria moltes més transmissions ($\sum_{x=0}^{D-1}{x}$, on \emph{D} és el nombre de dispositius), en vers a una única transmissió per cada dispositiu diferent del de referència ($D-1$ transmissions). A causa d'aquest major nombre de missatges de sincronització, el temps necessari per tenir tots els dispositius sincronitzats és també més llarg. A la \autoref{fig:app_opcionsIniciSync} es representen ambdues opcions.
 
