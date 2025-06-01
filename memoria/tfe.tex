@@ -491,6 +491,21 @@ La implementació de la cua de transmissió introdueix un problema: en notificar
 \subsubsection{Detalls d'implementació}
 La implementació d'aquesta capa s'ha realitzat mitjançant una màquina d'estats finita (\acro{fsm}). Això permet tenir un control més precís sobre l'estat de la capa, i el flux de les dades. El seu disseny, basat en les explicacions anteriors, es pot veure a la \autoref{fig:mac_fsm}.
 
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\linewidth]{imatges/mac_FSM.drawio.pdf}
+    \caption{Diagrama d'estats de la capa d'accés al medi.}
+    \label{fig:mac_fsm}
+\end{figure}
+
+Consta de quatre estats principals. De forma breu:
+\begin{itemize}
+    \item \emph{Idle}. Estat inicial. Es troba esperant una transmissió. En produir-se, comprova l'estat del canal, i si està lliure inicia la transmissió i el temporitzador d'espera de reconeixement. Si el canal està ocupat, s'inicia el temporitzador d'accés al canal (\acro{beb}).
+    \item \emph{Wait ack}. Es troba esperant el reconeixement. En produir-se un \emph{timeout}, fi del temporitzador, envia de nou si encara hi ha intents disponibles. Si el canal llavors es troba ocupat, inicia el temporitzador d'accés al canal; en cas contrari, transmet i inicia de nou el temporitzador d'espera de reconeixement. Si s'han esgotat els reintents, o es rep l'\acro{ack}, notifica d'error de transmissió o de fi de transmissió, respectivament. El \emph{callback} de recepció de la capa inferior és l'encarregat de generar l'esdeveniment de recepció d'\acro{ack}.
+    \item \emph{Wait chan.}. Està aplicant \acro{beb} per accedir al canal. Després del fi de temps d'espera, comprova de nou l'estat del canal. Si es troba lliure, fa la transmissió i inicia el temporitzador d'espera de reconeixement; en cas contrari, incrementa el nombre d'intents d'accés al canal ---limitant-lo a un màxim---, i inicia de nou el temporitzador d'accés al canal.
+    \item \emph{Queue}. Verifica l'estat de la cua de transmissió. Si es troba buida, torna a estat \emph{idle}. En cas contrari, si el canal es troba lliure inicia la transmissió, i si no aplica \acro{beb}.
+\end{itemize}
+
 Com la resta del protocol, s'ha implementat de forma no bloquejant ---amb l'excepció de la transmissió a través de la capa inferior, que sí que és bloquejant---, utilitzant el gestor de tasques. Aquestes s'utilitzen per programar els temps d'espera de recepció de reconeixement, i els de l'accés al canal (\acro{beb}). A més, s'han utilitzat per programar l'execució d'esdeveniments de la màquina d'estats principal. Això permet que l'execució de la \acro{fsm} no afecti altres tasques si el temps d'execució és molt llarg.
 
 Pel que fa a la implementació de la cua, s'ha utilitzat una cua enllaçada (mitjançant una {\emph{linked list}), que permet afegir i eliminar elements de forma dinàmica, sense necessitat de conèixer prèviament la mida màxima de la cua. Aquesta implementació permet una millor gestió de la memoria, utilitzant únicament la quanitat necessària en cada moment. A més, és més eficient que una llista basada en vectors, ja que no requereix moure tots els elements quan se n'afegeix o se n'elimina un. L'única limitació és la memòria disponible del microcontrolador; de forma experimental, s'ha observat una disponibiltiat d'uns \SI{300}{\kilo\byte} en el microcontrolador ESP32-WROOM-32, que permetria emmagatzemar més de \num{3000} trames de \SI{255}{\byte} (mida màxima de la trama, comptant capçalera).
@@ -2092,7 +2107,7 @@ Amb aquests resultats, es verifica com l'aplicació de baix consum ha reduit el 
 % veure consum en mode de baix consum, comentar que hi ha el LED sempre actiu, i multiplicar pel temps de baix consum real, sumarli el temps actiu pel consum en mode actiu. Comparar ambdós.
 
 \chapter{Conclusions}
-Aquest treball ha presentat el disseny i la implementació d’un protocol de comunicació basat en LoRa, amb capacitats d'encaminament estàtic i compatible amb LoRaWAN, aconseguint reduir la dependència de \est{gateways} LoRaWAN en els dispositius de monitoratge. Això s’ha aconseguit fent possible que un dispositiu sense connectivitat directa amb un \est{gateway} transmeti les dades a un altre dispositiu que sí que en disposa, actuant aquest com a node encaminador. El protocol s'ha limitat a xarxes estàtiques, una característica pròpia de les aplicacions de monitoratge, on els dispositius tenen una ubicació fixa i es vol monitorar una situació concreta de forma continuada. Gràcies a això, s'elimina la necessitat d'un protocol de descubriment de rutes, simplificant-ne així la implementació i manteniment.
+Aquest treball ha presentat el disseny i la implementació d'un protocol de comunicació basat en LoRa, amb capacitats d'encaminament estàtic i compatible amb LoRaWAN, aconseguint reduir la dependència de \est{gateways} LoRaWAN en els dispositius de monitoratge. Això s'ha aconseguit fent possible que un dispositiu sense connectivitat directa amb un \est{gateway} transmeti les dades a un altre dispositiu que sí que en disposa, actuant aquest com a node encaminador. El protocol s'ha limitat a xarxes estàtiques, una característica pròpia de les aplicacions de monitoratge, on els dispositius tenen una ubicació fixa i es vol monitorar una situació concreta de forma continuada. Gràcies a això, s'elimina la necessitat d'un protocol de descubriment de rutes, simplificant-ne així la implementació i manteniment.
 
 Les proves realitzades, que s'han vist limitades a la disponibilitat d'únicament dos dispositius, han permès validar el funcionament del protocol i demostrar-ne la seva viabilitat. Els mecanismes d'accés al canal compartit, així com els mecanismes de retransmissió, asseguren una comunicació fiable i robusta. L'encaminament estàtic, tot i restringir-ne l'ús en xarxes dinàmiques, facilita la implementació i manteniment del protocol. Gràcies als segments de la capa de transport, s'aconsegueix una comunicació fiable d'extrem a extrem, i la capa d'aplicació permet la compatibilitat i adaptació del protocol a diferents escenaris i necessitats. 
 
@@ -2107,14 +2122,6 @@ Tot i aixó, les proves realitzades ---amb temps de cicle reduits--- han demostr
 En conjunt, aquest treball ha permès demostrar la viabilitat d'una solució de comunicació eficient per a entorns de monitoratge basats en LoRa, buscant l'equilibri entre simplicitat, fiabilitat i baix consum energètic. Si bé encara existeixes possibles millores futures i proves en entorns més extensos i situacions reals, el sistema desenvolupat ofereix una base sòlida sobre la qual construir-hi aplicacions reals.
 
 \chapter{Treball futur}
-% \section{Suport a topologies més complexes}
-% \section{Optimització del consum energètic}
-% \section{Integració amb LoRaWAN o altres protocols}
-
-% fragmentació a nivell de protocol o a nivell d'aplicació
-% configuració dinàmica de dispositius
-% RTC extern. Alimentació del dispositiu controlat per aquest. S'atura totalment alimentació en baix consum, i només consumeix RTC.
-
 Tot i que la solució proposada ha assolit els objectius principals, existeixen línies de treball futur que poden afegir-hi noves funcionalitats.
 
 \begin{itemize}
