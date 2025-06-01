@@ -2073,30 +2073,28 @@ Amb aquests resultats, es verifica com l'aplicació de baix consum ha reduït el
 % veure consum en mode de baix consum, comentar que hi ha el LED sempre actiu, i multiplicar pel temps de baix consum real, sumarli el temps actiu pel consum en mode actiu. Comparar ambdós.
 
 \chapter{Conclusions}
-Aquest treball ha presentat el disseny i la implementació d'un protocol de comunicació basat en LoRa, amb capacitats d'encaminament estàtic i compatible amb LoRaWAN, aconseguint reduir la dependència de \est{gateways} LoRaWAN en els dispositius de monitoratge. Això s'ha aconseguit fent possible que un dispositiu sense connectivitat directa amb un \est{gateway} transmeti les dades a un altre dispositiu que sí que en disposa, actuant aquest com a node encaminador. El protocol s'ha limitat a xarxes estàtiques, una característica pròpia de les aplicacions de monitoratge, on els dispositius tenen una ubicació fixa i es vol monitorar una situació concreta de forma continuada. Gràcies a això, s'elimina la necessitat d'un protocol de descubriment de rutes, simplificant-ne així la implementació i manteniment.
+Aquest treball ha presentat el disseny i la implementació d'un protocol de comunicació basat en LoRa, amb capacitats d'encaminament estàtic i compatible amb LoRaWAN, aconseguint reduir la dependència de \est{gateways} LoRaWAN en els dispositius de monitoratge. Això s'ha aconseguit fent possible que un dispositiu sense connectivitat directa amb un \est{gateway} transmeti les dades a un altre dispositiu que sí que en disposa, actuant aquest com a node encaminador. El protocol s'ha limitat a xarxes estàtiques, una característica pròpia de les aplicacions de monitoratge, on els dispositius tenen una ubicació fixa i es vol monitorar una situació concreta de forma continuada. Gràcies a això, s'elimina la necessitat d'un protocol de descobriment de rutes, simplificant-ne així la implementació i manteniment.
 
 Les proves realitzades, que s'han vist limitades a la disponibilitat d'únicament dos dispositius, han permès validar el funcionament del protocol i demostrar-ne la seva viabilitat. Els mecanismes d'accés al canal compartit, així com els mecanismes de retransmissió, asseguren una comunicació fiable i robusta. L'encaminament estàtic, tot i restringir-ne l'ús en xarxes dinàmiques, facilita la implementació i manteniment del protocol. Gràcies als segments de la capa de transport, s'aconsegueix una comunicació fiable d'extrem a extrem, i la capa d'aplicació permet la compatibilitat i adaptació del protocol a diferents escenaris i necessitats. 
 
 Sobre del protocol s'ha construït una aplicació encarregada de reduir el consum energètic dels dispositius. Això s'ha aconseguit mitjançant un mecanisme de sincronització, on un dispositiu inicia el cicle de funcionament i la resta es mantenen a l'espera de rebre un missatge de sincronització. Per minimitzar el nombre de transmissions, el missatge de dades també actua com a missatge de sincronització, i cada dispositiu aprofita aquest missatge per propagar les seves pròpies dades.  
 
-El mecanisme de temps màxim d'espera implementat evita que els dispositius romanguin en mode de recepció indefinidament. Això evita perdre les dades de tots els dispositius de la xarxa, conservar energia, i identificar on s'ha produit una fallada en la sincronització.
+El mecanisme de temps màxim d'espera implementat evita que els dispositius romanguin en mode de recepció indefinidament. Això evita perdre les dades de tots els dispositius de la xarxa, conservar energia, i identificar on s'ha produït una fallada en la sincronització.
 
-Durant les proves de validació, s'ha detectat una limitació important en la precisió dels osci\l.ladors dels microcontroladors utilitzats en mode de baix consum. Els seus elevats errors i alta sensibilitat a la temperatura fan necessari deixar marges de temps de seguretat elevats, penalitzant l'eficiència energètica. Com a solució a aquest problema, es proposa l'ús d'osci\l.ladors de cristall, que presenten errors molt més reduits i constants, permetent així sincronitzacions més precises.
+Durant les proves de validació, s'ha detectat una limitació important en la precisió dels osci\l.ladors dels microcontroladors utilitzats en mode de baix consum. Els seus elevats errors i alta sensibilitat a la temperatura fan necessari deixar marges de temps de seguretat elevats, penalitzant l'eficiència energètica. Com a solució a aquest problema, es proposa l'ús d'osci\l.ladors de cristall, que presenten errors molt més reduïts i constants, cosa que permet sincronitzacions més precises.
 
-Tot i aixó, les proves realitzades ---amb temps de cicle reduits--- han demostrat que l'aplicació proposada aconsegueix reduir el consum energètic dels dispositius en més d'un 80\% respecte d'un sistema sense aquesta optimització.
+Tot i això, les proves realitzades ---amb temps de cicle reduïts--- han demostrat que l'aplicació proposada aconsegueix reduir el consum energètic dels dispositius en més d'un 80\% respecte d'un sistema sense aquesta optimització.
 
-En conjunt, aquest treball ha permès demostrar la viabilitat d'una solució de comunicació eficient per a entorns de monitoratge basats en LoRa, buscant l'equilibri entre simplicitat, fiabilitat i baix consum energètic. Si bé encara existeixes possibles millores futures i proves en entorns més extensos i situacions reals, el sistema desenvolupat ofereix una base sòlida sobre la qual construir-hi aplicacions reals.
+En conjunt, aquest treball ha permès demostrar la viabilitat d'una solució de comunicació eficient per a entorns de monitoratge basats en LoRa, buscant l'equilibri entre simplicitat, fiabilitat i baix consum energètic. Si bé encara existeixes possibles millores futures i proves en entorns més extensos i situacions reals, el sistema desenvolupat ofereix una base sòlida sobre la qual construir aplicacions reals.
 
 \chapter{Treball futur}
 Tot i que la solució proposada ha assolit els objectius principals, existeixen línies de treball futur que poden afegir-hi noves funcionalitats.
 
 \begin{itemize}
-    \item \emph{Altres tecnologies de comunicació}. El sistema actual es basa en utilitzar LoRaWAN per disposar de les dades de la xarxa. Una extensió possible seria substituir aquesta tecnologia per d'altres, com ara 4G, podent ser útil en entorns on LoRaWAN no és viable. Gràcies a la modularitat del protocol, aquesta implementació seria relativament senzilla, i podria aprofitar les mateixes capes d'encaminament i transport.
+    \item \emph{Altres tecnologies de comunicació}. El sistema actual es basa a utilitzar LoRaWAN per disposar de les dades de la xarxa. Una extensió possible seria substituir aquesta tecnologia per d'altres, com ara 4G, podent ser útil en entorns on LoRaWAN no és viable. Gràcies a la modularitat del protocol, aquesta implementació seria relativament senzilla, i podria aprofitar les mateixes capes d'encaminament i transport.
     \item \emph{Fragmentació de dades}. En l'aplicació de baix consum s'ha mencionat la necessitat d'un mecanisme de fragmentació de dades, en entorns amb molts dispositius o amb molta quantitat de dades. Aquest mecanisme podria ser implementat a nivell d'aplicació o de protocol, i oferiria una major flexibilitat i adaptabilitat a diferents situacions.
     \item \emph{Control extern de l'alimentació}. Una millora que podria reduir més el consum energètic és l'ús d'un circuit integrat capaç de desconnectar completament l'alimentació del microcontrolador i de la ràdio. Aquest circuit permetria definir un temps de desconnexió, al final del qual s'activaria de nou. El microcontrolador podria indicar quan desactivar l'alimentació, just abans del mode de baix consum. Aquesta millora oferiria consums extremadament reduïts, especialment útils per dispositius que requereixen una gran autonomia.  
 \end{itemize}
-
-% \listoftables
 
 \printbibliography
 
@@ -2105,7 +2103,8 @@ Tot i que la solució proposada ha assolit els objectius principals, existeixen 
 % (també la  \part del principi del document)
 %\appendix
 %\part{Apèndixs}
-%\chapter{Un apèndix}
+
+\chapter{Un apèndix}
 
 
 % ABANS D'ENTREGAR MIRAR QUE L·L ESTIGUIN BEN ESCRITES AMB \l.l
