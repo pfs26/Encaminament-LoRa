@@ -322,7 +322,7 @@ Cada dispositiu consta d'una taula d'encaminament, on es defineixen quin és el 
 Aquesta solució resol el problema de la «inundació controlada» presentat anteriorment, ja que únicament els nodes que es troben a la ruta reenvien el missatge. Malgrat això, presenta un dels inconvenients vists prèviament: tots els dispositius han d'estar sempre actius i en mode de recepció. Com s'ha mencionat, això provoca un consum elevat, reduint la viabilitat d'ús en aplicacions de monitoratge.
 
 \chapter{Desenvolupament del protocol de comunicació}
-En aquest capítol es presenta el disseny i implementació del protocol de comunicació. S'ha dissenyat amb l'objectiu de ser flexible, eficient, aplicable a una àmpla varietat de xarxes LoRa, i amb compatibilitat amb xarxes LoRaWAN. 
+En aquest capítol es presenta el disseny i implementació del protocol de comunicació. S'ha dissenyat amb l'objectiu de ser flexible, eficient, aplicable a una àmplia varietat de xarxes LoRa, i amb compatibilitat amb xarxes LoRaWAN.
 
 En un primer moment es fa un anàlisi de les característiques del protocol, així com la seva estructura. A continuació, es descriu l'entorn de desenvolupament i llibreries utilitzades. Seguidament, es presenta el disseny per capes del protocol, seguint l'estructura vista a la \autoref{sec:protocols}. Finalment, es mostra la implementació del protocol en un dispositiu real, i les verificacions realitzades per validar el funcionament.
 
@@ -331,37 +331,37 @@ No es farà especial menció a la implementació específica en codi de cada fun
 \section{Característiques}
 El disseny del protocol està fortament influenciat pel model \acro{tcp/ip}, presentat a la \autoref{sec:protocols}. El protocol presentat es basa en una pila de protocols, on cada capa s'encarrega d'una part específica del procés de comunicació. Això permet un disseny modular, i la possibilitat de modificar les funcionalitats d'una capa sense afectar la resta.
 
-Es basa en una xarxa de dispositius estàtics, una característica habitual en sistemes de monitoratge. Aquest fet permet prescindir de mecanismes d'encaminament dinàmic, com els presentats a la \autoref{sec:treballs_relacionats}, ja que la xarxa no canvia amb el temps, permetent simplificar el protocol. Per altra banda, això implica que la topologia de la xarxa ha de ser dissenyada abans de la seva implementació, definint les taules d'encaminament de cada dispositiu.
+Es basa en una xarxa de dispositius estàtics, una característica habitual en sistemes de monitoratge. Aquest fet permet prescindir de mecanismes d'encaminament dinàmic, com els presentats a la \autoref{sec:treballs_relacionats}, ja que la xarxa no canvia amb el temps, cosa que permet simplificar el protocol. Per altra banda, això implica que la topologia de la xarxa ha de ser dissenyada abans de la seva implementació, definint les taules d'encaminament de cada dispositiu.
 
-En utilitzar la modulació LoRa, que com s'ha dit anteriorment utilitza freqüències \acro{ism}, intenta maximitzar l'eficiència d'ús del canal. Això redueix la generació d'interferències amb altres dispositius que utilitzin el mateix canal, el nombre de retransmissions, i un menor consum energètic.
+En utilitzar la modulació LoRa, que com s'ha dit anteriorment utilitza freqüències \acro{ism}, intenta maximitzar l'eficiència d'ús del canal. Això redueix la generació d'interferències amb altres dispositius que facin servir el mateix canal, el nombre de retransmissions, i un menor consum energètic.
 
-Ofereix compatibilitat amb LoRaWAN, permetent que dispositius amb connexió a \est{gateways} puguin alternar entre l'ús del protocol dissenyat o LoRaWAN. Això ofereix la possibilitat a dispositius que no tenen connexió directe a \est{gateways} de comunicar-s'hi a través de dispositius que sí que en tenen. 
+Ofereix compatibilitat amb LoRaWAN, permetent que dispositius amb connexió a \est{gateways} puguin alternar entre l'ús del protocol dissenyat o LoRaWAN. Això ofereix la possibilitat a dispositius que no tenen connexió directa a \est{gateways} de comunicar-s'hi a través de dispositius que sí que en tenen.
 
 Finalment, el protocol incorpora mecanismes per tal d'assegurar la correcta transmissió dels missatges a través de retransmissions automàtiques i reconeixements de missatges, semblants al protocol \acro{tcp}.
 
 S'ha pensat per tal que totes les funcionalitats siguin configurables, permetent adaptar el protocol a les necessitats de cada aplicació. Això inclou la possibilitat d'activar o desactivar la retransmissió automàtica, així com la configuració dels paràmetres de LoRa, o intervals de temps entre retransmissions.
 
 \section{Arquitectura del codi i comunicació entre capes}
-El codi s'ha intentat organitzar de forma modular, amb la intenció de facilitar-ne la seva comprensió, manteniment, i millora, implementant cada capa del protocol com un mòdul independent. Això permet que cada capa pugui ser modificada o substituïda sense afectar la resta del protocol, facilitant la seva extensió i adaptació a diferents necessitats.
+El codi s'ha intentat organitzar de forma modular, amb la intenció de facilitar-ne la comprensió, manteniment, i millora, implementant cada capa del protocol com un mòdul independent. Això permet que cada capa pugui ser modificada o substituïda sense afectar la resta del protocol, facilitant la seva extensió i adaptació a diferents necessitats.
 
 El codi es divideix en dues seccions: els fitxers de capçalera (\est{headers}) i els fitxers de codi (\est{.cpp}). Els primers contenen la definició de les funcions (consultable a la ruta \fitx{firmware/include}), mentre que els segons contenen la implementació d'aquestes funcions (\fitx{firmware/src}).
 
-En els microcontroladors, el codi s'executa de forma cíclica, amb un bucle principal que s'executa de forma contínua. Un gran inconvenient és que no permet realitzar múltiples tasques en para\l.lel, una característica important, ja que cada capa podria haver de realitzar funcions diferents al mateix temps. Per tal d'aconseguir-ho, s'ha implementat un gestor de tasques, el qual permet executar tasques de forma periòdica, després d'un cert temps, o tan bon punt sigui possible. Malgrat no permetre l'execució para\l.lela real, aquesta solució permet simular-ho.
+En els microcontroladors, el codi s'executa de forma cíclica, amb un bucle principal que s'executa de forma contínua. Un gran inconvenient és que no permet executar múltiples tasques en para\l.lel, una característica important, ja que cada capa podria haver de realitzar funcions diferents al mateix temps. Per tal d'aconseguir-ho, s'ha implementat un gestor de tasques, el qual permet executar tasques de forma periòdica, després d'un cert temps, o tan bon punt sigui possible. Malgrat que no permetre l'execució para\l.lela real, aquesta solució permet simular-ho.
 Amb aquesta solució, tota l'execució del protocol es realitza a través de tasques generades amb el gestor, i en el bucle principal únicament s'executa el gestor de tasques, que verifica en cada cicle l'estat de cada tasca, executant les que ho requereixen (\fitx{src/utils/scheduler.cpp}).
 
 S'ha establert que la comunicació entre capes es realitzi a través de \est{callbacks}. Així, cada capa ofereix mètodes per permetre a una altra capa configurar una funció que s'executarà quan es produeixi un esdeveniment. Per exemple, la capa d'encaminament pot configurar una funció a la capa d'accés al medi per tal que s'executi quan es rebi un missatge. Aquesta implementació ofereix més flexibilitat, i no requereix que les capes coneguin la implementació de les altres.
 
-Finalment, per facilitar la configuració de tot el protocol, s'ha definit un únic fitxer de configuració (\fitx{config.h}), on es poden configurar tots els paràmetres del protocol, evitant-ne la seva dispersió en diverses parts del codi.
+Finalment, per facilitar la configuració de tot el protocol, s'ha definit un únic fitxer de configuració (\fitx{config.h}), on es poden configurar tots els paràmetres del protocol, evitant la seva dispersió en diverses parts del codi.
 
 \section{Biblioteques i entorn de desenvolupament}
 Per realitzar el desenvolupament, s'han utilitzat dues llibreries externes:
 \begin{itemize}
-    \item \est{RadioLib}. Una llibreria que permet la comunicació sense fils a través de múltiples protocols i modulacions, incloent LoRa i LoRaWAN. Aquesta llibreria s'ha utilitzat per implementar la capa física del protocol a través de LoRa, i per comunicar-se amb \est{gateways} a través de LoRaWAN. La seva documentació es pot consultar a \cite{jan_gromes_radiolib_nodate}. 
+    \item \est{RadioLib}. Una llibreria que permet la comunicació sense fils a través de múltiples protocols i modulacions, incloent-hi LoRa i LoRaWAN. Aquesta llibreria s'ha utilitzat per implementar la capa física del protocol a través de LoRa, i per comunicar-se amb \est{gateways} a través de LoRaWAN. La seva documentació es pot consultar a \cite{jan_gromes_radiolib_nodate}.
     \item \est{TaskScheduler}. Permet la creació de tasques periòdiques, amb prioritats, o amb retard inicial, així com la seva gestió. Aquesta llibreria s'ha utilitzat per implementar el gestor de tasques, que ofereix una interfície més simple i centralitzada de la llibreria. La seva documentació es pot consultar a \cite{arkhipenko_taskscheduler_nodate}.
 \end{itemize}
 
 \section{Disseny per capes}
-Com en la majoria de protocols moderns, s'ha dissenyat seguint un model per capes. L'estructura es basa en el model \acro{tcp/ip}, amb la diferència de la capa física, que el model \acro{tcp/ip} no contempla de forma explícita. 
+Com en la majoria dels protocols moderns, s'ha dissenyat seguint un model per capes. L'estructura es basa en el model \acro{tcp/ip}, amb la diferència de la capa física, que el model \acro{tcp/ip} no contempla de forma explícita.
 A continuació es descriuen les diferents capes del protocol, des de la capa física fins a la capa d'aplicació, indicant-ne les funcions principals, i les decisions de disseny adoptades per optimitzar el rendiment i la simplicitat del sistema.
 
 A la \autoref{fig:diagrama_protocols} es pot observar, de forma introductòria, com s'estructura el protocol amb les diverses capes, les quals s'explicaran amb més detall en els seus respectius apartats. 
