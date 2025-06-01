@@ -1537,7 +1537,7 @@ Aquesta situació es representa a la \autoref{fig:app_opcioSyncAcum3Err}, on una
 L'única possible solució per reduir aquest problema és deixar més marge de temps entre l'enviament de la sincronització i el de les dades. Aquesta solució, però, és totalment contrària al que es buscava en aquesta estratègia, que era minimitzar el temps d'espera.
 
 \section{Disseny final}
-Després de les iteracions anteriors, s'ha arribat a un disseny final que resol els problemes observats. En aquest apartat es presenta el funcionament general d'aquesta estratègia. Seguidament es consideren situacions no ideals que poden produir-se i que cal considerar per garantir el correcte funcionament, i les solucions proposades. A continuació es presenta la implementació realitzada a nivell d'aplicació, amb el format i estructura dels missatges. Finalment, es presenta la correcta utilització del sistema, com per exemple com afegir nous dispositius a la xarxa, i les proves i resultats obtinguts.
+Després de les iteracions anteriors, s'ha arribat a un disseny final que resol els problemes observats. En aquest apartat es presenta el funcionament general d'aquesta estratègia. Seguidament, es consideren situacions no ideals que poden produir-se i que cal considerar per garantir el correcte funcionament, i les solucions proposades. A continuació es presenta la implementació realitzada a nivell d'aplicació, amb el format i estructura dels missatges. Finalment, es presenta la correcta utilització del sistema, com per exemple com afegir nous dispositius a la xarxa, i les proves i resultats obtinguts.
 
 \subsection{Funcionament general}
 En l'últim disseny, l'estratègia que se seguia era la següent:
@@ -1551,7 +1551,7 @@ Deixant de banda el problema de les co\l.lisions en cas de retransmissions, aque
 Llavors, el funcionament seria el següent:
 \begin{itemize}
     \item El dispositiu de referència, en despertar del mode de baix consum, genera missatge amb les seves dades, el transmet, i inicia de nou el mode de baix consum.
-    \item La resta de dispositius, en sortir del mode de baix consum, s'esperen a rebre el missatge de dades, que indica també l'instant de sincronització. Llavors hi afegeixen les seves dades, el transmeten, i inicien el mode de baix consum.
+    \item La resta de dispositius, en sortir del mode de baix consum, s'esperen a rebre el missatge de dades, que indica també l'instant de sincronització. Llavors hi afegeixen les seves dades, el transmeten, i comencen el mode de baix consum.
 \end{itemize}
 
 \begin{figure}[ht]
@@ -1586,36 +1586,21 @@ Llavors, el funcionament seria el següent:
 \end{figure}
 
 
-Aquesta estratègia no només permet reduir el nombre de transmissions, sinó que també elimina l'inconvenient de les co\l.lisions provocades per retransmissions. Com que en qualsevol moment únicament un dispositiu de la xarxa estarà transmetent (la resta o bé ja han transmès i han passat al mode de baix consum, o bé estan esperant rebre les dades), la capa d'accés al medi d'aquest pot realitzar transmissions sense causar co\l.lisions als dispositius veïns.
+Aquesta estratègia no només permet reduir el nombre de transmissions, sinó que també elimina l'inconvenient de les co\l.lisions provocades per retransmissions. Com que en qualsevol moment únicament un dispositiu de la xarxa estarà transmetent (la resta o bé ja han transmès i han passat al mode de baix consum, o bé estan esperant rebre les dades), la capa d'accés al medi pot realitzar transmissions sense causar co\l.lisions als dispositius veïns.
 
-A més, s'observa també com el temps de funcionament normal de cada dispositiu, en condicions ideals ---sense que existeixin retransmissions---, és el mateix per a tots, i és constant. Tampoc existeix un temps d'espera entre la recepció del missatge de sincronització i el de dades, ja que el missatge de sincronització és implícit, fent que a més sigui el mínim possible, reduint el consum energètic.
+A més, s'observa també com el temps de funcionament normal de cada dispositiu en condicions ideals ---sense que existeixin retransmissions---, és el mateix per a tots, i és constant. Tampoc existeix un temps d'espera entre la recepció del missatge de sincronització i el de dades, ja que el missatge de sincronització és implícit.
 
 S'ha optat per utilitzar segments no fiables a la capa de transport per transmetre les dades. Cal tenir en compte que aquestes dades s'enviaran al següent dispositiu, el qual ja és el destí final. Així, en aquesta transmissió ja s'apliquen els reconeixements de la capa d'accés al medi i, per tant, és incoherent i poc òptim incloure-hi també un missatge de reconeixement a nivell de transport.
 \\
-D'ara endavant es considerarà l'instant en que es rep el missatge de sincronització com a $t_s$, i l'instant previ a iniciar el mode de baix consum com a $t_d$. El temps de funcionament normal, $t_n$, és la diferència entre ambdós: $t_n = t_d - t_s$. És important mencionar que un dispositiu coneix, en tot moment, el temps que ha transcorregut des que s'ha inicialitzat i, per tant, pot determinar l'instant de temps de cada un dels anteriors esdeveniments.
+D'ara endavant es considerarà l'instant en què es rep el missatge de sincronització com a $t_s$, i l'instant previ a iniciar el mode de baix consum com a $t_d$. El temps de funcionament normal, $t_n$, és la diferència entre ambdós: $t_n = t_d - t_s$. És important mencionar que un dispositiu coneix, en tot moment, el temps que ha transcorregut des que s'ha inicialitzat i, per tant, pot determinar l'instant de temps de cada un dels anteriors esdeveniments.
 El temps de cicle, $t_c$, és el temps que transcorre entre dos instants consecutius de sincronització, que en situacions ideals hauria de ser invariant en el temps.
 
-
-% D'ara endavant, es considerarà com a temps de cicle, $t_c$, el temps que transcorre entre dos instants consecutius de sincronització, i com a temps de \est{sleep}, $t_s$, el temps que un dispositiu està en mode de baix consum. L'instant en que un dispositiu rep el missatge de sincronització, $t_s$, és l'instant en què ha d'iniciar el seu cicle de funcionament, i l'instant previ a iniciar el mode de baix consum es coneix com a $t_d$. El temps de funcionament normal, $t_n$, és la diferència entre el temps de 
-
-% El temps de funcionament normal, $t_n$, és la diferència entre ambdós. Abans d'entrar en mode de baix consum, un dispositiu conèix el seu temps de funcionament normal, que és exactament el temps que ha transcorregut des que s'ha inicialitzat.
 
 Per garantir la sincronització, és important que els dispositius determinin correctament el temps de baix consum, $t_b$. El seu càlcul és diferent segons el tipus de dispositiu:
 \begin{itemize}
     \item \est{Referència}. Pel dispositiu de referència, el temps de baix consum és directament la diferència entre el temps de cicle i el temps de funcionament normal: $t_b = t_c - t_n$. El seu instant de sincronització és a $t=0$, ja que és el de referència i, per tant, $t_b = t_c - t_d$.
-    \item \est{No referència}. Per la resta de dispositius, i en situacions ideals, és important que es despertin abans que l'anterior dispositiu iniciï la transmissió de la sincronització. A més, han de basar l'inici del seu cicle en l'instant en que han rebut la sincronització. Així, han de despertar-se com a mínim $t_{tx}$ abans de l'esperat: $t_b = t_c - t_n - t_{tx} = t_c - (t_d - t_s) - t_{tx}$.
+    \item \est{No referència}. Per la resta de dispositius, i en situacions ideals, és important que es despertin abans que l'anterior dispositiu iniciï la transmissió de la sincronització. A més, han de basar l'inici del seu cicle en l'instant en què han rebut la sincronització. Així, han de despertar-se com a mínim $t_{tx}$ abans de l'esperat: $t_b = t_c - t_n - t_{tx} = t_c - (t_d - t_s) - t_{tx}$.
 \end{itemize}
-
-% explicar com poden determinar el temps de sleep cada tipus de dispositiu
-
-% En solució final, fer un petit resum de totes les funcionalitats (timeout, que permet saber on hi pot haver un error, etc.)
-
-
-% RECORDAR PARLAR DE COM S'AFEGEIX UN NOU DISPOSITIU, I DE LA SINCRONITZACIÓ INICIAL
-% PARLAR SOBRE COM AFEGIR NOUS DISPOSITIUS: 
-%   - Si només volem UPLINK implica modifica únicament el dispositiu anterior (o si volem canviar referència, modificar també el de referència). No és necessari modificar taula encaminament, ja que ni s'utilitza. En aquest cas la capa d'aplicació podria utilitzar-se a capa d'encaminament, per sobre de MAC directament.
-%   - Si volem DOWNLINK és necessari modificar-los tots, ja que cal canviar la taula d'encaminament dels dispositius. 
-% Si veiem que tot falla, resincronitzar tot des de 0: reiniciar dispositius començant pel de referència, la resta quedaran actius fins que referència enviï.
 
 \subsection{Situacions no ideals}
 En l'anterior subapartat s'ha presentat el funcionament del sistema en condicions ideals. Tot i això, hi ha certes situacions que cal tenir en compte per garantir la fiabilitat i robustesa del sistema. En aquest apartat es presenten aquestes situacions i les solucions proposades. 
@@ -1623,16 +1608,16 @@ En l'anterior subapartat s'ha presentat el funcionament del sistema en condicion
 \subsubsection{Errors del rellotge}
 Com s'ha vist a la \autoref{section:estrategiesSync}, els rellotges dels dispositius no són totalment precisos. Això provoca que, tot i indicar-li que estigui en mode de baix consum durant un temps determinat, el temps real en què hi està sigui diferent. Per un dispositiu que espera rebre les dades, si el seu rellotge és més lent de l'esperat, es trobarà en mode de baix consum durant més estona del que li correspondria. Això provocaria que, en despertar-se i esperar rebre les dades, aquestes ja s'haguessin transmès, fent que no les rebés.
     
-Una solució a aquest problema és afegir un temps de marge entre l'inici de funcionament normal i l'instant en què espera rebre les dades. Aquest temps de marge ha de ser superior al màxim error que es pot produir en els rellotges dels dispositius, i és fàcilment calculable a partir del temps de cicle total i l'error, normalment expresat en parts per millió (\acro{ppm}):
+Una solució a aquest problema és afegir un temps de marge entre l'inici de funcionament normal i l'instant en què espera rebre les dades. Aquest temps de marge ha de ser superior al màxim error que es pot produir en els rellotges dels dispositius, i és fàcilment calculable a partir del temps de cicle total i l'error, normalment expressat en parts per milió (\acro{ppm}):
 \begin{equation}
     t_{\text{marge}} \geq t_{\text{cicle}} \cdot \epsilon_{\text{\acro{ppm}}} \cdot 10^{-6}
     \label{eq:temps_marge}
 \end{equation}
 
 \subsubsection{Retransmissions}
-La capa d'accés al medi d'un dispositiu pot necessitar realitzar retransmissions si no rep el missatge de reconeixement, o aplicar \acro{beb} si el canal està ocupat per un altre dispositiu ---aliè a la xarxa---. Aquestes retransmissions impliquen que el missatge de dades arribi amb retard al següent dispositiu i, en conseqüència, que aquest també el propagui més tard, afectant a la resta de la xarxa. 
+La capa d'accés al medi d'un dispositiu pot necessitar realitzar retransmissions si no rep el missatge de reconeixement, o aplicar \acro{beb} si el canal està ocupat per un altre dispositiu ---aliè a la xarxa---. Aquestes retransmissions impliquen que el missatge de dades arribi amb retard al següent dispositiu i, en conseqüència, que aquest també el propagui més tard, afectant la resta de la xarxa. 
     
-A causa d'aquest retard provoca que els dispositius prenguin com a referència un instant de sincronització invàlid. En el següent cicle, a causa d'haver rebut l'anterior sincronització més tard, també iniciaran el funcionament normal més tard. Si ara no és necessari realitzar retransmissions, no rebran les dades o, en el millor dels casos, les rebran gràcies a les retransmissions de la capa d'accés al medi, generades ja que no havien enviat el reconeixement.
+Aquest retard provoca que els dispositius prenguin com a referència un instant de sincronització invàlid. En el següent cicle, a causa d'haver rebut l'anterior sincronització més tard, també iniciaran el funcionament normal més tard. Si ara no és necessari realitzar retransmissions, no rebran les dades o, en el millor dels casos, les rebran gràcies a les retransmissions de la capa d'accés al medi, generades ja que no havien enviat el reconeixement.
 
 A la \autoref{fig:syncDeltaTimeErr} es mostra un exemple d'aquesta situació. S'han representat els instants de temps d'inici de funcionament normal i del mode de baix consum, \fitx{w} i \fitx{s} respectivament, així com l'instant que es pren com a referència en la sincronització, \fitx{sync}. En aquest exemple la durada de cicle ($t_c$) és de 7 unitats de temps, i els dispositius que no són de referència apliquen un marge ($t_m$) d'1 unitat de temps. 
 
@@ -1643,15 +1628,14 @@ A la \autoref{fig:syncDeltaTimeErr} es mostra un exemple d'aquesta situació. S'
     \label{fig:syncDeltaTimeErr}
 \end{figure}
 
-S'observa com en el segon cicle \fitx{D2} ha hagut de fer una retransmissió; llavors \fitx{D1} pren l'instant de recepció de la retransmissió com el temps de sincronització. En el següent cicle, com que desperta més tard, no rep la transmissió del primer intent i, per tant, les torna a rebre en el segon intent. Tot i que les retransmissions no provoquen co\l.lisions, és important reduir-les al mínim ja que incrementen el consum. 
+S'observa com en el segon cicle \fitx{D2} ha hagut de fer una retransmissió; llavors \fitx{D1} pren l'instant de recepció de la retransmissió com el temps de sincronització. En el següent cicle, com que desperta més tard, no rep la transmissió del primer intent i, per tant, les torna a rebre en el segon intent. Tot i que les retransmissions no provoquen co\l.lisions, és important reduir-les al mínim, ja que incrementen el consum. 
 
-A més, cal destacar que perdre la primera transmissió redueix la probabilitat de sincronització, ja que disminueix el nombre d'intents «reals» en què \fitx{D1} està actiu. Per exemple, si el límit d'intents fos 2 i el primer es perdés sempre perquè està en baix consum, només disposaria d'1 intent per rebre les dades i, si aquest fallés, el dispositiu no es sincronitzaria.
+A més, cal destacar que perdre la primera transmissió redueix la probabilitat de sincronització, ja que disminueix el nombre d'intents «reals» en què \fitx{D1} està actiu. Per exemple, si el límit d'intents fos 2 i el primer es perdés sempre perquè està en baix consum, només disposaria d'1 intent per rebre les dades i, si aquest fallés, el dispositiu no se sincronitzaria.
 
 La solució que s'ha implementat és sortir del mode de baix consum un temps addicional de tolerància ($t_t$). Aquest temps es correspon a la diferència entre els instants en què pot rebre el primer i l'últim missatge de dades ---i sincronització--- possible:
 \begin{itemize}
     \item \emph{Primer possible}. Tots els dispositius han transmès correctament en el primer intent, sense necessitat de retransmissions ni d'esperes provocades en aplicar \acro{beb} per accedir al canal. 
-    \item \emph{Últim possible}. Tots els dispositius anteriors han utilitzat el nombre màxim d'intents de transmissió i, a més, han hagut d'aplicar \acro{beb} per accedir al canal. Per tenir en compte aquest temps addicional, el qual és imprevisible, es pot aplicar un factor al temps màxim, per exemple incrementant-lo en un 
-    \%.
+    \item \emph{Últim possible}. Tots els dispositius anteriors han utilitzat el nombre màxim d'intents de transmissió i, a més, han hagut d'aplicar \acro{beb} per accedir al canal. Per tenir en compte aquest temps addicional, el qual és imprevisible, es pot aplicar un factor al temps màxim, per exemple incrementant-lo en un \%.
 \end{itemize} 
 
 Gràcies a aquest temps addicional, es garanteix que el dispositiu estigui actiu durant tota la finestra de temps en què es pot rebre el missatge de dades. És cert que implica un augment del temps en mode actiu, però ofereix una major probabilitat de rebre les dades i, per tant, major robustesa del sistema. 
@@ -1719,13 +1703,14 @@ El flux de funcionament en enviar o rebre un missatge fragmentat seria el següe
 
 A la \autoref{fig:app_fragmentacio} s'ha representat com seria una comunicació amb fragmentació. Per simplicitat, s'ha considerat que la mida màxima de les dades és de \SI{10}{\byte} per missatge, i que cada dispositiu afegeix \SI{5}{\byte}. Per a cada transmissió es representa la mida de les dades, i si el camp boleà que indica si està fragmentat està actiu o no.
 
+Per simplicitat, i a causa que les necessitats no ho requerien, aquesta funcionalitat no es va acabar implementat. Amb el disseny establert, però, la seva implementació seria senzilla.
 
 \subsubsection{Pèrdua de dades}
 Tot i existir mecanismes que intenten garantir la integritat dels missatges, és possible que un dispositiu no rebi correctament les dades. Això pot ser degut a interferències en la comunicació, o al mal funcionament del dispositiu encarregat de transmetre-les.
 
-Aquest situació provocaria que un dispositiu que no és el de referència es quedi esperant indefinidament la recepció de dades, sense entrar en mode de baix consum. A més, comportaria la pèrdua de les dades del cicle actual de tota la xarxa. Per evitar-ho, s'ha implementat un temporitzador. En cas que no es rebin les dades dins d'aquest temps, el dispositiu assumeix que no les rebrà, i pren la iniciativa d'iniciar ell la transmissió de dades cap al següent node.
+Aquesta situació provocaria que un dispositiu que no és el de referència es quedi esperant indefinidament la recepció de dades, sense entrar en mode de baix consum. A més, comportaria la pèrdua de les dades del cicle actual de tota la xarxa. Per evitar-ho, s'ha implementat un temporitzador. En cas que no es rebin les dades dins d'aquest temps, el dispositiu assumeix que no les rebrà, i pren la iniciativa d'iniciar ell la transmissió de dades cap al següent node.
 
-Els següents dispositius rebrien el nou missatge de dades, i actuarien de forma normal. Aquest mecanisme es basa en el fet que els dispositius més propers al de referència inicien el mode de funcionament normal abans, i per tant també finalitzen abans el temps d'espera. Això assegura que un dispositiu situat més lluny no iniciï prematurament la transmissió de dades, mantenint l'ordre de propagació.
+Els següents dispositius rebrien el nou missatge de dades, i actuarien de forma normal. Aquest mecanisme es basa en el fet que els dispositius més propers al de referència comencen el mode de funcionament normal abans, i per tant també finalitzen abans el temps d'espera. Això assegura que un dispositiu situat més lluny no iniciï prematurament la transmissió de dades, mantenint l'ordre de propagació.
 
 Amb aquesta solució obtenim dos avantatges principals:
 \begin{itemize}
@@ -1733,7 +1718,7 @@ Amb aquesta solució obtenim dos avantatges principals:
     \item Permet detectar en quin punt de la xarxa hi ha hagut l'últim error. Si al servidor d'aplicació de LoRaWAN rebem un missatge amb \SI{10}{\byte} de dades, i sabem que cada dispositiu afegeix \SI{2}{\byte}, es dedueix que els últims 5 dispositius funcionen correctament, i que el problema es troba en el sisè dispositiu, o en l'enllaç entre aquest i el cinquè. Tot i això, no es pot assegurar que aquest sigui l'únic error, ja que en podrien existir més en dispositius anteriors al sisè.  
 \end{itemize}
 
-Per establir aquest temps d'espera cal considerar de nou el temps de tolerància ($t_t$) exposat anteriorment, que expresa la diferència entre el primer i últim missatge de dades vàlid que un dispositiu pot rebre. Per un dispositiu, suposem el següent:
+Per establir aquest temps d'espera cal considerar de nou el temps de tolerància ($t_t$) exposat anteriorment, que expressa la diferència entre el primer i últim missatge de dades vàlid que un dispositiu pot rebre. Per un dispositiu, suposem el següent:
 \begin{enumerate}
     \item Rep el missatge de dades a l'instant $t_1$. En el següent cicle, esperarà rebre'l a l'instant $t_2 = t_1 + t_c$.
     \item Com que no conèix quin missatge va rebre en el cicle anterior, surt del mode de baix consum a l'instant $t_2 - t_t$. Considerant els extrems, tenim les següents situacions:
@@ -1753,12 +1738,12 @@ Així, s'observa com el límit de temps en què pot rebre el missatge de dades �
 \end{equation}
 on $t_t$ i $t_m$ és necessari que siguin multiplicats per dos, ja que aquests també s'apliquen per despertar-se abans del mode de baix consum.
 
-En el cas que es produís una fi de temps d'espera, el dispositiu assumeix que la seva sincronització era vàlida i que l'error introduit és petit. Per aquest motiu, el càlcul de temps de baix consum el realitzarà com si fos el dispositiu de referència. 
+En el cas que es produís una fi de temps d'espera, el dispositiu assumeix que la seva sincronització era vàlida i que l'error introduït és petit. Per aquest motiu, el càlcul de temps de baix consum el realitzarà com si fos el dispositiu de referència. 
 \newline
 \newline
 Després de considerar aquestes no-idealitats, és necessari modificar l'expressió de càlcul dels temps de baix consum:
 \begin{itemize}
-    \item \est{Referència}. En tractar-se del dispositiu de referència, i com que és qui marca la referència, el seu temps de cicle no es veu modificat. Així, continua venint determinat per
+    \item \est{Referència}. En tractar-se del dispositiu de referència, i com que és qui marca la referència, el seu temps de cicle no es veu modificat. Així, continua sent determinat per
     \begin{equation}
         t_b = t_c - t_d
         \label{eq:calculSleepRef}
@@ -1781,9 +1766,10 @@ La implementació del disseny final s'ha realitzat a la capa d'aplicació del pr
 \subsubsection{Estructura dels missatges}
 En tractar-se d'una capa del protocol, és fonamental definir l'estructura dels missatges que utilitza. Aquests consten de tres camps:
 \begin{itemize}
-    \item \emph{Dades}. Les dades que s'envien en el missatge. En aquest camp cada dispositiu hi inclou les seves dades abans de transmetre-les. És important mencionar que tots els dispositius de la xarxa conèixen la quantitat de dades que han d'enviar. Té una longitud màxima de \SI{238}{\byte}, tenint en compte que la capa de transport permet un màxim de \SI{240}{\byte}, i que s'han de reservar \SI{2}{\byte} per als camps de longitud i ordre. 
+    \item \emph{Dades}. Les dades que s'envien en el missatge. En aquest camp cada dispositiu hi inclou les seves dades abans de transmetre-les. Té una longitud màxima de \SI{238}{\byte}, tenint en compte que la capa de transport permet un màxim de \SI{240}{\byte}, i que s'han de reservar \SI{2}{\byte} per als camps de longitud i ordre. 
+És important mencionar que tots els dispositius de la xarxa coneixen la quantitat de dades que han d'enviar, i els dispositius no estan restringits a haver de transmetre tots la mateixa quantitat de dades. Així, un dispositiu podria estar configurat per haver de transmetre \SI{2}{\byte}, mentre que un altre \SI{10}{\byte}. Tot i això, aquesta situació requeriria més complexitat en el servidor d'aplicació LoRaWAN encarregat de descodificar les dades, que hauria de considerar aquestes longituds diferents. 
     \item \emph{Longitud de les dades}. Indica la quantitat de dades, en bytes, que conté el camp de dades del missatge. Té una longitud d'\SI{1}{\byte}, suficient per a indicar la mida màxima de dades (\SI{238}{\byte}). 
-    \item \emph{Ordre}. Indica ordres addicionals als dispositius. Tot i no ser utilitzat en la implementació final, s'ha considerat oportú incloure'l per a futures millores. Té una longitud d'\SI{1}{\byte}, i podria ser utilitzat per donar instruccions als dispositius, com ara «després de propagar el missatge, manten-te actiu indefinidament», o de més complexes com ara modificar el temps de cicle. En qualsevol cas, els dispositius afegirien les seves dades al missatge, i el propagarien a la resta com fins ara.
+    \item \emph{Ordre}. Indica ordres addicionals als dispositius. Tot i no ser utilitzat en la implementació final, s'ha considerat oportú incloure'l per a futures millores. Té una longitud d'\SI{1}{\byte}, i podria ser utilitzat per donar instruccions als dispositius, com ara «després de propagar el missatge, mantén-te actiu indefinidament», o de més complexes com ara modificar el temps de cicle. En qualsevol cas, els dispositius afegirien les seves dades al missatge, i el propagarien a la resta com fins ara.
 \end{itemize}
 
 \begin{figure}
@@ -1804,13 +1790,13 @@ Per tal de facilitar l'obtenció de les dades, s'ha implementat un \emph{callbac
     \item \emph{Dades}. És un punter a les dades del missatge. És responsabilitat del \emph{callback} d'escriure exactament el nombre de bytes indicats pel paràmetre \emph{dataSize}. Si n'escriu menys, els bytes restants seran considerats zero. Si n'escriu més, el comportament és indefinit, i pot provocar errors.
 \end{itemize}
 
-Aquesta estratègia ofereix flexibilitat, ja que permet que qualsevol part del programar defineix-hi com s'obtenen les dades a transmetre, sense necessitat de modificar la capa d'aplicació. A més, també treu responsabilitat a la capa que obté les dades, que no s'ha de preocupar de quan s'han d'enviar: la capa d'aplicació és qui li ho notificarà. Al \autoref{subsubsec:exemple_app} es mostra un exemple d'aquest \emph{callback}.
+Aquesta estratègia ofereix flexibilitat, ja que permet que qualsevol part del programa defineix-hi com s'obtenen les dades a transmetre, sense necessitat de modificar la capa d'aplicació. A més, també treu responsabilitat a la capa que obté les dades, que no s'ha de preocupar de quan s'han d'enviar: la capa d'aplicació és qui li ho notificarà. Al \autoref{subsubsec:exemple_app} es mostra un exemple d'aquest \emph{callback}.
 
 \subsubsection{Funcionament}
 L'aplicació s'ha implementat com una màquina d'estats, el diagrama de la qual es pot veure a la \autoref{fig:app_maquina_estats}. Consta de quatre estats:
 \begin{itemize}
     \item \emph{1r Sync}. Estat inicial, en què el dispositiu no ha estat mai sincronitzat i espera rebre el primer missatge de sincronització. En aquest estat el dispositiu roman actiu de forma indefinida, fins a rebre la sincronització. En el cas que el dispositiu sigui el de referència ---iniciador---, genera el missatge i el transmet directament, sense esperar.
-    \item \emph{Propagar}. En aquest estat el dispositiu propaga el missatge de dades cap al següent dispositiu. Executa el \est{callback} d'obtenció de dades, i utilitza la interfície de la capa de transport per enviar el missatge. Quan aquesta mateixa capa notifica que la transmissió ha finalitzat (ja sigui amb èxit o error), canvia al següent estat.
+    \item \emph{Propagar}. En aquest estat el dispositiu propaga el missatge de dades cap al següent dispositiu. Executa el \est{callback} d'obtenció de dades, i utilitza la interfície de la capa de transport per enviar el missatge. Quan aquesta mateixa capa notifica que la transmissió ha finalitzat (sigui amb èxit o error), canvia al següent estat.
     \item \emph{Dormir}. En aquest estat el dispositiu entra en mode de baix consum, determinant la seva durada a través de les expressions \ref{eq:calculSleepRef} i \ref{eq:calculSleepList}. En finalitzar-se el temps, canvia a l'estat de propagació si és l'iniciador, o a l'estat d'espera de recepció de sincronització en cas contrari.
     \item \emph{Sync}. En aquest estat el dispositiu espera rebre el missatge de sincronització, aplicant el temporitzador de fi de temps d'espera en sortir del mode de baix consum (recordem, de durada $2\cdot (t_t+t_m)$). En rebre el missatge de sincronització atura el temporitzador, i canvia a l'estat de propagació; si finalitza el temps d'espera, genera el missatge de la capa d'aplicació com si fos el de referència, i el propaga.
 \end{itemize}
@@ -1867,9 +1853,7 @@ Aquest apartat descriu com utilitzar l'aplicació de baix consum, i la seva impl
 \subsubsection{Configuració inicial}
 Un cop es disposa de la xarxa de dispositius establerta i dissenyada, cal configurar de forma individual cada dispositiu per indicar-li quin és el seu dispositiu veí, al qual li ha de propagar els missatges. També cal indicar-li si és el dispositiu de referència, i la quantitat de dispositius de la xarxa.
 
-Amb tots els dispositiu correctament configurats i programats, es pot iniciar el sistema. Els dispositius s'han d'iniciar de forma inversa a com es propaguen les dades, és a dir, començant pel dispositiu més llunyà al de referència (i més proper al \est{gateway}), i acabant pel de referència. Això és necessari per garantir que cada dispositiu trobi el seu veí actiu quan s'inicia, i redueix el temps que els dispositius es troben en l'estat d'espera de sincronització inicial. Si s'iniciés en l'ordre contrari, el dispositiu de referència començaria a transmetre quan la resta encara estrarien apagats. En encendre'ls posteriorment, aquests quedarien esperant una sincronització que ja s'hauria produït, i haurien de romandre actius gairebé tot un cicle complet abans de rebre'l.
-
-Es vol destacar el fet que els dispositius no estan restringits a haver de transmetre tots la mateixa quantitat de dades. Així, un dispositiu podria estar configurat per haver de transmetre \SI{2}{\byte}, mentre que un altre \SI{10}{\byte}. Tot i això, aquesta situació requeriria més complexitat en el servidor d'aplicació LoRaWAN encarregat de descodificar les dades, que hauria de considerar aquestes longituds diferents. 
+Amb tots els dispositius correctament configurats i programats, es pot iniciar el sistema. Els dispositius s'han d'iniciar de forma inversa a com es propaguen les dades, és a dir, començant pel dispositiu més llunyà al de referència (i més proper al \est{gateway}), i acabant pel de referència. Això és necessari per garantir que cada dispositiu trobi el seu veí actiu quan s'inicia, i redueix el temps que els dispositius es troben en l'estat d'espera de sincronització inicial. Si es posés en marxa en l'ordre contrari, el dispositiu de referència començaria a transmetre quan la resta encara estarien apagats. En encendre'ls posteriorment, aquests quedarien esperant una sincronització que ja s'hauria produït, i haurien de romandre actius gairebé tot un cicle complet abans de rebre'l.
 
 \subsubsection{Configuració de nous dispositius}
 Pot haver de ser necessari afegir nous dispositius a la xarxa. En aquest cas, es distingeixen dues situacions depenent del rol del dispositiu a afegir:
@@ -1896,9 +1880,9 @@ Si la quantitat de dispositius anteriors és major que la que s'ha configurat, e
 Això es pot evitar si els dispositius s'afegeixen en l'extrem més proper al \est{gateway}, ja que aquest seria l'últim dispositiu de la cadena. En aquest cas, seria únicament necessari modificar el dispositiu anterior al que s'afegeix per indicar-li el nou veí, i establir que no té capacitats LoRaWAN.
 
 \subsubsection{Resincronització de la xarxa}
-Tot i que l'aplicació intenta garantir la sincronització de tots els dispositius de la xarxa, i la robustesa i fiabilitat, és possible que es produeixin errors que puguin dur a una desincronització total de la xarxa. En tal cas, caldria reiniciar tots els dispositius de la xarxa, i iniciar-los de nou com si fos la primera vegada. En aquest procediment també es recomana detectar l'error que ha provocat la desincronització, i corregir-lo si és possible. A continuació es mostren algunes possibles causes d'error, i la seva solució:
+Tot i que l'aplicació intenta garantir la sincronització de tots els dispositius de la xarxa, i la robustesa i fiabilitat, és possible que es produeixin errors que puguin dur a una dessincronització total de la xarxa. En tal cas, caldria reiniciar tots els dispositius de la xarxa, i iniciar-los de nou com si fos la primera vegada. En aquest procediment també es recomana detectar l'error que ha provocat la dessincronització, i corregir-lo si és possible. A continuació es mostren algunes possibles causes d'error, i la seva solució:
 \begin{itemize}
-    \item Mal enllaç entre dispositius. Si la desincronització és causada per un mal enllaç entre dispositius, es podrien modificar els paràmetres de transmissió LoRa, o bé afegir un dispositiu intermig per millorar la comunicació.
+    \item Mal enllaç entre dispositius. Si la dessincronització és causada per un mal enllaç entre dispositius, es podrien modificar els paràmetres de transmissió LoRa, o bé afegir un dispositiu intermedi per millorar la comunicació.
     \item Sincronització rebuda en baix consum. Si la sincronització es rep quan el dispositiu encara es troba en mode de baix consum, és possible que el temps de marge, encarregat de contrarestar l'error del rellotge, sigui massa petit. 
     \item Consums excessius. Si es detecta que un dispositiu té consums d'energia excessius i dispars amb la resta, pot ser causat a reinicis del microcontrolador, fent que es quedi en mode de sincronització inicial. És important verificar que l'alimentació del dispositiu és suficient per alimentar el microcontrolador i el mòdul de comunicació, que pot tenir un consum elevat en el moment de la transmissió.
 \end{itemize}
@@ -1964,7 +1948,7 @@ function decodeUplink(input) {
 
 \subsection{Validació i resultats}
 \subsubsection{Entorn de proves}
-Les proves s'han realitzat utilitzant dos microcontroladors \acro{esp32}, cadascun equipat amb un transductor LoRa \acro{sx1262}. Per verificar el correcte funcionament a través de LoRaWAN, es disposava de connectivitat a un \est{gateway} Mikrotik wAP-LR8. Es poden observar els dispositius utilitzats a la \autoref{fig:dispositius_proves}.
+Les proves s'han realitzat utilitzant dos microcontroladors \acro{esp32}, cadascun equipat amb un transductor LoRa \acro{sx1262}. Per verificar el correcte funcionament a través de LoRaWAN, es disposava de connectivitat a un \est{gateway} Mikrotik wAP-LR8. Es poden observar els dispositius usats a la \autoref{fig:dispositius_proves}.
 
 \begin{figure}
     \centering
@@ -1977,7 +1961,7 @@ Com a base per a les proves, s'ha utilitzat el codi d'exemple mostrat al \autore
 
 Per verificar el correcte funcionament de l'aplicació de baix consum, s'ha afegit un punt de depuració específic amb el prefix \fitx{[SLEEP_STATS]}. Aquest punt proporciona informació detallada sobre els temps de sincronització, la finalització del cicle de funcionament, el temps de baix consum i l'estat de sincronització, entre d'altres. Aquesta informació es transmet a través del port sèrie, i es pot observar en temps real mitjançant eines com \est{picocom}.
 
-Per afegir marques temporals (\emph{timestamps}) a cada línia de sortida, s'ha utilitza l'eina \emph{ts}, la qual permet registrar l'instant en què s'ha rebut cada missatge. Amb aquesta informació és possible determinar si els cicles de baix consum es realitzen correctament. A més, aquesta informació s'ha redirigit a un fitxer per al seu posterior anàlisi. L'ordre utilitzada per obtenir aquesta informació és la següent:
+Per afegir marques temporals (\emph{timestamps}) a cada línia de sortida, s'ha utilitzat l'eina \emph{ts}, la qual permet registrar l'instant en què s'ha rebut cada missatge. Amb aquesta informació és possible determinar si els cicles de baix consum es realitzen correctament. A més, aquesta informació s'ha redirigit a un fitxer per al seu posterior anàlisi. L'ordre utilitzada per obtenir aquesta informació és la següent:
 
 \begin{lstlisting}[style=bashStyle]
 picocom --omap spchex,tabhex,crhex,lfhex --baud 115200 --imap lfcrlf <port_UBS> | ts "[%Y-%m-%d %H:%M:%.S]" >> <nom_fitxer>
@@ -2001,9 +1985,9 @@ Ambdós es van configurar per enviar un byte de dades generades aleatòriament.
 
 % // TODO: A PARTIR D'AQUI QUEDA PENDENT REVISAR
 
-Després de realitzar la sincronització inicial, es va deixar en funcionament poc més de 4 hores, realitzant un total de 50 cicles. En tots aquests, la sincronització es va realitzar correctament, i es van obtenir els dos bytes de dades ---un per dispositiu--- a la consola de \acro{ttn}. El temps de sincronització mitjà pel segon dispositiu era de 16.6 segons després de sortir del mode de baix consum. Aquest temps és coherent, considerant que el temps de tolerància, calculat durant la compilació, era de 12.6 segons, i que el temps de marge afegit era de 2 segons, resultant en un total 14.6 segons. Els dos segons restants semblaven, en un primer moment, poder ser causats per temps d'iniciació o processament del microcontrolador, o simplement per l'error del rellotge, fet que més endavant es confirmarà. Si es volen consultar les traces de la prova, es poden trobar a la carpeta \fitx{tests/test5Minuts}.
+Després de realitzar la sincronització inicial, es va deixar en funcionament poc més de 4 hores, realitzant un total de 50 cicles. En tots aquests, la sincronització es va realitzar correctament, i es van obtenir els dos bytes de dades ---un per dispositiu--- a la consola de \acro{ttn}. El temps de sincronització mitjà pel segon dispositiu era de 16.6 segons després de sortir del mode de baix consum. Aquest temps és coherent, considerant que el temps de tolerància, calculat durant la compilació, era de 12.6 segons, i que el temps de marge afegit era de 2 segons, donant com a resultat un total 14.6 segons. Els dos segons restants semblaven, en un primer moment, poder ser causats per temps d'iniciació o processament del microcontrolador, o simplement per l'error del rellotge, fet que més endavant es confirmarà. Si es volen consultar les traces de la prova, es poden trobar a la carpeta \fitx{tests/test5Minuts}.
 
-A continuació es va verificar el temps de baix consum d'ambdós dispositius, gràcies a les marques de temps afegides amb l'eina \emph{ts}. Amb aquest temps, es va determinar de nou l'error, i comprovar que fos coherent amb els que s'havien obtingut prèviament. El resultats es poden observar a la \autoref{tab:app_resultatsErrClock}, sent els temps els valors mitjans.
+A continuació es va verificar el temps de baix consum d'ambdós dispositius, gràcies a les marques de temps afegides amb l'eina \emph{ts}. Amb aquest temps, es va determinar de nou l'error, i comprovar que fos coherent amb els que s'havien obtingut prèviament. Els resultats es poden observar a la \autoref{tab:app_resultatsErrClock}, sent els temps els valors mitjans.
 
 \begin{table}
     \centering
@@ -2019,9 +2003,9 @@ A continuació es va verificar el temps de baix consum d'ambdós dispositius, gr
     \label{tab:app_resultatsErrClock}
 \end{table}
 
-S'observa com els resultats d'error obtingut no es corresponen amb cap dels errors obtinguts prèviament, indicant que per algun motiu aquest error ha augmentat en implementar el protocol i l'aplicació de baix consum. A més, sorprèn el fet que el segon dispositiu tingui un error més, tenint en compte que la implementació entre dispositius acaba sent molt semblant. Aquests errors no són menyspreables, tenint en compte que l'error s'ha més que duplicat respecte dels obtinguts prèviament i, a més, semblen ser imprevisibles.
+S'observa com els resultats d'error obtingut no es corresponen amb cap dels errors obtinguts prèviament, indicant que per algun motiu aquest error ha augmentat en implementar el protocol i l'aplicació de baix consum. A més, sorprèn el fet que el segon dispositiu tingui un error més, tenint en compte que la implementació entre dispositius acaba sent molt semblant. Aquests errors no són negligibles, tenint en compte que l'error s'ha més que duplicat respecte dels obtinguts prèviament i, a més, semblen ser imprevisibles.
 
-Per descobrir l'origen d'aquest error, es va dur a terme una bateria de proves (\fitx{tests/provesOrigenErrorClock.cpp}). Les proves consistien en simular el funcionament de la capa d'aplicació per a cada dispositiu, però sense utilitzar-la directament. Les proves realitzades van ser:
+Per descobrir l'origen d'aquest error, es va dur a terme una bateria de proves (\fitx{tests/provesOrigenErrorClock.cpp}). Les proves consistien a simular el funcionament de la capa d'aplicació per a cada dispositiu, però sense utilitzar-la directament. Les proves realitzades van ser:
 \begin{itemize}
     \item \emph{Transmissió després de baix consum}. Simula el comportament del dispositiu de referència, que en sortir del mode de baix consum realitza una transmissió automàticament, i torna a iniciar-lo durant un temps determinat. Els resultats, per a diferents temps de baix consum, es corresponien amb els errors obtinguts prèviament pel dispositiu iniciador. Es va descartar que l'error pel dispositiu de referència fos causat per l'aplicació.
     \item \emph{Retorn a baix consum automàticament}. Es va repetir la prova que determinava l'error dels rellotges, però inicialitzant el protocol i el transductor LoRa. Els resultats obtinguts per ambdues plaques van ser similars als obtinguts en determinar l'error dels rellotges. Es va descartar que l'error fos causat per aquestes inicialitzacions, o per utilitzar la ràdio. Va donar la idea que aquest increment en l'error podia ser causat en realitzar una transmissió.
@@ -2058,11 +2042,11 @@ Per verificar aquesta hipòtesi, es va realitzar una nova prova, modificant el r
     \label{tab:app_resultatsRendiment}
 \end{table}
 
-Aquests resultats permeten explicar el comportament observat, especialment en el dispositiu que espera la sincronització. Aquest és qui es troba durant més temps actiu i, per tant, qui té un major rendiment de cicle. Aquest fet permet explicar els dos segons restants del temps de sincronització obtingut en les proves.
+Aquests resultats permeten explicar el comportament observat, especialment en el dispositiu que espera la sincronització. Aquest és qui es troba durant més temps actiu i, per tant, qui té un major rendiment de cicle. Això fet permet explicar els dos segons restants del temps de sincronització obtingut en les proves.
 
-Aquest error presenta un greu problema, considerant que en grans xarxes de monitoratge no es pot garantir una temperatura constant en tots els dispositius. En aquests casos, la temperatura ambient dels dispositius podria ser molt diferent, fent que l'error també ho fos, i impossibilitzant poder garantir la sincronització sense deixar grans temps de marge.
+Aquest error presenta un greu problema, considerant que en grans xarxes de monitoratge no es pot garantir una temperatura constant en tots els dispositius. En aquests casos, la temperatura ambient dels dispositius podria ser molt diferent, fent que l'error també ho fos, i impossibilitant poder garantir la sincronització sense deixar grans temps de marge.
 
-La principal solució proposada consisteix en utilitzar un osci\l.lador de major precisió, com per exemple un de cristall. Aquests presenten una variació molt menor en el seu error en funció de la temperatura, fent que l'error dels dispositius fos més homogeni. En tractar-se d'un error més constant, seria possible establir un temps de marge més petit, sense renunciar a la fiabilitat del sistema.
+La principal solució proposada consisteix a utilitzar un osci\l.lador de major precisió, com per exemple un de cristall. Aquests presenten una variació molt menor en el seu error en funció de la temperatura, fent que l'error dels dispositius fos més homogeni. En tractar-se d'un error més constant, seria possible establir un temps de marge més petit, sense renunciar a la fiabilitat del sistema.
 
 \subsubsection{Fi temps d'espera}
 A causa de les idealitats en l'entorn de proves, per verificar el funcionament del fi de temps d'espera de la recepció de la sincronització, es va modificar el codi de l'aplicació per simular que el dispositiu de referència no enviava la sincronització amb un 50\% de probabilitats. 
@@ -2081,9 +2065,9 @@ Després de la sincronització inicial, es va deixar en funcionament poc més de
 \subsubsection{Reducció del consum}
 Per acabar, es va verificar que aquesta aplicació aconseguís reduir satisfactòriament el consum. Per fer-ho, es va comparar el consum d'un dispositiu sense implementar aquesta solució, que es trobava en mode actiu durant tot el cicle de 5 minuts, amb un altre que sí que implementava l'aplicació de baix consum. En la comparació no es va considerar el consum durant una transmissió, ja que en qualsevol de les situacions ambdós dispositius realitzarien el mateix nombre de transmissions.
 
-En mode actiu, el dispositiu té un consum d'aproximadament \SI{80}{\milli\ampere}. En mode de baix consum, en canvi, aquest es redueix fins aproximadament \SI{13}{\milli\ampere}. És important tenir en compte que la placa de desenvolupament conté un \acro{led} vermell, el qual sempre es troba actiu, i presenta un consum afegit. En qualsevol dels casos, es pot observar com efectivament el consum s'ha vist reduït.
+En mode actiu, el dispositiu té un consum d'aproximadament \SI{80}{\milli\ampere}. En mode de baix consum, en canvi, aquest es redueix fins a aproximadament \SI{13}{\milli\ampere}. És important tenir en compte que la placa de desenvolupament conté un \acro{led} vermell, el qual sempre es troba actiu, i presenta un consum afegit. En qualsevol dels casos, es pot observar com efectivament el consum s'ha vist reduït.
 
-Amb aquests resultats, es verifica com l'aplicació de baix consum ha reduit el consum en un $\frac{80-13}{80}\cdot100=83.75\%$. 
+Amb aquests resultats, es verifica com l'aplicació de baix consum ha reduït el consum en un $\frac{80-13}{80}\cdot100=83.75\%$. 
 
 % veure quin es el consum en mode actiu. Multiplicar per 5 minuts.
 % veure consum en mode de baix consum, comentar que hi ha el LED sempre actiu, i multiplicar pel temps de baix consum real, sumarli el temps actiu pel consum en mode actiu. Comparar ambdós.
