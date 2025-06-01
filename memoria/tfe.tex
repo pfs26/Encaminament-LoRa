@@ -150,15 +150,6 @@
 % admet gènerer i número (vegeu 9.2 del manual)
 \advisor{Jordi Bonet Dalmau i Arnau Arumi Casanovas}
 
-% Si el treball es fa sota un conveni de pràctiques (modalitat empresa)
-% llavors el director (advisor) és la persona de la empresa que
-% dirigeix el treball i, a més, hi ha un professor que fa de tutor (counselor).
-% En aquest cas també es consigna l'empresa (company)
-% \counselor admet gènere (vegeu 9.2 del manual)
-%
-% \counselor{}
-% \company{}
-
 % Els àmbits temàtics en que es classifica el treball. Pregunteu al
 % director.
 \topics{}
@@ -169,7 +160,6 @@
 % Si voleu agraïments descomenteu
 %\begin{acknowledgments}
 %\end{acknowledgments}
-
 
 \begin{resum}
 Aquest treball presenta el disseny i implementació d'un protocol de comunicació basat en LoRa amb encaminament estàtic, pensat per a xarxes de dispositius de monitoratge en entorns extensos o aïllats, on la presència humana és limitada. L'objectiu és reduir la dependència dels \est{gateways} LoRaWAN, aprofitant que els dispositius són habitualment estàtics i permeten l'ús de rutes de comunicació predefinides.
@@ -1276,7 +1266,6 @@ Per aconseguir que tots els dispositius es puguin sincronitzar, és important qu
 \end{figure}
 
 En els següents apartats es presenten els diferents mecanismes de sincronització externa considerats, amb les seves diferències i limitacions.
-% PARLAR DE SINCRONITZACIÓ INICIAL
 
 \section{Sincronització explícita}
 Com a sincronització explícita es considera l'ús d'un missatge especial i fàcilment identificable. Com s'ha comentat, el propòsit d'aquest missatge és indicar l'instant d'inici de cicle de funcionament normal, i eliminar l'error introduït pel rellotge intern. En aquest apartat es mostren dues estratègies considerades, on la diferència principal entre aquestes és el moment de transmissió de les dades.
@@ -1552,7 +1541,6 @@ No obstant això, encara hi ha un fet crític: què passa si la capa d'accés al
 Aquesta situació es representa a la \autoref{fig:app_opcioSyncAcum3Err}, on una única retransmissió del missatge de sincronització, causada per no haver rebut el missatge de reconeixement de la capa d'accés al medi, ha causat una co\l.lisió. Quan el dispositiu \fitx{D3} estava rebent el missatge de dades, el dispositiu \fitx{D2} retransmet el missatge de sincronització cap a \fitx{D1}, fent que ambdues transmissions es superposessin.
 
 L'única possible solució per reduir aquest problema és deixar més marge de temps entre l'enviament de la sincronització i el de les dades. Aquesta solució, però, és totalment contrària al que es buscava en aquesta estratègia, que era minimitzar el temps d'espera.
-
 
 \section{Disseny final}
 Després de les iteracions anteriors, s'ha arribat a un disseny final que resol els problemes observats. En aquest apartat es presenta el funcionament general d'aquesta estratègia. Seguidament es consideren situacions no ideals que poden produir-se i que cal considerar per garantir el correcte funcionament, i les solucions proposades. A continuació es presenta la implementació realitzada a nivell d'aplicació, amb el format i estructura dels missatges. Finalment, es presenta la correcta utilització del sistema, com per exemple com afegir nous dispositius a la xarxa, i les proves i resultats obtinguts.
@@ -2143,8 +2131,6 @@ Tot i que la solució proposada ha assolit els objectius principals, existeixen 
 
 
 % ABANS D'ENTREGAR MIRAR QUE L·L ESTIGUIN BEN ESCRITES AMB \l.l
-% // TODO: Falta diagrama FSM de capa MAC
-% // TODO: Diagrama funcionament transport
 
 % // TODO: Modiciar ’ per '
 
