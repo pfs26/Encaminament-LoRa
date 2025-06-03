@@ -16,34 +16,6 @@
 #define MIN_TO_S(x) (x * 60)                // Minuts a segons
 #define H_TO_MS(x) (x * 60 * 60 * 1000ULL)  // Hores a milisegons
 
-// Port que utilitza l'aplicació de SLEEP
-#define SLEEP_PORT 0x01
-
-// Defineix si és un node "iniciador" de xarxa. Enviarà SYNC sense esperar a rebre'l. 
-#define SLEEP_IS_INITIATOR !IS_GATEWAY
-
-// Durada d'un cicle de funcionament, en `ms`
-#define SLEEP_CYCLE_DURATION (uint64_t) MIN_TO_MS(2.5)
-
-// Error del clock, en `ppm`
-#define SLEEP_CLOCK_ERROR (0)
-// Temps de correcció d'error del clock, en `ms`
-#define SLEEP_CLOCK_CORRECTION (int64_t)((SLEEP_CYCLE_DURATION * SLEEP_CLOCK_ERROR / 1000000.0))
-
-// Temps extra d'espera de recepció de SYNC, i previ a primera recepció esperada, en `ms`
-// No hauria de ser molt gran; temps tolerància ja considera el temps màxim teòric
-#define SLEEP_EXTRA_TIME (uint64_t) S_TO_MS(1) 
-
-// Percentatge addicional que s'aplicarà a temps delta, per considerar CSMA, etc.
-#define SLEEP_DELTA_EXTRA 0.25
-
-// Bytes de dades que cada node pot afegir
-#define SLEEP_DATASIZE_PER_NODE 1 
-
-// Quantitat de dispositius de la xarxa. Ha de ser igual a major als dispositius reals de la xarxa.
-// Es recomana que sigui major per facilitar la tasca d'afegir-ne de nous, i evitar haver de programar-los tots de nou
-#define SLEEP_QUANTITAT_DISPOSITIUS 5
-
 // Enum per definir ordres possibles. Definició per ús futur
 enum sleep_command_t : uint8_t {
     SLEEP_CMD_NONE,
