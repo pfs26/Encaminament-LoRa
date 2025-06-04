@@ -13,18 +13,18 @@ static routing_tx_callback_t onTxError = nullptr;
 
 static std::vector<mac_id_t> higherLayerPackets;
 
-void _printPacket(const routing_pdu_t* const pdu);
-void _onMacReceived(void);
-void _onMacSend(uint16_t);
-void _onMacTxFailed(uint16_t);
-void _onWANReceived(void);
-void _processReceivedPacket(size_t length);
-void _packetReceived();
-void _packetSent(uint16_t id);
-void _packetTxFailed(uint16_t id);
-routing_err_t _sendThroughLoRaWAN(routing_pdu_t* pdu, uint16_t* id=nullptr);
-void _WANPacketSent();
-void _WANPacketTxFailed();
+static void _printPacket(const routing_pdu_t* const pdu);
+static void _onMacReceived(void);
+static void _onMacSend(uint16_t);
+static void _onMacTxFailed(uint16_t);
+static void _onWANReceived(void);
+static void _processReceivedPacket(size_t length);
+static void _packetReceived();
+static void _packetSent(uint16_t id);
+static void _packetTxFailed(uint16_t id);
+static routing_err_t _sendThroughLoRaWAN(routing_pdu_t* pdu, uint16_t* id=nullptr);
+static void _WANPacketSent();
+static void _WANPacketTxFailed();
 
 bool Routing_init(node_address_t selfAddr, bool is_gateway) {
     // Inicialitzar capa MAC
@@ -147,7 +147,7 @@ void Routing_onReceive(routing_rx_callback_t cb) { onPacketReceived = cb; }
 void Routing_onSend(routing_tx_callback_t cb) { onPacketSent = cb; }
 void Routing_onTxError(routing_tx_callback_t cb) { onTxError = cb; }
 
-routing_err_t _sendThroughLoRaWAN(routing_pdu_t* pdu, uint16_t* id) {
+static routing_err_t _sendThroughLoRaWAN(routing_pdu_t* pdu, uint16_t* id) {
     _PI("[ROUTING] Sending packet to gateway. Forwarding to LoRaWAN");
     bool state = LW_send((uint8_t*)pdu, pdu->dataLength+ROUTING_HEADERS_SIZE);
     if (id) 
@@ -164,7 +164,7 @@ routing_err_t _sendThroughLoRaWAN(routing_pdu_t* pdu, uint16_t* id) {
     }
 }
 
-void _processReceivedPacket(size_t length) {
+static void _processReceivedPacket(size_t length) {
     // Si destí de paquet som nosalters, notifiquem capa superior
     if(rxPDU.dst == self) {
         _PI("[ROUTING] Received packet from 0x%02X", rxPDU.src);
@@ -210,7 +210,7 @@ void _processReceivedPacket(size_t length) {
     _PI("[ROUTING] Forwarded packet to 0x%02X", rxPDU.dst);
 }
 
-void _onWANReceived(void) {
+static void _onWANReceived(void) {
     // Executat quan hi ha una nova recepció de dades a través de LoRaWAN
     // Cal processar-ho i actuar com si fos una recepció de MAC
     size_t length;
@@ -222,7 +222,7 @@ void _onWANReceived(void) {
     _processReceivedPacket(length);
 }
 
-void _onMacReceived(void) {
+static void _onMacReceived(void) {
     // Executat quan MAC obté un frame per nosaltres; cal que processem el paquet
     // i veure si és per nosaltres o cal reenviar-lo
     size_t MAClength = 0;
@@ -238,7 +238,7 @@ void _onMacReceived(void) {
     _processReceivedPacket(MAClength);
 }
 
-void _onMacSend(uint16_t id) {
+static void _onMacSend(uint16_t id) {
     int pos = 0; // Per guardar quin element s'ha d'eliminar
     for(int value : higherLayerPackets) { // iterar per cada element del vector
         if(value == id) {
@@ -250,7 +250,7 @@ void _onMacSend(uint16_t id) {
     }
 }
 
-void _onMacTxFailed(uint16_t id) {
+static void _onMacTxFailed(uint16_t id) {
     int pos = 0; // Per guardar quin element s'ha d'eliminar
     for(int value : higherLayerPackets) { // iterar per cada element del vector
         if(value == id) {
@@ -262,31 +262,31 @@ void _onMacTxFailed(uint16_t id) {
     }
 }
 
-void _packetReceived() {
+static void _packetReceived() {
     if(onPacketReceived != nullptr) {
         onPacketReceived();
     }
 }
 
-void _packetSent(uint16_t id) {
+static void _packetSent(uint16_t id) {
     if(onPacketSent != nullptr) {
         onPacketSent(id);
     }
 }
 
-void _packetTxFailed(uint16_t id) {
+static void _packetTxFailed(uint16_t id) {
     if(onTxError != nullptr) {
         onTxError(id);
     }
 }
 
-void _WANPacketSent() {
+static void _WANPacketSent() {
     // Executat quan s'ha enviat un paquet a través de LoRaWAN
     // Esdeveniments simulats per mantenir coherència amb capa MAC, a través de scheduler
     _packetSent(0);
 }
 
-void _WANPacketTxFailed() {
+static void _WANPacketTxFailed() {
     // Executat quan s'ha intentat enviar un paquet a través de LoRaWAN i ha fallat
     _packetTxFailed(0);
 }
