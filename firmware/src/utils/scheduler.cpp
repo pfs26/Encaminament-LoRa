@@ -6,9 +6,9 @@
 #include "utils.h"
 #include "LinkedFIFO.hpp"
 
-void _delete_completed_tasks();
-void _start_cleanup_if_needed();
-void _stop_cleanup_if_needed();
+static void _delete_completed_tasks();
+static void _start_cleanup_if_needed();
+static void _stop_cleanup_if_needed();
 
 Scheduler ts;  
 bool is_cleanup_running = false;
@@ -51,7 +51,7 @@ void scheduler_stop(Task* task) {
     _start_cleanup_if_needed();
 }
 
-void _delete_completed_tasks() {
+static void _delete_completed_tasks() {
     _PI("[SCHED] Cleanup started. Tasks: %d, Heap: %d", scheduled_tasks.size(), ESP.getFreeHeap());
     for (auto tsk = scheduled_tasks.begin(); tsk != scheduled_tasks.end();) {
         if (!(*tsk)->isEnabled()) {  // Comprva si tasca habilitada
@@ -68,7 +68,7 @@ void _delete_completed_tasks() {
     _stop_cleanup_if_needed();
 }
 
-void _start_cleanup_if_needed() {
+static void _start_cleanup_if_needed() {
     // La tasca que hi ha al vector és la que s'acaba d'afegir
     if (!is_cleanup_running && scheduled_tasks.size() == 1) {
         // Iniciar cleanup
@@ -78,7 +78,7 @@ void _start_cleanup_if_needed() {
     }
 }
 
-void _stop_cleanup_if_needed() {
+static void _stop_cleanup_if_needed() {
     // Si només queda la propia tasca de cleanup
     if (is_cleanup_running && scheduled_tasks.size() == 1) {  
         Task* cleanup_task = *scheduled_tasks.begin();  

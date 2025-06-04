@@ -36,10 +36,32 @@
 
 #include <vector>
 
+/// @brief Programa l'execució d'una tasca una sola vegada.
+/// @param callback Mètode a executar
+/// @param startDelay Retard inicial abans d'executar la tasca.
+/// @return Apuntador a la tasca creada
 Task* scheduler_once(TaskCallback callback, unsigned long startDelay = 0);
+
+/// @brief Programa l'execució d'una tasca cada `interval` ms.
+/// @param interval Interval d'execució
+/// @param cb Mètode a executar
+/// @param startDelay Retard inicial
+/// @return Apuntador a la tasca
 Task* scheduler_infinite(unsigned long interval, TaskCallback cb, unsigned long startDelay = 0);
+
+/// @brief Programa l'execució d'una tasca cada `interval` ms `repetition` vegades.
+/// @param interval Interval d'execució
+/// @param repetition Vegades a executar
+/// @param cb Mètode a executar
+/// @param startDelay Retard inicial
+/// @return Apuntador a la tasca
 Task* scheduler_repeat(unsigned long interval, unsigned int repetition, TaskCallback cb, unsigned long startDelay = 0);
+
+/// @brief Atura l'execució d'una tasca
+/// @param task Apuntador de tasca a executar
 void scheduler_stop(Task* task);
+
+/// @brief Executa el gestor de tasques per un cicle. Hauria de ser l'únic mètode de bucle principal
 void scheduler_run();
 
 
