@@ -37,9 +37,9 @@ static struct {
     uint8_t port = 0;
 } downlink_data;
 
-bool _reuseSession();
-void _saveSession();
-bool _lwActivate();
+static bool _reuseSession();
+static void _saveSession();
+static bool _lwActivate();
 
 static Preferences prefs;
 
@@ -186,14 +186,14 @@ void LW_onReceive(lora_callback_t cb) {
 
 // Guarda la sessió de LoRaWAN actual a array, permetent poder-la reutilitzar
 // per establir nova connexió sense handshake d'OTAA.
-void _saveSession() {
+static void _saveSession() {
     memcpy(LWsession, node.getBufferSession(), RADIOLIB_LORAWAN_SESSION_BUF_SIZE);
     isSessionSaved = true;
     _PI("[LW] Saving session:");
 }
 
 // Obté la sessió guardada, i l'utilitza per reconnectar-se a la xarxa
-bool _reuseSession() {
+static bool _reuseSession() {
     return _lwActivate();
     /*
     if(!isSessionSaved) {
@@ -225,7 +225,7 @@ bool _reuseSession() {
     */
 }
 
-bool _lwActivate() {
+static bool _lwActivate() {
     int16_t state = RADIOLIB_ERR_UNKNOWN;
     prefs.begin("lorawan", false);
     if (!prefs.isKey("nonces")) {
