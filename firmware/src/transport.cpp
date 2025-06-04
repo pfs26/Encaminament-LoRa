@@ -38,17 +38,17 @@ static std::vector<transport_tx_metadata> txQueue;
 static transport_pdu_t rxPDU; // PDU per guardar segment rebut
 static node_address_t rxAddress = NODE_ADDRESS_NULL; // Adreça de node que ha enviat el segment rebut
 
-void _onRoutingReceived();
-void _onRoutingSent(uint16_t id);
-void _onRoutingTxError(uint16_t id);
-size_t _buildAck(transport_pdu_t* pdu, node_address_t rx, transport_id_t id);
-void _printSegment(const transport_pdu_t* const pdu);
-void _segmentReceived(transport_port_t port);
-void _segmentSent(transport_port_t port);
-void _segmentSentError(transport_port_t port);
-void _ackReceived(transport_pdu_t* pdu);
-void _checkTxQueueMetadata(void);
-void _resendSegment(transport_tx_metadata* meta);
+static void _onRoutingReceived();
+static void _onRoutingSent(uint16_t id);
+static void _onRoutingTxError(uint16_t id);
+static size_t _buildAck(transport_pdu_t* pdu, node_address_t rx, transport_id_t id);
+static void _printSegment(const transport_pdu_t* const pdu);
+static void _segmentReceived(transport_port_t port);
+static void _segmentSent(transport_port_t port);
+static void _segmentSentError(transport_port_t port);
+static void _ackReceived(transport_pdu_t* pdu);
+static void _checkTxQueueMetadata(void);
+static void _resendSegment(transport_tx_metadata* meta);
 
 bool Transport_init(node_address_t selfAddr, bool is_gateway) {
     _PI("[TRANSPORT] Initializing...");
@@ -165,7 +165,7 @@ bool Transport_onEvent(transport_port_t port,
 }
 
 // Executat per capa inferior (Routing) quan s'han rebut dades per nosaltres
-void _onRoutingReceived() {
+static void _onRoutingReceived() {
     /*
         1. Enviar ACK si demana ACK
         2. Guardar ID a buffer de rebuts
@@ -217,7 +217,7 @@ void _onRoutingReceived() {
     }
 }
 
-void _ackReceived(transport_pdu_t* pdu) {
+static void _ackReceived(transport_pdu_t* pdu) {
     // Busquem ID d'ACK a txQueue, i si el trobem, eliminem de la llista i generem event de segment enviat
     int index = 0;
     for(transport_tx_metadata meta : txQueue) {
@@ -233,7 +233,7 @@ void _ackReceived(transport_pdu_t* pdu) {
     _PE("[TRANSPORT] ACK received for unknown segment %d. ACK received after TOUT, check TOUT settings", pdu->ID);
 }
 
-void _onRoutingSent(uint16_t id) {
+static void _onRoutingSent(uint16_t id) {
     for(size_t i = 0; i < txQueue.size(); i++) {
         // Per referència (com si fos un punter) per modificar-ho directament a cua
         transport_tx_metadata& meta = txQueue[i];
@@ -260,7 +260,7 @@ void _onRoutingSent(uint16_t id) {
     _PE("[TRANSPORT] TX done for frame %d. Was not found on transport's send list. This is right if you are a gateway", id);
 }
 
-void _onRoutingTxError(uint16_t id) {
+static void _onRoutingTxError(uint16_t id) {
     // Un txError pot venir únicament de MAC (propagat a través de routing)
     // pot significar que no ha rebut ACK de next hop, i ha esgotat reintents de MAC
     // Com a tal, no s'ha rebut ACK i per tant no s'ha executat esdeveniment de MAC onSend (i propagat per routing)
@@ -308,7 +308,7 @@ void _onRoutingTxError(uint16_t id) {
  no és problema ja que per cada tx es programa un callback; així, després n'hi haurà un altre
  Per l'ordre de retransmissió, s'itera de principi a fi, i al principi hi ha els que primer s'han
  enviat; així, també es manté l'ordre */
-void _checkTxQueueMetadata(void) {
+static void _checkTxQueueMetadata(void) {
     for(size_t pos = 0; pos < txQueue.size(); pos++) {
         // Per referència (com si fos un punter) per modificar-ho directament a cua
         transport_tx_metadata& meta = txQueue[pos];
@@ -327,7 +327,7 @@ void _checkTxQueueMetadata(void) {
     _PE("[TRANSPORT] ACK timeout callback without any pending segment. This should not happen. Check guard ms at TOUT");
 }
 
-void _resendSegment(transport_tx_metadata* meta) {
+static void _resendSegment(transport_tx_metadata* meta) {
     meta->isSent = false;
     meta->ackTimeout = -1;
     uint16_t segmentID;
@@ -344,7 +344,7 @@ void _resendSegment(transport_tx_metadata* meta) {
     meta->id = segmentID;
 }
     
-size_t _buildAck(transport_pdu_t* pdu, node_address_t rx, transport_id_t id) {
+static size_t _buildAck(transport_pdu_t* pdu, node_address_t rx, transport_id_t id) {
     pdu->flags.ACKResponse = 1;
     pdu->flags.ACKRequest = 0;
     // pdu->flags.port = 0; // @todo: mirar si utilitzar port 0 per acks?
@@ -355,7 +355,7 @@ size_t _buildAck(transport_pdu_t* pdu, node_address_t rx, transport_id_t id) {
 }
 
 // Notifica recepció de segment a la capa aplicació amb el port corresponent
-void _segmentReceived(transport_port_t port) {
+static void _segmentReceived(transport_port_t port) {
     if(appHandlers[port].onReceive != nullptr) {
         appHandlers[port].onReceive();
     }
@@ -364,13 +364,13 @@ void _segmentReceived(transport_port_t port) {
 // Notifica a capa aplicació amb el port corresponent que s'ha enviat un segment
 // No s'indica quin segment s'ha enviat; la capa d'aplicació no hauria de realitzar
 // més d'una transmissió seguida
-void _segmentSent(transport_port_t port) {
+static void _segmentSent(transport_port_t port) {
     if(appHandlers[port].onSend != nullptr) {
         appHandlers[port].onSend();
     }
 }
 
-void _segmentSentError(transport_port_t port) {
+static void _segmentSentError(transport_port_t port) {
     if(appHandlers[port].onSendError != nullptr) {
         appHandlers[port].onSendError();
     }
