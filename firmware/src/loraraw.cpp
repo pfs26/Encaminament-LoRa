@@ -14,12 +14,11 @@ change LoRa transceivers.
 #include "scheduler.h"
 #include "utils.h"
 
-void _received_lora(void);
-void _onReceive(void);
-int16_t _startReceiving();
-void LoRaRAW_stopReceiving();
-void _checkReceived(void);
-void _printLora(const lora_data_t data, size_t length);
+static void _received_lora(void);
+static void _onReceive(void);
+static int16_t _startReceiving();
+static void _checkReceived(void);
+static void _printLora(const lora_data_t data, size_t length);
 
 volatile bool received = false;
 static lora_callback_t onReceive = nullptr;
@@ -170,7 +169,7 @@ Permet registrar un callback que s'executarà quan es rebi alguna cosa
 */
 void LoRaRAW_onReceive(lora_callback_t cb) { onReceive = cb; }
 
-int16_t _startReceiving() {
+static int16_t _startReceiving() {
     // Activar interrupció en recepció
     radio.setDio1Action(_onReceive);
 
@@ -186,7 +185,7 @@ int16_t _startReceiving() {
 
 // per guardar ISR a RAM per accés més ràpid
 ICACHE_RAM_ATTR
-void _onReceive(void) {
+static void _onReceive(void) {
     // Si es gestionen interrupcions
     // aquí (amb els callbacks), es generen crashes a l'ESP.
     // El temps d'execució dins d'ISR passa a ser molt alt i peta.
@@ -198,14 +197,14 @@ void _onReceive(void) {
     received = true;
 }
 
-void _checkReceived(void) {
+static void _checkReceived(void) {
     if (received) {
         received = false;
         _received_lora();
     }
 }
 
-void _received_lora(void) {
+static void _received_lora(void) {
     /*
     Executat quan es produeix interrupció
     de recepció.
@@ -223,7 +222,7 @@ void _received_lora(void) {
 }
 
 #if LOG_LEVEL <= LOG_LEVEL_INFO
-void _printLora(const lora_data_t data, size_t length) {
+static void _printLora(const lora_data_t data, size_t length) {
     _PI("[LR] Packet: %.*s", length * 2, ([](const lora_data_t data, size_t length) {
         static char hexBuffer[LORA_MAX_SIZE * 2 + 1];
         for (size_t i = 0; i < length; ++i) {
@@ -233,5 +232,5 @@ void _printLora(const lora_data_t data, size_t length) {
     })(data, length));
 }
 #else
-void _printLora(const lora_data_t data, size_t length) {}
+static void _printLora(const lora_data_t data, size_t length) {}
 #endif
