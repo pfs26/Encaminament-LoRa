@@ -26,22 +26,24 @@
 // Aquest define és ÚNICAMENT per tenir-ho tot en un mateix lloc. Incrementar-lo a més de 3 generaria problemes
 // ja que camp que indica reintents a PDU és de 2 bits (i per tant valor màxim 3)
 #define MAC_MAX_RETRIES 3
+
 // Valor màxim de reintents de backoff (Backoff seguirà fent-se, però no augmentarà més, per evitar desbordar uint32 i temps excessiu)
 // Per valor de 10 s'obté un temps màxim aproximat de 100 segons (2^10*100/1000)
 #define MAC_MAX_BEB_RETRY 10
+
 // Slots de temps en ms per BEB. Per MAC_MAX_BEB_RETRY, el temps màxim serà MAC_BEB_SLOT_MS * 2^MAC_MAX_BEB_RETRY
 #define MAC_BEB_SLOT_MS 100 
+
 // Factor de temps addicional per recepció d'ACK, en funció de time on air de la mida d'un ACK enviat (mida headers MAC)
 // Si factor és 5 i time on air és 1ms, el timeout serà de 5 ms (dues vegades el temps esperat, anada+tornada)
 // Inici de TOUT es genera després de realitzat la transmissió
 #define MAC_ACK_TIMEOUT_FACTOR 3
+
 // Número d'IDs de frames anteriors rebuts guardats (per si cal enviar "ACK")
 #define MAC_QUEUE_SIZE 5
+
 // Polinomi per CRC8 (x^8+x^2+1). 
 #define MAC_CRC8_POLY 0x07
-// Percentatge de duty cycle màxim, per complir amb regulacions, en tant per cent. No definir si no es vol complir.
-// Pot donar errors si moltes TX. Millor mantenir comentat. No verificat el seu funcionament. Feina futura o millores
-// #define MAC_DUTY_CYCLE 1
 
 /* =========== */
 /*   ROUTING   */
@@ -54,12 +56,10 @@
 /* ============= */
 // Nombre màxim de reintents si no es rep ACK (i sol·licitat)
 #define TRANSPORT_MAX_RETRIES 3 
-/* Time before an ACK timeout; it shuold consider payload length (including overhead of headers),
-datarate, maximum number of hops, delay between hops (TX+ACK+possible retries), and any other overheads
-After each retry, the delay is doubled, applying an exponential backoff; thus, if the maximum retries
-is set to 5 (6 total attempts), and the initial timeout is 1second, on the last attempt the timeout
-will be set to 1*2^(6-1) sec. The real timeout follows `tout(attempt) = tout_base * 2^(attempt-1)` 
-Value is specified in ms! */
+
+// Temps d'espera d'ACK, en `ms`. Hauria de considerar mida de les dades, número de salts, i altres factors (BEB, reintents, etc.)
+// Després de cada reintent, el temps d'espera incrementa exponencialment. 
+// En un intent de transmissió `r`, i per un temps base `t`, el temps d'espera serà t*2^(r-1) 
 #define TRANSPORT_RETRY_DELAY 10000 
 
 // Mida de cua d'últims segments rebuts, per filtrar repeticions
@@ -101,9 +101,12 @@ Value is specified in ms! */
 /* =========== */
 /*   GENERAL   */
 /* =========== */
-#define LOG_LEVEL 1 // "4 = none; 1 = info; 2 = warn; 3 = err"
+// Nivell d'error per les traces. 4 = Desactivat, 1 = Informació, 2 = Advertència, 3 = Error
+#define LOG_LEVEL 1 
 
-#define SELF_ADDRESS 0x03 // Adreça per defecte del node (uint8_t)
-#define IS_GATEWAY false  // Es un gateway? (true/false) 
+// Adreça del dispositiu (uint8_t)
+#define SELF_ADDRESS 0x03 
+// Especifica si té capacitats LoRaWAN (extensió de gateway)
+#define IS_GATEWAY false  
 
 #endif
