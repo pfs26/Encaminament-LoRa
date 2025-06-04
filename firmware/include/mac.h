@@ -61,18 +61,43 @@ typedef void (*mac_rx_callback_t)();
 // no hauria de suposar un problema si es veu aquest identificador com un de diferent
 typedef void (*mac_tx_callback_t)(uint16_t); 
 
+/// @brief Inicialitza la capa MAC. Ja inicialtiza automàticament capes inferiors
+/// @param selfAddr Adreça del node que s'està inicialitzant. Ha de ser única a la xarxa
+/// @return `true` si s'ha pogut inicialitzar correctament, `false` si no
 bool MAC_init(node_address_t selfAddr);
+
+/// @brief Desinicialitza la capa MAC. Desinicialitza també capes inferiors
 void MAC_deinit();
 
-// ID és un identificador pel frame enviat per ser utilitzat per capes superiors per fer-ne seguiment
-// **NO** té perquè ser igual al mac_id_t!
+/// @brief Envia dades a través de la capa MAC
+/// @param rx Adreça del node receptor. 
+/// @param data Dades a enviar
+/// @param length Longitud de les dades a enviar
+/// @param ID Identificador del frame enviat. Si és `nullptr`, no es retorna cap ID
 mac_err_t MAC_send(node_address_t rx, const mac_data_t data, size_t length, uint16_t* ID = nullptr);
-node_address_t MAC_receive(mac_data_t* data, size_t* length);
-size_t MAC_toReceive();
-bool MAC_isAvailable();
-void MAC_onReceive(mac_rx_callback_t cb);
-void MAC_onSend(mac_tx_callback_t cb);
-void MAC_onTxFailed(mac_tx_callback_t cb);
 
+/// @brief Obté l'últim frame rebut
+/// @param data Apuntador a l'espai on guardar les dades rebudes
+/// @param length Apuntador a la longitud de les dades rebudes
+/// @return Adreça del node emissor de l'últim frame rebut
+node_address_t MAC_receive(mac_data_t* data, size_t* length);
+
+/// @brief Retorna el nombre de frames pendents de ser rebuts per la capa superior
+/// @return Nombre de frames pendents de ser rebuts
+size_t MAC_toReceive();
+
+/// @brief Retorna si la capa MAC està disponible per enviar dades
+/// @return `true` si la capa MAC està disponible per enviar dades, `false` si no
+bool MAC_isAvailable();
+
+/// @brief Registra un callback per a la recepció de dades a la capa MAC
+/// @param cb Callback a executar quan es rebin dades
+void MAC_onReceive(mac_rx_callback_t cb);
+/// @brief Registra un callback per a l'enviament de dades a la capa MAC
+/// @param cb Callback a executar quan es completi l'enviament de dades
+void MAC_onSend(mac_tx_callback_t cb);
+/// @brief Registra un callback per a l'enviament fallit de dades a la capa MAC
+/// @param cb Callback a executar quan es produeixi un error en l'enviament de dades
+void MAC_onTxFailed(mac_tx_callback_t cb);
 
 #endif

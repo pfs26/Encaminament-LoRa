@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "lora.h"
+#include "config.h"
 
 /// @brief Inicialitza i configura LoRaWAN (OOTA i guardar info a NVS)
 bool LW_init();
