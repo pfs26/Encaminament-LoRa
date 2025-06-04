@@ -27,7 +27,6 @@ typedef struct {
     transport_pdu_t pdu;
     uint16_t id;
     node_address_t rx;
-    // size_t dataLength;
     bool isSent = false;
     long ackTimeout = -1;
     uint8_t retries = 0;
@@ -36,7 +35,8 @@ typedef struct {
 
 static std::vector<transport_tx_metadata> txQueue;
 
-static transport_pdu_t rxPDU;
+static transport_pdu_t rxPDU; // PDU per guardar segment rebut
+static node_address_t rxAddress = NODE_ADDRESS_NULL; // Adreça de node que ha enviat el segment rebut
 
 void _onRoutingReceived();
 void _onRoutingSent(uint16_t id);
@@ -68,7 +68,7 @@ bool Transport_init(node_address_t selfAddr, bool is_gateway) {
     Routing_onSend(_onRoutingSent);
     Routing_onTxError(_onRoutingTxError);
 
-    // @todo: veure si ajuda o no
+    // Permet reservar memòria només iniciar. Avantatge que no cal realloc inicialment per cada segment
     // txQueue.reserve(10);
 
     _PI("[TRANSPORT] Initialized");
@@ -120,8 +120,6 @@ transport_err_t Transport_send(node_address_t rx, transport_port_t port, const t
         return TRANSPORT_ERR;
     }
 
-    // Només ens interessa guardar info si demana ACK
-
     // Guardem metadades per poder notificar sobre esdeveniments a capa superior
     transport_tx_metadata pduMeta;
     pduMeta.pdu = pdu;
@@ -139,8 +137,7 @@ node_address_t Transport_receive(transport_port_t* port, transport_data_t* data,
     *port = rxPDU.flags.port;
     *length = rxPDU.dataLength;
     memcpy(data, rxPDU.data, *length);
-    // @todo: no implementat; potser no cal ja que és tasca de capa inferior
-    return NODE_ADDRESS_NULL;
+    return rxAddress;
 }
 
 bool Transport_onEvent(transport_port_t port,
@@ -155,8 +152,6 @@ bool Transport_onEvent(transport_port_t port,
     transport_app_handlers handler = appHandlers[port];
 
     if(handler.onReceive || handler.onSend || handler.onSendError) {
-    // if(handler.onReceive || handler.onSendTCP || handler.onSendErrorTCP || 
-    //    handler.onSendUDP || handler.onSendErrorUDP) {
         _PW("[TRANSPORT] Port %d already in use", port);
         return false;
     }
@@ -182,7 +177,7 @@ void _onRoutingReceived() {
 
     transport_pdu_t pdu;
     size_t RoutingLength;
-    node_address_t rx = Routing_receive((routing_data_t*)&pdu, &RoutingLength);
+    rxAddress = Routing_receive((routing_data_t*)&pdu, &RoutingLength);
 
     // La mida ha de ser com a mínim la del header, si no no és vàlid
     if (RoutingLength < TRANSPORT_HEADER_SIZE) {
@@ -196,8 +191,8 @@ void _onRoutingReceived() {
     if (pdu.flags.ACKRequest) { 
         _PI("[TRANSPORT] ACK requested for segment %d", pdu.ID);
         transport_pdu_t ack;
-        size_t length = _buildAck(&ack, rx, pdu.ID);
-        routing_err_t state = Routing_send(rx, (const uint8_t*) &ack, length);
+        size_t length = _buildAck(&ack, rxAddress, pdu.ID);
+        routing_err_t state = Routing_send(rxAddress, (const uint8_t*) &ack, length);
     }
     else {
         _PI("[TRANSPORT] ACK not requested for segment %d", pdu.ID);
@@ -322,7 +317,6 @@ void _checkTxQueueMetadata(void) {
                 _PW("[TRANSPORT] Max retries for segment %d reached", meta.id);
                 txQueue.erase(txQueue.begin() + pos);
                 _segmentSentError(meta.pdu.flags.port); // Notificar a capa superior que no s'ha pogut enviar
-                // @todo: potser caldria notificar a capa superior que no s'ha pogut enviar?
                 return;
             }
             _PI("[TRANSPORT] ACK timeout for segment %d. Retrying... (retry %d)", meta.id, meta.retries);
@@ -360,17 +354,7 @@ size_t _buildAck(transport_pdu_t* pdu, node_address_t rx, transport_id_t id) {
     return TRANSPORT_HEADER_SIZE;
 }
 
-
-#if LOG_LEVEL <= LOG_LEVEL_INFO
-void _printSegment(const transport_pdu_t* const pdu) {
-    // Mostra info de PDU en format maco.
-    _PI("[TRANSPORT] SEGMENT: ID=%d PORT=%d ACKreq=%d ACKResp=%d D-LEN=%d DATA=%.*s", 
-        pdu->ID, pdu->flags.port, pdu->flags.ACKRequest, pdu->flags.ACKResponse, pdu->dataLength, pdu->dataLength, pdu->data);
-}
-#else
-void _printSegment(const transport_pdu_t* const pdu) {}
-#endif
-
+// Notifica recepció de segment a la capa aplicació amb el port corresponent
 void _segmentReceived(transport_port_t port) {
     if(appHandlers[port].onReceive != nullptr) {
         appHandlers[port].onReceive();
@@ -391,3 +375,13 @@ void _segmentSentError(transport_port_t port) {
         appHandlers[port].onSendError();
     }
 }
+
+#if LOG_LEVEL <= LOG_LEVEL_INFO
+void _printSegment(const transport_pdu_t* const pdu) {
+    // Mostra info de PDU en format maco.
+    _PI("[TRANSPORT] SEGMENT: ID=%d PORT=%d ACKreq=%d ACKResp=%d D-LEN=%d DATA=%.*s", 
+        pdu->ID, pdu->flags.port, pdu->flags.ACKRequest, pdu->flags.ACKResponse, pdu->dataLength, pdu->dataLength, pdu->data);
+}
+#else
+void _printSegment(const transport_pdu_t* const pdu) {}
+#endif

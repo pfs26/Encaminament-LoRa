@@ -53,6 +53,7 @@ bool Routing_init(node_address_t selfAddr, bool is_gateway) {
     }
 
     // Potser reservar memòria per un número N de paquets, amb possibilitat d'augmentar dinàmicament
+    // Avantatge que no cal fer realloc cada cop
     // higherLayerPackets.reserve(10);
 
     MAC_onReceive(_onMacReceived);
