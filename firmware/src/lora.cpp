@@ -7,6 +7,7 @@
 #include "utils.h"
 #include "lora.h"
 
+// NO static, s'utilitza globalment a fitxers LoRa per inicialització
 bool isLoraInitialized = false;
 
 // No static, ja que és la mateixa radio utilitzada pels dos LoRa (RAW i WAN)
