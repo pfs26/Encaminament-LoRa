@@ -7,8 +7,8 @@ static Preferences preferences;
 static routing_entry_t* RoutingTable; 
 static int RoutingTableSize = 0;
 
-int _getIndexInRoutingTable(node_address_t dst);
-bool _saveTableToNVS();
+static int _getIndexInRoutingTable(node_address_t dst);
+static bool _saveTableToNVS();
 
 
 bool RoutingTable_init() {
@@ -165,7 +165,7 @@ bool RoutingTable_updateRoute(node_address_t dst, node_address_t nextHop) {
     return false;
 }
 
-int _getIndexInRoutingTable(node_address_t dst) {
+static int _getIndexInRoutingTable(node_address_t dst) {
     for (int i = 0; i < RoutingTableSize; ++i) {
         if (RoutingTable[i].dst == dst) {
             return i;
@@ -174,7 +174,7 @@ int _getIndexInRoutingTable(node_address_t dst) {
     return -1;
 }
 
-bool _saveTableToNVS() {
+static bool _saveTableToNVS() {
     // Guardar taula de rutes a NVS. Verifica que l'escriptura sigui la correcta
     int bWritten = preferences.putBytes("routingTable", (uint8_t*)RoutingTable, RoutingTableSize * sizeof(routing_entry_t));
     if (bWritten != RoutingTableSize * sizeof(routing_entry_t)) {
