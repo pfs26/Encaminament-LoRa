@@ -178,8 +178,6 @@ int16_t _startReceiving() {
     int16_t state = radio.startReceive();
     if (state != RADIOLIB_ERR_NONE) {
         _PW("[LR] Couldn't start receiving (code = %d)", state);
-        // TODO: Potser és interessant fer reset de radio, per si queda
-        // bloquejada?
         return _startReceiving();
     }
     _PI("[LR] Started Receiving");
@@ -233,12 +231,6 @@ void _printLora(const lora_data_t data, size_t length) {
         }
         return hexBuffer;
     })(data, length));
-    // Serial.print("[LR] Packet's data: ");
-    // for (uint8_t i = 0; i < length; ++i) {
-    //     Serial.printf("%02X", ((char*)data)[i]);
-    // }
-    // Serial.printf(" (%d)", length);
-    // Serial.println();
 }
 #else
 void _printLora(const lora_data_t data, size_t length) {}

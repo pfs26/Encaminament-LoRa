@@ -208,12 +208,10 @@ static void _preparePDU(mac_pdu_t* pdu, node_address_t rx, const mac_data_t data
     pdu->tx = self;
     pdu->rx = rx;
     pdu->id = isAck ? PDUtoACK->id : (retry > 0 ? txPDU.id : _getRandomID()); // si ACK, utilitzem PDU donada; si retry > 0, no modifiquem ID
-    // pdu->id = isAck ? PDUtoACK->id+self : (retry > 0 ? txPDU.id : _getRandomID()); // versió anterior on ID = ID + ID_rx
     pdu->flags.isACK = isAck;
     pdu->flags.retry = retry;
     pdu->flags.reserved = 0b11111;
     pdu->dataLength = length;
-    // strcpy((char*)pdu->data, (char*)data); @todo: revisar per si mai falla, abans estava així i no sé perque ho vaig posar
     memcpy((char*)pdu->data, (char*)data, length);
     pdu->crc = _computeCRC(pdu);
 }
@@ -281,7 +279,6 @@ static mac_id_t _getRandomID() { return (mac_id_t)random(1, (1 << (8 * sizeof(ma
 // A més, és necessari que l'estat de capa MAC sigui esperant ACK
 static bool _is_ack_valid(const mac_pdu_t * const pdu) {
     return pdu->flags.isACK && pdu->tx == txPDU.rx && pdu->id == txPDU.id && fsmState == mac_state_t::WAIT_ACK_S;
-    // return pdu->flags.isACK && pdu->tx == txPDU.rx && pdu->id == txPDU.id + txPDU.rx && fsmState == mac_state_t::WAIT_ACK_S;
 }
 
 /* *************************** */
@@ -356,7 +353,6 @@ static void _onLoraReceived(void) {
             // Prioritats no utilitzades (de moment) per res; per defecte a baixa
             MACbuff_pushRx(receivedPDU, MACBUFF_PRIORITY_LOW); // Guardar recepció a buffer
 
-            // @todo: Potser es pot programar amb scheduler per sortir-ne abans?
             _received_mac(); // Notificar capa superior de nova recepció
         }
     }
@@ -371,8 +367,6 @@ static void _onLoraReceived(void) {
 static void _mac_fsm(mac_event_t e) {
     // Obtenim estat canal per poder-ho utilitzar com a esdeveniment (aplicar beb)
     lora_event_t lora_e = (lora_event_t)LoRaRAW_isAvailable();
-    // lora_e = lora_event_t (random(0, 3)/2); // FICTICI, ELIMINAR, NOMÉS PER SIMULAR ESTAT CANAL (33%)
-    // _PI("[MAC] FSM:\tSTATE %d\tMAC %d\tLORA %d", fsmState, e, lora_e);
     
     switch (fsmState) {
         case IDLE_S:
@@ -493,18 +487,14 @@ static bool _attempt_transmission(uint8_t retry_count) {
 }
 
 // Inicia recepció d'ACK, calculant timeout
-// @todo: potser es pot introduir una mica d'aleatorietat, per evitar col·lisions múltiples
-// si dos nodes intenten enviar just a la mateixa vegada? Reintents els farien al mateix temps sino
 static void _setup_ack_reception(void) {
     fsmState = WAIT_ACK_S;
 
     LoRaRAW_startReceiving();
     
     // Calcula i programa timeout
-    // long airtime_us = LoRaRAW_getTimeOnAir(txPDU.dataLength + MAC_PDU_HEADER_SIZE);
     long ack_airtime_us = LoRaRAW_getTimeOnAir(MAC_PDU_HEADER_SIZE);
 
-    // uint32_t timeout_ms = 3 * MAC_ACK_TIMEOUT_FACTOR * ack_airtime_us / 1000;
     uint32_t timeout_ms = MAC_ACK_TIMEOUT_FACTOR * ack_airtime_us / 1000;
     txTimeoutTask = scheduler_once(_mac_fsm_event_tout_ack, timeout_ms);
     _PI("[MAC] Timeout d'ACK: %dms (%dus airtime)", timeout_ms, ack_airtime_us);
@@ -563,11 +553,6 @@ static void _printPDU(const mac_pdu_t* const pdu) {
     // Intenta mostrar en ASCII; mostra també en HEX per si caràcters no imprimibles4
     _PI("[MAC] FRAME: TX=%02X RX=%02X ID=%d D-LEN=%d DATA=%.*s CRC=%d ACK=%d RETRY=%d", 
         pdu->tx, pdu->rx, pdu->id, pdu->dataLength, pdu->dataLength, pdu->data, pdu->crc, pdu->flags.isACK, pdu->flags.retry);
-    // Serial.printf("===== PDU =====\nTX\t%d\nRX\t%d\nID\t%d\nD-LEN\t%d\nDATA\t%.*s\nD-HEX\t", 
-    // pdu->tx, pdu->rx, pdu->id, pdu->dataLength, pdu->dataLength, pdu->data);
-    // for (int i = 0; i < pdu->dataLength; i++) 
-    //     Serial.printf("%02X ", pdu->data[i]); 
-    // Serial.printf("\nCRC\t%d\nACK\t%d\nRETRY\t%d\n===============\n", pdu->crc, pdu->flags.isACK, pdu->flags.retry);
 }
 #else
 static void _printPDU(const mac_pdu_t* const pdu) {}

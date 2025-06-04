@@ -184,29 +184,3 @@ bool _saveTableToNVS() {
     _PI("[RTABLE] Routing table saved to NVS (Bytes written: %d)", bWritten);
     return true;
 }
-
-// void setup() {
-//     Serial.begin(115200);
-//     RoutingTable_init();
-//     RoutingTable_print();
-//     RoutingTable_addRoute(0x01, 0x02);
-//     RoutingTable_print();
-//     RoutingTable_addRoute(0x03, 0x02);
-//     RoutingTable_print();
-//     RoutingTable_addRoute(0x04, 0x03);
-//     RoutingTable_print();
-//     RoutingTable_removeRoute(0x03);
-//     RoutingTable_print();
-//     node_address_t nextHop = RoutingTable_getRoute(0x04);
-//     Serial.printf("Next hop for 0x04: 0x%02X\n", nextHop);
-//     nextHop = RoutingTable_getRoute(0x02);
-//     Serial.printf("Next hop for 0x02: 0x%02X\n", nextHop);
-//     RoutingTable_updateRoute(0x04, 0x01);
-//     RoutingTable_print();
-//     nextHop = RoutingTable_getRoute(0x04);
-//     Serial.printf("Next hop for 0x04: 0x%02X\n", nextHop);
-// }
-
-// void loop() {
-
-// }

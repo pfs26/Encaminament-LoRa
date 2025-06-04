@@ -120,7 +120,6 @@ bool LW_send(const lora_data_t data, size_t length, uint8_t port, bool confirmed
     bool reused = _reuseSession();
     if(!reused) {
         _PW("[LW] Could not restore session");
-        // LW_init(); // @todo: potser abans deinit; retornar error i programar amb scheduler
         returnState = false;
     }
 

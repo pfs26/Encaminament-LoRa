@@ -5,7 +5,6 @@
 #include "utils.h"
 #include "sleep.h"
 
-// #if true
 #if IS_GATEWAY
     #define NODE_ADDRESS 0x02
 #else
