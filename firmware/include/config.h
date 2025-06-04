@@ -45,6 +45,10 @@
 // Polinomi per CRC8 (x^8+x^2+1). 
 #define MAC_CRC8_POLY 0x07
 
+// NO verificat. Implementació molt bàsica. Limita el temps de cicle d'un node per evitar superar el limit de temps d'airtime. En %.
+// No definir per no utilitzar-lo. 
+// #define MAC_DUTY_CYCLE 0
+
 /* =========== */
 /*   ROUTING   */
 /* =========== */
