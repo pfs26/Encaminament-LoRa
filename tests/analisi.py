@@ -5,7 +5,7 @@ from datetime import datetime
 
 # Nom del fitxer amb el log
 # Si genera error de "frozen codecs", eliminar les primeres files generades per picocom
-NOM_LOG = "testTimeout1Minut/listener.log"
+NOM_LOG = "test5Minuts/listener.log"
 
 # Aplicar regex per buscar sleep stats al log
 pattern = re.compile(
@@ -95,6 +95,7 @@ axes[0].scatter(
 # sync/done time
 axes[1].plot(df["timestamp"], df["done_time"], label="Done Time")
 axes[1].plot(df["timestamp"], df["sync_time"], label="Sync Time")
+axes[1].axhline(df["done_time"].mean(), color='red', linestyle='--', label=f"Done mean ({df['done_time'].mean():.2f} ms)")
 axes[1].set_ylabel("Time (ms)")
 axes[1].legend()
 axes[1].grid(True)
@@ -121,3 +122,42 @@ plt.show()
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 print(df)
+
+
+
+CONSUM_NORMAL = 78.3  # mA
+CONSUM_SLEEP = 11.3   # mA
+
+# Calcula el consum d'un cicle, a partir del temps de cicle i del temps done
+df["consum_cicle"] = ((df["done_time"] / 1000) * CONSUM_NORMAL + (df["sleep_time"] / 1000) * CONSUM_SLEEP)/3600
+
+# plot consum
+fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(14, 6))
+ax[0].plot(df["timestamp"], df["consum_cicle"], label="Consum per cicle", color='blue')
+ax[0].axhline(df["consum_cicle"].mean(), color='red', linestyle='--', label=f"Mean {df['consum_cicle'].mean():.2f} mA")
+ax[0].set_ylabel("Consumption (mA)")
+ax[0].set_title("Consum per cicle")
+ax[0].legend()
+ax[0].grid(True)
+
+# Grafic consum esperat per diferents cicles
+T_VALUES = [i*60 for i in range(1, 60)]  # Temps a calcular consum, en ms. 
+DONE_TIME = df["done_time"].mean()  # in ms
+expected_consumptions = {}
+normal_consumptions = {T: T*CONSUM_NORMAL/3600 for T in T_VALUES}
+reduccions = {}
+for T in T_VALUES:
+    expected_consumptions[T] = CONSUM_NORMAL * (DONE_TIME / 1000)/3600  + CONSUM_SLEEP* (T - DONE_TIME/1000) / 3600
+    reduccions[T] = (normal_consumptions[T] - expected_consumptions[T]) / normal_consumptions[T] * 100
+    
+ax[1].plot([i/60 for i in reduccions.keys()], reduccions.values(), label="Reducció consum", color='orange')
+ax[1].legend()
+ax[1].grid(True)
+ax[1].set_xlabel("Temps cicle (minuts)")
+ax[1].set_ylabel("Reducció (%)")
+ax[1].set_title("Reducció consum per diferents cicles")
+ax[1].axvline(df["cycle_time"].mean() / 60000, color='red', linestyle='--', label='Mitjana cicle real')
+ax[1].legend()
+plt.show()
+
+print(f"Average cycle consumption: {df['consum_cicle'].mean():.2f} mA")
