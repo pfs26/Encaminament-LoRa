@@ -1,9 +1,7 @@
-# LoRa Mesh Network Protocol
+# LoRa Static Routing Protocol for Monitoring Applications
+This work presents the design and implementation of a modular and layered communication protocol based on LoRa and static routing, intended for monitoring device networks in extensive or isolated environments, where human presence is limited. The goal is to reduce the dependency on LoRaWAN gateways, taking advantage of the fact that devices are usually static and allow the use of predefined communication routes.
 
-## Overview
-This project implements a **custom LoRa-based mesh network protocol** designed for **low-power, long-range communications** in remote environments. The protocol operates over **LoRa (SX1262 transceivers)** using the **RadioLib library**, ensuring efficient packet transmission, relay, and acknowledgment.
-
-The system features a **static routing mechanism**, **adaptive retransmission strategies**, **CSMA-based channel access**, and **error detection** to enhance network reliability.
+An application optimized for linear networks -a topology particularly useful in railway lines or tunnels- has been developed based on this protocol. It focuses on minimizing the energy consumption of the devices through a synchronization strategy between nodes, which allows coordinating transmissions and reducing the active time of the devices, without compromising reliability or the routing mechanisms provided by the protocol. The conducted tests have demonstrated that the proposed solution is viable, scalable, and efficient in environments where energy consumption and coverage are critical.
 
 ## Features
 - **Custom LoRa MAC Protocol**
@@ -20,7 +18,11 @@ The system features a **static routing mechanism**, **adaptive retransmission st
 - **LoRaWAN Relaying**
   - Nodes with LoRaWAN access can relay packets to the gateway
   - Handles end-to-end acknowledgment since LoRaWAN gateways cannot do this natively
-  
+
+- **Transport Layer**
+  - Allows for optional end-to-end reliability
+  - Segment deduplication 
+
 - **Application Layer**
   - User-defined and fully customizable
   - Includes built-in low-power management, to be run on port `0x01`
@@ -32,8 +34,8 @@ The system features a **static routing mechanism**, **adaptive retransmission st
 │   ├── src/           # LoRa protocol implementation
 │   ├── include/       # Header files
 │   ├── config/        # LoRa settings
-│   └── main.cpp       # Entry point
-├── memoria/           # Design and code documentation
+├── tests/             # Tests and results, done during validation
+├── memoria/           # Design and code documentation (.tex format)
 └── README.md          # This file
 ```
 
