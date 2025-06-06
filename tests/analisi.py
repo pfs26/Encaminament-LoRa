@@ -141,7 +141,7 @@ ax[0].legend()
 ax[0].grid(True)
 
 # Grafic consum esperat per diferents cicles
-T_VALUES = [i*60 for i in range(1, 60)]  # Temps a calcular consum, en ms. 
+T_VALUES = [i*60 for i in range(1, 60)]  # Temps a calcular consum, en s. 
 DONE_TIME = df["done_time"].mean()  # in ms
 expected_consumptions = {}
 normal_consumptions = {T: T*CONSUM_NORMAL/3600 for T in T_VALUES}
