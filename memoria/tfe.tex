@@ -138,7 +138,6 @@
 % Indica quines bd bibliografiques usarem
 \addbibresource{tfe.bib}
 
-% \title{Disseny d'un protocol LoRa amb encaminament estàtic per aplicacions de monitoratge}
 \title{Disseny d'un protocol LoRa amb encaminament estàtic per aplicacions de monitoratge}
 \subtitle{Aplicació en xarxes de baix consum}
 % \subtitle{Adaptació per a escenaris de baix consum mitjançant sincronització temporal}
@@ -169,7 +168,7 @@ Sobre aquest protocol s'ha desenvolupat una aplicació optimitzada per a xarxes 
 
 
 \begin{abstract}
-This work presents the design and implementation of a modular and layered communication protocol based on LoRa and static routing, intended for monitoring device networks in extensive or isolated environments, where human presence is limited. The goal is to reduce the dependency on LoRaWAN gateways, taking advantage of the fact that devices are usually static and allow the use of predefined communication routes.
+This work presents the design and implementation of a modular and layered communication protocol based on LoRa and static routing, intended for monitoring device networks in extensive or isolated environments, where human presence is limited. The goal is to reduce the dependency on LoRaWAN \est{gateways}, taking advantage of the fact that devices are usually static and allow the use of predefined communication routes.
 
 An application optimized for linear networks ---a topology particularly useful in railway lines or tunnels--- has been developed based on this protocol. It focuses on minimizing the energy consumption of the devices through a synchronization strategy between nodes, which allows coordinating transmissions and reducing the active time of the devices, without compromising reliability or the routing mechanisms provided by the protocol. The conducted tests have demonstrated that the proposed solution is viable, scalable, and efficient in environments where energy consumption and coverage are critical.
 \end{abstract}
@@ -186,7 +185,7 @@ Tecnologies com LoRaWAN han guanyat protagonisme en aquests escenaris, gràcies 
 
 Aquest treball té com a objectiu dissenyar una solució per a xarxes de dispositius de monitoratge que permeti reduir la dependència dels \est{gateways}, partint de la premissa que aquestes xarxes són, en general, estàtiques, cosa que permet utilitzar rutes de comunicació prèviament definides. 
 
-El resultat del treball ha sigut el disseny i desenvolupament d'un protocol de comunicació fiable i modular, basat en tecnologia LoRa, amb encaminament estàtic i compatible amb LoRaWAN. A més, s'ha implementat una aplicació de baix consum energètic, construïda sobre aquest protocol, dissenyada específicament per a topologies lineals i basada en una estratègia de sincronització entre dispositius. 
+El resultat del treball ha estat el disseny i desenvolupament d'un protocol de comunicació fiable i modular, basat en tecnologia LoRa, amb encaminament estàtic i compatible amb LoRaWAN. A més, s'ha implementat una aplicació de baix consum energètic, construïda sobre aquest protocol, dissenyada específicament per a topologies lineals i basada en una estratègia de sincronització entre dispositius. 
 
 Les validacions s'han dut a terme en un entorn controlat, simulant escenaris reals, i han demostrat que el protocol és capaç de transmetre dades de manera fiable i eficient. A més, l'aplicació de baix consum energètic ha demostrat una reducció significativa en el consum dels dispositius finals.
 
@@ -232,7 +231,7 @@ Els termes \emph{LoRa} i \emph{LoRaWAN} sovint es confonen i s'utilitzen ambdós
 \subsection{LoRa}
 El nom de \emph{LoRa} prové de l'anglès \est{Long Range}. És una tecnologia de comunicació sense fils, de llarg abast, i de baix consum, fent que sigui especialment útil per a aplicacions d'Internet de les Coses (\acro{iot}). Va ser desenvolupada per \emph{Cycleo}, que va ser adquirida per \emph{Semtech} el 2012.
 
-Utilitza freqüència sub-GHz en bandes \acro{ism} ---\emph{Industrial, Scientific and Medical}---, que són bandes de freqüència lliures de llicència. Això permet que qualsevol persona pugui utilitzar la tecnologia sense necessitat d'obtenir una llicència. Malgrat això, existeixen limitacions legals, com la potència màxima de transmissió o la quantitat de dades que es poden transmetre en un període de temps determinat. Per a més informació, es pot consultar \ref{subsec:limitacions_legals}.
+Utilitza freqüències sub-GHz en bandes \acro{ism} ---\emph{Industrial, Scientific and Medical}---, que són bandes de freqüència lliures de llicència. Això permet que qualsevol persona pugui utilitzar la tecnologia sense necessitat d'obtenir una llicència. Malgrat això, existeixen limitacions legals, com la potència màxima de transmissió o la quantitat de dades que es poden transmetre en un període de temps determinat. Per a més informació, es pot consultar \ref{subsec:limitacions_legals}.
 
 Per assolir una comunicació de llarg abast, LoRa utilitza modulació de \emph{chirp spread spectrum} (\acro{css}), que permet una comunicació robusta i fiable en entorns amb interferències. Aquesta modulació es basa a codificar cada símbol com un senyal que s'escampa per tota l'amplada de banda disponible, augmentant (o disminuint) de forma lineal la freqüència al llarg del temps. Gràcies al fet que la freqüència varia de forma lineal, també és resistent a l'efecte \emph{Doppler}, com s'ha estudiat a \cite{doroshkin_experimental_2019}. Una representació visual del funcionament de la modulació \acro{css} es pot veure a \cite{richard_wenner_lora_2017}.
 
@@ -244,7 +243,7 @@ Consta de diversos paràmetres que es poden ajustar per adaptar la comunicació 
     \item \emph{Coding Rate}. La taxa de codificació (\acro{cr}) defineix la proporció d'informació útil que es transmet en comparació amb la quantitat total de dades enviades. Els possibles valors són $\frac{4}{5}$, $\frac{4}{6}$, $\frac{4}{7}$ i $\frac{4}{8}$. Així, per un \acro{cr} de $\frac{4}{5}$, per cada quatre bits d'informació útil, se n'afegeix un de redundància.
 \end{itemize}
 
-Tots aquests paràmetres estan relacionats entre ells, i és important trobar un equilibri entre ells per aconseguir la millor comunicació possible. Per exemple, si es vol obtenir una comunicació de llarg abast, es pot augmentar el \acro{sf} i el \acro{cr}. Això reduirà la velocitat de transmissió i, per tant, augmentarà el consum energètic, ja que serà necessari estar transmetent més temps. En canvi, si es vol una comunicació ràpida, es pot reduir el \acro{sf} i augmentar el \acro{bw}, però això reduirà el rang de comunicació.
+Tots aquests paràmetres estan relacionats entre ells, i és important trobar-hi un equilibri per aconseguir la millor comunicació possible. Per exemple, si es vol obtenir una comunicació de llarg abast, es pot augmentar el \acro{sf} i el \acro{cr}. Això reduirà la velocitat de transmissió i, per tant, augmentarà el consum energètic, ja que serà necessari estar transmetent més temps. En canvi, si es vol una comunicació ràpida, es pot reduir el \acro{sf} i augmentar el \acro{bw}, però això reduirà el rang de comunicació.
 
 Amb una configuració adequada, es poden aconseguir comunicacions de fins a quinze quilòmetres en entorns rurals, i amb una vida útil de les bateries de diversos mesos i anys, com especifica Semtech a \cite{noauthor_lora_2024}.
 
@@ -277,7 +276,7 @@ Els dispositius finals poden operar en tres modes diferents, coneguts com a \emp
     \item \emph{Classe C}. Obren també dues finestres de recepció després d'un \est{uplink}, amb la diferència que la segona finestra es manté oberta fins a la següent transmissió. Així, es pot considerar que aquests dispositius sempre estan rebent, amb l'excepció de quan transmeten. La latència de recepció de \est{downlinks} és la mínima d'entre les tres classes, però el consum energètic és màxim.
 \end{itemize}
 
-Una altra característica important de LoRaWAN és la seva capacitat d'autoajustament, conegut com a \acro{adr} (\est{Adaptative Data Rate}). Els dispositius finals poden ajustar automàticament els paràmetres de comunicació, com el \acro{sf} o la potència de transmissió, per adaptar-se a les condicions del canal de comunicació. Quan s'utilitza, el servidor de la xarxa pot indicar als dispositius finals quins paràmetres utilitzar, reduint el consum energètic i possibles interferències amb altres dispositius. Per exemple, un dispositiu molt proper a un \est{gateway} hauria d'utilitzar \acro{sf} més baix, mentre que dispositius llunyans n'haurien d'utilitzar de més elevats.
+Una altra característica important de LoRaWAN és la seva capacitat d'autoajustament, conegut com a \acro{adr} (\est{Adaptive Data Rate}). Els dispositius finals poden ajustar automàticament els paràmetres de comunicació, com el \acro{sf} o la potència de transmissió, per adaptar-se a les condicions del canal de comunicació. Quan s'utilitza, el servidor de la xarxa pot indicar als dispositius finals quins paràmetres utilitzar, reduint el consum energètic i possibles interferències amb altres dispositius. Per exemple, un dispositiu molt proper a un \est{gateway} hauria d'utilitzar \acro{sf} més baix, mentre que dispositius llunyans n'haurien d'utilitzar de més elevats.
 
 \subsection{The Things Network}
 Es tracta d'un projecte d'\acro{iot} que proporciona un servidor de xarxa públic i gratuït. El seu objectiu és crear una xarxa global de dispositius LoRaWAN, que permet la comunicació entre ells sense necessitat d'infraestructura pròpia. Els usuaris poden connectar els seus \est{gateways} a la xarxa i compartir la seva cobertura amb altres usuaris. Es pot consultar tota la seva documentació, que inclou referències de LoRaWAN, a \cite{the_things_network_lorawan_nodate}.
@@ -290,13 +289,13 @@ Com s'ha comentat anteriorment, LoRa utilitza bandes de freqüència lliures de 
 
 Pel que fa a la Unió Europea, l'entitat responsable de la regulació de les comunicacions és l'\acro{etsi} (\est{European Telecommunications Standards Institute}). Estableix l'ús de LoRa en les freqüències entre \SI{863}{\MHz} i \SI{870}{\MHz}, amb una amplada de banda màxima de \SI{250}{\kHz}.
 
-A més, estableix un límit de potència màxima de transmissió, i un màxim d'utilització del canal. Aquestes limitacions depenen de la subbanda utilitzada (dins el rang anteriorment mencionat), però de forma genèrica es considera una potència màxima de \SI{16}{\deci\bel\text{m}}, i una utilització màxima del canal (conegut com a \emph{duty cyle}) de l'\SI{1}{\%}. Així, per cada hora de funcionament, poden transmetre un màxim de 36 segons. Tots els detalls sobre les limitacions legals a la Unió Europea es poden consultar a \cite{etsi_etsi_nodate}.
+A més, estableix un límit de potència màxima de transmissió, i un màxim d'utilització del canal. Aquestes limitacions depenen de la subbanda utilitzada (dins el rang anteriorment mencionat), però de forma genèrica es considera una potència màxima de \SI{16}{\deci\bel\text{m}}, i una utilització màxima del canal (conegut com a \emph{duty cycle}) de l'\SI{1}{\%}. Així, per cada hora de funcionament, poden transmetre un màxim de 36 segons. Tots els detalls sobre les limitacions legals a la Unió Europea es poden consultar a \cite{etsi_etsi_nodate}.
 
 Si s'utilitza un servidor de xarxa públic com \emph{The Things Network}, és important tenir en compte que aquest també pot aplicar limitacions addicionals. Pel que fa a \acro{ttn}, estableix una política d'ús just (\emph{fair use policy}) que limita l'ús del canal en 30 segons per dispositiu final i dia. A més, s'estableix un límit de deu \est{downlinks} per dispositiu i dia. És important tenir aquestes limitacions en compte en dissenyar un sistema; en cas d'incompliment, el servidor de xarxa podria bloquejar l'accés del dispositiu final.
 
 \section{Treballs relacionats}
 \label{sec:treballs_relacionats}
-Existeixen diversos projectes amb un objectiu similar al d'aquest treball, com ara \emph{Meshtastic} o \emph{LoRaMesher}. Tots dos projectes utilitzen LoRa per crear xarxes de comunicació entre dispositius finals, però presenten diferències amb els objectius d'aquest treball. A més, consten també de limitacions, a les quals se'ls vol donar solució. En aquest apartat es presenten ambdós projectes, amb les seves característiques i limitacions, així com diferències vers el treball presentat.
+Existeixen diversos projectes amb un objectiu similar al d'aquest treball, com ara \emph{Meshtastic} o \emph{LoRaMesher}. Tots dos projectes utilitzen LoRa per crear xarxes de comunicació entre dispositius finals, però presenten diferències amb els objectius d'aquest treball. A més, consten també de limitacions, a les quals se'ls vol donar solució. En aquest apartat es presenten ambdós projectes, amb les seves característiques i limitacions, així com diferències respecte del treball presentat.
 
 \subsection{Meshtastic}
 Es tracta d'un projecte de codi obert que té com a objectiu crear una xarxa de comunicació descentralitzada, i pensada per a ser utilitzada en dispositius de baix consum i cost. El seu repositori es troba disponible a \href{https://github.com/meshtastic}{GitHub}.
@@ -307,14 +306,14 @@ L'estratègia d'encaminament que utilitza es basa en «inundació» (\est{floodi
 
 Per intentar reduir aquest efecte, implementa un estil d'«inundació controlada». Quan un dispositiu rep un missatge, espera un temps proporcional a la relació senyal soroll (\acro{snr}) del missatge rebut abans de retransmetre, i cance\l.la l'enviament si un node realitza la transmissió abans. Així, un dispositiu més proper a l'origen (major \acro{snr}) esperarà més temps que un de llunyà i, per tant, el missatge el retransmetrà únicament el dispositiu llunyà. És cert que això redueix el nombre de transmissions que realitza cada dispositiu, però no evita que el missatge es retransmeti per tota la xarxa. 
 
-Un altre inconvenient és que, a causa que els dispositius no saben quan altres dispositius realitzaran una transmissió, hagin d'estar sempre actius i en mode de recepció. Això provoca que el consum dels dispositius sigui més elevat, fent-los poc adequats per aplicacions de monitoratge on no es pot assegurar el subministrament energètic.
+Un altre inconvenient és que, a causa que els dispositius no saben quan altres dispositius realitzaran una transmissió, hagin d'estar sempre actius i en mode de recepció. Això provoca que el consum dels dispositius sigui més elevat, fent-los poc adequats per a aplicacions de monitoratge on no es pot assegurar el subministrament energètic.
 
 Durant el desenvolupament d'aquest treball, Meshtastic ha iniciat la implementació d'un protocol d'encaminament per a missatges entre dos únics dispositius. La idea d'aquest protocol és descobrir la ruta més òptima entre dos dispositius utilitzant el mecanisme d'«inundació controlada»; un cop el destí rep el missatge, respon amb un nou missatge amb la informació de la ruta, que conté tots els dispositius que han de retransmetre el missatge per arribar fins a ell. En el procés de fer arribar aquesta resposta al transmissor del missatge, tots els nodes intermedis poden generar la seva taula de rutes. En les següents transmissions, si es coneix la ruta, els missatges els reenvien únicament els nodes de la ruta. Els detalls de la implementació i funcionament d'aquest protocol es poden consultar a \cite{open_source_mesh_nodate}.
 
 \subsection{LoRaMesher}
 Es tracta d'una llibreria que implementa un protocol d'encaminament per a ser utilitzat en xarxes basades en LoRa. 
 
-Cada dispositiu consta d'una taula d'encaminament, on es defineixen quin és el següent dispositiu a qui han d'enviar un missatge per fer-lo arribar al destí final. De forma periòdica, cada node transmet informació sobre la seva taula d'encaminament; els nodes que es troben a l'abast reben el missatge i actualitzen la seva taula d'encaminament amb la informació rebuda, no només coneixent informació sobre els seus veïns directes, sinó també sobre els veïns dels seus veïns, i així successivament. Es poden consultar els detalls d'aquesta implementació a \cite{sole_implementation_2022}.
+Cada dispositiu consta d'una taula d'encaminament, on es defineix quin és el següent dispositiu a qui han d'enviar un missatge per fer-lo arribar al destí final. De forma periòdica, cada node transmet informació sobre la seva taula d'encaminament; els nodes que es troben a l'abast reben el missatge i actualitzen la seva taula d'encaminament amb la informació rebuda, no només coneixent informació sobre els seus veïns directes, sinó també sobre els veïns dels seus veïns, i així successivament. Es poden consultar els detalls d'aquesta implementació a \cite{sole_implementation_2022}.
 
 Aquesta solució resol el problema de la «inundació controlada» presentat anteriorment, ja que únicament els nodes que es troben a la ruta reenvien el missatge. Malgrat això, presenta un dels inconvenients vists prèviament: tots els dispositius han d'estar sempre actius i en mode de recepció. Com s'ha mencionat, això provoca un consum elevat, reduint la viabilitat d'ús en aplicacions de monitoratge.
 
@@ -343,7 +342,7 @@ El codi s'ha intentat organitzar de forma modular, amb la intenció de facilitar
 
 El codi es divideix en dues seccions: els fitxers de capçalera (\est{headers}) i els fitxers de codi (\est{.cpp}). Els primers contenen la definició de les funcions (consultable a la ruta \fitx{firmware/include}), mentre que els segons contenen la implementació d'aquestes funcions (\fitx{firmware/src}).
 
-En els microcontroladors, el codi s'executa de forma cíclica, amb un bucle principal que s'executa de forma contínua. Un gran inconvenient és que no permet executar múltiples tasques en para\l.lel, una característica important, ja que cada capa podria haver de realitzar funcions diferents al mateix temps. Per tal d'aconseguir-ho, s'ha implementat un gestor de tasques, el qual permet executar tasques de forma periòdica, després d'un cert temps, o tan bon punt sigui possible. Malgrat que no permetre l'execució para\l.lela real, aquesta solució permet simular-ho.
+En els microcontroladors, el codi s'executa de forma cíclica, amb un bucle principal que s'executa de forma contínua. Un gran inconvenient és que no permet executar múltiples tasques en para\l.lel, una característica important, ja que cada capa podria haver de realitzar funcions diferents al mateix temps. Per tal d'aconseguir-ho, s'ha implementat un gestor de tasques, el qual permet executar tasques de forma periòdica, després d'un cert temps, o tan bon punt sigui possible. Malgrat que no permet l'execució para\l.lela real, aquesta solució permet simular-ho.
 Amb aquesta solució, tota l'execució del protocol es realitza a través de tasques generades amb el gestor, i en el bucle principal únicament s'executa el gestor de tasques, que verifica en cada cicle l'estat de cada tasca, executant les que ho requereixen (\fitx{src/utils/scheduler.cpp}).
 
 S'ha establert que la comunicació entre capes es realitzi a través de \est{callbacks}. Així, cada capa ofereix mètodes per permetre a una altra capa configurar una funció que s'executarà quan es produeixi un esdeveniment. Per exemple, la capa d'encaminament pot configurar una funció a la capa d'accés al medi per tal que s'executi quan es rebi un missatge. Aquesta implementació ofereix més flexibilitat, i no requereix que les capes coneguin la implementació de les altres.
@@ -400,9 +399,9 @@ Una tasca important en qualsevol protocol és definir la forma de les dades, la 
 
 Dos camps essencials són el \emph{receptor} i l'\emph{emissor}, que indiquen respectivament les adreces del dispositiu que rep i envia el missatge. S'ha decidit utilitzar adreces d'\SI{1}{\byte}, oferint un total de 256 adreces diferents. Malgrat això, únicament 253 són utilitzables, reservant l'adreça \fitx{0x01} per representar el \est{gateway}, la \fitx{0xFF} per un possible ús de difusió (\emph{broadcast}), i la \fitx{0x00}, per indicar l'absència d'adreça. Aquesta quantitat de dispositius es considera suficient per a la majoria d'aplicacions de monitoratge, evitant l'ús innecessari de dades i, per tant, minimitzant el temps de transmissió i el consum energètic.
 
-Per a identificar cada trama, s'ha inclòs un camp d'\emph{identificador} (\emph{id}), que conté un nombre aleatori generat per l'emissor. Aquest camp permet que el receptor pugui identificar trames duplicades i no processar-les de nou. S'ha considerat utilitzar una longitud de \SI{2}{\byte}, permetent 65536 identificadors diferents. Tot i això, s'ha reservat l'identificador \fitx{0x0000}; la utilitat d'aquest s'exposarà al \autoref{subsubsec:mac_lorawan}. En el pitjor dels casos, si 252 dispositius transmetessin a un mateix receptor, la probabilitat d'una co\l.lisió és, aproximadament, d'un 38\%. Es tracta d'un problema similar al del «problema dels aniversaris» \cite{noauthor_birthday_2025}.
+Per a identificar cada trama, s'ha inclòs un camp d'\emph{identificador} (\emph{id}), que conté un nombre aleatori generat per l'emissor. Aquest camp permet que el receptor pugui identificar trames duplicades i no processar-les de nou. S'ha considerat utilitzar una longitud de \SI{2}{\byte}, permetent \num{65536} identificadors diferents. Tot i això, s'ha reservat l'identificador \fitx{0x0000}; la utilitat d'aquest s'exposarà al \autoref{subsubsec:mac_lorawan}. En el pitjor dels casos, si \num{252} dispositius transmetessin a un mateix receptor, la probabilitat d'una co\l.lisió és, aproximadament, d'un 38\%. Es tracta d'un problema similar al del «problema dels aniversaris» \cite{noauthor_birthday_2025}.
 
-Tot i semblar una probabilitat molt elevada, no es considera un fet greu: es tracta del pitjor dels casos, on 252 dispositius transmeten al mateix destí, i on el receptor recorda tots els identificadors rebuts. En aplicacions reals, la quantitat d'identificadors guardats és limitada (per exemple als últims 10), reduint la probabilitat de co\l.lisió. Si ho repetim en un cas més realista, on hi ha un receptor comú i 5 transmissors, obtenim una probabilitat de col\l.lisió del 0.015\%, i del 0.068\% si considerem 10 transmissors. Així, s'ha considerat escaient una longitud de \SI{2}{\byte}, buscant minimitzar el consum energètic i el temps de transmissió, sense afectar greument el funcionament.
+Tot i semblar una probabilitat molt elevada, no es considera un fet greu: es tracta del pitjor dels casos, on \num{252} dispositius transmeten al mateix destí, i on el receptor recorda tots els identificadors rebuts. En aplicacions reals, la quantitat d'identificadors guardats és limitada (per exemple als últims 10), reduint la probabilitat de co\l.lisió. Si ho repetim en un cas més realista, on hi ha un receptor comú i 5 transmissors, obtenim una probabilitat de col\l.lisió del 0.015\%, i del 0.068\% si considerem 10 transmissors. Així, s'ha considerat escaient una longitud de \SI{2}{\byte}, buscant minimitzar el consum energètic i el temps de transmissió, sense afectar greument el funcionament.
 
 Un altre camp important és el dels \est{flags}, que conté informació sobre el missatge. En concret, s'ha definit un camp de \SI{1}{\byte} amb els següents bits:
 \begin{itemize}
@@ -453,7 +452,7 @@ Pel que fa al nombre màxim de retransmissions, s'ha considerat oportú limitar-
 
 Un altre mecanisme implementat per millorar la possibilitat d'èxit de la transmissió és l'increment automàtic de la potència de transmissió. En la primera transmissió s'utilitza la potència mínima, i per cada reintent, s'incrementa de forma lineal fins a la potència màxima. Ambdós valors de potència són configurables, permetent ajustar-se a les necessitats i regulacions locals de cada aplicació. Es va considerar també la possibilitat d'incrementar el factor d'espargiment (\acro{sf}), augmentant l'abast, seguint una estratègia similar a l'\acro{adr}. Malgrat això, no és una opció viable, ja que si el transmissor modifica aquest factor, el receptor no el podrà rebre correctament, perquè no coneix el nou factor (en LoRaWAN el \est{gateway} és capaç de rebre utilitzant múltiples \acro{sf}, fent aquesta solució factible). 
 
-S'ha inclòs el mecanisme de detecció d'errors \acro{crc}, d'un byte de longitud. Aquest permet afegir redundància a les dades (d'\SI{1}{\byte} en aquest cas), calculat en el moment de la transmissió. Quan el receptor rep el missatge, calcula de nou el \acro{crc}, i el compara amb el rebut: si coincideixen, significa que el missatge ha arribat correctament, i s'envia el missatge de reconeixement. En cas contrari, el receptor ignora el missatge rebut, i no envia cap missatge de reconeixement. Això provoca que el transmissor reintenti la transmissió, amb el mecanisme vist anteriorment. Cal tenir en compte, però, que cap mecanisme de detecció d'errors és infa\l.llible, i pot donar falsos positius.  
+S'ha inclòs el mecanisme de detecció d'errors \acro{crc}, d'un byte de longitud. Aquest permet afegir redundància a les dades (d'\SI{1}{\byte} en aquest cas), calculat en el moment de la transmissió. Quan el receptor rep el missatge, calcula de nou el \acro{crc}, i el compara amb el rebut: si coincideixen, significa que el missatge ha arribat correctament, i s'envia el missatge de reconeixement. En cas contrari, el receptor ignora el missatge rebut, i no envia cap missatge de reconeixement. Això provoca que el transmissor reintenti la transmissió, amb el mecanisme vist anteriorment. Cal tenir en compte, però, que cap mecanisme de detecció d'errors és infa\l.lible, i pot donar falsos positius.  
 
 Tot i que LoRa ofereix la possibilitat d'incorporar un \acro{crc}, s'ha decidit implementar un \acro{crc} propi, per tal de garantir que sempre s'utilitzi, independentment de la configuració del transductor LoRa utilitzat, millorant la integritat de les dades. 
 
@@ -473,7 +472,7 @@ Per evitar-ho, s'ha implementat una cua de transmissió. Quan es vol realitzar u
 
 Un aspecte important d'aquesta cua és la gestió dels reconeixements. Si un \acro{ack} es transmetés a través de la cua, caldria esperar a transmetre totes les trames anteriors, fet que podria retardar excessivament el seu enviament. Això podria provocar que el transmissor considerés que la transmissió havia fallat. Per evitar-ho, els missatges de reconeixement s'envien de manera immediata, sense passar per la cua, minimitzant així el temps de resposta.
 
-Pel que fa a la recepció, també s'ha implementat una cua. Un cop processada una trama rebuda, explicat anteriorment, aquesta es guarda a la cua i es notifica la seva arribada a la capa superior. S'hi exposen dues interfícies: una permet conèixer el nombre de trames emmagatzemades, i l'altra, obtenir les dades de la primera trama. Aquesta implementació proporciona més flexibilitat a la capa superior per gestionar els missatges rebuts, i evita el risc de sobreescriure dades rebudes prèviament que la capa superior encara no ha processat.
+Pel que fa a la recepció, també s'ha implementat una cua. Un cop processada una trama rebuda, explicat anteriorment, aquesta es guarda a la cua i es notifica la seva arribada a la capa superior. S'hi exposen dues interfícies: una permet conèixer el nombre de trames emmagatzemades, i l'altra, obtenir les dades de la primera trama. Aquesta implementació proporciona més flexibilitat a la capa superior per gestionar els missatges rebuts, i evita el risc de sobreescriure dades rebudes prèviament les quals la capa superior encara no ha processat.
 
 La implementació de la cua de transmissió introdueix un problema: en notificar a la capa superior que s'ha transmès un missatge, aquesta no coneix quin missatge s'ha enviat. Per solucionar-ho, quan la capa superior inicia una transmissió, se li retorna l'identificador de la trama. Un cop s'ha enviat, el \est{callback} de fi de transmissió rep com a paràmetre aquest identificador, cosa que permet a la capa superior saber quin missatge ha estat enviat. A més, s'afegeix un \est{callback} de transmissió errònia, que notifica a la capa superior quan no s'ha pogut realitzar una transmissió (per exemple, per esgotament de reintents), proporcionant també l'identificador de la trama.
 \subsubsection{Detalls d'implementació}
@@ -573,7 +572,7 @@ A la \autoref{fig:mac_tx_correcte_reintent} s'observa un exemple de transmissió
     \label{fig:mac_tx_correcte_reintent}
 \end{figure}
 
-Una situació més excepcional és la representada a la \autoref{fig:mac_tx_considerat_fallida}, on el dispositiu 1 realitza una transmissió, sense rebre en cap retransmissió el missatge de reconeixement. Malgrat això, el dispositiu 2 sí que havia rebut la trama, generant l'\acro{ack} corresponent, el qual no arriba al dispositiu 1. S'observa com en la segona recepció de la trama, el dispositiu 2 no notifica a la capa superior, ja que ja s'havia processat prèviament. En aquesta situació, el dispositiu 1 considera que la transmissió no ha estat satisfactòria, malgrat que el dispositiu 2 sí que havia rebut la trama.
+Una situació més excepcional és la representada a la \autoref{fig:mac_tx_considerat_fallida}, on el dispositiu 1 realitza una transmissió, sense rebre el missatge de reconeixement en cap reintent. Malgrat això, el dispositiu 2 sí que havia rebut la trama, generant l'\acro{ack} corresponent, el qual no arriba al dispositiu 1. S'observa com en la segona recepció de la trama, el dispositiu 2 no notifica a la capa superior, perquè ja s'havia processat prèviament. En aquesta situació, el dispositiu 1 considera que la transmissió no ha estat satisfactòria, malgrat que el dispositiu 2 sí que havia rebut la trama.
 
 % TX incorrecte + 3 reintents - Fallada transmissió
 \begin{figure}
@@ -859,9 +858,9 @@ Les taules d'encaminament de cada dispositiu i exemple es representen a la \auto
 \end{table}
 
 
-A la \autoref{fig:routing_encaminament_basic_gateway} es mostra un exemple bàsic. Primerament, el dispositiu \fitx{0x02} vol enviar un paquet al \fitx{0x04}: obté la ruta per aquest, transmetent-ho a \fitx{0x03}. Aquest rep el paquet, verifica el \acro{ttl}, i obté la següent ruta, que és \fitx{0x04}, el qual rep el paquet, comprova que és el destí final, i ho notifica a la capa superior. 
+A la \autoref{fig:routing_encaminament_basic_gateway} es mostra un exemple bàsic. Primerament, el dispositiu \fitx{0x02} vol enviar un paquet al \fitx{0x04}: obté la ruta, i el transmet a \fitx{0x03}. Aquest rep el paquet, verifica el \acro{ttl}, i obté la següent ruta, que és \fitx{0x04}. Quan aquest rep el paquet, comprova que és el destí final, i ho notifica a la capa superior. 
 
-Un segon exemple de transmissió es realitza quan \fitx{0x02} vol enviar un paquet al \est{gateway}. El dispositiu 2 consulta la taula d'encaminament i veu que el següent salt és el dispositiu 3. Aquest rep el paquet, consulta la seva taula, i ho transmet al dispositiu \fitx{0x04}, qui ho encamina cap al \est{gateway} a través de LoRaWAN. En obrir les finestres de recepció, rep un paquet amb destí el dispositiu \fitx{0x03}, el qual és encaminat seguint el mateix procediment.
+Un segon exemple de transmissió es realitza quan \fitx{0x02} vol enviar un paquet al \est{gateway}. El dispositiu 2 consulta la taula d'encaminament i veu que el següent salt és el dispositiu 3. Aquest rep el paquet, consulta la seva taula, i ho transmet al dispositiu \fitx{0x04}, qui ho encamina cap al \est{gateway} a través de LoRaWAN. En obrir les finestres de recepció, rep un paquet amb el dispositiu \fitx{0x03} com a destí, i utilitza el mateix procediment vist anteriorment per fer-li arribar el paquet.
 
 Per acabar, es representa també com un paquet amb fi de temps de vida (\acro{ttl}) és descartat, de la mateixa manera que un paquet que no pot ser encaminat, ja que no existeix cap entrada a la taula d'encaminament del dispositiu. 
 
@@ -1067,7 +1066,7 @@ Quan s'ha realitzat la transmissió d'un segment fiable s'inicia un temporitzado
 
 Per a identificar quin segment un missatge de reconeixement ---aquell que té el camp \emph{ackResponse} actiu--- reconeix, s'estableix que l'identificador d'aquests segments sigui el mateix que el del segment original, el que reconeixen. Així, en rebre un reconeixement, la capa de transport pot consultar la llista de metadades, que conté l'identificador del segment original, i així poder identificar el segment i aturar el temporitzador d'espera d'\acro{ack}.
 
-El temps d'espera de recepció del reconeixement no és fix, sinó que depèn del nombre de retransmissions que s'han realitzat anteriorment, seguint una funció exponencial. Gràcies a això, el temps d'espera s'incrementa com més reintents s'han realitzat, ajustant-se a les condicions de la xarxa.
+El temps d'espera de recepció del reconeixement no és fix, sinó que depèn del nombre de retransmissions que s'han realitzat anteriorment, seguint una funció exponencial. Gràcies a això, el temps d'espera s'incrementa amb el nombre de reintents, ajustant-se a les condicions de la xarxa.
 Aquest temps és determinat per l'expressió $k\cdot 2^r$, on \emph{k} és un valor constant i configurable, i \emph{r} el nombre de reintents realitzats. El valor de \emph{k} cal configurar-lo adequadament per evitar generar \est{timeouts} prematurs, i per evitar un excés de temps d'espera:
 \begin{itemize}
     \item Hauria de verificar $k\ge (2n-1)\cdot t_{tx}$, on \emph{n} és el nombre de dispositius en la ruta més llarga de la xarxa, sense incloure el dispositiu emissor. És així ja que cada node ha de realitzar una transmissió al següent salt del segment (d'aquí el factor \emph{n}), i també haurà de fer-ho pel missatge de reconeixement del receptor final (d'aquí el factor \emph{2}). A més, cal recordar que l'inici del temps d'espera s'inicia després de transmetre el segment al següent salt, d'aquí el terme \emph{-1}.
@@ -1227,7 +1226,7 @@ En el procés de validació es van observar inconsistències en el funcionament 
     \item Configuració de la ràdio en LoRaWAN i LoRa. Després de realitzar una transmissió a través de LoRaWAN, no es rebien missatges enviats a través de LoRa. Això es devia al fet que la ràdio quedava amb la configuració de LoRaWAN, i no es tornava a configurar per a LoRa. Es va solucionar a través de la capa d'abstracció \est{LoRa}, superior a \est{LoRaWAN} i {LoRaRAW}.
 \end{itemize}
 
-Després de les verificacions, cada capa del protocol verifica els requisits prèviament definits, amb la fiabilitat i el baix consum de les transmissions com a objectius principals. Tot i que no s'han pogut realitzar proves en entorns reals i topologies més complexes, es considera que el protocol estableix una base funcional i estable per a la seva aplicació.
+Després de les verificacions, cada capa del protocol satisfà els requisits prèviament definits, amb la fiabilitat i el baix consum de les transmissions com a objectius principals. Tot i que no s'han pogut realitzar proves en entorns reals i topologies més complexes, es considera que el protocol estableix una base funcional i estable per a la seva aplicació.
 
 \chapter{Adaptació a entorns de baix consum}
 \label{chap:adaptacio_baix_consum}
@@ -1295,7 +1294,7 @@ En el període de funcionament és important que els dispositius es trobin actiu
 
 Per tal de garantir la fiabilitat a llarg termini, i evitar la dessincronització amb el pas del temps, s'ha optat per utilitzar el mecanisme de sincronització externa. 
 
-Per aconseguir que tots els dispositius es puguin sincronitzar, és important que cada dispositiu propagui aquest missatge al següent dispositiu (o dispositius). Així, quan l'aplicació, que d'ara endavant es denominarà \emph{aplicació de baix consum}, rebi un missatge de sincronització, el propagarà al següent dispositiu, del qual n'ha de conèixer l'adreça. Aquesta opció és més òptima que no pas fer que sigui el dispositiu de referència qui genera un missatge de sincronització per a cada dispositiu, ja que aquesta opció implicaria moltes més transmissions ($\sum_{x=0}^{D-1}{x}$, on \emph{D} és el nombre de dispositius), en vers a una única transmissió per cada dispositiu diferent del de referència ($D-1$ transmissions). A causa d'aquest major nombre de missatges de sincronització, el temps necessari per tenir tots els dispositius sincronitzats és també més llarg. A la \autoref{fig:app_opcionsIniciSync} es representen ambdues opcions.
+Per aconseguir que tots els dispositius es puguin sincronitzar, és important que cada dispositiu propagui aquest missatge al següent dispositiu (o dispositius). Així, quan l'aplicació, que d'ara endavant es denominarà \emph{aplicació de baix consum}, rebi un missatge de sincronització, el propagarà al següent dispositiu, del qual n'ha de conèixer l'adreça. Aquesta opció és més òptima que no pas fer que sigui el dispositiu de referència qui genera un missatge de sincronització per a cada dispositiu, ja que aquesta opció implicaria moltes més transmissions ($\sum_{x=0}^{D-1}{x}$, on \emph{D} és el nombre de dispositius), en comparació a una única transmissió per cada dispositiu diferent del de referència ($D-1$ transmissions). A causa d'aquest major nombre de missatges de sincronització, el temps necessari per tenir tots els dispositius sincronitzats és també més llarg. A la \autoref{fig:app_opcionsIniciSync} es representen ambdues opcions.
 
 \begin{figure}
     \centering
@@ -1409,7 +1408,7 @@ Es va considerar la possibilitat d'utilitzar més de dos blocs, per exemple en m
 Finalment, es va descartar la implementació de qualsevol de les opcions anteriors, ja que requereixen una quantitat molt elevada de transmissions. Amb \fitx{N} dispositius, el nombre total de transmissions (incloent-hi les dades i missatges de sincronització) és aproximadament $\sum{N} + N$, fet que incrementa el consum energètic i la saturació del canal. A més, la lògica de funcionament és excessivament complexa, dificultant la implementació d'aquesta solució. 
 
 \subsection{Dades acumulades}
-Com s'ha comentat, un dels principals inconvenients de les solucions anteriors és l'elevat nombre de transmissions que es realitzen en cada cicle. El motiu és que cada dispositiu genera el seu propi segment de dades amb destí final al gateway. Ja que la topologia és lineal, aquest segment ha de ser encaminat a través dels dispositius intermedis, els quals han de retransmetre'l fins al seu destí, fent que el nombre de transmissions i l'ús del canal creixi de forma exponencial amb el nombre de dispositius. 
+Com s'ha comentat, un dels principals inconvenients de les solucions anteriors és l'elevat nombre de transmissions que es realitzen en cada cicle. El motiu és que cada dispositiu genera el seu propi segment de dades amb destí final al \est{gateway}. Ja que la topologia és lineal, aquest segment ha de ser encaminat a través dels dispositius intermedis, els quals han de retransmetre'l fins al seu destí, fent que el nombre de transmissions i l'ús del canal creixi de forma exponencial amb el nombre de dispositius. 
 
 Per tal de reduir aquest nombre de transmissions, s'ha optat per acumular les dades de tots els dispositius en un únic missatge. És important recordar que s'havia limitat el comportament dels dispositius a un únic missatge, i amb el mateix destí final, el \est{gateway}. Si no s'haguessin pres aquestes limitacions, aquesta estratègia no seria possible.
 
@@ -1498,7 +1497,7 @@ Una segona opció que intenta minimitzar aquest efecte es pot veure representat 
 \toprule
 \end{tabular}
 }
-    \caption{Transmissió de dades acumulades. Dispositiu de referència intermig.}
+    \caption{Transmissió de dades acumulades. Dispositiu de referència intermedi.}
     \label{fig:app_opcioSyncAcum2}
 \end{figure}
 
@@ -1542,7 +1541,7 @@ En aquesta segona situació s'observa com el temps d'espera entre la recepció d
     \label{fig:app_opcioSyncAcum3}
 \end{figure}
 
-Amb aquesta nova estratègia s'observa com el temps d'espera entre la sincronització i la recepció de les dades és el mínim possible sense que hi hagi co\l.lisions i, a més, és constant per a tots els dispositius ---excepte els dels extrems, que o bé no rep la sincronització, ja que la genera, o bé no l'ha de propagar---. Això provoca que el temps de funcionament normal sigui també igual per a tots, en aquest exemple, de 5 unitats de temps, excepte pel de referència, que no ha d'iniciar abans ja que no ha de rebre la sincronització.
+Amb aquesta nova estratègia s'observa com el temps d'espera entre la sincronització i la recepció de les dades és el mínim possible sense que hi hagi co\l.lisions i, a més, és constant per a tots els dispositius ---excepte els dels extrems, que o bé no rep la sincronització, ja que la genera, o bé no l'ha de propagar---. Això provoca que el temps de funcionament normal sigui també igual per a tots, en aquest exemple, de 5 unitats de temps, excepte pel dispositiu de referència, que no ha d'iniciar abans ja que no ha de rebre la sincronització.
 
 No obstant això, encara hi ha un fet crític: què passa si la capa d'accés al medi ha de realitzar retransmissions, o aplicar \acro{beb} per accedir al canal? En aquest cas, i ja que s'ha dissenyat per tal que el temps d'espera sigui mínim, qualsevol retard en la transmissió provocaria una co\l.lisió.
 
@@ -1701,7 +1700,7 @@ Aquest temps de tolerància depèn del nombre màxim d'intents de retransmissió
 \end{itemize}
 
 \subsubsection{Límit de dades}
-El fet que cada dispositiu afegeix-hi les dades en un mateix missatge pot provocar que aquest acabi superant la mida màxima permesa ser transmès. En aquest cas, una solució és fragmentar el missatge en múltiples, i transmetre'ls de forma seqüencial. Com que no existeix fragmentació en el protocol, seria necessari implementar-lo a nivell d'aplicació. Això implica que el missatge de dades hauria de contenir informació addicional per indicar si es tracta d'un missatge fragmentat o no, per exemple un camp boleà: si està actiu significa que està fragmentat; en cas contrari, significa que no ho està, o que és l'últim fragment.
+El fet que cada dispositiu afegeix-hi les dades en un mateix missatge pot provocar que aquest acabi superant la mida màxima permesa per ser transmès. En aquest cas, una solució és fragmentar el missatge en múltiples, i transmetre'ls de forma seqüencial. Com que no existeix fragmentació en el protocol, seria necessari implementar-lo a nivell d'aplicació. Això implica que el missatge de dades hauria de contenir informació addicional per indicar si es tracta d'un missatge fragmentat o no, per exemple un camp boleà: si està actiu significa que està fragmentat; en cas contrari, significa que no ho està, o que és l'últim fragment.
     
 El flux de funcionament en enviar o rebre un missatge fragmentat seria el següent:
 \begin{itemize}
@@ -1744,7 +1743,7 @@ El flux de funcionament en enviar o rebre un missatge fragmentat seria el següe
     \label{fig:app_fragmentacio}
 \end{figure}
 
-A la \autoref{fig:app_fragmentacio} s'ha representat com seria una comunicació amb fragmentació. Per simplicitat, s'ha considerat que la mida màxima de les dades és de \SI{10}{\byte} per missatge, i que cada dispositiu afegeix \SI{5}{\byte}. Per a cada transmissió es representa la mida de les dades, i si el camp boleà que indica si està fragmentat està actiu o no.
+A la \autoref{fig:app_fragmentacio} s'ha representat com seria una comunicació amb fragmentació. Per simplicitat, s'ha considerat que la mida màxima de les dades és de \SI{10}{\byte} per missatge, i que cada dispositiu afegeix \SI{5}{\byte}. Per a cada transmissió es representa la mida de les dades, i si es troben fragmentades o no.
 
 Per simplicitat, i a causa que les necessitats no ho requerien, aquesta funcionalitat no es va acabar implementat. Amb el disseny establert, però, la seva implementació seria senzilla.
 
@@ -1918,7 +1917,7 @@ Pot haver de ser necessari afegir nous dispositius a la xarxa. En aquest cas, es
 
 És important considerar que la capa d'aplicació necessita conèixer la quantitat de dispositius anteriors al que s'afegeix per calcular correctament el temps de tolerància (veure \autoref{eq:app_tolerancia}). 
 
-Si la quantitat de dispositius anteriors és major que la que s'ha configurat, el càlcul del temps de tolerància serà incorrecte, i no es pot garantir la sincronització. Si això passés, seria necessari modificar aquest paràmetre en tots els dispositius següents al que s'afegeix, i reiniciar-los tots. Pel que fa als dispositius anteriors, aquest valor seria el mateix i, per tant, no és necessari modificar-lo. Per aquest motiu, si es preveu afegir nous dispositius, es recomana establir aquest paràmetre un valor superior al necessari.
+Si la quantitat de dispositius anteriors és major que la que s'ha configurat, el càlcul del temps de tolerància serà incorrecte, i no es pot garantir la sincronització. Si això passés, seria necessari modificar aquest paràmetre en tots els dispositius següents al que s'afegeix, i reiniciar-los tots. Pel que fa als dispositius anteriors, aquest valor seria el mateix i, per tant, no és necessari modificar-lo. Per aquest motiu, si es preveu afegir nous dispositius, es recomana establir aquest paràmetre amb un valor superior al necessari.
 
 Això es pot evitar si els dispositius s'afegeixen en l'extrem més proper al \est{gateway}, ja que aquest seria l'últim dispositiu de la cadena. En aquest cas, seria únicament necessari modificar el dispositiu anterior al que s'afegeix per indicar-li el nou veí, i establir que no té capacitats LoRaWAN.
 
@@ -1993,7 +1992,7 @@ function decodeUplink(input) {
 \subsubsection{Entorn de proves}
 Les proves s'han realitzat utilitzant dos microcontroladors \acro{esp32}, cadascun equipat amb un transductor LoRa \acro{sx1262}. Per verificar el correcte funcionament a través de LoRaWAN, es disposava de connectivitat a un \est{gateway} Mikrotik wAP-LR8. Es poden observar els dispositius usats a la \autoref{fig:dispositius_proves}.
 
-\begin{figure}
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.6\textwidth]{imatges/plaques.jpeg}
     \caption{Dispositius utilitzats en les proves.}
@@ -2057,7 +2056,7 @@ Per descobrir l'origen d'aquest error, es va dur a terme una bateria de proves (
 
 De l'última prova es va veure que l'error augmentava únicament per tenir el dispositiu actiu, i que no era causat per realitzar una transmissió o utilitzar el protocol. Es va descobrir que el rellotge intern utilitzat en mode de baix consum és, per defecte, un osci\l.lador RC de \SI{150}{\kilo\hertz}, el qual es veu greument afectat per la temperatura \cite{espressif_system_nodate}. La hipòtesi que es va considerar és que, en trobar-se en mode actiu, la temperatura del microcontrolador augmenta lleugerament, fent que l'error del rellotge es vegi afectat.
 
-Per verificar aquesta hipòtesi, es va realitzar una nova prova, modificant el rendiment de cicle i obtenint l'error en cada un d'ells. És a dir, per a un temps de cicle determinar (2.5 minuts), es va modificar el temps que el microcontrolador estava actiu, i trobant-se la resta del cicle en mode de baix consum. Els resultats obtinguts, per a cada microcontrolador, es poden observar a la \autoref{tab:app_resultatsRendiment}, els quals verifiquen la hipòtesi plantejada: a major rendiment de cicle, major és el temps que el microcontrolador es troba actiu, i major és l'error del rellotge. És important tenir en compte que tot i que l'error en segons disminueix, l'error en \acro{ppm} depèn del temps en baix consum, el qual també disminueix, i no del temps de cicle total.
+Per verificar aquesta hipòtesi, es va realitzar una nova prova, modificant el rendiment de cicle i obtenint l'error en cada un d'ells. És a dir, per a un temps de cicle determinar (2.5 minuts), es va modificar el temps que el microcontrolador estava actiu, i trobant-se la resta del cicle en mode de baix consum. Els resultats obtinguts, per a cada microcontrolador, es poden observar a la \autoref{tab:app_resultatsRendiment}, els quals verifiquen la hipòtesi plantejada: a major rendiment de cicle, major és el temps que el microcontrolador es troba actiu, i major és l'error del rellotge. És important tenir en compte que, tot i que l'error en segons disminueix, l'error en \acro{ppm} depèn del temps en baix consum, el qual també disminueix, i no del temps de cicle total.
 
 \begin{table}
 \centering
@@ -2136,7 +2135,7 @@ En aquesta aplicació s'ha buscat la robustesa i fiabilitat a llarg termini, pre
 
 Durant les proves de validació, s'ha detectat una limitació important en la precisió dels osci\l.ladors dels microcontroladors utilitzats en mode de baix consum. Els seus elevats errors ($\pm 5000$ ppm) i alta sensibilitat a la temperatura ($1000$ ppm/ºC) fan necessari deixar marges de temps de seguretat elevats, penalitzant l'eficiència energètica. Com a solució a aquest problema, es proposa l'ús d'osci\l.ladors de cristall, que presenten errors molt més reduïts i constants, cosa que permet sincronitzacions més precises.
 
-Les proves realitzades han demostrat que l'aplicació proposada aconsegueix reduir el consum energètic dels dispositius. De forma experimental, i amb el maquinari utilitzat, s'ha observat una reducció del consum del 85\% en un cicle d'1 hora. Aquesta reducció podria ser encara més elevada amb els components més eficients ---amb consums molt reduits en mode de baix consum---, sent possible assolir reduccions superiors al 98\%. 
+Les proves realitzades han demostrat que l'aplicació proposada aconsegueix reduir el consum energètic dels dispositius. De forma experimental, i amb el maquinari utilitzat, s'ha observat una reducció del consum del 85\% en un cicle d'1 hora. Aquesta reducció podria ser encara més elevada amb els components més eficients ---amb consums molt reduïts en mode de baix consum---, sent possible assolir reduccions superiors al 98\%. 
 
 En conjunt, aquest treball ha permès demostrar la viabilitat d'una solució de comunicació eficient per a entorns de monitoratge basats en LoRa, buscant l'equilibri entre simplicitat, fiabilitat i baix consum energètic. Si bé encara existeixen possibles millores futures i proves en entorns més extensos i situacions reals, el sistema desenvolupat ofereix una base sòlida sobre la qual construir aplicacions reals.
 
@@ -2145,7 +2144,7 @@ La solució proposada ha assolit els objectius principals del treball, desenvolu
 \begin{itemize}
     \item \emph{Altres tecnologies de comunicació}. El sistema actual es basa a utilitzar LoRaWAN per disposar de les dades de la xarxa. Una extensió possible seria substituir aquesta tecnologia per d'altres, com ara 4G, podent ser útil en entorns on LoRaWAN no és viable. Gràcies a la modularitat del protocol, aquesta implementació seria relativament senzilla, i podria aprofitar les mateixes capes d'encaminament i transport.
     \item \emph{Fragmentació de dades}. En l'aplicació de baix consum s'ha mencionat la necessitat d'un mecanisme de fragmentació de dades, en entorns amb molts dispositius o amb molta quantitat de dades. Aquest mecanisme podria ser implementat a nivell d'aplicació o de protocol, i oferiria una major flexibilitat i adaptabilitat a diferents situacions.
-    \item \emph{Control extern de l'alimentació}. Una millora que podria reduir més el consum energètic és l'ús d'un circuit integrat capaç de desconnectar completament l'alimentació del microcontrolador i de la ràdio. Aquest circuit permetria definir un temps de desconnexió, al final del qual s'activaria de nou. El microcontrolador podria indicar quan desactivar l'alimentació, just abans del mode de baix consum. Aquesta estratègia permetria aconseguir un estalvi energètic molt elevat precisament durant el mode de baix consum, que és quan l'aplicació aconsegueix reduir el consum energètic, fent-ho especialment útils per dispositius que requereixen una gran autonomia.  
+    \item \emph{Control extern de l'alimentació}. Una millora que podria reduir més el consum energètic és l'ús d'un circuit integrat capaç de desconnectar completament l'alimentació del microcontrolador i de la ràdio. Aquest circuit permetria definir un temps de desconnexió, al final del qual s'activaria de nou. El microcontrolador podria indicar quan desactivar l'alimentació, just abans del mode de baix consum. Aquesta estratègia permetria aconseguir un estalvi energètic molt elevat precisament durant el mode de baix consum, que és quan l'aplicació aconsegueix reduir el consum energètic, fent-ho especialment útil per dispositius que requereixen una gran autonomia.  
 \end{itemize}
 
 \printbibliography
@@ -2179,3 +2178,5 @@ La solució proposada ha assolit els objectius principals del treball, desenvolu
 %%% TeX-master: t
 %%% LaTeX-biblatex-use-Biber: t
 %%% End:
+
+
