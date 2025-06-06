@@ -152,7 +152,7 @@
 
 % Els àmbits temàtics en que es classifica el treball. Pregunteu al
 % director.
-\topics{}
+\topics{TIC}
 
 % Si voleu dedicatòria descomenteu
 %\dedication{}
@@ -162,14 +162,14 @@
 %\end{acknowledgments}
 
 \begin{resum}
-Aquest treball presenta el disseny i implementació d'un protocol de comunicació basat en LoRa amb encaminament estàtic, pensat per a xarxes de dispositius de monitoratge en entorns extensos o aïllats, on la presència humana és limitada. L'objectiu és reduir la dependència dels \est{gateways} LoRaWAN, aprofitant que els dispositius són habitualment estàtics i permeten l'ús de rutes de comunicació predefinides.
+Aquest treball presenta el disseny i implementació d'un protocol de comunicació modular basat en LoRa i amb encaminament estàtic, pensat per a xarxes de dispositius de monitoratge en entorns extensos o aïllats, on la presència humana és limitada. L'objectiu és reduir la dependència dels \est{gateways} LoRaWAN, aprofitant que els dispositius són habitualment estàtics i permeten l'ús de rutes de comunicació predefinides.
 
 Sobre aquest protocol s'ha desenvolupat una aplicació optimitzada per a xarxes lineals ---una topologia especialment útil en vies de tren o túnels--- centrada a minimitzar el consum energètic dels dispositius. Aquesta solució es basa en una estratègia de sincronització entre nodes, que permet coordinar-ne les transmissions i reduir el temps actiu dels dispositius, sense renunciar a la fiabilitat ni als mecanismes d'encaminament que el protocol ofereix. Les proves realitzades han demostrat que la proposta és viable, escalable i eficient en entorns on el consum energètic i la cobertura són crítics.
 \end{resum}
 
 
 \begin{abstract}
-This work presents the design and implementation of a communication protocol based on LoRa and static routing intended for monitoring device networks in extensive or isolated environments, where human presence is limited. The goal is to reduce the dependency on LoRaWAN gateways, taking advantage of the fact that devices are usually static and allow the use of predefined communication routes.
+This work presents the design and implementation of a modular and layered communication protocol based on LoRa and static routing, intended for monitoring device networks in extensive or isolated environments, where human presence is limited. The goal is to reduce the dependency on LoRaWAN gateways, taking advantage of the fact that devices are usually static and allow the use of predefined communication routes.
 
 An application optimized for linear networks ---a topology particularly useful in railway lines or tunnels--- has been developed based on this protocol. It focuses on minimizing the energy consumption of the devices through a synchronization strategy between nodes, which allows coordinating transmissions and reducing the active time of the devices, without compromising reliability or the routing mechanisms provided by the protocol. The conducted tests have demonstrated that the proposed solution is viable, scalable, and efficient in environments where energy consumption and coverage are critical.
 \end{abstract}
@@ -188,9 +188,11 @@ Aquest treball té com a objectiu dissenyar una solució per a xarxes de disposi
 
 El resultat del treball ha sigut el disseny i desenvolupament d'un protocol de comunicació fiable i modular, basat en tecnologia LoRa, amb encaminament estàtic i compatible amb LoRaWAN. A més, s'ha implementat una aplicació de baix consum energètic, construïda sobre aquest protocol, dissenyada específicament per a topologies lineals i basada en una estratègia de sincronització entre dispositius. 
 
-El desenvolupament del treball s'ha vist limitat per la disponibilitat de dispositius finals, fent difícil la validació de les solucions proposades en escenaris reals. No obstant això, les proves realitzades ---que han intentat simular escenaris reals--- han demostrat que el protocol és capaç de transmetre dades de manera fiable i eficient, i que l'aplicació de baix consum permet reduir el consum energètic dels dispositius finals.
+Les validacions s'han dut a terme en un entorn controlat, simulant escenaris reals, i han demostrat que el protocol és capaç de transmetre dades de manera fiable i eficient. A més, l'aplicació de baix consum energètic ha demostrat una reducció significativa en el consum dels dispositius finals.
 
-Els objectius principals d'aquest treball han estat:
+% El desenvolupament del treball s'ha vist limitat per la disponibilitat de dispositius finals, fent difícil la validació de les solucions proposades en escenaris reals. No obstant això, les proves realitzades ---que han intentat simular escenaris reals--- han demostrat que el protocol és capaç de transmetre dades de manera fiable i eficient, i que l'aplicació de baix consum permet reduir el consum energètic dels dispositius finals.
+
+En un primer moment, es va plantejar un únic objectiu, que era dissenyar un protocol de comunicació modular i fiable, basat en LoRa, que permetés reduir la dependència dels \est{gateways} LoRaWAN. No obstant això, a mesura que es va avançar en el projecte, es va veure la importància de minimitzar el consum dels dispositius finals. D'aquesta manera, els objectius van acabar sent:
 \begin{itemize}
     \item Dissenyar i implementar un protocol amb encaminament estàtic per a xarxes de dispositius sense mobilitat, pensat per reduir la necessitat de \est{gateways} i optimitzar la recollida de dades en entorns extensos.
     \item Desenvolupar una aplicació de baix consum energètic, basada en el protocol dissenyat, pensada específicament per a xarxes lineals, que permeti reduir el consum energètic dels dispositius finals sense renunciar a les funcionalitats d'encaminament.
@@ -355,6 +357,8 @@ Per realitzar el desenvolupament, s'han utilitzat dues llibreries externes:
     \item \est{TaskScheduler}. Permet la creació de tasques periòdiques, amb prioritats, o amb retard inicial, així com la seva gestió. Aquesta llibreria s'ha utilitzat per implementar el gestor de tasques, que ofereix una interfície més simple i centralitzada de la llibreria. La seva documentació es pot consultar a \cite{arkhipenko_taskscheduler_nodate}.
 \end{itemize}
 
+Pel que fa a l'entorn de desenvolupament, s'ha utilitzat PlatformIO, integrat dins de Visual Studio Code. Aquest facilita la gestió de llibreries, és compatible amb múltiples plataformes i microcontroladors, i integra eines de depuració i monitoratge del port sèrie, facilitant el desenvolupament. 
+
 \section{Disseny per capes}
 Com en la majoria dels protocols moderns, s'ha dissenyat seguint un model per capes. L'estructura es basa en el model \acro{tcp/ip}, amb la diferència de la capa física, que el model \acro{tcp/ip} no contempla de forma explícita.
 A continuació es descriuen les diferents capes del protocol, des de la capa física fins a la capa d'aplicació, indicant-ne les funcions principals, i les decisions de disseny adoptades per optimitzar el rendiment i la simplicitat del sistema.
@@ -363,7 +367,7 @@ A la \autoref{fig:diagrama_protocols} es pot observar, de forma introductòria, 
 \begin{figure}
     \centering
     \includegraphics[width=0.4\linewidth]{imatges/capesprotocol.drawio.pdf}
-    \caption{Estructura per capes del protocol}
+    \caption{Estructura per capes del protocol.}
     \label{fig:diagrama_protocols}
 \end{figure}
 
@@ -519,7 +523,7 @@ En aquest subapartat es descriuen diferents situacions que poden produir-se dura
 
 A la \autoref{fig:mac_tx_correcte_reintent} s'observa un exemple de transmissió correcta, amb una següent transmissió també satisfactòria després d'un reintent. Es tractaria d'una situació considerada comuna, i on l'estat final dels dos dispositius és l'esperat: el dispositiu 1 realitza 2 transmissions que considera satisfactòries (ja que rep \acro{ack}), i el dispositiu 2 les ha rebut correctament.
 % TX correcta + TX amb 1 reintent (no rep dades)
-\begin{figure}[h]
+\begin{figure}
     \centering
     \begin{tikzpicture}[
         device/.style={draw=none, minimum width=1cm, minimum height=0.8cm},
@@ -572,7 +576,7 @@ A la \autoref{fig:mac_tx_correcte_reintent} s'observa un exemple de transmissió
 Una situació més excepcional és la representada a la \autoref{fig:mac_tx_considerat_fallida}, on el dispositiu 1 realitza una transmissió, sense rebre en cap retransmissió el missatge de reconeixement. Malgrat això, el dispositiu 2 sí que havia rebut la trama, generant l'\acro{ack} corresponent, el qual no arriba al dispositiu 1. S'observa com en la segona recepció de la trama, el dispositiu 2 no notifica a la capa superior, ja que ja s'havia processat prèviament. En aquesta situació, el dispositiu 1 considera que la transmissió no ha estat satisfactòria, malgrat que el dispositiu 2 sí que havia rebut la trama.
 
 % TX incorrecte + 3 reintents - Fallada transmissió
-\begin{figure}[h]
+\begin{figure}
     \centering
     \begin{tikzpicture}[
         node distance=1cm and 3cm,
@@ -626,7 +630,7 @@ Una situació més excepcional és la representada a la \autoref{fig:mac_tx_cons
 
 Per acabar es mostra una situació més complexa i completa, representada a la \autoref{fig:mac_tx_complet}. Es representen tres dispositius, amb la primera transmissió del dispositiu 2 completada després d'un reintent. En el procés d'espera de recepció de reconeixement, es mostra com aquest rep una trama, enviada pel dispositiu 1, i genera el corresponent \acro{ack}. Per acabar, es representa el comportament de la cua de transmissió, on el dispositiu 2 inicia una nova transmissió just després de rebre el missatge de reconeixement.
 
-\begin{figure}[h]
+\begin{figure}
     \centering
     \begin{tikzpicture}[
         node distance=1cm and 3cm,
@@ -677,7 +681,7 @@ Per acabar es mostra una situació més complexa i completa, representada a la \
 
 
     \end{tikzpicture}
-    \caption{Transmissió considerada fallida, rebuda correctament per receptor.}
+    \caption{Comportament complex a la capa d'accés al medi.}
     \label{fig:mac_tx_complet}
 \end{figure}
 
@@ -918,7 +922,7 @@ Una altra situació més complexa es pot produir quan la xarxa es troba separada
 
 A més, es requereix també un servidor d'aplicació, encarregat de processar els paquets que el \est{gateway} rep i generar els \est{downlinks} corresponents. Malgrat aquests requisits, aquest exemple permet i\l.lustrar les capacitats d'encaminament de la capa, que no tenen per què estar limitades a una única xarxa. El seu diagrama es pot trobar representat a la \autoref{fig:routing_encaminament_complex_gateway}.
 
-\begin{figure}[h]
+\begin{figure}
     \centering
     \begin{tikzpicture}[
         device/.style={draw=none, minimum width=1cm, minimum height=0.8cm},
@@ -1138,7 +1142,7 @@ Seguidament, el dispositiu \fitx{0x03} realitza dues transmissions no fiables ca
     \draw[blue] ($(dev2.south)+(0,-3.5)$) node[left] {\tiny{\acro{txerr}}};
 
     \end{tikzpicture}
-    \caption{Exemple de comunicació entre }
+    \caption{Exemple funcionament capa de transport.}
     \label{fig:transport_exemple_1}
 \end{figure}
 
@@ -1426,7 +1430,7 @@ El funcionament d'aquest mecanisme és el següent:
 % Explicar qui és referència i qui dades
 Una qüestió important és determinar quin dispositiu és el de referència. Inicialment, es va considerar utilitzar el dispositiu més proper al \est{gateway}, de manera que la sincronització es propagaria en un únic sentit (des del \est{gateway} cap a l'extrem de la xarxa), mentre que les dades circularien en sentit contrari. Aquesta situació es mostra a la \autoref{fig:app_opcioSyncAcum1}, on el dispositiu \fitx{D1}, el més proper al \est{gateway}, inicia el missatge de sincronització. Per altra banda, el dispositiu \fitx{D6}, situat a l'extrem oposat, és l'encarregat d'iniciar la transmissió de dades després de sincronitzar-se. Les transmissions de dades s'identifiquen com \fitx{TX_Dm:n}, on \fitx{m} representa el dispositiu que ha afegit les primeres dades, i \fitx{n} el dispositiu que ha afegit les últimes.
 
-\begin{figure}[ht]
+\begin{figure}
     \centering
     \setlength{\extrarowheight}{0pt}
     \addtolength{\extrarowheight}{\aboverulesep}
@@ -1461,7 +1465,7 @@ En analitzar el diagrama, es pot observar com els dispositius més propers al \e
 
 Una segona opció que intenta minimitzar aquest efecte es pot veure representat a la \autoref{fig:app_opcioSyncAcum2}. En aquest cas s'utilitza com a referència un dispositiu més pròxim a l'extrem oposat, que és qui inicia l'enviament de dades. A causa de trobar-se entre dos dispositius, és necessari que enviï el missatge de sincronització als seus dos veïns, fent que aquest es propagi simultàniament en ambdós sentits. Per evitar una co\l.lisió és necessari que entre els dos missatges de sincronització que transmet deixi un marge de temps, equivalent al temps de transmissió d'aquest missatge. Això permet que el dispositiu que rep el primer pugui propagar-lo sense que es superposi amb el segon missatge de sincronització. El dispositiu que inicia l'enviament de dades continua sent el de l'extrem oposat al que té capacitats LoRaWAN, el més llunyà al \est{gateway}.
 
-\begin{figure}[ht]
+\begin{figure}
     \centering
 \setlength{\extrarowheight}{0pt}
 \addtolength{\extrarowheight}{\aboverulesep}
@@ -1501,7 +1505,7 @@ Una segona opció que intenta minimitzar aquest efecte es pot veure representat 
 
 En aquesta segona situació s'observa com el temps d'espera entre la recepció de la sincronització i de les dades és menor, fent també que el temps total del cicle sigui menor. Malgrat aquesta millora, es continua observant que el temps de cicle no és constant entre dispositius, sent aquest molt major pel dispositiu de referència (7 unitats de temps, en aquest cas) en comparació amb el dispositiu que inicia la transmissió de dades (2 unitats de temps). S'ha observat, però, que desplaçant el dispositiu de referència cap al que inicia la transmissió de dades s'aconsegueix reduir el temps d'espera. Portant aquesta situació a l'extrem, es podria pensar en utilitzar com a dispositiu de referència el que inicia la transmissió de dades. En aquest cas, el dispositiu de referència enviaria la sincronització i, seguidament, les dades. Això faria que el temps d'espera entre ambdós missatges fos el mínim possible, i constant per a tots els dispositius. De nou, és important afegir un temps d'espera mínim entre els dos missatges; en cas contràri, es produirien co\l.lisions, ja que un dispositiu estaria transmetent les dades, mentre que el següent, que les ha de rebre, està propagant la sincronització. Aquesta situació es representa a la \autoref{fig:app_opcioSyncAcum3}.
 
-\begin{figure}[ht]
+\begin{figure}
     \centering
 \setlength{\extrarowheight}{0pt}
 \addtolength{\extrarowheight}{\aboverulesep}
@@ -1542,7 +1546,7 @@ Amb aquesta nova estratègia s'observa com el temps d'espera entre la sincronitz
 
 No obstant això, encara hi ha un fet crític: què passa si la capa d'accés al medi ha de realitzar retransmissions, o aplicar \acro{beb} per accedir al canal? En aquest cas, i ja que s'ha dissenyat per tal que el temps d'espera sigui mínim, qualsevol retard en la transmissió provocaria una co\l.lisió.
 
-\begin{figure}[ht]
+\begin{figure}
     \centering
     \setlength{\extrarowheight}{0pt}
 \addtolength{\extrarowheight}{\aboverulesep}
@@ -1595,7 +1599,7 @@ Llavors, el funcionament seria el següent:
     \item La resta de dispositius, en sortir del mode de baix consum, s'esperen a rebre el missatge de dades, que indica també l'instant de sincronització. Llavors hi afegeixen les seves dades, el transmeten, i comencen el mode de baix consum.
 \end{itemize}
 
-\begin{figure}[ht]
+\begin{figure}
     \centering
     \setlength{\extrarowheight}{0pt}
     \addtolength{\extrarowheight}{\aboverulesep}
@@ -2100,19 +2104,31 @@ Després de la sincronització inicial, es va deixar en funcionament poc més de
 \end{figure} 
 
 \subsubsection{Reducció del consum}
-Per acabar, es va verificar que aquesta aplicació aconseguís reduir satisfactòriament el consum. Per fer-ho, es va comparar el consum d'un dispositiu sense implementar aquesta solució, que es trobava en mode actiu durant tot el cicle de 5 minuts, amb un altre que sí que implementava l'aplicació de baix consum. En la comparació no es va considerar el consum durant una transmissió, ja que en qualsevol de les situacions ambdós dispositius realitzarien el mateix nombre de transmissions.
+Per acabar, es va verificar que aquesta aplicació aconseguís reduir satisfactòriament el consum. Per fer-ho, es va comparar el consum d'un dispositiu sense implementar aquesta solució, que es trobava en mode actiu durant tot el cicle de 5 minuts, amb un altre que sí que implementava l'aplicació de baix consum ---utilitzant els resultats de la primera prova---. En la comparació no es va considerar el consum durant una transmissió, ja que en qualsevol de les situacions ambdós dispositius consumirien el mateix per realitzar-la.
 
-En mode actiu, el dispositiu té un consum d'aproximadament \SI{80}{\milli\ampere}. En mode de baix consum, en canvi, aquest es redueix fins a aproximadament \SI{13}{\milli\ampere}. És important tenir en compte que la placa de desenvolupament conté un \acro{led} vermell, el qual sempre es troba actiu, i presenta un consum afegit. En qualsevol dels casos, es pot observar com efectivament el consum s'ha vist reduït.
+Per tal de mesurar els consums, és necessari determinar el corrent d'alimentació. Abans de fer-ho, es va calcular la intensitat utilitzada pel LED vermell de la placa de desenvolupament, que indica que està alimentada i sempre es troba actiu, obtenint un valor de \SI{1.7}{\milli\ampere}.
+Seguidament es va mesurar el corrent d'alimentació, obtenint que en mode actiu el dispositiu consumia aproximadament \SI{80}{\milli\ampere}, i en mode de baix consum aquest es reduïa a \SI{13}{\milli\ampere}. Sense considerar el consum del LED, el consum en mode actiu és de \SI{78.3}{\milli\ampere}, i en mode de baix consum és de \SI{11.3}{\milli\ampere}.
 
-Amb aquests resultats, es verifica com l'aplicació de baix consum ha reduït el consum en un $\frac{80-13}{80}\cdot100=83.75\%$. 
+Tenint en compte que el temps de funcionament normal mitjà va ser de 23.3 segons, podem aproximar el consum per cicle de cada situació:
+\begin{itemize}
+    \item \emph{Sense aplicació}. El consum per cicle és directament $78.3 \cdot \frac{5}{60} = \num{6.53}$ mAh.
+    \item \emph{Amb aplicació}. Cal considerar el consum en mode actiu, i en mode de baix consum. Així, és $78.3\cdot\frac{23.3}{60\cdot60}+11.3\cdot\frac{5\cdot60-23.3}{60\cdot60}=1.38$ mAh.
+\end{itemize} 
 
-% veure quin es el consum en mode actiu. Multiplicar per 5 minuts.
-% veure consum en mode de baix consum, comentar que hi ha el LED sempre actiu, i multiplicar pel temps de baix consum real, sumarli el temps actiu pel consum en mode actiu. Comparar ambdós.
+Amb aquests resultats, es verifica com l'aplicació de baix consum ha reduït el consum en un $\frac{6.53-1.38}{6.53}\cdot100=78.9\%$.
+
+Es poden aproximar altres resultats, considerant que el temps de funcionament normal és constant ---només vàlid si l'error del rellotge és reduit---. Per exemple, per un temps de cicle d'1 hora, la reducció del consum seria d'un 85\%, i per un cicle d'un dia del 85.5\%.  
+
+És important tenir en compte que aquests resultats són únicament vàlids per aquesta situació, i que depenen no només del temps de cicle, sinó que també, per exemple, de la quantitat de dispositius o paràmetres del protocol, ja que fan modificar el temps de tolerància i, per tant, el temps de baix consum. 
+
+Amb el maquinari adequat, amb el qual es podrien obtenir consums en mode de baix consum de menys d'\SI{1}{\milli\ampere}, s'obtindrien reduccions molt majors, de l'ordre del 98\% en un cicle d'1 hora.
+
+% Dir que segons hardware, es poden aconseguir consums en baix consum de micros, fent aque la redeucció sigui encara majro
 
 \chapter{Conclusions}
-Aquest treball ha presentat el disseny i la implementació d'un protocol de comunicació basat en LoRa, amb capacitats d'encaminament estàtic i compatible amb LoRaWAN, aconseguint reduir la dependència de \est{gateways} LoRaWAN en els dispositius de monitoratge. Això s'ha aconseguit fent possible que un dispositiu sense connectivitat directa amb un \est{gateway} transmeti les dades a un altre dispositiu que sí que en disposa, actuant aquest com a node encaminador. El protocol s'ha limitat a xarxes estàtiques, una característica pròpia de les aplicacions de monitoratge, on els dispositius tenen una ubicació fixa i es vol monitorar una situació concreta de forma continuada. Gràcies a això, s'elimina la necessitat d'un protocol de descobriment de rutes, simplificant-ne així la implementació i manteniment.
+Aquest treball ha presentat el disseny i la implementació d'un protocol de comunicació basat en LoRa, amb capacitats d'encaminament estàtic i compatible amb LoRaWAN, aconseguint reduir la dependència de \est{gateways} LoRaWAN en els dispositius de monitoratge. Això s'ha aconseguit fent possible que un dispositiu sense connectivitat directa amb un \est{gateway} transmeti les dades a través d'un o diversos dispositius intermedis, que actuen com a nodes encaminadors fins a arribar al \est{gateway}. El protocol s'ha limitat a xarxes estàtiques, una característica pròpia de les aplicacions de monitoratge, on els dispositius tenen una ubicació fixa i es vol monitorar una situació concreta de forma continuada. Gràcies a això, s'elimina la necessitat d'un protocol de descobriment de rutes, simplificant-ne així la implementació i manteniment.
 
-Les proves realitzades, que s'han vist limitades a la disponibilitat d'únicament dos dispositius, han permès validar el funcionament del protocol i demostrar-ne la seva viabilitat. Els mecanismes d'accés al canal compartit, així com els mecanismes de retransmissió, asseguren una comunicació fiable i robusta. L'encaminament estàtic, tot i restringir-ne l'ús en xarxes dinàmiques, facilita la implementació i manteniment del protocol. Gràcies als segments de la capa de transport, s'aconsegueix una comunicació fiable d'extrem a extrem, i la capa d'aplicació permet la compatibilitat i adaptació del protocol a diferents escenaris i necessitats. 
+Les proves realitzades, que s'han vist limitades a la disponibilitat d'únicament dos dispositius, han permès validar el funcionament del protocol i demostrar-ne la seva viabilitat. Els mecanismes d'accés al canal compartit, així com els mecanismes de retransmissió, asseguren una comunicació fiable i robusta, mentre que l'encaminament permet augmentar el rang de comunicació dels dispositius, més enllà del seu abast directe. Gràcies als segments de la capa de transport, s'aconsegueix una comunicació fiable d'extrem a extrem, i la capa d'aplicació permet la compatibilitat i adaptació del protocol a diferents escenaris i necessitats. 
 
 A partir del protocol, s'ha creat una aplicació encarregada de reduir el consum energètic dels dispositius. Aquesta s'ha limitat a un tipus concret de xarxes: les xarxes lineals, especialment útils en entorns ferroviaris o agrícoles. El funcionament de l'aplicació es basa en un mecanisme de sincronització, on un dispositiu inicia el cicle de funcionament i la resta es mantenen a l'espera de rebre un missatge de sincronització. Per minimitzar el nombre de transmissions, s'aprofita el missatge de sincronització per enviar les dades de cada dispositiu. Així, en rebre la sincronització, el dispositiu hi afegeix les seves dades i propaga el missatge al següent dispositiu de la xarxa.
 
@@ -2120,17 +2136,16 @@ En aquesta aplicació s'ha buscat la robustesa i fiabilitat a llarg termini, pre
 
 Durant les proves de validació, s'ha detectat una limitació important en la precisió dels osci\l.ladors dels microcontroladors utilitzats en mode de baix consum. Els seus elevats errors ($\pm 5000$ ppm) i alta sensibilitat a la temperatura ($1000$ ppm/ºC) fan necessari deixar marges de temps de seguretat elevats, penalitzant l'eficiència energètica. Com a solució a aquest problema, es proposa l'ús d'osci\l.ladors de cristall, que presenten errors molt més reduïts i constants, cosa que permet sincronitzacions més precises.
 
-Tot i això, les proves realitzades ---amb temps de cicle reduïts--- han demostrat que l'aplicació proposada aconsegueix reduir el consum energètic dels dispositius en més d'un 80\% respecte d'un sistema sense aquesta optimització.
+Les proves realitzades han demostrat que l'aplicació proposada aconsegueix reduir el consum energètic dels dispositius. De forma experimental, i amb el maquinari utilitzat, s'ha observat una reducció del consum del 85\% en un cicle d'1 hora. Aquesta reducció podria ser encara més elevada amb els components més eficients ---amb consums molt reduits en mode de baix consum---, sent possible assolir reduccions superiors al 98\%. 
 
-En conjunt, aquest treball ha permès demostrar la viabilitat d'una solució de comunicació eficient per a entorns de monitoratge basats en LoRa, buscant l'equilibri entre simplicitat, fiabilitat i baix consum energètic. Si bé encara existeixes possibles millores futures i proves en entorns més extensos i situacions reals, el sistema desenvolupat ofereix una base sòlida sobre la qual construir aplicacions reals.
+En conjunt, aquest treball ha permès demostrar la viabilitat d'una solució de comunicació eficient per a entorns de monitoratge basats en LoRa, buscant l'equilibri entre simplicitat, fiabilitat i baix consum energètic. Si bé encara existeixen possibles millores futures i proves en entorns més extensos i situacions reals, el sistema desenvolupat ofereix una base sòlida sobre la qual construir aplicacions reals.
 
 \chapter{Treball futur}
-Tot i que la solució proposada ha assolit els objectius principals, existeixen línies de treball futur que poden afegir-hi noves funcionalitats.
-
+La solució proposada ha assolit els objectius principals del treball, desenvolupant un protocol funcional i un mecanisme per a la reducció del consum. A més, s'identifiquen diverses línies de treball futur que poden aportar-hi noves funcionalitats:
 \begin{itemize}
     \item \emph{Altres tecnologies de comunicació}. El sistema actual es basa a utilitzar LoRaWAN per disposar de les dades de la xarxa. Una extensió possible seria substituir aquesta tecnologia per d'altres, com ara 4G, podent ser útil en entorns on LoRaWAN no és viable. Gràcies a la modularitat del protocol, aquesta implementació seria relativament senzilla, i podria aprofitar les mateixes capes d'encaminament i transport.
     \item \emph{Fragmentació de dades}. En l'aplicació de baix consum s'ha mencionat la necessitat d'un mecanisme de fragmentació de dades, en entorns amb molts dispositius o amb molta quantitat de dades. Aquest mecanisme podria ser implementat a nivell d'aplicació o de protocol, i oferiria una major flexibilitat i adaptabilitat a diferents situacions.
-    \item \emph{Control extern de l'alimentació}. Una millora que podria reduir més el consum energètic és l'ús d'un circuit integrat capaç de desconnectar completament l'alimentació del microcontrolador i de la ràdio. Aquest circuit permetria definir un temps de desconnexió, al final del qual s'activaria de nou. El microcontrolador podria indicar quan desactivar l'alimentació, just abans del mode de baix consum. Aquesta millora oferiria consums extremadament reduïts, especialment útils per dispositius que requereixen una gran autonomia.  
+    \item \emph{Control extern de l'alimentació}. Una millora que podria reduir més el consum energètic és l'ús d'un circuit integrat capaç de desconnectar completament l'alimentació del microcontrolador i de la ràdio. Aquest circuit permetria definir un temps de desconnexió, al final del qual s'activaria de nou. El microcontrolador podria indicar quan desactivar l'alimentació, just abans del mode de baix consum. Aquesta estratègia permetria aconseguir un estalvi energètic molt elevat precisament durant el mode de baix consum, que és quan l'aplicació aconsegueix reduir el consum energètic, fent-ho especialment útils per dispositius que requereixen una gran autonomia.  
 \end{itemize}
 
 \printbibliography
